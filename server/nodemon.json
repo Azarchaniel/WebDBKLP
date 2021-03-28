@@ -1,0 +1,7 @@
+{
+  "env": {
+    "MONGO_USER": "Azarchaniel",
+    "MONGO_PASSWORD": "lubos26csonka",
+    "MONGO_DB": "WebDBKLP"
+  }
+}
