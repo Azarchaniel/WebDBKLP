@@ -1,15 +1,16 @@
-import React, {useState} from 'react'
-import {IAutor} from "../../../server/src/types"; //todo: add type
+import React, {useState} from "react";
+import {IAutor} from "../../../server/src/types";
+import {TextField} from "@material-ui/core";
 
 type Props = {
     saveAutor: (e: React.FormEvent, formData: IAutor | any) => void
 }
 
-const AddAutor: React.FC<Props> = ({saveAutor}) => {
+const AddAutor: React.FC<Props> = ({saveAutor} : {saveAutor : any}) => {
     const [openedNewAutorForm, setOpenedNewAutorForm] = useState<boolean>(false);
     const [formData, setFormData] = useState<IAutor | {}>()
 
-    const handleForm = (e: React.FormEvent<HTMLInputElement>): void => {
+    const handleForm = (e: any): void => {
         setFormData({
             ...formData,
             [e.currentTarget.id]: e.currentTarget.value,
@@ -39,11 +40,11 @@ const AddAutor: React.FC<Props> = ({saveAutor}) => {
                     <div>
                         <div>
                             <label htmlFor='dateOfBirth'>Datum narodenia</label>
-                            <input onChange={handleForm} type='date' id='dateOfBirth'/>
+                            <TextField onChange={handleForm} type='date' id='dateOfBirth'/>
                         </div>
                         <div>
                             <label htmlFor='dateOfDeath'>Datum smrti</label>
-                            <input onChange={handleForm} type='date' id='dateOfDeath'/>
+                            <TextField onChange={handleForm} type='date' id='dateOfDeath' />
                         </div>
                     </div>
                     <div>

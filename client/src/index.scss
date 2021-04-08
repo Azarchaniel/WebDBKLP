@@ -54,6 +54,19 @@ body {
     margin-right: 1rem;
 }
 
+.Autor {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #bea24b;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid #333333;
+
+    .text {
+        color: #444;
+    }
+}
+
 .Form {
     display: flex;
     justify-content: space-between;

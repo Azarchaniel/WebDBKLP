@@ -18,9 +18,10 @@ mongoose.set('useFindAndModify', false)
 mongoose
     .connect(uri, options)
     .then(() =>
-        app.listen(PORT, () =>
-            console.log(`Server running on http://localhost:${PORT}`)
-        )
+        app.listen(PORT, () => {
+            console.log(`Server running on http://localhost:${PORT}`);
+            console.log(`Database URI is: ${uri}`);
+        })
     )
     .catch((error) => {
         throw error

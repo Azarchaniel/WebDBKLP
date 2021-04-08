@@ -1,11 +1,12 @@
 import axios, { AxiosResponse } from 'axios'
-import {ApiDataType, IBook} from "./type";
+import {ApiAutorDataType, ApiBookDataType, IBook} from "./type";
 
 const baseUrl: string = 'http://localhost:4000'
 
-export const getBooks = async (): Promise<AxiosResponse<ApiDataType>> => {
+//### BOOK ###
+export const getBooks = async (): Promise<AxiosResponse<ApiBookDataType>> => {
   try {
-    const books: AxiosResponse<ApiDataType> = await axios.get(
+    const books: AxiosResponse<ApiBookDataType> = await axios.get(
       baseUrl + '/books'
     )
     return books
@@ -16,9 +17,9 @@ export const getBooks = async (): Promise<AxiosResponse<ApiDataType>> => {
 
 export const getBook = async (
     _id: string
-): Promise<AxiosResponse<ApiDataType>> => {
+): Promise<AxiosResponse<ApiBookDataType>> => {
   try {
-    const book: AxiosResponse<ApiDataType> = await axios.get(
+    const book: AxiosResponse<ApiBookDataType> = await axios.get(
         `${baseUrl}/book/${_id}`
     )
     return book
@@ -30,7 +31,7 @@ export const getBook = async (
 //FIXME: ugly as hell, serialization!
 export const addBook = async (
   formData: /*IBook*/any
-): Promise<AxiosResponse<ApiDataType>> => {
+): Promise<AxiosResponse<ApiBookDataType>> => {
   try {
     const book: any/*Omit<IBook, '_id'>*/ = {
       title: formData.title,
@@ -46,7 +47,7 @@ export const addBook = async (
       },
 
     }
-    const saveBook: AxiosResponse<ApiDataType> = await axios.post(
+    const saveBook: AxiosResponse<ApiBookDataType> = await axios.post(
       baseUrl + '/add-book',
       book
     )
@@ -60,12 +61,12 @@ export const addBook = async (
 // Therefore I need Hidden Input field with _id and IF in creating
 export const updateBook = async (
   book: IBook
-): Promise<AxiosResponse<ApiDataType>> => {
+): Promise<AxiosResponse<ApiBookDataType>> => {
   try {
     const bookUpdate: Pick<IBook, 'title'> = {
         title: 'Upravena zatial takto'
     }
-    const updatedBook: AxiosResponse<ApiDataType> = await axios.put(
+    const updatedBook: AxiosResponse<ApiBookDataType> = await axios.put(
       `${baseUrl}/edit-book/${book._id}`,
       bookUpdate
     )
@@ -78,12 +79,75 @@ export const updateBook = async (
 //todo: Do you really want to delete?
 export const deleteBook = async (
   _id: string
-): Promise<AxiosResponse<ApiDataType>> => {
+): Promise<AxiosResponse<ApiBookDataType>> => {
   try {
-    const deletedBook: AxiosResponse<ApiDataType> = await axios.delete(
+    const deletedBook: AxiosResponse<ApiBookDataType> = await axios.delete(
       `${baseUrl}/delete-book/${_id}`
     )
     return deletedBook
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+// ### AUTOR ###
+
+
+export const getAutors = async (): Promise<AxiosResponse<ApiAutorDataType>> => {
+  try {
+    const autors: AxiosResponse<ApiAutorDataType> = await axios.get(
+        baseUrl + '/autors'
+    )
+    return autors
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+export const getAutor = async (
+    _id: string
+): Promise<AxiosResponse<ApiAutorDataType>> => {
+  try {
+    const autor: AxiosResponse<ApiAutorDataType> = await axios.get(
+        `${baseUrl}/autor/${_id}`
+    );
+
+    return autor;
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+export const addAutor = async (
+    formData: /*IAutor*/any
+): Promise<AxiosResponse<ApiAutorDataType>> => {
+  try {
+    const autor: any/*Omit<IAutor, '_id'>*/ = {
+      firstName: formData.firstName ?? '',
+      lastName: formData.lastName,
+      nationality: formData.nationality ?? '',
+      note: formData.note ?? '',
+      dateOfBirth: formData.dateOfBirth ?? undefined,
+      dateOfDeath: formData.dateOfDeath ?? undefined
+    }
+    const saveAutor: AxiosResponse<ApiAutorDataType> = await axios.post(
+        baseUrl + '/add-autor',
+        autor
+    )
+    return saveAutor
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+export const deleteAutor = async (
+    _id: string
+): Promise<AxiosResponse<ApiAutorDataType>> => {
+  try {
+    const deletedAutor: AxiosResponse<ApiAutorDataType> = await axios.delete(
+        `${baseUrl}/delete-autor/${_id}`
+    )
+    return deletedAutor
   } catch (error) {
     throw new Error(error)
   }

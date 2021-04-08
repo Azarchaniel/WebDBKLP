@@ -27,7 +27,8 @@
     "isolatedModules": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "src"
   ],
   "exclude": [
     "node_modules",

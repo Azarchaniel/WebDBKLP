@@ -1,5 +1,9 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from "react";
 import {IBook} from "../type";
+import {getAutors} from "../API";
+import {TextField} from "@material-ui/core";
+import {Autocomplete} from "@material-ui/lab";
+import {IAutor} from "../../../server/src/types";
 
 type Props = {
     saveBook: (e: React.FormEvent, formData: IBook | any) => void
@@ -8,6 +12,14 @@ type Props = {
 const AddBook: React.FC<Props> = ({saveBook}) => {
     const [openedNewBookForm, setOpenedNewBookForm] = useState<boolean>(false);
     const [formData, setFormData] = useState<IBook | {}>()
+    const [autors, setAutors] = useState<IAutor[] | any>();
+
+    //param [] will make useEffect to go only once
+    useEffect(() => {
+        getAutors()
+            .then(autors => setAutors(autors.data.autors))
+            .catch(err => console.error('Couldnt fetch autors', err));
+    }, [])
 
     const handleForm = (e: React.FormEvent<HTMLInputElement>): void => {
         setFormData({
@@ -24,6 +36,17 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
         if (openedNewBookForm) {
             return (<form id='addForm' className='Form' onSubmit={(e) => {saveBook(e, formData)}}>
                 <div>
+                    <div>
+                        <Autocomplete
+                            id={'autor'}
+                            options={autors}
+                            getOptionLabel={(option) => (option as IAutor).lastName}
+                            style={{width: 300}}
+                            renderInput={(params) => (
+                                <TextField {...params} label="Combo box" variant="outlined"/>
+                            )}
+                        />
+                    </div>
                     <div>
                         <label htmlFor='title'>Nazev</label>
                         <input onChange={handleForm} type='text' id='title'/>

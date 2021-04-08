@@ -1,3 +1,5 @@
+import {IAutor} from "../../server/src/types";
+
 interface IBook {
     _id: string
     title: string
@@ -15,11 +17,21 @@ type BookProps = {
     book: IBook
 }
 
-type ApiDataType = {
+type ApiBookDataType = {
     message: string
     books: IBook[]
     book?: IBook
   }
+
+type ApiAutorDataType = {
+    message: string
+    autors: IAutor[]
+    autor?: IAutor
+}
+
+type AutorProps = {
+    autor: IAutor
+}
 
 export type Published = {
     publisher?: string;

@@ -17,7 +17,10 @@ const options = { useNewUrlParser: true, useUnifiedTopology: true };
 mongoose_1.default.set('useFindAndModify', false);
 mongoose_1.default
     .connect(uri, options)
-    .then(() => app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`)))
+    .then(() => app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Database URI is: ${uri}`);
+}))
     .catch((error) => {
     throw error;
 });
