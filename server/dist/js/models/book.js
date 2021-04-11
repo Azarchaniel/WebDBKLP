@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const published_1 = require("./published");
 const bookSchema = new mongoose_1.Schema({
+    autor: { type: [String], required: false },
     title: { type: String, required: true },
     subtitle: { type: String, required: false },
     ISBN: { type: String, required: false },

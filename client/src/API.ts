@@ -33,7 +33,9 @@ export const addBook = async (
   formData: /*IBook*/any
 ): Promise<AxiosResponse<ApiBookDataType>> => {
   try {
+    console.log('FORM ####', formData);
     const book: any/*Omit<IBook, '_id'>*/ = {
+      autor: formData.autor,
       title: formData.title,
       subtitle: formData.subtitle,
       ISBN: formData.ISBN,

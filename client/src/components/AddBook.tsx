@@ -17,36 +17,49 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
     //param [] will make useEffect to go only once
     useEffect(() => {
         getAutors()
-            .then(autors => setAutors(autors.data.autors))
+            .then(autors => {
+                setAutors(autors.data.autors)
+            })
             .catch(err => console.error('Couldnt fetch autors', err));
     }, [])
 
-    const handleForm = (e: React.FormEvent<HTMLInputElement>): void => {
+    const handleForm = (e: any): void => {
+        //console.log(e.currentTarget.value);
         setFormData({
             ...formData,
             [e.currentTarget.id]: e.currentTarget.value,
         })
+        console.log(formData);
     }
 
-    const handleOpenedBookForm = () => {
-        setOpenedNewBookForm(!openedNewBookForm);
-    }
+    const handleOpenedBookForm = () => setOpenedNewBookForm(!openedNewBookForm);
 
     const showAddBook = () => {
         if (openedNewBookForm) {
-            return (<form id='addForm' className='Form' onSubmit={(e) => {saveBook(e, formData)}}>
+            return (<form id='addForm' className='Form' onSubmit={(e) => {
+                saveBook(e, formData)
+            }}>
                 <div>
-                    <div>
-                        <Autocomplete
-                            id={'autor'}
-                            options={autors}
-                            getOptionLabel={(option) => (option as IAutor).lastName}
-                            style={{width: 300}}
-                            renderInput={(params) => (
-                                <TextField {...params} label="Combo box" variant="outlined"/>
-                            )}
-                        />
-                    </div>
+                    <Autocomplete
+                        id={'autor'}
+                        multiple
+                        options={autors}
+                        getOptionLabel={(option: IAutor) => `${option.lastName}, ${option.firstName}`}
+                        style={{width: 300}}
+                        /*onChange={handleForm}*/
+                        onChange={(_event: any, newValue: any) => {
+                            console.log(newValue.map((item: IAutor) => item._id));
+                            setFormData({...formData, autor: newValue.map((item: IAutor) => item._id)})
+                        }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Autor"
+                                variant="outlined"
+                                id='autor'
+                            />
+                        )}
+                    />
                     <div>
                         <label htmlFor='title'>Nazev</label>
                         <input onChange={handleForm} type='text' id='title'/>
@@ -85,13 +98,15 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                 <button onClick={handleOpenedBookForm}>Skry form</button>
             </form>);
         } else {
-            return <form className='Form'><button onClick={handleOpenedBookForm}>Zobraz form</button></form>;
+            return <form className='Form'>
+                <button onClick={handleOpenedBookForm}>Zobraz form</button>
+            </form>;
         }
     }
 
     return (
         <>
-          {showAddBook()}
+            {showAddBook()}
         </>
     )
 }

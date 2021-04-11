@@ -26,7 +26,7 @@ const AddAutor: React.FC<Props> = ({saveAutor} : {saveAutor : any}) => {
             return (<form id='addForm' className='Form' onSubmit={(e) => {saveAutor(e, formData)}}>
                 <div>
                     <div>
-                        <label htmlFor='firstName'>Krtne meno</label>
+                        <label htmlFor='firstName'>Krstne meno</label>
                         <input onChange={handleForm} type='text' id='firstName'/>
                     </div>
                     <div>

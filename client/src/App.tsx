@@ -32,6 +32,7 @@ const App: React.FC = () => {
 
     const handleSaveBook = (e: React.FormEvent, formData: IBook): void => {
       e.preventDefault()
+        console.log('handle',formData);
       addBook(formData)
       .then(({ status, data }) => {
           if (status !== 201) {

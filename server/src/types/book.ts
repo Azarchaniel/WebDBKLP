@@ -1,8 +1,9 @@
 import { Document } from 'mongoose'
 import {Published} from "./published";
+import {IAutor} from "./autor";
 
 export interface IBook extends Document {
-    // autor?: Autor[];
+    autor?: IAutor[];
     // editor?: Editor[];
     // ilustrator?: Ilustrator[];
     // translator?: Translator[];

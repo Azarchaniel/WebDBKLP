@@ -1,9 +1,10 @@
 import {IAutor} from "../../server/src/types";
 
 interface IBook {
-    _id: string
-    title: string
-    subtitle?: string
+    _id: string;
+    autor: IAutor[];
+    title: string;
+    subtitle?: string;
     ISBN?: string;
     language: string;
     numberOfPages: number;

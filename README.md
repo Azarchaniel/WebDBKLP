@@ -5,8 +5,11 @@ Once done it will be a **system for cataloging books** I own. Predecessor for th
 I'm using **MERN stack**.
 
 ### TODO
+- [ ] redesign
 - [ ] side menu!
 - [ ] authorization/authentication
 - [ ] CRUD for Quotes
 - [ ] add Owner
-- [ ] test autocomplete
+- [ ] adding / updating item
+Autocomplete
+- [X] allow multichoice  

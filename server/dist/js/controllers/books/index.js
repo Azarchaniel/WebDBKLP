@@ -36,20 +36,21 @@ const getBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getBook = getBook;
 const addBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e;
+    var _a, _b;
     try {
-        const body = req.body;
+        const { title, subtitle, ISBN, language, note, numberOfPages, published, autor } = req.body;
         const book = new book_1.default({
-            title: body.title,
-            subtitle: body.subtitle,
-            ISBN: body.ISBN,
-            language: body.language,
-            note: body.note,
-            numberOfPages: body.numberOfPages,
+            autor: autor,
+            title: title,
+            subtitle: subtitle,
+            ISBN: ISBN,
+            language: language,
+            note: note,
+            numberOfPages: numberOfPages,
             published: {
-                publisher: (_a = body.published) === null || _a === void 0 ? void 0 : _a.publisher,
-                year: (_c = (_b = body.published) === null || _b === void 0 ? void 0 : _b.year) !== null && _c !== void 0 ? _c : undefined,
-                country: (_e = (_d = body.published) === null || _d === void 0 ? void 0 : _d.country) !== null && _e !== void 0 ? _e : ''
+                publisher: published === null || published === void 0 ? void 0 : published.publisher,
+                year: (_a = published === null || published === void 0 ? void 0 : published.year) !== null && _a !== void 0 ? _a : undefined,
+                country: (_b = published === null || published === void 0 ? void 0 : published.country) !== null && _b !== void 0 ? _b : ''
             },
         });
         const newBook = yield book.save();

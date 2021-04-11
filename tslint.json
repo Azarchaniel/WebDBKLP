@@ -4,6 +4,7 @@
     "node_modules/codelyzer"
   ],
   "rules": {
+    "semicolon": [true, "always"],
     "arrow-return-shorthand": true,
     "callable-types": true,
     "class-name": true,

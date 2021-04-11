@@ -1,6 +1,6 @@
-import {Response, Request} from 'express'
-import {IBook} from '../../types'
-import Book from '../../models/book'
+import {Response, Request} from 'express';
+import {IBook} from '../../types';
+import Book from '../../models/book';
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -22,21 +22,22 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
-const addBook = async (req: any, res: any): Promise<void> => {
+const addBook = async (req: Request, res: Response): Promise<void> => {
     try {
-        const body = req.body as Pick<IBook, 'title' | 'subtitle' | 'ISBN' | 'language' | 'note' | 'numberOfPages' | 'published' >
+        const {title, subtitle, ISBN, language, note, numberOfPages, published, autor} = req.body;
 
         const book: IBook = new Book({
-            title: body.title,
-            subtitle: body.subtitle,
-            ISBN: body.ISBN,
-            language: body.language,
-            note: body.note,
-            numberOfPages: body.numberOfPages,
+            autor: autor,
+            title: title,
+            subtitle: subtitle,
+            ISBN: ISBN,
+            language: language,
+            note: note,
+            numberOfPages: numberOfPages,
             published: {
-                publisher: body.published?.publisher,
-                year: body.published?.year ?? undefined,
-                country: body.published?.country ?? ''
+                publisher: published?.publisher,
+                year: published?.year ?? undefined,
+                country: published?.country ?? ''
             },
         })
 

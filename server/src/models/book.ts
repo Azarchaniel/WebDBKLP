@@ -3,6 +3,7 @@ import {model, Schema} from 'mongoose'
 import {publishedSchema} from "./published";
 
 const bookSchema: Schema = new Schema({
+    autor: {type: [String], required: false},
     title: {type: String, required: true},
     subtitle: {type: String, required: false},
     ISBN: {type: String, required: false},
