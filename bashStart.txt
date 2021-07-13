@@ -1,0 +1,2 @@
+cd C:\Users\User\Desktop\WebDBKLP\server; npm start
+cd C:\Users\User\Desktop\WebDBKLP\client; npm start

@@ -13,10 +13,10 @@ const Autor: React.FC<Props> = ({autor, deleteAutor, updateAutor}) => {
     return (
         <div className='Autor'>
             <div className='text'>
-                <h1>Meno: {autor.lastName}, {autor.firstName}</h1>
+                <h1>Meno: {autor.lastName}{autor.firstName ? ', ' + autor.firstName : ''}</h1>
                 <p>Narodnost: {autor.nationality}</p>
-                <p>Datum narodenia: {moment(autor.dateOfBirth).format('D.M.YYYY')}</p>
-                <p>Datum smrti: {moment(autor.dateOfDeath).format('D.M.YYYY')}</p>
+                <p>Datum narodenia: {autor.dateOfBirth ? moment(autor.dateOfBirth).format('D.M.YYYY') : ''}</p>
+                <p>Datum smrti: {autor.dateOfBirth ? moment(autor.dateOfDeath).format('D.M.YYYY') : ''}</p>
                 <p>Poznamka: {autor.note}</p>
             </div>
             <div className='Card--button'>

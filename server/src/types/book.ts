@@ -14,7 +14,7 @@ export interface IBook extends Document {
     // serie?: Edition;
     ISBN?: string;
     published?: Published;
-    language: string;
+    language: string[];
     //readBy: [ref(ownerId)]
     note?: string;
     // dimensions?: Dimensions;

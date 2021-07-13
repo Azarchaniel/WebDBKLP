@@ -8,9 +8,10 @@ import 'react-confirm-alert/src/react-confirm-alert.css';
 import AddAutor from "./components/AddAutor";
 import {IAutor} from "../../server/src/types";
 import AutorItem from "./components/AutorItem";
-import {toast, ToastContainer, Slide} from 'react-toastify';
+import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.scss'
+import Toast from "./components/Toast";
 
 const App: React.FC = () => {
     const [books, setBooks] = useState<IBook[]>([]);
@@ -108,9 +109,14 @@ const App: React.FC = () => {
                 if (status !== 201) {
                     throw new Error('Error! Todo not saved')
                 }
+                const autorNames = `${data.autor?.lastName}${data.autor?.firstName ? ', ' + data.autor?.firstName : ''}`;
+                toast.success(`Autor ${autorNames} bol uspesne pridany.`);
                 setAutors(data.autors);
             })
-            .catch((err) => console.log(err))
+            .catch((err) => {
+                toast.error(`Autora sa nepodarilo pridat!`);
+                console.log(err);
+            })
     }
 
     const handleUpdateAutor = (autor: IAutor): void => {console.log(autor)}
@@ -122,8 +128,7 @@ const App: React.FC = () => {
                     toast.error('Doslo k chybe!');
                     throw new Error('Chyba! Autor nevymazany.')
                 }
-                console.log(data);
-                const autorNames = `${data.autor?.lastName}, ${data.autor?.lastName}`;
+                const autorNames = `${data.autor?.lastName}${data.autor?.firstName ? ', ' + data.autor?.firstName : ''}`;
 
                 confirmAlert({
                     title: 'Vymazat autora?',
@@ -150,7 +155,7 @@ const App: React.FC = () => {
                             label: 'Ne',
                             onClick: () => {}
                         }
-                    ]
+                    ],
                 });
             })
             .catch((err) => console.log(err))
@@ -159,10 +164,10 @@ const App: React.FC = () => {
 
   return (
     <main className='App'>
-      <h1>My Books</h1>
+      <h1>WebDBKLP</h1>
       <AddBook saveBook={handleSaveBook} />
       <AddAutor saveAutor={handleSaveAutor}/>
-      {books.map((book: IBook) => (
+      {books.sort((a,b) => a.title.localeCompare(b.title)).map((book: IBook) => (
         <BookItem
           key={book._id}
           updateBook={handleUpdateBook}
@@ -170,7 +175,8 @@ const App: React.FC = () => {
           book={book}
         />
       ))}
-        {autors.map((autor: IAutor) => (
+        {/*todo: sorting and better fetching anyway*/}
+        {autors.sort((a,b) => a.lastName.localeCompare(b.lastName)).map((autor: IAutor) => (
             <AutorItem
                 key={autor._id}
                 updateAutor={handleUpdateAutor}
@@ -178,18 +184,7 @@ const App: React.FC = () => {
                 autor={autor}
             />
         ))}
-        <ToastContainer
-            position="bottom-center"
-            autoClose={3000}
-            transition={Slide}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-        />
+        <Toast />
     </main>
   )
 };

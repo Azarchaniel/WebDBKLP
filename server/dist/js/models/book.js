@@ -7,7 +7,7 @@ const bookSchema = new mongoose_1.Schema({
     title: { type: String, required: true },
     subtitle: { type: String, required: false },
     ISBN: { type: String, required: false },
-    language: { type: String, required: true },
+    language: { type: [String], required: true },
     note: { type: String, required: false },
     numberOfPages: { type: Number, required: false },
     published: { type: published_1.publishedSchema, required: false }

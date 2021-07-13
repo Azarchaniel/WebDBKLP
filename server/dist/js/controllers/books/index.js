@@ -39,6 +39,7 @@ const addBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
         const { title, subtitle, ISBN, language, note, numberOfPages, published, autor } = req.body;
+        console.log(req.body);
         const book = new book_1.default({
             autor: autor,
             title: title,

@@ -1,5 +1,7 @@
-import React from "react";
-import {BookProps, IBook} from "../type";
+import React, {useEffect, useState} from "react";
+import {ApiAutorDataType, BookProps, IBook} from "../type";
+import {AxiosResponse} from "axios";
+import {getAutor} from "../API";
 
 type Props = BookProps & {
     updateBook: (book: IBook) => void
@@ -7,7 +9,13 @@ type Props = BookProps & {
 }
 
 const Book: React.FC<Props> = ({book, updateBook, deleteBook}) => {
-   const ifPublished = () => {
+    const [autors, setAutors] = useState<string>('');
+
+    useEffect(() => {
+        getAutors(book.autor);
+    }, [])
+
+    const ifPublished = () => {
         if (book.published) {
             return (
                 <>
@@ -19,13 +27,34 @@ const Book: React.FC<Props> = ({book, updateBook, deleteBook}) => {
         }
     }
 
+    const getAutors = (autsId: string[]): void => {
+        const promisArray: Promise<AxiosResponse<ApiAutorDataType>>[] = [];
+        for (let id of autsId) {
+            promisArray.push(getAutor(id));
+        }
+        Promise.all(promisArray)
+            .then((aut: any) => {
+                let autorsTemp = '';
+                for (let autorFor of aut) {
+                    const singleAut = autorFor.data.autor;
+                    if (autorsTemp) autorsTemp += '; ';
+                    autorsTemp += `${singleAut.lastName}, ${singleAut.firstName}`;
+                }
+                setAutors(autorsTemp);
+            })
+            .catch(err => {
+                throw Error('Error retrieving autors in BookItem ' + err)
+            })
+    }
+
     return (
         <div className='Card'>
             <div className='Card--text'>
                 <h1>Nazov: {book.title}</h1>
+                <h2>Autor: {autors}</h2>
                 <p>Podnazov: {book.subtitle}</p>
                 <p>ISBN: {book.ISBN}</p>
-                <p>Jazyk: {book.language}</p>
+                <p>Jazyk: {book.language.length < 2 ? book.language[0] : book.language.join(", ")}</p>
                 <p>Poznamka: {book.note}</p>
                 <p>Pocet stran: {book.numberOfPages}</p>
                 {ifPublished()}

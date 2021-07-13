@@ -28,20 +28,12 @@ export const getBook = async (
   }
 }
 
-//FIXME: ugly as hell, serialization!
 export const addBook = async (
   formData: /*IBook*/any
 ): Promise<AxiosResponse<ApiBookDataType>> => {
   try {
-    console.log('FORM ####', formData);
     const book: any/*Omit<IBook, '_id'>*/ = {
-      autor: formData.autor,
-      title: formData.title,
-      subtitle: formData.subtitle,
-      ISBN: formData.ISBN,
-      language: formData.language,
-      note: formData.note,
-      numberOfPages: formData.numberOfPages,
+      ...formData,
       published: {
         publisher: formData['published.publisher'] ?? '',
         year: formData['published.year'] ?? undefined,
@@ -78,7 +70,6 @@ export const updateBook = async (
   }
 }
 
-//todo: Do you really want to delete?
 export const deleteBook = async (
   _id: string
 ): Promise<AxiosResponse<ApiBookDataType>> => {
@@ -93,8 +84,6 @@ export const deleteBook = async (
 }
 
 // ### AUTOR ###
-
-
 export const getAutors = async (): Promise<AxiosResponse<ApiAutorDataType>> => {
   try {
     const autors: AxiosResponse<ApiAutorDataType> = await axios.get(
@@ -116,6 +105,7 @@ export const getAutor = async (
 
     return autor;
   } catch (error) {
+    console.error('API ERROR');
     throw new Error(error)
   }
 }
@@ -124,6 +114,7 @@ export const addAutor = async (
     formData: /*IAutor*/any
 ): Promise<AxiosResponse<ApiAutorDataType>> => {
   try {
+    console.log('add autor', formData);
     const autor: any/*Omit<IAutor, '_id'>*/ = {
       firstName: formData.firstName ?? '',
       lastName: formData.lastName,
@@ -132,6 +123,7 @@ export const addAutor = async (
       dateOfBirth: formData.dateOfBirth ?? undefined,
       dateOfDeath: formData.dateOfDeath ?? undefined
     }
+    console.log(autor);
     const saveAutor: AxiosResponse<ApiAutorDataType> = await axios.post(
         baseUrl + '/add-autor',
         autor

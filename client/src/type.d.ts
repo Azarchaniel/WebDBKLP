@@ -2,11 +2,11 @@ import {IAutor} from "../../server/src/types";
 
 interface IBook {
     _id: string;
-    autor: IAutor[];
+    autor: string[]; //id[]
     title: string;
     subtitle?: string;
     ISBN?: string;
-    language: string;
+    language: string[];
     numberOfPages: number;
     note: string;
     published: Published;
@@ -38,4 +38,9 @@ export type Published = {
     publisher?: string;
     year?: number;
     country?: string;
+}
+
+export type ILangCode = {
+    key: string;
+    value: string;
 }

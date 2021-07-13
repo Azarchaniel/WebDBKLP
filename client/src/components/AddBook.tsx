@@ -1,107 +1,212 @@
 import React, {useEffect, useState} from "react";
-import {IBook} from "../type";
-import {getAutors} from "../API";
-import {TextField} from "@material-ui/core";
-import {Autocomplete} from "@material-ui/lab";
+import {IBook, ILangCode} from "../type";
 import {IAutor} from "../../../server/src/types";
+import {toast} from "react-toastify";
+import {getAutors} from "../API";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
+import {langCode} from "../utils/locale";
+//@ts-ignore
+import {Multiselect} from 'multiselect-react-dropdown';
 
 type Props = {
     saveBook: (e: React.FormEvent, formData: IBook | any) => void
 }
 
 const AddBook: React.FC<Props> = ({saveBook}) => {
-    const [openedNewBookForm, setOpenedNewBookForm] = useState<boolean>(false);
     const [formData, setFormData] = useState<IBook | {}>()
     const [autors, setAutors] = useState<IAutor[] | any>();
+    const [error, setError] = useState<string | undefined>('Názov knihy musí obsahovať aspoň jeden znak!');
 
     //param [] will make useEffect to go only once
     useEffect(() => {
         getAutors()
-            .then(autors => {
-                setAutors(autors.data.autors)
+            .then(aut => {
+                //constructing fullName for autocomplete
+                setAutors(aut.data.autors.map((aut: IAutor) => ({
+                    ...aut,
+                    fullName: `${aut.lastName}, ${aut.firstName}`
+                })));
             })
-            .catch(err => console.error('Couldnt fetch autors', err));
-    }, [])
+            .catch(err => {
+                toast.error('Nepodarilo sa nacitat autorov!');
+                console.error('Couldnt fetch autors', err)
+            });
+    }, [formData])
+
+    useEffect(() => {
+        //shortcut
+        const data = (formData as unknown as IBook);
+
+        //if there is no filled field, its disabled
+        if (!data) return;
+
+        if (data?.title && data.title.trim().length > 1) {
+            setError(undefined);
+        } else {
+            setError('Názov knihy musí obsahovať aspoň jeden znak!')
+        }
+
+    }, [formData])
+
+    useEffect(() => {
+        setFormData({});
+    }, []);
 
     const handleForm = (e: any): void => {
-        //console.log(e.currentTarget.value);
         setFormData({
             ...formData,
             [e.currentTarget.id]: e.currentTarget.value,
         })
-        console.log(formData);
     }
 
-    const handleOpenedBookForm = () => setOpenedNewBookForm(!openedNewBookForm);
+    const showError = () => {
+        if (!error) return <></>;
+        return (
+            <div className="alert alert-danger"><FontAwesomeIcon icon={faExclamationTriangle}/> {error}</div>
+        );
+    }
 
     const showAddBook = () => {
-        if (openedNewBookForm) {
-            return (<form id='addForm' className='Form' onSubmit={(e) => {
-                saveBook(e, formData)
-            }}>
-                <div>
-                    <Autocomplete
-                        id={'autor'}
-                        multiple
-                        options={autors}
-                        getOptionLabel={(option: IAutor) => `${option.lastName}, ${option.firstName}`}
-                        style={{width: 300}}
-                        /*onChange={handleForm}*/
-                        onChange={(_event: any, newValue: any) => {
-                            console.log(newValue.map((item: IAutor) => item._id));
-                            setFormData({...formData, autor: newValue.map((item: IAutor) => item._id)})
-                        }}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                label="Autor"
-                                variant="outlined"
-                                id='autor'
-                            />
-                        )}
-                    />
-                    <div>
-                        <label htmlFor='title'>Nazev</label>
-                        <input onChange={handleForm} type='text' id='title'/>
-                    </div>
-                    <div>
-                        <label htmlFor='subtitle'>Podtitul</label>
-                        <input onChange={handleForm} type='text' id='subtitle'/>
-                    </div>
-                    <div>
-                        <label htmlFor='ISBN'>ISBN</label>
-                        <input onChange={handleForm} type='text' id='ISBN'/>
-                    </div>
-                    <div>
-                        <label htmlFor='language'>Jazyk</label>
-                        <input onChange={handleForm} type='text' id='language'/>
-                    </div>
-                    <div>
-                        <label htmlFor='note'>Poznamky</label>
-                        <input onChange={handleForm} type='text' id='note'/>
-                    </div>
-                    <div>
-                        <label htmlFor='numberOfPages'>Pocet stran</label>
-                        <input onChange={handleForm} type='number' id='numberOfPages'/>
-                    </div>
-                    <div>
-                        <label htmlFor='published.publisher'>Vydavatel</label>
-                        <input onChange={handleForm} type='text' id={'published.publisher'}/>
-                        <label htmlFor='published.year'>Rok vydania</label>
-                        <input onChange={handleForm} type='number' id={'published.year'}/>
-                        <label htmlFor='published.country'>Krajina vydania</label>
-                        <input onChange={handleForm} type='text' id={'published.country'}/>
-                    </div>
+        return (
+            <>
+                <button type="button" className="btn btn-dark" data-toggle="modal" data-target="#bookModal">
+                    Pridaj knihu
+                </button>
 
+                <div className="modal fade" id="bookModal" tabIndex={-1} role="dialog"
+                     aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div className="modal-dialog" role="document">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="exampleModalLabel"><b>Pridať knihu</b></h5>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div className="modal-body">
+                                <form onSubmit={(e) => {
+                                    saveBook(e, formData)
+                                }}>
+                                    <div className="row">
+                                        <div className="col">
+                                            <input onChange={handleForm} type='text' id='title' placeholder='*Názov'
+                                                   className="form-control" autoComplete="off"/>
+                                        </div>
+                                        <div className="col">
+                                            <input onChange={handleForm} type='text' id='subtitle'
+                                                   placeholder='Podnázov'
+                                                   className="form-control"
+                                                   autoComplete="off"/>
+                                        </div>
+
+                                    </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
+                                    <div className="row">
+                                        <Multiselect
+                                            options={autors}
+                                            isObject={true}
+                                            displayValue="fullName"
+                                            closeOnSelect={true}
+                                            placeholder="Autor"
+                                            closeIcon="cancel"
+                                            onChange={handleForm}
+                                            onSelect={(pickedAut: IAutor[]) => {
+                                                setFormData({...formData, autor: pickedAut.map(v => v._id)})
+                                            }}
+                                            style={{
+                                                inputField: {marginLeft: "0.5rem"},
+                                                searchBox: {borderRadius: '3px', maxWidth: '94%', marginLeft: '15px'},
+                                                optionContainer: {maxWidth: '94%', marginLeft: '15px'}
+                                            }}
+                                        />
+                                    </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
+
+                                    <div className="row">
+                                        <div className="col">
+                                            <input onChange={handleForm} type='text' id='ISBN' placeholder='ISBN'
+                                                   className="form-control"
+                                                   autoComplete="off"/>
+                                        </div>
+                                        <div className="col">
+                                            <Multiselect
+                                                options={langCode}
+                                                displayValue="value"
+                                                placeholder="Jazyk"
+                                                closeIcon="cancel"
+                                                onChange={handleForm}
+                                                onSelect={(picked: ILangCode[]) => {
+                                                    setFormData({...formData, language: picked.map(v => v.key)})
+                                                }}
+                                                style={{
+                                                    inputField: {marginLeft: "0.5rem"},
+                                                    searchBox: {
+                                                        width: "100%",
+                                                        paddingRight: '5px',
+                                                        marginRight: '-5px',
+                                                        borderRadius: '3px'
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
+                                    <div className="row">
+                                        <div className="col">
+                                            <input onChange={handleForm} type='number' id='numberOfPages' placeholder='Počet strán'
+                                                   className="form-control"
+                                                   autoComplete="off"/>
+                                        </div>
+                                        <div className="col">
+                                            <input onChange={handleForm} type='text' id='published.publisher' placeholder='Vydavateľ'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
+                                    <div className="row">
+                                        <div className="col">
+                                            <input onChange={handleForm} type='text' id='published.country' placeholder='Krajina vydania'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                            />
+                                        </div>
+                                        <div className="col">
+                                            <input onChange={handleForm} type='number' id='published.year' placeholder='Rok vydania'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
+                                    <div className="row">
+                                        <div className="col">
+                                            <input onChange={handleForm} type='text' id='note' placeholder='Poznámka'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
+                                    {showError()}
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-secondary" data-dismiss="modal">Zavrieť
+                                        </button>
+                                        <button type="submit"
+                                                disabled={Boolean(error)}
+                                                className="btn btn-success">Uložiť knihu
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <button disabled={formData === undefined}>Add Book</button>
-                <button onClick={handleOpenedBookForm}>Skry form</button>
-            </form>);
-        } else {
-            return <form className='Form'>
-                <button onClick={handleOpenedBookForm}>Zobraz form</button>
-            </form>;
-        }
+            </>
+        );
+
     }
 
     return (

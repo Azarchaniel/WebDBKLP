@@ -7,4 +7,5 @@ export interface IAutor extends Document {
     dateOfBirth?: Date;
     dateOfDeath?: Date;
     note?: string;
+    fullName?: string;
 }
