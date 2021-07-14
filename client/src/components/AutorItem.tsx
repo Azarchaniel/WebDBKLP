@@ -7,7 +7,7 @@ type Props = AutorProps & {
     updateAutor: (autor: IAutor) => void
     deleteAutor: (_id: string) => void
 }
-re
+
 const Autor: React.FC<Props> = ({autor, deleteAutor, updateAutor}) => {
 
     return (
