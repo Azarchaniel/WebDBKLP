@@ -172,6 +172,8 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                    className="form-control"
                                                    autoComplete="off"
                                             />
+
+
                                         </div>
                                         <div className="col">
                                             <input onChange={handleForm} type='number' id='published.year' placeholder='Rok vydania'

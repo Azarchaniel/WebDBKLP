@@ -16,7 +16,7 @@ body, html, main, #root {
 
 .App {
   width: 95%;
-  margin: 4rem auto;
+  margin: 4rem 3rem;
 }
 
 .App > h1 {
@@ -100,3 +100,80 @@ body, html, main, #root {
 .hide-button {
   display: none;
 }
+
+.sideBarOpened {
+  position: fixed;
+  width: 16vw;
+  height: 110vh;
+  background-color: #343A40;
+  margin: -4rem 0 0 -2.5vw;
+  padding: 3rem 0 1rem 1rem;
+  transition: 0.5s;
+
+  .closeIcon {
+    color: black;
+    font-size: xx-large;
+    position: absolute;
+    right: 1rem;
+    top: 0;
+    cursor: pointer;
+  }
+
+  .SB-Parent {
+    font-size: 1.5rem;
+    margin-top: 1rem;
+    cursor: pointer;
+  }
+  .SB-Child {
+    font-size: 1rem !important;
+    padding-left: 3rem;
+    cursor: pointer;
+  }
+  .SB-chevron {
+    position: absolute;
+    right: 50%;
+    padding-top: 0.3rem;
+    cursor: pointer;
+  }
+}
+
+.sideBarClosed {
+  position: fixed;
+  width: 50px;
+  height: 110vh;
+  background-color: #343A40;
+  margin: -4rem 0 0 -2.5vw;
+  padding-top: 3rem;
+
+  .closeIcon {
+    color: black;
+    font-size: xx-large;
+    position: absolute;
+    right: 25%;
+    top: 0;
+    cursor: pointer;
+    transition: 0.5s;
+  }
+  .SB-Parent {
+    margin-left: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+
+    i {
+      visibility: visible;
+      cursor: pointer;
+    }
+  }
+  .SB-Child {
+    color: gray;
+    visibility: visible;
+    cursor: pointer;
+  }
+
+}
+
+.closeIcon:hover {
+  color: white;
+}
+
+

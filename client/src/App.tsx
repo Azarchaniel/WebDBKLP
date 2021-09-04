@@ -12,6 +12,7 @@ import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.scss'
 import Toast from "./components/Toast";
+import Sidebar from "./components/sidebar";
 
 const App: React.FC = () => {
     const [books, setBooks] = useState<IBook[]>([]);
@@ -164,6 +165,7 @@ const App: React.FC = () => {
 
   return (
     <main className='App'>
+        <Sidebar />
       <h1>WebDBKLP</h1>
       <AddBook saveBook={handleSaveBook} />
       <AddAutor saveAutor={handleSaveAutor}/>

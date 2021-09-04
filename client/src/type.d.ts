@@ -44,3 +44,10 @@ export type ILangCode = {
     key: string;
     value: string;
 }
+
+export interface ISideMenuItems {
+    title: string;
+    icon?: string;
+    route: string;
+    children?: ISideMenuItems[];
+}
