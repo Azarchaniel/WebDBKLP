@@ -1,13 +1,46 @@
 import React, {useState} from "react";
 import '../styles/font-awesome/css/all.css';
-import {ISideMenuItems} from "../type";
+import {IBook, ISideMenuItems} from "../type";
+
+type PropsSB = {
+    parent: ISideMenuItems
+}
+
+const SingleLevel: React.FC<PropsSB> = ({parent}) => {
+    return (
+        <div className="SB-Parent">
+            {parent.icon ? <i className={parent.icon}>&nbsp;</i> : <></>}
+            <span>{parent.title}</span>
+            &nbsp;
+        </div>);
+}
+
+const MultiLevel: React.FC<PropsSB> = (parent) => {
+    const [open, setOpen] = useState<boolean>(false)
+
+    if (open) {
+        return (
+            <>
+                <i className="fas fa-chevron-down SB-chevron" onClick={() => setOpen(!open)}/>
+                {parent.children && Array.isArray(parent.children) ? parent.children?.map((child: any) => {
+                    return <div className="SB-Child">{child.title}</div>
+                }) : <></>
+                }
+            </>
+        );
+    } else {
+        return (
+            <>
+                <i className="fas fa-chevron-down SB-chevron" onClick={() => setOpen(!open)}/>
+                {<></>}
+            </>
+        );
+    }
+}
 
 const Sidebar = () => {
     const [sidebarOpened, setSidebarOpened] = useState<boolean>(false);
-    const [SBCopened, setSBCopened] = useState<any>({
-        books: false,
-        quotes: false
-    });
+
     const content: ISideMenuItems[] = [
         {
             title: 'Knihy',
@@ -46,30 +79,29 @@ const Sidebar = () => {
         }
     ];
 
+    const hasChildren = (item: ISideMenuItems) => {
+        const { children } = item;
+
+        if (children === undefined) {
+            return false;
+        }
+        if (children.constructor !== Array) {
+            return false;
+        }
+        return children.length !== 0;
+
+    }
+
+
+    // FUCKING REACT
+
     const showContent = (contentItems: ISideMenuItems[]) => {
-        //todo: make it a function and then recursion over children, because in future we could make more children
         return contentItems.map((item: ISideMenuItems) => {
             if (sidebarOpened) {
-                if (!item.children) {
-                    return <div className="SB-Parent">
-                        {item.icon ? <i className={item.icon}>&nbsp;</i> : <></>}
-                        <span>{item.title}</span>
-                        &nbsp;
-                    </div>
+                if (hasChildren(item)) {
+                    return React.createElement(<SingleLevel parent={item} />);
                 } else {
-                    return <div className="SB-Parent">
-                        {item.icon ? <i className={item.icon}>&nbsp;</i> : <></>}
-                        <span>{item.title}</span>
-                        &nbsp;
-                        <i className="fas fa-chevron-down SB-chevron" onClick={() => setSBCopened({[item.route]: true})}/>
-                        {
-                            SBCopened ?
-                            item.children.map((child: ISideMenuItems) =>
-                            <div className="SB-Child">{child.title}</div>) :
-                                <></>
-
-                        }
-                    </div>
+                    return React.createElement(<MultiLevel item={item}/>);
                 }
             } else {
                 //sidebar closed
@@ -81,8 +113,8 @@ const Sidebar = () => {
                     return <div className="SB-Parent">
                         {item.icon ? <i className={item.icon}>&nbsp;</i> : <></>}
                         {
-                            item.children.map((child: ISideMenuItems) =>
-                                <div className="SB-Child">{child.title.substring(0,1)}</div>)
+                            item.children.map((child: ISideMenuItems, index) =>
+                                <div key={index} className="SB-Child">{child.title.substring(0,1)}</div>)
                         }
                     </div>
                 }
