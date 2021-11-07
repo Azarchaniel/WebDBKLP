@@ -68,7 +68,7 @@ const updateAutor = async (req: Request, res: Response): Promise<void> => {
 
 const deleteAutor = async (req: Request, res: Response): Promise<void> => {
     try {
-        console.log(req.params);
+        console.trace(req.params);
         const deletedAutor: IAutor | null = await Autor.findByIdAndRemove(
             req.params.id
         )

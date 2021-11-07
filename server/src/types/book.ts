@@ -4,12 +4,12 @@ import {IAutor} from "./autor";
 
 export interface IBook extends Document {
     autor?: IAutor[];
-    // editor?: Editor[];
-    // ilustrator?: Ilustrator[];
-    // translator?: Translator[];
+    editor?: IAutor[];
+    ilustrator?: IAutor[];
+    translator?: IAutor[];
     title: string;
     subtitle?: string;
-    // content?: string[];
+    content?: string[];
     // edition?: Edition;
     // serie?: Edition;
     ISBN?: string;
@@ -19,7 +19,7 @@ export interface IBook extends Document {
     note?: string;
     // dimensions?: Dimensions;
     numberOfPages?: number;
-    // exLibris: boolean;	//default: true
+    exLibris: boolean;	//default: true
     // location: Location;
     // owner: ref(OwnerId);
 }

@@ -25,7 +25,7 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
 const addBook = async (req: Request, res: Response): Promise<void> => {
     try {
         const {title, subtitle, ISBN, language, note, numberOfPages, published, autor} = req.body;
-        console.log(req.body);
+        console.trace(req.body);
 
         const book: IBook = new Book({
             autor: autor,

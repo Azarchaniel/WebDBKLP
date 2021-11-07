@@ -29,12 +29,12 @@ const App: React.FC = () => {
       .then(({ data: { books } }: IBook[] | any) => {
           setBooks(books);
       })
-      .catch((err: Error) => console.log(err))
+      .catch((err: Error) => console.trace(err))
     }
 
     const handleSaveBook = (e: React.FormEvent, formData: IBook): void => {
       e.preventDefault()
-        console.log('handle',formData);
+        console.trace('handle',formData);
       addBook(formData)
       .then(({ status, data }) => {
           if (status !== 201) {
@@ -42,7 +42,7 @@ const App: React.FC = () => {
         }
         setBooks(data.books)
       })
-      .catch((err) => console.log(err))
+      .catch((err) => console.trace(err))
     }
 
     const handleUpdateBook = (book: IBook): void => {
@@ -53,7 +53,7 @@ const App: React.FC = () => {
           }
           setBooks(data.books)
         })
-        .catch((err) => console.log(err))
+        .catch((err) => console.trace(err))
     }
 
     const handleDeleteBook = (_id: string): void => {
@@ -80,7 +80,7 @@ const App: React.FC = () => {
                                       })
                                       .catch((err) => {
                                           toast.error('Doslo k chybe!');
-                                          console.log(err);
+                                          console.trace(err);
                                       })
                               }
                           },
@@ -91,7 +91,7 @@ const App: React.FC = () => {
                       ]
                   });
             })
-            .catch((err) => console.log(err))
+            .catch((err) => console.trace(err))
     }
 
     // ### AUTORS ###
@@ -100,7 +100,7 @@ const App: React.FC = () => {
             .then(({ data: { autors } }: IAutor[] | any) => {
                 setAutors(autors);
             })
-            .catch((err: Error) => console.log(err))
+            .catch((err: Error) => console.trace(err))
     }
 
     const handleSaveAutor = (e: React.FormEvent, formData: IAutor): void => {
@@ -116,11 +116,11 @@ const App: React.FC = () => {
             })
             .catch((err) => {
                 toast.error(`Autora sa nepodarilo pridat!`);
-                console.log(err);
+                console.trace(err);
             })
     }
 
-    const handleUpdateAutor = (autor: IAutor): void => {console.log(autor)}
+    const handleUpdateAutor = (autor: IAutor): void => {console.trace(autor)}
 
     const handleDeleteAutor = (_id: string): void => {
         getAutor(_id)
@@ -148,7 +148,7 @@ const App: React.FC = () => {
                                     })
                                     .catch((err) => {
                                         toast.error('Doslo k chybe!');
-                                        console.log(err);
+                                        console.trace(err);
                                     })
                             }
                         },
@@ -159,7 +159,7 @@ const App: React.FC = () => {
                     ],
                 });
             })
-            .catch((err) => console.log(err))
+            .catch((err) => console.trace(err))
 
     }
 

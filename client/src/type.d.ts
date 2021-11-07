@@ -10,6 +10,7 @@ interface IBook {
     numberOfPages: number;
     note: string;
     published: Published;
+    exLibris: boolean;
     createdAt?: string;
     updatedAt?: string;
 }

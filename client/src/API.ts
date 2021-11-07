@@ -10,7 +10,7 @@ export const getBooks = async (): Promise<AxiosResponse<ApiBookDataType>> => {
       baseUrl + '/books'
     )
     return books
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error)
   }
 }
@@ -23,7 +23,7 @@ export const getBook = async (
         `${baseUrl}/book/${_id}`
     )
     return book
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error)
   }
 }
@@ -46,7 +46,7 @@ export const addBook = async (
       book
     )
     return saveBook
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error)
   }
 }
@@ -65,7 +65,7 @@ export const updateBook = async (
       bookUpdate
     )
     return updatedBook
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error)
   }
 }
@@ -78,7 +78,7 @@ export const deleteBook = async (
       `${baseUrl}/delete-book/${_id}`
     )
     return deletedBook
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error)
   }
 }
@@ -90,7 +90,7 @@ export const getAutors = async (): Promise<AxiosResponse<ApiAutorDataType>> => {
         baseUrl + '/autors'
     )
     return autors
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error)
   }
 }
@@ -104,7 +104,7 @@ export const getAutor = async (
     );
 
     return autor;
-  } catch (error) {
+  } catch (error: any) {
     console.error('API ERROR');
     throw new Error(error)
   }
@@ -114,7 +114,7 @@ export const addAutor = async (
     formData: /*IAutor*/any
 ): Promise<AxiosResponse<ApiAutorDataType>> => {
   try {
-    console.log('add autor', formData);
+    console.trace('add autor', formData);
     const autor: any/*Omit<IAutor, '_id'>*/ = {
       firstName: formData.firstName ?? '',
       lastName: formData.lastName,
@@ -123,13 +123,13 @@ export const addAutor = async (
       dateOfBirth: formData.dateOfBirth ?? undefined,
       dateOfDeath: formData.dateOfDeath ?? undefined
     }
-    console.log(autor);
+    console.trace(autor);
     const saveAutor: AxiosResponse<ApiAutorDataType> = await axios.post(
         baseUrl + '/add-autor',
         autor
     )
     return saveAutor
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error)
   }
 }
@@ -142,7 +142,7 @@ export const deleteAutor = async (
         `${baseUrl}/delete-autor/${_id}`
     )
     return deletedAutor
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error)
   }
 }

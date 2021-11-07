@@ -74,7 +74,7 @@ const updateAutor = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.updateAutor = updateAutor;
 const deleteAutor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log(req.params);
+        console.trace(req.params);
         const deletedAutor = yield autor_1.default.findByIdAndRemove(req.params.id);
         const allAutors = yield autor_1.default.find();
         res.status(200).json({

@@ -20,7 +20,9 @@ type Props = {
 
 const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
     const [formData, setFormData] = useState<IAutor | {}>();
-    const [error, setError] = useState<string | undefined>('Priezvisko autora musí obsahovať aspoň jeden znak!');
+    const [error, setError] = useState<string | undefined>(
+        'Priezvisko autora musí obsahovať aspoň jeden znak!'
+    );
 
     useEffect(() => {
         //shortcut
@@ -56,7 +58,7 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                 ...formData,
                 [e?.currentTarget.id]: e?.currentTarget.value
             })
-            console.log(formData);
+            console.trace(formData);
         } catch (err) {
             toast.error('Chyba pri zadávaní do formuláru!')
             console.error('AddAutor(handleForm)', err)
@@ -115,7 +117,6 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                                                 displayValue="value"
                                                 placeholder="Národnosť"
                                                 closeIcon="cancel"
-                                                onChange={handleForm}
                                                 onSelect={(picked: ILangCode[]) => {setFormData({...formData, nationality: picked[0].key})}}
                                                 style={{inputField: {marginLeft: "0.5rem"},
                                                     searchBox: {width: "100%", paddingRight: '5px', marginRight: '-5px', borderRadius: '3px'}

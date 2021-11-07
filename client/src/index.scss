@@ -111,7 +111,7 @@ body, html, main, #root {
   transition: 0.5s;
 
   .closeIcon {
-    color: black;
+    color: white;
     font-size: xx-large;
     position: absolute;
     right: 1rem;
@@ -125,14 +125,15 @@ body, html, main, #root {
     cursor: pointer;
   }
   .SB-Child {
-    font-size: 1rem !important;
+    color: gray;
+    font-size: 1.1rem;
     padding-left: 3rem;
     cursor: pointer;
   }
   .SB-chevron {
     position: absolute;
-    right: 50%;
-    padding-top: 0.3rem;
+    right: 0.5rem;
+    padding-top: 0.5rem;
     cursor: pointer;
   }
 }
@@ -146,10 +147,10 @@ body, html, main, #root {
   padding-top: 3rem;
 
   .closeIcon {
-    color: black;
+    color: white;
     font-size: xx-large;
     position: absolute;
-    right: 25%;
+    right: 50%;
     top: 0;
     cursor: pointer;
     transition: 0.5s;
@@ -169,11 +170,9 @@ body, html, main, #root {
     visibility: visible;
     cursor: pointer;
   }
-
 }
 
 .closeIcon:hover {
   color: white;
 }
-
 

@@ -147,7 +147,7 @@ const SearchAutocomplete = (
     };
 
     const handleClickOutside = (event: any) => {
-        console.log(event);
+        console.trace(event);
     }
 
     const resultsTable = () => {
