@@ -56,6 +56,12 @@ body, html, main, #root {
   margin-right: 1rem;
 }
 
+.checkBox {
+  width: 1rem;
+  height: 1rem;
+  margin-right: .5rem;
+}
+
 .Autor {
   display: flex;
   justify-content: space-between;
@@ -133,8 +139,14 @@ body, html, main, #root {
   .SB-chevron {
     position: absolute;
     right: 0.5rem;
-    padding-top: 0.5rem;
+    padding: 0.5rem;
     cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .SB-chevron:hover {
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 15%;
+    padding: .5rem;
   }
 }
 
@@ -155,6 +167,7 @@ body, html, main, #root {
     cursor: pointer;
     transition: 0.5s;
   }
+
   .SB-Parent {
     margin-left: 1rem;
     font-size: 1.5rem;

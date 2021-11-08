@@ -8,7 +8,7 @@ import {IAutor} from "../../../server/src/types";
 import cs from 'date-fns/locale/cs';
 import {countryCode} from "../utils/locale";
 //@ts-ignore
-import { Multiselect } from 'multiselect-react-dropdown';
+import {Multiselect} from 'multiselect-react-dropdown';
 import {ILangCode} from "../type";
 
 //for datepicker
@@ -72,6 +72,10 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
         );
     }
 
+    const isValidDate = (varToCheck: unknown) => {
+        return varToCheck instanceof Date && !isNaN(varToCheck.valueOf());
+    }
+
     const showAddAutor = () => {
         return (
             <>
@@ -93,7 +97,6 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                                 <form onSubmit={(e) => {
                                     saveAutor(e, formData)
                                 }}>
-
                                     <div className="row">
                                         <div className="col">
                                             <input type="text" onChange={handleForm} className="form-control"
@@ -104,28 +107,6 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                                             <input type="text" onChange={handleForm} className="form-control"
                                                    id='lastName'
                                                    placeholder="*Priezvisko"/>
-                                        </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-
-                                    <div className="row">
-                                        <div className="col">
-                                            <Multiselect
-                                                selectionLimit={1}
-                                                closeOnSelect={true}
-                                                options={countryCode}
-                                                displayValue="value"
-                                                placeholder="Národnosť"
-                                                closeIcon="cancel"
-                                                onSelect={(picked: ILangCode[]) => {setFormData({...formData, nationality: picked[0].key})}}
-                                                style={{inputField: {marginLeft: "0.5rem"},
-                                                    searchBox: {width: "100%", paddingRight: '5px', marginRight: '-5px', borderRadius: '3px'}
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="col">
-                                            <input type="text" onChange={handleForm} className="form-control" id='note'
-                                                   placeholder="Poznámka"/>
                                         </div>
                                     </div>
 
@@ -150,10 +131,11 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                                                 placeholderText={'Dátum narodenia'}
                                                 maxDate={new Date()}
                                             />
-                                            <button className='clearInput' type="button" onClick={() => {
-                                                setFormData({...formData, dateOfBirth: undefined})
-                                            }}>&#10006;
-                                            </button>
+                                            {isValidDate(formData && 'dateOfBirth' in formData ? formData?.dateOfBirth : false) ?
+                                                <button className='clearInput' type="button" onClick={() => {
+                                                    setFormData({...formData, dateOfBirth: undefined})
+                                                }}>&#10006;
+                                                </button> : <></>}
                                         </div>
                                         <div className="col">
                                             <DatePicker
@@ -173,13 +155,44 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                                                 placeholderText={'Dátum smrti'}
                                                 maxDate={new Date()}
                                             />
-                                            <button className='clearInput' type="button" onClick={() => {
-                                                setFormData({...formData, dateOfDeath: undefined})
-                                            }}>&#10006;
-                                            </button>
+                                            {isValidDate(formData && 'dateOfDeath' in formData ? formData?.dateOfDeath : false) ?
+                                                <button className='clearInput' type="button" onClick={() => {
+                                                    setFormData({...formData, dateOfDeath: undefined})
+                                                }}>&#10006;
+                                                </button> : <></>}
                                         </div>
                                     </div>
 
+                                    <div style={{height: '5px', width: '100%'}}/>
+
+                                    <div className="row">
+                                        <div className="col">
+                                            <Multiselect
+                                                selectionLimit={1}
+                                                closeOnSelect={true}
+                                                options={countryCode}
+                                                displayValue="value"
+                                                placeholder="Národnosť"
+                                                closeIcon="cancel"
+                                                onSelect={(picked: ILangCode[]) => {
+                                                    setFormData({...formData, nationality: picked[0].key})
+                                                }}
+                                                style={{
+                                                    inputField: {marginLeft: "0.5rem"},
+                                                    searchBox: {
+                                                        width: "100%",
+                                                        paddingRight: '5px',
+                                                        marginRight: '-5px',
+                                                        borderRadius: '3px'
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="col">
+                                            <input type="text" onChange={handleForm} className="form-control" id='note'
+                                                   placeholder="Poznámka"/>
+                                        </div>
+                                    </div>
                                     <div style={{height: '5px', width: '100%'}}/>
 
                                     {showError()}

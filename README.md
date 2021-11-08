@@ -12,13 +12,16 @@ cd ./client; npm run
 ### TODO
 - [X] redesign - add bootstrap
 - [X] side menu
-- [ ] (in far future) authorization/authentication
-- [ ] CRUD for Quotes
-- [ ] add Owner
 - [X] adding / updating item
 - [X] Autocomplete
+- [X] allow multichoice
+- [ ] CRUD for Quotes
+- [ ] soft delete
+- [ ] add Owner
 - [ ] rework Autocomplete - custom
-- [X] allow multichoice  
+- [ ] custom modal
 - [ ] clean form after saving item
 - [ ] create all models and interfaces
+- [ ] webscrapper and autofilling
 - [ ] (in far future) localization
+- [ ] (in far future) authorization/authentication

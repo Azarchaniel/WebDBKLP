@@ -59,15 +59,15 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
     }, [formData])
 
     useEffect(() => {
-        setFormData({});
+        cleanFields();
     }, []);
 
     const changeExLibris = () => {
-       setExLibrisValue(!exLibrisValue);
-       setFormData({
-           ...formData,
-           exLibris: !exLibrisValue
-       })
+        setExLibrisValue(!exLibrisValue);
+        setFormData({
+            ...formData,
+            exLibris: !exLibrisValue
+        })
     }
 
     const handleForm = (e: any): void => {
@@ -129,7 +129,6 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                    value={formData && "subtitle" in formData ? formData.subtitle : ''}
                                             />
                                         </div>
-
                                     </div>
                                     <div style={{height: '5px', width: '100%'}}/>
                                     <div className="row">
@@ -166,6 +165,37 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                             />
                                         </div>
                                         <div className="col">
+                                            <input onChange={handleForm} type='text' id='published.publisher'
+                                                   placeholder='Vydavateľ'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "published.publisher" in formData ? formData["published.publisher"] : ''}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
+                                    <div className="row">
+                                        <div className="col">
+                                            <input onChange={handleForm} type='number' id='numberOfPages'
+                                                   placeholder='Počet strán'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "numberOfPages" in formData ? formData.numberOfPages : ''}
+                                            />
+                                        </div>
+                                        <div className="col">
+                                            <input onChange={handleForm} type='number' id='published.year'
+                                                   placeholder='Rok vydania'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "published.year" in formData ? formData["published.year"] : ''}
+                                            />
+
+                                        </div>
+                                    </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
+                                    <div className="row">
+                                        <div className="col">
                                             <Multiselect
                                                 options={langCode}
                                                 displayValue="value"
@@ -185,29 +215,8 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                 }}
                                                 ref={langRef}
                                             />
+
                                         </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-                                    <div className="row">
-                                        <div className="col">
-                                            <input onChange={handleForm} type='number' id='numberOfPages'
-                                                   placeholder='Počet strán'
-                                                   className="form-control"
-                                                   autoComplete="off"
-                                                   value={formData && "numberOfPages" in formData ? formData.numberOfPages : ''}
-                                            />
-                                        </div>
-                                        <div className="col">
-                                            <input onChange={handleForm} type='text' id='published.publisher'
-                                                   placeholder='Vydavateľ'
-                                                   className="form-control"
-                                                   autoComplete="off"
-                                                   value={formData && "published.publisher" in formData ? formData["published.publisher"] : ''}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-                                    <div className="row">
                                         <div className="col">
                                             <Multiselect
                                                 options={countryCode}
@@ -215,7 +224,10 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                 placeholder="Krajina vydania"
                                                 closeIcon="cancel"
                                                 onSelect={(picked: ILangCode[]) => {
-                                                    setFormData({...formData, "published.country": picked.map(v => v.key)})
+                                                    setFormData({
+                                                        ...formData,
+                                                        "published.country": picked.map(v => v.key)
+                                                    })
                                                 }}
                                                 style={{
                                                     inputField: {marginLeft: "0.5rem"},
@@ -228,14 +240,7 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                 }}
                                                 ref={countryRef}
                                             />
-                                        </div>
-                                        <div className="col">
-                                            <input onChange={handleForm} type='number' id='published.year'
-                                                   placeholder='Rok vydania'
-                                                   className="form-control"
-                                                   autoComplete="off"
-                                                   value={formData && "published.year" in formData ? formData["published.year"] : ''}
-                                            />
+
                                         </div>
                                     </div>
                                     <div style={{height: '5px', width: '100%'}}/>
@@ -253,12 +258,13 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                         <div className="col">
                                             <input type="checkbox"
                                                    id="exLibris"
+                                                   className="checkBox"
                                                    checked={exLibrisValue}
                                                    onChange={changeExLibris}
                                             />Ex Libris
                                         </div>
-                                        <div className="col"></div>
                                     </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
                                     {showError()}
                                     <div className="modal-footer">
                                         <button type="button" className="btn btn-secondary"

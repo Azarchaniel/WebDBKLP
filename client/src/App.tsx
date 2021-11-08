@@ -38,9 +38,11 @@ const App: React.FC = () => {
       addBook(formData)
       .then(({ status, data }) => {
           if (status !== 201) {
-          throw new Error('Error! Todo not saved')
-        }
-        setBooks(data.books)
+              toast.error('Chyba! Kniha nebola pridaná!')
+              throw new Error('Chyba! Kniha nebola pridaná!');
+          }
+          toast.success(`Kniha ${data.book?.title} bola úspešne pridaná.`);
+          setBooks(data.books)
       })
       .catch((err) => console.trace(err))
     }
@@ -79,7 +81,7 @@ const App: React.FC = () => {
                                           setBooks(data.books)
                                       })
                                       .catch((err) => {
-                                          toast.error('Doslo k chybe!');
+                                          toast.error('Chyba! Knihu nemožno vymazať!');
                                           console.trace(err);
                                       })
                               }
