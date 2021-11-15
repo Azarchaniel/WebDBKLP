@@ -110,32 +110,32 @@ const App: React.FC = () => {
         addAutor(formData)
             .then(({ status, data }) => {
                 if (status !== 201) {
-                    throw new Error('Error! Todo not saved')
+                    throw new Error('Autora sa nepodarilo pridať!')
                 }
                 const autorNames = `${data.autor?.lastName}${data.autor?.firstName ? ', ' + data.autor?.firstName : ''}`;
-                toast.success(`Autor ${autorNames} bol uspesne pridany.`);
+                toast.success(`Autor ${autorNames} bol úspešne pridaný.`);
                 setAutors(data.autors);
             })
             .catch((err) => {
-                toast.error(`Autora sa nepodarilo pridat!`);
+                toast.error(`Autora sa nepodarilo pridať!`);
                 console.trace(err);
             })
     }
 
-    const handleUpdateAutor = (autor: IAutor): void => {console.trace(autor)}
+    const handleUpdateAutor = (): any => {}
 
     const handleDeleteAutor = (_id: string): void => {
         getAutor(_id)
             .then(({ status, data }) => {
                 if (status !== 200) {
-                    toast.error('Doslo k chybe!');
-                    throw new Error('Chyba! Autor nevymazany.')
+                    toast.error('Došlo k chybe!');
+                    throw new Error('Chyba! Autor nebol vymazaný.')
                 }
                 const autorNames = `${data.autor?.lastName}${data.autor?.firstName ? ', ' + data.autor?.firstName : ''}`;
 
                 confirmAlert({
                     title: 'Vymazat autora?',
-                    message: `Naozaj chces vymazat autora ${autorNames}?`,
+                    message: `Naozaj chceš vymazať autora ${autorNames}?`,
                     buttons: [
                         {
                             label: 'Ano',
@@ -145,11 +145,11 @@ const App: React.FC = () => {
                                         if (status !== 200) {
                                             throw new Error('Error! Autor not deleted')
                                         }
-                                        toast.success(`Autor ${autorNames} bol uspesne vymazany.`);
+                                        toast.success(`Autor ${autorNames} bol úspešne vymazaný.`);
                                         setAutors(data.autors)
                                     })
                                     .catch((err) => {
-                                        toast.error('Doslo k chybe!');
+                                        toast.error('Došlo k chybe!');
                                         console.trace(err);
                                     })
                             }
@@ -171,23 +171,25 @@ const App: React.FC = () => {
       <h1>WebDBKLP</h1>
       <AddBook saveBook={handleSaveBook} />
       <AddAutor saveAutor={handleSaveAutor}/>
-      {books.sort((a,b) => a.title.localeCompare(b.title)).map((book: IBook) => (
-        <BookItem
+      {books.sort((a,b) => a.title.localeCompare(b.title)).map((book: IBook) => {
+        if (book.isDeleted) return null;
+        return <BookItem
           key={book._id}
           updateBook={handleUpdateBook}
           deleteBook={handleDeleteBook}
           book={book}
         />
-      ))}
-        {/*todo: sorting and better fetching anyway*/}
-        {autors.sort((a,b) => a.lastName.localeCompare(b.lastName)).map((autor: IAutor) => (
-            <AutorItem
+      })}
+        {/*todo: better fetching*/}
+        {autors.sort((a,b) => a.lastName.localeCompare(b.lastName)).map((autor: IAutor) => {
+            if (autor.isDeleted) return null;
+            return <AutorItem
                 key={autor._id}
                 updateAutor={handleUpdateAutor}
                 deleteAutor={handleDeleteAutor}
                 autor={autor}
             />
-        ))}
+        })}
         <Toast />
     </main>
   )

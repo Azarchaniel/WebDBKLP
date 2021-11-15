@@ -58,7 +58,7 @@ export const updateBook = async (
 ): Promise<AxiosResponse<ApiBookDataType>> => {
   try {
     const bookUpdate: Pick<IBook, 'title'> = {
-        title: 'Upravena zatial takto'
+        title: 'Upravena zatial takto2'
     }
     const updatedBook: AxiosResponse<ApiBookDataType> = await axios.put(
       `${baseUrl}/edit-book/${book._id}`,
@@ -74,7 +74,7 @@ export const deleteBook = async (
   _id: string
 ): Promise<AxiosResponse<ApiBookDataType>> => {
   try {
-    const deletedBook: AxiosResponse<ApiBookDataType> = await axios.delete(
+    const deletedBook: AxiosResponse<ApiBookDataType> = await axios.post(
       `${baseUrl}/delete-book/${_id}`
     )
     return deletedBook
@@ -138,7 +138,7 @@ export const deleteAutor = async (
     _id: string
 ): Promise<AxiosResponse<ApiAutorDataType>> => {
   try {
-    const deletedAutor: AxiosResponse<ApiAutorDataType> = await axios.delete(
+    const deletedAutor: AxiosResponse<ApiAutorDataType> = await axios.post(
         `${baseUrl}/delete-autor/${_id}`
     )
     return deletedAutor
@@ -146,3 +146,5 @@ export const deleteAutor = async (
     throw new Error(error)
   }
 }
+
+

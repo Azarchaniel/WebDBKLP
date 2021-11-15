@@ -1,3 +1,4 @@
+
 ### Work in progress
 # WebDBKLP
 
@@ -15,8 +16,8 @@ cd ./client; npm run
 - [X] adding / updating item
 - [X] Autocomplete
 - [X] allow multichoice
+- [X] soft delete
 - [ ] CRUD for Quotes
-- [ ] soft delete
 - [ ] add Owner
 - [ ] rework Autocomplete - custom
 - [ ] custom modal

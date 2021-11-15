@@ -23,17 +23,15 @@ const getAutor = async (req: Request, res: Response): Promise<void> => {
 }
 
 const addAutor = async (req: any, res: any): Promise<void> => {
+    const {firstName, lastName, dateOfBirth, dateOfDeath, note, nationality} = req.body;
     try {
-        //todo: maybe just const {firstName} = body; ?? Or not at all?
-        const body = req.body as Pick<IAutor, 'firstName' | 'lastName' | 'dateOfBirth' | 'dateOfDeath' | 'note' | 'nationality'>
-
         const autor: IAutor = new Autor({
-            firstName: body.firstName,
-            lastName: body.lastName,
-            dateOfBirth: body.dateOfBirth,
-            dateOfDeath: body.dateOfDeath,
-            note: body.note,
-            nationality: body.nationality
+            firstName: firstName,
+            lastName: lastName,
+            dateOfBirth: dateOfBirth,
+            dateOfDeath: dateOfDeath,
+            note: note,
+            nationality: nationality ?? ''
         });
 
         const newAutor: IAutor = await autor.save()
@@ -68,9 +66,16 @@ const updateAutor = async (req: Request, res: Response): Promise<void> => {
 
 const deleteAutor = async (req: Request, res: Response): Promise<void> => {
     try {
-        console.trace(req.params);
-        const deletedAutor: IAutor | null = await Autor.findByIdAndRemove(
-            req.params.id
+        const {
+            params: {id},
+            body,
+        } = req
+        const deletedAutor: IAutor | null = await Autor.findByIdAndUpdate(
+            {_id: id},
+            {
+                ...body,
+                isDeleted: true
+            }
         )
         const allAutors: IAutor[] = await Autor.find()
         res.status(200).json({

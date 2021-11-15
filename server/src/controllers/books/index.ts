@@ -74,8 +74,16 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
 
 const deleteBook = async (req: Request, res: Response): Promise<void> => {
     try {
-        const deletedBook: IBook | null = await Book.findByIdAndRemove(
-            req.params.id
+        const {
+            params: {id},
+            body,
+        } = req
+        const deletedBook: IBook | null = await Book.findByIdAndUpdate(
+            {_id: id},
+            {
+                ...body,
+                isDeleted: true
+            }
         )
         const allBooks: IBook[] = await Book.find()
         res.status(200).json({

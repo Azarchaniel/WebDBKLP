@@ -3,7 +3,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {toast} from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {IAutor} from "../../../server/src/types";
 import cs from 'date-fns/locale/cs';
 import {countryCode} from "../utils/locale";
@@ -23,6 +23,7 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
     const [error, setError] = useState<string | undefined>(
         'Priezvisko autora musí obsahovať aspoň jeden znak!'
     );
+    const countryRef = useRef(null);
 
     useEffect(() => {
         //shortcut
@@ -52,6 +53,10 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
         if (autorLength && !dates) setError('Dátum smrti nemôže byť skôr, než dátum narodenia!');
     }, [formData])
 
+    useEffect(() => {
+        cleanFields();
+    }, []);
+
     const handleForm = (e: any): void => {
         try {
             setFormData({
@@ -74,6 +79,12 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
 
     const isValidDate = (varToCheck: unknown) => {
         return varToCheck instanceof Date && !isNaN(varToCheck.valueOf());
+    }
+
+    const cleanFields = () => {
+        setFormData({});
+        //@ts-ignore
+        countryRef?.current?.resetSelectedValues();
     }
 
     const showAddAutor = () => {
@@ -186,6 +197,7 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                                                         borderRadius: '3px'
                                                     }
                                                 }}
+                                                ref={countryRef}
                                             />
                                         </div>
                                         <div className="col">
@@ -198,8 +210,12 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                                     {showError()}
 
                                     <div className="modal-footer">
+                                        <button type="button" className="btn btn-secondary"
+                                                onClick={cleanFields}>Vymazať polia
+                                        </button>
                                         <button type="button" className="btn btn-secondary" data-dismiss="modal">Zavrieť
                                         </button>
+                                        {/* TODO: add button Save and add another */}
                                         <button type="submit"
                                                 disabled={Boolean(error)}
                                                 className="btn btn-success">Uložiť autora

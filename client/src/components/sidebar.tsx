@@ -10,7 +10,7 @@ const hasChildren = (item: ISideMenuItems) => {
     const { children } = item;
 
     if (children === undefined || children.constructor !== Array) return false;
-    return children.length !== 0;
+    return children.length;
 }
 
 const MenuItem: React.FC<PropsSB> = ({parent}) => {
@@ -24,7 +24,7 @@ const MenuItem: React.FC<PropsSB> = ({parent}) => {
                     {parent.icon ? <i className={parent.icon}>&nbsp;</i> : <></>}
                     <span>{parent.title}</span>
                     &nbsp;
-                    <i className="fas fa-chevron-down SB-chevron" onClick={() => setOpen(!open)}/>
+                    <i className={`fas fa-chevron-${open ? 'up' : 'down'} SB-chevron`} onClick={() => setOpen(!open)}/>
                     {parent.children && Array.isArray(parent.children) ? parent.children?.map((child: any, index) => {
                         return <div key={index} className="SB-Child">{child.title}</div>
                     }) : <></>}
@@ -36,7 +36,7 @@ const MenuItem: React.FC<PropsSB> = ({parent}) => {
                     {parent.icon ? <i className={parent.icon}>&nbsp;</i> : <></>}
                     <span>{parent.title}</span>
                     &nbsp;
-                    <i className="fas fa-chevron-down SB-chevron" onClick={() => setOpen(!open)}/>
+                    <i className={`fas fa-chevron-${open ? 'up' : 'down'} SB-chevron`} onClick={() => setOpen(!open)}/>
                 </div>
             );
         }
@@ -54,6 +54,7 @@ const MenuItem: React.FC<PropsSB> = ({parent}) => {
 const Sidebar = () => {
     const [sidebarOpened, setSidebarOpened] = useState<boolean>(false);
 
+    //todo: this shouldn't be here - separate data and component
     const content: ISideMenuItems[] = [
         {
             title: 'Knihy',
@@ -69,6 +70,11 @@ const Sidebar = () => {
                     route: 'books/zaneta',
                 },
             ],
+        },
+        {
+            title: 'Autori',
+            icon: 'fas fa-feather-alt',
+            route: 'autors',
         },
         {
             title: 'LP',

@@ -36,16 +36,15 @@ const getAutor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getAutor = getAutor;
 const addAutor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { firstName, lastName, dateOfBirth, dateOfDeath, note, nationality } = req.body;
     try {
-        //todo: maybe just const {firstName} = body; ?? Or not at all?
-        const body = req.body;
         const autor = new autor_1.default({
-            firstName: body.firstName,
-            lastName: body.lastName,
-            dateOfBirth: body.dateOfBirth,
-            dateOfDeath: body.dateOfDeath,
-            note: body.note,
-            nationality: body.nationality
+            firstName: firstName,
+            lastName: lastName,
+            dateOfBirth: dateOfBirth,
+            dateOfDeath: dateOfDeath,
+            note: note,
+            nationality: nationality !== null && nationality !== void 0 ? nationality : ''
         });
         const newAutor = yield autor.save();
         const allAutors = yield autor_1.default.find();
@@ -74,8 +73,8 @@ const updateAutor = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.updateAutor = updateAutor;
 const deleteAutor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.trace(req.params);
-        const deletedAutor = yield autor_1.default.findByIdAndRemove(req.params.id);
+        const { params: { id }, body, } = req;
+        const deletedAutor = yield autor_1.default.findByIdAndUpdate({ _id: id }, Object.assign(Object.assign({}, body), { isDeleted: true }));
         const allAutors = yield autor_1.default.find();
         res.status(200).json({
             message: 'Autor deleted',

@@ -7,4 +7,4 @@ exports.publishedSchema = new mongoose_1.Schema({
     year: { type: Number, required: false },
     country: { type: String, required: false }
 }, { _id: false });
-exports.default = mongoose_1.model('Published', exports.publishedSchema);
+exports.default = (0, mongoose_1.model)('Published', exports.publishedSchema);

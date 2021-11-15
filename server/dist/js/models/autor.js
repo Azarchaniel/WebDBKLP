@@ -7,6 +7,7 @@ const autorSchema = new mongoose_1.Schema({
     nationality: { type: String, required: false },
     dateOfBirth: { type: Date, required: false },
     dateOfDeath: { type: Date, required: false },
-    note: { type: String, required: false }
+    note: { type: String, required: false },
+    isDeleted: { type: Boolean, defaut: false }
 }, { timestamps: true });
-exports.default = mongoose_1.model('Autor', autorSchema);
+exports.default = (0, mongoose_1.model)('Autor', autorSchema);

@@ -3,10 +3,10 @@ import {Published} from "./published";
 import {IAutor} from "./autor";
 
 export interface IBook extends Document {
-    autor?: IAutor[];
-    editor?: IAutor[];
-    ilustrator?: IAutor[];
-    translator?: IAutor[];
+    autor?: string[]; //IDs
+    editor?: string[];
+    ilustrator?: string[];
+    translator?: string[];
     title: string;
     subtitle?: string;
     content?: string[];
@@ -22,4 +22,5 @@ export interface IBook extends Document {
     exLibris: boolean;	//default: true
     // location: Location;
     // owner: ref(OwnerId);
+    isDeleted: boolean;
 }

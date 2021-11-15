@@ -11,6 +11,7 @@ interface IBook {
     note: string;
     published: Published;
     exLibris: boolean;
+    isDeleted?: boolean;
     createdAt?: string;
     updatedAt?: string;
 }

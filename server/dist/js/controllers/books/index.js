@@ -81,7 +81,8 @@ const updateBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.updateBook = updateBook;
 const deleteBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const deletedBook = yield book_1.default.findByIdAndRemove(req.params.id);
+        const { params: { id }, body, } = req;
+        const deletedBook = yield book_1.default.findByIdAndUpdate({ _id: id }, Object.assign(Object.assign({}, body), { isDeleted: true }));
         const allBooks = yield book_1.default.find();
         res.status(200).json({
             message: 'Book deleted',

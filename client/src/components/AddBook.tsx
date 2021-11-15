@@ -146,9 +146,9 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                             style={{
                                                 inputField: {marginLeft: "0.5rem"},
                                                 optionContainer: {
-                                                    marginRight: "1.4rem",
-                                                    backgroundColor: "transparent"
+                                                    backgroundColor: "transparent",
                                                 },
+                                                option: {},
                                                 multiselectContainer: {maxWidth: '100%'},
                                             }}
                                             ref={autorRef}
@@ -272,6 +272,7 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                         </button>
                                         <button type="button" className="btn btn-secondary" data-dismiss="modal">Zavrieť
                                         </button>
+                                        {/* TODO: add button Save and add another */}
                                         <button type="submit"
                                                 disabled={Boolean(error)}
                                                 className="btn btn-success">Uložiť knihu

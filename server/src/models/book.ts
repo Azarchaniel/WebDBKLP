@@ -19,7 +19,7 @@ const bookSchema: Schema = new Schema({
     numberOfPages: {type: Number, required: false},
     exLibris: {type: Boolean},
     published: {type: publishedSchema, required: false},
-    //softDelete: {type: Boolean}
+    isDeleted: {type: Boolean, default: false}
 }, {timestamps: true})
 
 export default model<IBook>('Book', bookSchema);
