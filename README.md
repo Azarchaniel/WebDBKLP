@@ -17,7 +17,7 @@ cd ./client; npm run
 - [X] Autocomplete
 - [X] allow multichoice
 - [X] soft delete
-- [ ] CRUD for Quotes
+- [X] CRUD for Quotes
 - [ ] add Owner
 - [ ] rework Autocomplete - custom
 - [ ] custom modal

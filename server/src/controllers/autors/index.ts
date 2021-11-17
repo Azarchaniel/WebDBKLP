@@ -8,13 +8,14 @@ const getAllAutors = async (req: Request, res: Response): Promise<void> => {
 
         res.status(200).json({autors: autors})
     } catch (error) {
+        res.status(400);
         throw error
     }
 }
 
 const getAutor = async (req: Request, res: Response): Promise<void> => {
     try {
-        const autor = await Autor.findById(req.params.id);
+        const autor: IAutor | null = await Autor.findById(req.params.id);
         const allAutors: IAutor[] = await Autor.find()
         res.status(200).json({autor: autor, autors: allAutors})
     } catch (err) {
@@ -22,7 +23,7 @@ const getAutor = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
-const addAutor = async (req: any, res: any): Promise<void> => {
+const addAutor = async (req: Request, res: Response): Promise<void> => {
     const {firstName, lastName, dateOfBirth, dateOfDeath, note, nationality} = req.body;
     try {
         const autor: IAutor = new Autor({

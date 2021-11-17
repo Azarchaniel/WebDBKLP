@@ -20,6 +20,7 @@ const getAllAutors = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(200).json({ autors: autors });
     }
     catch (error) {
+        res.status(400);
         throw error;
     }
 });

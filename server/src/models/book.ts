@@ -1,6 +1,7 @@
 import {IBook} from '../types';
 import {model, Schema} from 'mongoose'
 import {publishedSchema} from "./published";
+import {editionSerieSchema} from "./editionSerie";
 
 const bookSchema: Schema = new Schema({
     //string, because it's ID
@@ -11,8 +12,8 @@ const bookSchema: Schema = new Schema({
     title: {type: String, required: true},
     subtitle: {type: String, required: false},
     content: {type: String, required: false},
-    //edition: {type: ?, required: false},
-    //serie: {type: ?, required: false},
+    edition: {type: editionSerieSchema, required: false},
+    serie: {type: editionSerieSchema, required: false},
     ISBN: {type: String, required: false},
     language: {type: [String], required: true},
     note: {type: String, required: false},

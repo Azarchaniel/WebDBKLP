@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import {IBook, ILangCode} from "../type";
-import {IAutor} from "../../../server/src/types";
+import {IAutor, IBook, ILangCode} from "../type";
 import {toast} from "react-toastify";
 import {getAutors} from "../API";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";

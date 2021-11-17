@@ -1,7 +1,11 @@
-import {IAutor} from "../../server/src/types";
-
-interface IBook {
+interface IBaseType {
     _id: string;
+    isDeleted?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface IBook extends IBaseType{
     autor: string[]; //id[]
     title: string;
     subtitle?: string;
@@ -11,9 +15,21 @@ interface IBook {
     note: string;
     published: Published;
     exLibris: boolean;
-    isDeleted?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
+}
+
+export interface IAutor extends IBaseType {
+    firstName?: string;
+    lastName: string;
+    nationality?: string;
+    dateOfBirth?: Date;
+    dateOfDeath?: Date;
+    note?: string;
+    fullName?: string;
+}
+
+export interface IQuote extends IBaseType {
+    text: string; //text or URL to pic
+    fromBook: string; //id
 }
 
 type BookProps = {
@@ -30,6 +46,12 @@ type ApiAutorDataType = {
     message: string
     autors: IAutor[]
     autor?: IAutor
+}
+
+type ApiQuoteDataType = {
+    message: string
+    quotes: IQuote[]
+    quote?: IQuote
 }
 
 type AutorProps = {

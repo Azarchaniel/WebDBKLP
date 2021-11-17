@@ -75,6 +75,15 @@ body, html, main, #root {
   }
 }
 
+.Quote {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: aqua;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #333333;
+}
+
 .modal-title, .modal-body {
   color: black;
 }

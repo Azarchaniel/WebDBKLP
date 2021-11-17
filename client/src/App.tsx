@@ -1,26 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import BookItem from './components/BookItem'
 import AddBook from './components/AddBook'
-import {getBooks, addBook, updateBook, deleteBook, getBook, addAutor, getAutors, getAutor, deleteAutor} from './API'
-import {IBook} from "./type";
+import {
+    getBooks,
+    addBook,
+    updateBook,
+    deleteBook,
+    getBook,
+    addAutor,
+    getAutors,
+    getAutor,
+    deleteAutor,
+    addQuote, getQuotes, deleteQuote
+} from './API'
+import {IAutor, IBook, IQuote} from "./type";
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import AddAutor from "./components/AddAutor";
-import {IAutor} from "../../server/src/types";
 import AutorItem from "./components/AutorItem";
 import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.scss'
 import Toast from "./components/Toast";
 import Sidebar from "./components/sidebar";
+import AddQuote from "./components/AddQuote";
+import QuoteItem from "./components/QuoteItem";
 
 const App: React.FC = () => {
     const [books, setBooks] = useState<IBook[]>([]);
     const [autors, setAutors] = useState<IAutor[]>([]);
+    const [quotes, setQuotes] = useState<IQuote[]>([]);
 
     useEffect(() => {
       fetchBooks();
       fetchAutors();
+      fetchQuotes();
     }, [])
 
         // ### BOOKS ###
@@ -162,8 +176,65 @@ const App: React.FC = () => {
                 });
             })
             .catch((err) => console.trace(err))
-
     }
+
+    // ### QUOTES ###
+    const fetchQuotes = (): void => {
+        getQuotes()
+            .then(({ data: { quotes } }: IQuote[] | any) => {
+                setQuotes(quotes);
+            })
+            .catch((err: Error) => console.trace(err))
+    }
+
+    const handleSaveQuote = (e: React.FormEvent, formData: IQuote): void => {
+        e.preventDefault()
+        addQuote(formData)
+            .then(({status, data}) => {
+                if (status !== 201) {
+                    throw new Error('Citat sa nepodarilo pridať!')
+                }
+                toast.success(`Citat bol úspešne pridaný.`);
+                setQuotes(data.quotes);
+            })
+            .catch((err) => {
+                toast.error(`Citat sa nepodarilo pridať!`);
+                console.trace(err);
+            })
+    }
+
+    const handleUpdateQuote = (): any => {}
+
+    const handleDeleteQuote = (_id: string): void => {
+        confirmAlert({
+            title: 'Vymazat citat?',
+            message: `Naozaj chceš vymazať citat?`,
+            buttons: [
+                {
+                    label: 'Ano',
+                    onClick: () => {
+                        deleteQuote(_id)
+                            .then(({ status, data }) => {
+                                if (status !== 200) {
+                                    throw new Error('Error! Quote not deleted')
+                                }
+                                toast.success(`Citat bol úspešne vymazaný.`);
+                                setQuotes(data.quotes)
+                            })
+                            .catch((err) => {
+                                toast.error('Došlo k chybe!');
+                                console.trace(err);
+                            })
+                    }
+                },
+                {
+                    label: 'Ne',
+                    onClick: () => {}
+                }
+            ],
+        });
+    }
+
 
   return (
     <main className='App'>
@@ -171,6 +242,7 @@ const App: React.FC = () => {
       <h1>WebDBKLP</h1>
       <AddBook saveBook={handleSaveBook} />
       <AddAutor saveAutor={handleSaveAutor}/>
+        <AddQuote saveQuote={handleSaveQuote} />
       {books.sort((a,b) => a.title.localeCompare(b.title)).map((book: IBook) => {
         if (book.isDeleted) return null;
         return <BookItem
@@ -188,6 +260,15 @@ const App: React.FC = () => {
                 updateAutor={handleUpdateAutor}
                 deleteAutor={handleDeleteAutor}
                 autor={autor}
+            />
+        })}
+        {quotes.map((quote: IQuote) => {
+            if (quote.isDeleted) return null;
+            return <QuoteItem
+                key={quote._id}
+                updateQuote={handleUpdateQuote}
+                deleteQuote={handleDeleteQuote}
+                quote={quote}
             />
         })}
         <Toast />

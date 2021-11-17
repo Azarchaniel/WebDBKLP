@@ -1,6 +1,5 @@
 import React from "react";
-import {IAutor} from "../../../server/src/types";
-import {AutorProps} from "../type";
+import {AutorProps, IAutor} from "../type";
 import moment from "moment";
 
 type Props = AutorProps & {

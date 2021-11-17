@@ -13,7 +13,7 @@ const Book: React.FC<Props> = ({book, updateBook, deleteBook}) => {
 
     useEffect(() => {
         getAutors(book.autor);
-    }, [])
+    }, [book.autor])
 
     const ifPublished = () => {
         if (book.published) {

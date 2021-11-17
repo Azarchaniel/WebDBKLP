@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const published_1 = require("./published");
+const editionSerie_1 = require("./editionSerie");
 const bookSchema = new mongoose_1.Schema({
     //string, because it's ID
     autor: { type: [String], required: false },
@@ -11,8 +12,8 @@ const bookSchema = new mongoose_1.Schema({
     title: { type: String, required: true },
     subtitle: { type: String, required: false },
     content: { type: String, required: false },
-    //edition: {type: ?, required: false},
-    //serie: {type: ?, required: false},
+    edition: { type: editionSerie_1.editionSerieSchema, required: false },
+    serie: { type: editionSerie_1.editionSerieSchema, required: false },
     ISBN: { type: String, required: false },
     language: { type: [String], required: true },
     note: { type: String, required: false },

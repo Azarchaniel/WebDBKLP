@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import {ApiAutorDataType, ApiBookDataType, IBook} from "./type";
+import {ApiAutorDataType, ApiBookDataType, ApiQuoteDataType, IBook} from "./type";
 
 const baseUrl: string = 'http://localhost:4000'
 
@@ -147,4 +147,61 @@ export const deleteAutor = async (
   }
 }
 
+// ### QUOTES ###
+export const getQuotes = async (): Promise<AxiosResponse<ApiQuoteDataType>> => {
+  try {
+    const quotes: AxiosResponse<ApiQuoteDataType> = await axios.get(
+        baseUrl + '/quotes'
+    )
+    return quotes
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
 
+export const getQuote = async (
+    _id: string
+): Promise<AxiosResponse<ApiQuoteDataType>> => {
+  try {
+    const quote: AxiosResponse<ApiQuoteDataType> = await axios.get(
+        `${baseUrl}/quote/${_id}`
+    );
+
+    return quote;
+  } catch (error: any) {
+    console.error('API ERROR');
+    throw new Error(error)
+  }
+}
+
+export const addQuote = async (
+    formData: any
+): Promise<AxiosResponse<ApiQuoteDataType>> => {
+  try {
+    console.trace('add autor', formData);
+    const quote: any = {
+      text: formData.text,
+      fromBook: formData.fromBook
+    }
+    const saveQuote: AxiosResponse<ApiQuoteDataType> = await axios.post(
+        baseUrl + '/add-quote',
+        quote
+    )
+    return saveQuote
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export const deleteQuote = async (
+    _id: string
+): Promise<AxiosResponse<ApiQuoteDataType>> => {
+  try {
+    const deletedQuote: AxiosResponse<ApiQuoteDataType> = await axios.post(
+        `${baseUrl}/delete-quote/${_id}`
+    )
+    return deletedQuote
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
