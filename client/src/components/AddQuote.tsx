@@ -19,7 +19,7 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
     useEffect(() => {
         getBooks()
             .then(books => {
-                //constructing fullName for autocomplete
+                //todo: add autor on backend
                 setBooks(books.data.books.map((book: IBook) => ({
                     ...book,
                     showName: ``
@@ -110,7 +110,7 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                                         placeholder="Z knihy"
                                         closeIcon="cancel"
                                         emptyRecordMsg="Žiadne knihy nenájdené"
-                                        singleSelect={true}
+                                        selectionLimit={1}
                                         onSelect={(pickedBook: IBook[]) => {
                                             setFormData({...formData, fromBook: pickedBook
                                                     .map(v => v._id)})

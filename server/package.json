@@ -1,6 +1,6 @@
 {
-  "name": "fullstack-typescript-node",
-  "version": "1.0.0",
+  "name": "WebDBKLP",
+  "version": "0.0.1",
   "description": "",
   "main": "app.js",
   "scripts": {

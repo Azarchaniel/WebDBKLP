@@ -57,6 +57,7 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
             params: {id},
             body,
         } = req
+        //TODO: conect autors to it
         const updateBook: IBook | null = await Book.findByIdAndUpdate(
             {_id: id},
             body

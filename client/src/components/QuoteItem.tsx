@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {IBook, IQuote} from "../type";
 import {getBook} from "../API";
-import {throws} from "assert";
 
 type Props = { quote: IQuote } & {
     updateQuote: (quote: IQuote) => void
@@ -13,10 +12,9 @@ const Quote: React.FC<Props> = ({quote, deleteQuote, updateQuote}) => {
 
     useEffect(() => {
         getBook(quote.fromBook).then((book) => {
-            console.log(book.data.book);
             setBookTitle(book.data.book);
         }).catch(err => {throw new Error('Cant find book in QuoteItem' + err)});
-    }, [])
+    }, [quote])
 
 
     return (

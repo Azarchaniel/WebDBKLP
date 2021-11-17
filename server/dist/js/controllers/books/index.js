@@ -66,6 +66,7 @@ exports.addBook = addBook;
 const updateBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { params: { id }, body, } = req;
+        //TODO: conect autors to it
         const updateBook = yield book_1.default.findByIdAndUpdate({ _id: id }, body);
         const allBooks = yield book_1.default.find();
         res.status(200).json({

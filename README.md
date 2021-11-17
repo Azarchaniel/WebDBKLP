@@ -18,6 +18,7 @@ cd ./client; npm run
 - [X] allow multichoice
 - [X] soft delete
 - [X] CRUD for Quotes
+- [ ] implement table library (https://material-table.com/#/)
 - [ ] add Owner
 - [ ] rework Autocomplete - custom
 - [ ] custom modal
