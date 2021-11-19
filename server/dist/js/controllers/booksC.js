@@ -13,11 +13,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getBook = exports.deleteBook = exports.updateBook = exports.addBook = exports.getAllBooks = void 0;
-const book_1 = __importDefault(require("../../models/book"));
+const book_1 = __importDefault(require("../models/book"));
 const getAllBooks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const books = yield book_1.default.find().populate('autor').exec();
-        console.log(books);
+        //remember: when populating, and NameOfField != Model, define it with {}
+        const books = yield book_1.default
+            .find()
+            .populate([
+            { path: 'autor', model: 'Autor' },
+            { path: 'owner', model: 'User' },
+            { path: 'readBy', model: 'User' }
+        ])
+            .exec();
         res.status(200).json({ books: books });
     }
     catch (error) {
@@ -27,8 +34,12 @@ const getAllBooks = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.getAllBooks = getAllBooks;
 const getBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const book = yield book_1.default.findById(req.params.id).populate('autor').exec();
-        const allBooks = yield book_1.default.find().populate('autor').exec();
+        const book = yield book_1.default
+            .findById(req.params.id)
+            .populate('autor')
+            .populate('user')
+            .exec();
+        const allBooks = yield book_1.default.find().populate('autor').populate('user').exec();
         res.status(200).json({ book: book, books: allBooks });
     }
     catch (err) {
@@ -39,7 +50,8 @@ exports.getBook = getBook;
 const addBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
-        const { title, subtitle, ISBN, language, note, numberOfPages, published, autor, owner } = req.body;
+        //todo: there has to be a better way for cleaner code
+        const { title, subtitle, ISBN, language, note, numberOfPages, published, autor, owner, exLibris, readBy } = req.body;
         console.trace(req.body);
         const book = new book_1.default({
             autor: autor,
@@ -54,7 +66,9 @@ const addBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 year: (_a = published === null || published === void 0 ? void 0 : published.year) !== null && _a !== void 0 ? _a : undefined,
                 country: (_b = published === null || published === void 0 ? void 0 : published.country) !== null && _b !== void 0 ? _b : ''
             },
-            owner: owner
+            owner: owner,
+            exLibris: exLibris,
+            readBy: readBy
         });
         const newBook = yield book.save();
         const allBooks = yield book_1.default.find();
@@ -68,7 +82,6 @@ exports.addBook = addBook;
 const updateBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { params: { id }, body, } = req;
-        //TODO: conect autors to it
         const updateBook = yield book_1.default.findByIdAndUpdate({ _id: id }, body);
         const allBooks = yield book_1.default.find();
         res.status(200).json({

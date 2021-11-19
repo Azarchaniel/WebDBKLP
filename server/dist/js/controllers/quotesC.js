@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteQuote = exports.updateQuote = exports.addQuote = exports.getQuote = exports.getAllQuotes = void 0;
-const quote_1 = __importDefault(require("../../models/quote"));
+const quote_1 = __importDefault(require("../models/quote"));
 const getAllQuotes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const quotes = yield quote_1.default.find().populate('books').exec();

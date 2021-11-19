@@ -19,10 +19,12 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
     useEffect(() => {
         getBooks()
             .then(books => {
-                //todo: add autor on backend
                 setBooks(books.data.books.map((book: IBook) => ({
                     ...book,
-                    showName: ``
+                    showName: `${book.title} 
+                        ${book.autor && book.autor[0] && book.autor[0].firstName ? '/ ' + book.autor[0].firstName : ''} 
+                        ${book.autor && book.autor[0] && book.autor[0].lastName ? book.autor[0].lastName : ''} 
+                        ${book.published && book.published?.year ? '/ ' + book.published?.year : ''}`
                 }))
                     .filter((book:IBook) => !book.isDeleted)
                     .sort((a: Partial<IBook>, b: Partial<IBook>) => a.title!.localeCompare(b.title!)));
@@ -53,7 +55,6 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                 ...formData,
                 [e?.currentTarget.id]: e?.currentTarget.value
             })
-            console.trace(formData);
         } catch (err) {
             toast.error('Chyba pri zadávaní do formuláru!')
             console.error('AddQuote(handleForm)', err)
@@ -95,7 +96,7 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                             }}>
                                 <div className="row">
                                     <div className="col">
-                                        <input onChange={handleForm} type='text' id='text' placeholder='*Text'
+                                        <textarea onChange={handleForm} id='text' placeholder='*Text'
                                                className="form-control" autoComplete="off"
                                                value={formData && "text" in formData ? formData.text : ''}/>
                                     </div>
@@ -105,7 +106,7 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                                     <Multiselect
                                         options={books}
                                         isObject={true}
-                                        displayValue="title"
+                                        displayValue="showName"
                                         closeOnSelect={true}
                                         placeholder="Z knihy"
                                         closeIcon="cancel"

@@ -1,6 +1,8 @@
 import { Document } from 'mongoose'
-import {Published} from "./published";
-import {IAutor} from "./autor";
+import {TPublished} from "./published";
+import {TLocation} from "./location";
+import {TDimension} from "./dimension";
+import {TEditionSerie} from "./editionSerie";
 
 export interface IBook extends Document {
     autor?: string[]; //IDs
@@ -10,17 +12,17 @@ export interface IBook extends Document {
     title: string;
     subtitle?: string;
     content?: string[];
-    // edition?: Edition;
-    // serie?: Edition;
+    edition?: TEditionSerie;
+    serie?: TEditionSerie;
     ISBN?: string;
-    published?: Published;
+    published?: TPublished;
     language: string[];
-    //readBy: [ref(ownerId)]
     note?: string;
-    // dimensions?: Dimensions;
+    dimensions?: TDimension;
     numberOfPages?: number;
-    exLibris: boolean;	//default: true
-    // location: Location;
-    // owner: ref(OwnerId);
+    exLibris: boolean;
+    location: TLocation;
+    owner: string;
     isDeleted: boolean;
+    readBy: string[];
 }

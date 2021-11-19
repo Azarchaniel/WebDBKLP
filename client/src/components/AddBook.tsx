@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
-import {IAutor, IBook, ILangCode} from "../type";
+import {IAutor, IBook, ILangCode, IUser} from "../type";
 import {toast} from "react-toastify";
-import {getAutors} from "../API";
+import {getAutors, getUsers} from "../API";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {langCode, countryCode} from "../utils/locale";
@@ -15,11 +15,14 @@ type Props = {
 const AddBook: React.FC<Props> = ({saveBook}) => {
     const [formData, setFormData] = useState<IBook | {}>()
     const [autors, setAutors] = useState<IAutor[] | any>();
+    const [users, setUsers] = useState<IUser[] | undefined>();
     const [error, setError] = useState<string | undefined>('Názov knihy musí obsahovať aspoň jeden znak!');
     const [exLibrisValue, setExLibrisValue] = useState(false);
     const autorRef = useRef(null);
     const langRef = useRef(null);
     const countryRef = useRef(null);
+    const ownerRef = useRef(null);
+    const readByRef = useRef(null);
 
     //param [] will make useEffect to go only once
     useEffect(() => {
@@ -35,6 +38,13 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                 toast.error('Nepodarilo sa nacitat autorov!');
                 console.error('Couldnt fetch autors', err)
             });
+
+        getUsers().then(user => {
+            setUsers(user.data.users.map((user: IUser) => ({
+                ...user,
+                fullName: `${user.lastName}, ${user.firstName}`
+            })).sort((a: any, b: any) => a.fullName!.localeCompare(b.fullName!)));
+        }).catch();
     }, [formData])
 
     useEffect(() => {
@@ -85,12 +95,17 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
 
     const cleanFields = () => {
         setFormData({});
-        //@ts-ignore
+        //just trust me...
+        // @ts-ignore
         autorRef?.current?.resetSelectedValues();
-        //@ts-ignore
+        // @ts-ignore
         langRef?.current?.resetSelectedValues();
-        //@ts-ignore
+        // @ts-ignore
         countryRef?.current?.resetSelectedValues();
+        // @ts-ignore
+        ownerRef?.current?.resetSelectedValues();
+        // @ts-ignore
+        readByRef?.current?.resetSelectedValues();
     }
 
     const showAddBook = () => {
@@ -189,7 +204,6 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                    autoComplete="off"
                                                    value={formData && "published.year" in formData ? formData["published.year"] : ''}
                                             />
-
                                         </div>
                                     </div>
                                     <div style={{height: '5px', width: '100%'}}/>
@@ -214,7 +228,6 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                 }}
                                                 ref={langRef}
                                             />
-
                                         </div>
                                         <div className="col">
                                             <Multiselect
@@ -245,10 +258,55 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                     <div style={{height: '5px', width: '100%'}}/>
                                     <div className="row">
                                         <div className="col">
-                                            <input onChange={handleForm} type='text' id='note' placeholder='Poznámka'
+                                            <textarea onChange={handleForm} id='note' placeholder='Poznámka'
                                                    className="form-control"
                                                    autoComplete="off"
                                                    value={formData && "note" in formData ? formData.note : ''}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
+                                    <div className="row">
+                                        <div className="col">
+                                            <Multiselect
+                                                options={users}
+                                                displayValue="fullName"
+                                                placeholder="Prečítané"
+                                                closeIcon="cancel"
+                                                onSelect={(picked: IUser[]) => {
+                                                    setFormData({...formData, readBy: picked.map(v => v._id)})
+                                                }}
+                                                style={{
+                                                    inputField: {marginLeft: "0.5rem"},
+                                                    searchBox: {
+                                                        width: "100%",
+                                                        paddingRight: '5px',
+                                                        marginRight: '-5px',
+                                                        borderRadius: '3px'
+                                                    }
+                                                }}
+                                                ref={readByRef}
+                                            />
+                                        </div>
+                                        <div className="col">
+                                            <Multiselect
+                                                options={users}
+                                                displayValue="fullName"
+                                                placeholder="Vlastník"
+                                                closeIcon="cancel"
+                                                onSelect={(picked: IUser[]) => {
+                                                    setFormData({...formData, owner: picked.map(v => v._id)})
+                                                }}
+                                                style={{
+                                                    inputField: {marginLeft: "0.5rem"},
+                                                    searchBox: {
+                                                        width: "100%",
+                                                        paddingRight: '5px',
+                                                        marginRight: '-5px',
+                                                        borderRadius: '3px'
+                                                    }
+                                                }}
+                                                ref={ownerRef}
                                             />
                                         </div>
                                     </div>
@@ -284,7 +342,6 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                 </div>
             </>
         );
-
     }
 
     return (

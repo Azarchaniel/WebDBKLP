@@ -1,11 +1,10 @@
 import {Request, Response} from "express";
-import {IQuote} from "../../types";
-import Quote from "../../models/quote"
+import {IQuote} from "../types";
+import Quote from "../models/quote"
 
 const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
     try {
-        const quotes: IQuote[] = await Quote.find();
-
+        const quotes: IQuote[] = await Quote.find().populate('books').exec();
         res.status(200).json({quotes: quotes})
     } catch (error) {
         res.status(400);
@@ -15,9 +14,8 @@ const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
 
 const getQuote = async (req: Request, res: Response): Promise<void> => {
     try {
-        const quote: IQuote | null = await Quote.findById(req.params.id);
-        const allQuotes: IQuote[] = await Quote.find()
-        //todo: add this to types in FE
+        const quote: IQuote | null = await Quote.findById(req.params.id).populate('book').exec();
+        const allQuotes: IQuote[] = await Quote.find().populate('book').exec();
         //todo: do I need allQuotes and allAuthors...?
         res.status(200).json({quote: quote, quotes: allQuotes});
     } catch (err) {

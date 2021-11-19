@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import {ApiAutorDataType, ApiBookDataType, ApiQuoteDataType, IBook} from "./type";
+import {ApiAutorDataType, ApiBookDataType, ApiQuoteDataType, ApiUserDataType, IBook} from "./type";
 
 const baseUrl: string = 'http://localhost:4000'
 
@@ -169,7 +169,6 @@ export const getQuote = async (
 
     return quote;
   } catch (error: any) {
-    console.error('API ERROR');
     throw new Error(error)
   }
 }
@@ -201,6 +200,31 @@ export const deleteQuote = async (
         `${baseUrl}/delete-quote/${_id}`
     )
     return deletedQuote
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export const getUsers = async (): Promise<AxiosResponse<ApiUserDataType>> => {
+  try {
+    const users: AxiosResponse<ApiUserDataType> = await axios.get(
+        baseUrl + '/users'
+    )
+    return users
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export const getUser = async (
+    _id: string
+): Promise<AxiosResponse<ApiUserDataType>> => {
+  try {
+    const user: AxiosResponse<ApiUserDataType> = await axios.get(
+        `${baseUrl}/user/${_id}`
+    );
+
+    return user;
   } catch (error: any) {
     throw new Error(error)
   }

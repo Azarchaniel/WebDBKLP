@@ -1,9 +1,10 @@
 import {model, Schema} from "mongoose";
 import {IQuote} from "../types";
+import mongoose from "mongoose";
 
 const quoteSchema: Schema = new Schema({
     text: String,
-    fromBook: String,
+    fromBook: {type: [mongoose.Schema.Types.ObjectId], ref: 'Book', required: false},
     isDeleted: { type: Boolean, defaut: false }
 }, {timestamps: true})
 

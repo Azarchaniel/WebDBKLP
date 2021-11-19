@@ -1,6 +1,4 @@
-import { Document } from 'mongoose'
-
-export interface IEditionSerie extends Document {
-    no: number,
+export type TEditionSerie = {
+    no?: number,
     title: string
 }

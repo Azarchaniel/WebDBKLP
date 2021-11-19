@@ -1,4 +1,4 @@
-export type Published = {
+export type TPublished = {
     publisher?: string;
     year?: number;
     country?: string;

@@ -200,7 +200,7 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                                             />
                                         </div>
                                         <div className="col">
-                                            <input type="text" onChange={handleForm} className="form-control" id='note'
+                                            <textarea onChange={handleForm} className="form-control" id='note'
                                                    placeholder="Poznámka"/>
                                         </div>
                                     </div>

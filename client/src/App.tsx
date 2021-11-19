@@ -244,7 +244,7 @@ const App: React.FC = () => {
       <AddAutor saveAutor={handleSaveAutor}/>
         <AddQuote saveQuote={handleSaveQuote} />
       {books.sort((a,b) => a.title.localeCompare(b.title)).map((book: IBook) => {
-        if (book.isDeleted) return null;
+        if (book?.isDeleted) return null;
         return <BookItem
           key={book._id}
           updateBook={handleUpdateBook}
@@ -254,7 +254,7 @@ const App: React.FC = () => {
       })}
         {/*todo: better fetching*/}
         {autors.sort((a,b) => a.lastName.localeCompare(b.lastName)).map((autor: IAutor) => {
-            if (autor.isDeleted) return null;
+            if (autor?.isDeleted) return null;
             return <AutorItem
                 key={autor._id}
                 updateAutor={handleUpdateAutor}
@@ -262,7 +262,7 @@ const App: React.FC = () => {
                 autor={autor}
             />
         })}
-        {quotes.map((quote: IQuote) => {
+        {quotes?.map((quote: IQuote) => {
             if (quote.isDeleted) return null;
             return <QuoteItem
                 key={quote._id}

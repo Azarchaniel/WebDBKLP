@@ -1,7 +1,8 @@
 import {Router} from 'express'
-import {getAllBooks, addBook, updateBook, deleteBook, getBook} from '../controllers/books'
-import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers/autors";
-import {addQuote, deleteQuote, getAllQuotes, getQuote, updateQuote} from "../controllers/quotes";
+import {getAllBooks, addBook, updateBook, deleteBook, getBook} from '../controllers'
+import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
+import {addQuote, deleteQuote, getAllQuotes, getQuote, updateQuote} from "../controllers";
+import {getAllUsers, getUser} from "../controllers";
 
 const router: Router = Router()
 
@@ -26,5 +27,8 @@ router.post('/add-quote', addQuote)
 router.put('/edit-quote/:id', updateQuote)
 router.post('/delete-quote/:id', deleteQuote)
 
+// ### USERS ###
+router.get('/user/:id', getUser)
+router.get('/users', getAllUsers)
 
 export default router;

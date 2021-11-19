@@ -16,7 +16,6 @@ const Quote: React.FC<Props> = ({quote, deleteQuote, updateQuote}) => {
         }).catch(err => {throw new Error('Cant find book in QuoteItem' + err)});
     }, [quote])
 
-
     return (
         <div className='Quote'>
             <div className='text'>

@@ -1,11 +1,10 @@
 import {Response, Request} from 'express';
-import {IAutor} from '../../types';
-import Autor from "../../models/autor";
+import {IAutor} from '../types';
+import Autor from "../models/autor";
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
         const autors: IAutor[] = await Autor.find()
-
         res.status(200).json({autors: autors})
     } catch (error) {
         res.status(400);

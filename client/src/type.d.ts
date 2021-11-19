@@ -6,7 +6,7 @@ interface IBaseType {
 }
 
 export interface IBook extends IBaseType{
-    autor: string[]; //id[]
+    autor: IAutor[];
     title: string;
     subtitle?: string;
     ISBN?: string;
@@ -15,6 +15,8 @@ export interface IBook extends IBaseType{
     note: string;
     published: Published;
     exLibris: boolean;
+    owner: IUser[];
+    readBy: IUser[];
 }
 
 export interface IAutor extends IBaseType {
@@ -25,6 +27,12 @@ export interface IAutor extends IBaseType {
     dateOfDeath?: Date;
     note?: string;
     fullName?: string;
+}
+
+export interface IUser extends IBaseType {
+    firstName?: string;
+    lastName: string;
+    hashedPassword?: string;
 }
 
 export interface IQuote extends IBaseType {
@@ -52,6 +60,12 @@ type ApiQuoteDataType = {
     message: string
     quotes: IQuote[]
     quote?: IQuote
+}
+
+type ApiUserDataType = {
+    message: string
+    users: IUser[]
+    user?: IUser
 }
 
 type AutorProps = {

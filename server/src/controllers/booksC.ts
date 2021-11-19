@@ -1,11 +1,18 @@
 import {Response, Request} from 'express';
-import {IBook} from '../../types';
-import Book from '../../models/book';
+import {IBook} from '../types';
+import Book from '../models/book';
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        const books: IBook[] = await Book.find()
-
+        //remember: when populating, and NameOfField != Model, define it with {}
+        const books: IBook[] = await Book
+            .find()
+            .populate([
+                {path: 'autor', model: 'Autor'},
+                {path: 'owner', model: 'User'},
+                {path: 'readBy', model: 'User'}
+            ])
+            .exec();
         res.status(200).json({books: books})
     } catch (error) {
         throw error
@@ -14,8 +21,12 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
 
 const getBook = async (req: Request, res: Response): Promise<void> => {
     try {
-        const book = await Book.findById(req.params.id);
-        const allBooks: IBook[] = await Book.find()
+        const book = await Book
+            .findById(req.params.id)
+            .populate('autor')
+            .populate('user')
+            .exec();
+        const allBooks: IBook[] = await Book.find().populate('autor').populate('user').exec()
         res.status(200).json({book: book, books: allBooks})
     } catch (err) {
         throw err;
@@ -24,7 +35,11 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
 
 const addBook = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {title, subtitle, ISBN, language, note, numberOfPages, published, autor} = req.body;
+        //todo: there has to be a better way for cleaner code
+        const {
+            title, subtitle, ISBN, language, note, numberOfPages,
+            published, autor, owner, exLibris, readBy
+        } = req.body;
         console.trace(req.body);
 
         const book: IBook = new Book({
@@ -40,6 +55,9 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
                 year: published?.year ?? undefined,
                 country: published?.country ?? ''
             },
+            owner: owner,
+            exLibris: exLibris,
+            readBy: readBy
         })
 
         const newBook: IBook = await book.save()
@@ -57,7 +75,6 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
             params: {id},
             body,
         } = req
-        //TODO: conect autors to it
         const updateBook: IBook | null = await Book.findByIdAndUpdate(
             {_id: id},
             body
