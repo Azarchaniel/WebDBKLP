@@ -1,10 +1,10 @@
 import React, {useEffect, useRef, useState} from "react";
-import {IAutor, IBook, ILangCode, IUser} from "../type";
+import {IAutor, IBook, ILangCode, IUser} from "../../type";
 import {toast} from "react-toastify";
-import {getAutors, getUsers} from "../API";
+import {getAutors, getUsers} from "../../API";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
-import {langCode, countryCode} from "../utils/locale";
+import {langCode, countryCode} from "../../utils/locale";
 //@ts-ignore
 import {Multiselect} from 'multiselect-react-dropdown';
 

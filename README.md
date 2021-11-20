@@ -19,12 +19,13 @@ cd ./client; npm run
 - [X] soft delete
 - [X] CRUD for Quotes
 - [X] add Owner
-- [ ] proper pages and router
-- [ ] implement table library (https://material-table.com/#/)
+- [X] proper pages and router
+- -[ ] implement table library (https://material-table.com/#/)
 - [ ] rework Autocomplete - custom
 - [ ] custom modal
 - [ ] clean form after saving item
 - [ ] create all models and interfaces
 - [ ] webscrapper and autofilling
+- [ ] some reports, numbers, graphs on Main page
 - [ ] (in far future) localization
 - [ ] (in far future) authorization/authentication

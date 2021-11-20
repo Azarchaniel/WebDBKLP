@@ -1,5 +1,5 @@
-import React, {useEffect} from "react";
-import {BookProps, IAutor, IBook, IUser} from "../type";
+import React from "react";
+import {BookProps, IAutor, IBook, IUser} from "../../type";
 
 type Props = BookProps & {
     updateBook: (book: IBook) => void
@@ -21,7 +21,7 @@ const Book: React.FC<Props> = ({book, updateBook, deleteBook}) => {
 
     const ifOwner = () => {
         //if there is only one Owner, show only his name
-        // if there are more Owners, show their name and comma. But last owner doesnt have a comma.
+        //if there are more Owners, show their name and comma. But last owner doesnt have a comma.
         if (book.owner && Array.isArray(book.owner)) {
             return book.owner.map((owner: IUser, index) => {
               return book.owner.length > 1 && book.owner.length-1 !== index ? `${owner.lastName} ${owner.firstName}, ` : `${owner.lastName} ${owner.firstName}`

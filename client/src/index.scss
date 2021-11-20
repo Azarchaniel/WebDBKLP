@@ -141,12 +141,14 @@ body, html, main, #root {
     margin-top: 1rem;
     cursor: pointer;
   }
+
   .SB-Child {
     color: gray;
     font-size: 1.1rem;
     padding-left: 3rem;
     cursor: pointer;
   }
+
   .SB-chevron {
     position: absolute;
     right: 0.5rem;
@@ -189,6 +191,7 @@ body, html, main, #root {
       cursor: pointer;
     }
   }
+
   .SB-Child {
     color: gray;
     visibility: visible;
@@ -198,5 +201,20 @@ body, html, main, #root {
 
 .closeIcon:hover {
   color: white;
+}
+
+.customLink {
+  text-decoration: none;
+  color: white;
+  &:hover {
+    color: #bea24b !important;
+    text-decoration: none !important;
+  }
+}
+
+.futureReports {
+  position: absolute;
+  top: 50%;
+  right: 40%;
 }
 

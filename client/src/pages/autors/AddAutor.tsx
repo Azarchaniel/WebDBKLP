@@ -5,10 +5,10 @@ import {toast} from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import React, {useEffect, useRef, useState} from "react";
 import cs from 'date-fns/locale/cs';
-import {countryCode} from "../utils/locale";
+import {countryCode} from "../../utils/locale";
 //@ts-ignore
 import {Multiselect} from 'multiselect-react-dropdown';
-import {IAutor, ILangCode} from "../type";
+import {IAutor, ILangCode} from "../../type";
 
 //for datepicker
 registerLocale('cs', cs)
