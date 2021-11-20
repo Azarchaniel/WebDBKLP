@@ -6,6 +6,7 @@ import '../node_modules/font-awesome/css/font-awesome.min.css';
 import {BrowserRouter, Routes, Route} from "react-router-dom";
 import BookPage from "./pages/books/BookPage";
 import AutorPage from "./pages/autors/AutorPage";
+import QuotePage from "./pages/quotes/QuotePage";
 
 // const components = {
 //     '/books': <Books />,
@@ -19,6 +20,7 @@ ReactDOM.render(
                 <Route path="/" element={<App />} />
                 <Route path="/books" element={<BookPage />} />
                 <Route path="/autors" element={<AutorPage />} />
+                <Route path="/quotes" element={<QuotePage />} />
             </Routes>
         </BrowserRouter>
     </React.StrictMode>,
