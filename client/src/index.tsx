@@ -7,6 +7,7 @@ import {BrowserRouter, Routes, Route} from "react-router-dom";
 import BookPage from "./pages/books/BookPage";
 import AutorPage from "./pages/autors/AutorPage";
 import QuotePage from "./pages/quotes/QuotePage";
+import LPPage from "./pages/lps/LPPage";
 
 // const components = {
 //     '/books': <Books />,
@@ -19,7 +20,9 @@ ReactDOM.render(
             <Routes>
                 <Route path="/" element={<App />} />
                 <Route path="/books" element={<BookPage />} />
+                <Route path="/books/:id" element={<BookPage />} />
                 <Route path="/autors" element={<AutorPage />} />
+                <Route path="/lp" element={<LPPage />} />
                 <Route path="/quotes" element={<QuotePage />} />
             </Routes>
         </BrowserRouter>

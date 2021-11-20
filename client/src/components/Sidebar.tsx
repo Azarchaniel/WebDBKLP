@@ -75,11 +75,11 @@ const Sidebar = () => {
             children: [
                 {
                     title: 'Ľuboš',
-                    route: '/books/lubos', //todo: there should be User table and then ID
+                    route: '/books/619800d46aba58b905cc2455',
                 },
                 {
                     title: 'Žaneta',
-                    route: '/books/zaneta',
+                    route: '/books/619802656aba58b905cc245e',
                 },
             ],
         },
@@ -125,13 +125,17 @@ const Sidebar = () => {
                     </div>
                 } else {
                     return <div className="SB-Parent">
-                        <Link className='customLink' to={item.route}>
-                            {item.icon ? <i key={index} className={item.icon}>&nbsp;</i> : <></>}
+
+                        {item.icon ? <Link className='customLink' to={item.route}>
+                            <i key={index} className={item.icon}>&nbsp;</i>
+                        </Link> : <></>}
                             {
                                 item.children.map((child: ISideMenuItems, index) =>
-                                    <div key={index} className="SB-Child">{child.title.substring(0, 1)}</div>)
+                                    <Link className='customLink' to={child.route}>
+                                        <div key={index} className="SB-Child">{child.title.substring(0, 1)}</div>
+                                    </Link>)
                             }
-                        </Link>
+
                     </div>
                 }
             }

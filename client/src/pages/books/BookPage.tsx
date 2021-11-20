@@ -1,4 +1,4 @@
-import {IBook} from "../../type";
+import {IBook, IUser} from "../../type";
 import BookItem from "./BookItem";
 import React, {useEffect, useState} from "react";
 import {addBook, deleteBook, getBook, getBooks, updateBook} from "../../API";
@@ -14,13 +14,30 @@ export default function BookPage() {
     const [books, setBooks] = useState<IBook[]>([]);
 
     useEffect(() => {
+        console.log('#######');
         fetchBooks();
-    }, [])
+    }, [window.location.href])
 
     // ### BOOKS ###
     const fetchBooks = (): void => {
         getBooks()
             .then(({ data: { books } }: IBook[] | any) => {
+                const userId = window.location.href.split('/')[4];
+
+                if (userId) {
+                    //todo: simplify
+                    const booksArr: IBook[] = [];
+                    books.forEach((book: IBook) => {
+                        book.owner?.forEach((owner: IUser) => {
+                            if (owner._id === userId) {
+                                booksArr.push(book);
+                                return;
+                            }
+                        })
+                    })
+                    books = booksArr;
+                }
+
                 setBooks(books);
             })
             .catch((err: Error) => console.trace(err))
@@ -96,7 +113,6 @@ export default function BookPage() {
             <h1><Link className='customLink' to='/'>WebDBKLP</Link></h1>
             <AddBook saveBook={handleSaveBook} />
             {books.sort((a,b) => a.title.localeCompare(b.title)).map((book: IBook) => {
-                if (book?.isDeleted) return null;
                 return <BookItem
                     key={book._id}
                     updateBook={handleUpdateBook}

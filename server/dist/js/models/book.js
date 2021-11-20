@@ -24,7 +24,6 @@ const published_1 = require("./published");
 const editionSerie_1 = require("./editionSerie");
 const mongoose = __importStar(require("mongoose"));
 const bookSchema = new mongoose_1.Schema({
-    //string, because it's ID
     autor: { type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false },
     editor: { type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false },
     ilustrator: { type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false },

@@ -5,6 +5,7 @@ const controllers_1 = require("../controllers");
 const controllers_2 = require("../controllers");
 const controllers_3 = require("../controllers");
 const controllers_4 = require("../controllers");
+const controllers_5 = require("../controllers");
 const router = (0, express_1.Router)();
 // ### BOOKS ###
 router.get('/book/:id', controllers_1.getBook);
@@ -27,4 +28,10 @@ router.post('/delete-quote/:id', controllers_3.deleteQuote);
 // ### USERS ###
 router.get('/user/:id', controllers_4.getUser);
 router.get('/users', controllers_4.getAllUsers);
+// ### QUOTES ###
+router.get('/lp/:id', controllers_5.getLp);
+router.get('/lps', controllers_5.getAllLps);
+router.post('/add-lp', controllers_5.addLp);
+router.put('/edit-lp/:id', controllers_5.updateLp);
+router.post('/delete-lp/:id', controllers_5.deleteLp);
 exports.default = router;

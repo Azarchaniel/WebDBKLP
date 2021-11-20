@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
-import {IBook, IQuote} from "../type";
-import {getBook} from "../API";
+import {IBook, IQuote} from "../../type";
+import {getBook} from "../../API";
 
 type Props = { quote: IQuote } & {
     updateQuote: (quote: IQuote) => void

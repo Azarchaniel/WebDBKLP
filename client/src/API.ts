@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import {ApiAutorDataType, ApiBookDataType, ApiQuoteDataType, ApiUserDataType, IBook} from "./type";
+import {ApiAutorDataType, ApiBookDataType, ApiLPDataType, ApiQuoteDataType, ApiUserDataType, IBook} from "./type";
 
 const baseUrl: string = 'http://localhost:4000'
 
@@ -205,6 +205,7 @@ export const deleteQuote = async (
   }
 }
 
+// ### USER ###
 export const getUsers = async (): Promise<AxiosResponse<ApiUserDataType>> => {
   try {
     const users: AxiosResponse<ApiUserDataType> = await axios.get(
@@ -225,6 +226,70 @@ export const getUser = async (
     );
 
     return user;
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+// ### LP ###
+export const getLPs = async (): Promise<AxiosResponse<ApiLPDataType>> => {
+  try {
+    const lps: AxiosResponse<ApiLPDataType> = await axios.get(
+        baseUrl + '/lps'
+    )
+    return lps
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export const getLP = async (
+    _id: string
+): Promise<AxiosResponse<ApiLPDataType>> => {
+  try {
+    const lp: AxiosResponse<ApiLPDataType> = await axios.get(
+        `${baseUrl}/lp/${_id}`
+    );
+
+    return lp;
+  } catch (error: any) {
+    console.error('API ERROR');
+    throw new Error(error)
+  }
+}
+
+export const addLP = async (
+    formData: /*ILP*/any
+): Promise<AxiosResponse<ApiLPDataType>> => {
+  try {
+
+    const lp: any/*Omit<ILP, '_id'>*/ = {
+      ...formData,
+      published: {
+        publisher: formData['published.publisher'] ?? '',
+        year: formData['published.year'] ?? undefined,
+        country: formData['published.country'] ?? ''
+      },
+    }
+    console.trace(lp);
+    const saveLP: AxiosResponse<ApiLPDataType> = await axios.post(
+        baseUrl + '/add-lp',
+        lp
+    )
+    return saveLP
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+export const deleteLP = async (
+    _id: string
+): Promise<AxiosResponse<ApiLPDataType>> => {
+  try {
+    const deletedAutor: AxiosResponse<ApiLPDataType> = await axios.post(
+        `${baseUrl}/delete-lp/${_id}`
+    )
+    return deletedAutor
   } catch (error: any) {
     throw new Error(error)
   }

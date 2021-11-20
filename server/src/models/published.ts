@@ -1,5 +1,5 @@
 import {model, Schema} from 'mongoose'
-import {Published} from "../types/published";
+import {TPublished} from "../types/published";
 
 export const publishedSchema: Schema = new Schema({
     publisher: {type: String, required: false},
@@ -7,4 +7,4 @@ export const publishedSchema: Schema = new Schema({
     country: {type: String, required: false}
 }, { _id: false });
 
-export default model('Published', publishedSchema);
+export default model<TPublished>('Published', publishedSchema);

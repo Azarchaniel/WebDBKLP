@@ -1,3 +1,6 @@
+import {TEditionSerie} from "../../server/src/types";
+import {TPublished} from "../../server/src/types/published";
+
 interface IBaseType {
     _id: string;
     isDeleted?: boolean;
@@ -5,7 +8,7 @@ interface IBaseType {
     updatedAt?: string;
 }
 
-export interface IBook extends IBaseType{
+export interface IBook extends IBaseType {
     autor: IAutor[];
     title: string;
     subtitle?: string;
@@ -17,6 +20,18 @@ export interface IBook extends IBaseType{
     exLibris: boolean;
     owner: IUser[];
     readBy: IUser[];
+}
+
+export interface ILP extends IBaseType {
+    autor?: IAutor[];
+    title: string;
+    subtitle?: string;
+    edition?: TEditionSerie;
+    countLp: number;
+    speed: number;
+    published: TPublished;
+    language: string;
+    note: string;
 }
 
 export interface IAutor extends IBaseType {
@@ -48,7 +63,7 @@ type ApiBookDataType = {
     message: string
     books: IBook[]
     book?: IBook
-  }
+}
 
 type ApiAutorDataType = {
     message: string
@@ -60,6 +75,12 @@ type ApiQuoteDataType = {
     message: string
     quotes: IQuote[]
     quote?: IQuote
+}
+
+type ApiLPDataType = {
+    message: string
+    lps: ILP[]
+    lp?: ILP
 }
 
 type ApiUserDataType = {

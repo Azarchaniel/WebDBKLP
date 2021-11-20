@@ -5,7 +5,6 @@ import {editionSerieSchema} from "./editionSerie";
 import * as mongoose from "mongoose";
 
 const bookSchema: Schema = new Schema({
-    //string, because it's ID
     autor: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
     editor: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
     ilustrator: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},

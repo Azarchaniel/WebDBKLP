@@ -21,10 +21,11 @@ cd ./client; npm run
 - [X] add Owner
 - [X] proper pages and router
 - -[ ] implement table library (https://material-table.com/#/)
+- [X] clean form after saving item
+- [X] create all models and interfaces
+- [ ] fix router not fetching data when changing Owner
 - [ ] rework Autocomplete - custom
 - [ ] custom modal
-- [ ] clean form after saving item
-- [ ] create all models and interfaces
 - [ ] webscrapper and autofilling
 - [ ] some reports, numbers, graphs on Main page
 - [ ] (in far future) localization

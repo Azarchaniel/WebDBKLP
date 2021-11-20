@@ -3,6 +3,7 @@ import {getAllBooks, addBook, updateBook, deleteBook, getBook} from '../controll
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote, updateQuote} from "../controllers";
 import {getAllUsers, getUser} from "../controllers";
+import {addLp, deleteLp, getAllLps, getLp, updateLp} from "../controllers";
 
 const router: Router = Router()
 
@@ -30,5 +31,12 @@ router.post('/delete-quote/:id', deleteQuote)
 // ### USERS ###
 router.get('/user/:id', getUser)
 router.get('/users', getAllUsers)
+
+// ### QUOTES ###
+router.get('/lp/:id', getLp)
+router.get('/lps', getAllLps)
+router.post('/add-lp', addLp)
+router.put('/edit-lp/:id', updateLp)
+router.post('/delete-lp/:id', deleteLp)
 
 export default router;

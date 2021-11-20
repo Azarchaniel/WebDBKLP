@@ -86,6 +86,15 @@ body, html, main, #root {
   border-bottom: 1px solid #333333;
 }
 
+.LP {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: sienna;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #333333;
+}
+
 .modal-title, .modal-body {
   color: black;
 }

@@ -15,3 +15,4 @@ __exportStar(require("./book"), exports);
 __exportStar(require("./user"), exports);
 __exportStar(require("./quote"), exports);
 __exportStar(require("./editionSerie"), exports);
+__exportStar(require("./lp"), exports);

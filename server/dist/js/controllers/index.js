@@ -14,3 +14,4 @@ __exportStar(require("./usersC"), exports);
 __exportStar(require("./autorsC"), exports);
 __exportStar(require("./booksC"), exports);
 __exportStar(require("./quotesC"), exports);
+__exportStar(require("./lpC"), exports);

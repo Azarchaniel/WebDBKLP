@@ -1,10 +1,10 @@
-import {IBook, IQuote} from "../type";
+import {IBook, IQuote} from "../../type";
 import React, {useEffect, useRef, useState} from "react";
 import {toast} from "react-toastify";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {Multiselect} from "multiselect-react-dropdown";
-import {getBooks} from "../API";
+import {getBooks} from "../../API";
 
 type Props = {
     saveQuote: (e: React.FormEvent, formData: IQuote | any) => void
@@ -92,7 +92,8 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                         </div>
                         <div className="modal-body">
                             <form onSubmit={(e) => {
-                                saveQuote(e, formData)
+                                saveQuote(e, formData);
+                                cleanFields();
                             }}>
                                 <div className="row">
                                     <div className="col">

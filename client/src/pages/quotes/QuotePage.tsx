@@ -1,8 +1,8 @@
 import Sidebar from "../../components/Sidebar";
 import {Link} from "react-router-dom";
-import AddQuote from "../../components/AddQuote";
+import AddQuote from "./AddQuote";
 import {IQuote} from "../../type";
-import QuoteItem from "../../components/QuoteItem";
+import QuoteItem from "./QuoteItem";
 import Toast from "../../components/Toast";
 import React, {useEffect, useState} from "react";
 import {addQuote, deleteQuote, getQuotes} from "../../API";

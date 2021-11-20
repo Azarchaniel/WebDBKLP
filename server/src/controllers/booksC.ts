@@ -5,6 +5,7 @@ import Book from '../models/book';
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
         //remember: when populating, and NameOfField != Model, define it with {}
+        //todo: populate also editor, translator...
         const books: IBook[] = await Book
             .find()
             .populate([
@@ -23,10 +24,17 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
     try {
         const book = await Book
             .findById(req.params.id)
-            .populate('autor')
-            .populate('user')
+            .populate([
+                {path: 'autor', model: 'Autor'},
+                {path: 'owner', model: 'User'},
+                {path: 'readBy', model: 'User'}
+            ])
             .exec();
-        const allBooks: IBook[] = await Book.find().populate('autor').populate('user').exec()
+        const allBooks: IBook[] = await Book.find().populate([
+            {path: 'autor', model: 'Autor'},
+            {path: 'owner', model: 'User'},
+            {path: 'readBy', model: 'User'}
+        ]).exec()
         res.status(200).json({book: book, books: allBooks})
     } catch (err) {
         throw err;
@@ -61,7 +69,11 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
         })
 
         const newBook: IBook = await book.save()
-        const allBooks: IBook[] = await Book.find()
+        const allBooks: IBook[] = await Book.find().populate([
+            {path: 'autor', model: 'Autor'},
+            {path: 'owner', model: 'User'},
+            {path: 'readBy', model: 'User'}
+        ]).exec();
 
         res.status(201).json({message: 'Book added', book: newBook, books: allBooks})
     } catch (error) {
@@ -79,7 +91,12 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
             {_id: id},
             body
         )
-        const allBooks: IBook[] = await Book.find()
+        const allBooks: IBook[] = await Book.find().populate([
+            {path: 'autor', model: 'Autor'},
+            {path: 'owner', model: 'User'},
+            {path: 'readBy', model: 'User'}
+        ]).exec();
+
         res.status(200).json({
             message: 'Book updated',
             book: updateBook,
@@ -103,7 +120,12 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
                 isDeleted: true
             }
         )
-        const allBooks: IBook[] = await Book.find()
+        const allBooks: IBook[] = await Book.find().populate([
+            {path: 'autor', model: 'Autor'},
+            {path: 'owner', model: 'User'},
+            {path: 'readBy', model: 'User'}
+        ]).exec();
+
         res.status(200).json({
             message: 'Book deleted',
             book: deletedBook,

@@ -127,7 +127,8 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                             </div>
                             <div className="modal-body">
                                 <form onSubmit={(e) => {
-                                    saveBook(e, formData)
+                                    saveBook(e, formData);
+                                    cleanFields();
                                 }}>
                                     <div className="row">
                                         <div className="col">

@@ -17,6 +17,7 @@ const book_1 = __importDefault(require("../models/book"));
 const getAllBooks = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         //remember: when populating, and NameOfField != Model, define it with {}
+        //todo: populate also editor, translator...
         const books = yield book_1.default
             .find()
             .populate([
@@ -36,10 +37,17 @@ const getBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const book = yield book_1.default
             .findById(req.params.id)
-            .populate('autor')
-            .populate('user')
+            .populate([
+            { path: 'autor', model: 'Autor' },
+            { path: 'owner', model: 'User' },
+            { path: 'readBy', model: 'User' }
+        ])
             .exec();
-        const allBooks = yield book_1.default.find().populate('autor').populate('user').exec();
+        const allBooks = yield book_1.default.find().populate([
+            { path: 'autor', model: 'Autor' },
+            { path: 'owner', model: 'User' },
+            { path: 'readBy', model: 'User' }
+        ]).exec();
         res.status(200).json({ book: book, books: allBooks });
     }
     catch (err) {
@@ -71,7 +79,11 @@ const addBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             readBy: readBy
         });
         const newBook = yield book.save();
-        const allBooks = yield book_1.default.find();
+        const allBooks = yield book_1.default.find().populate([
+            { path: 'autor', model: 'Autor' },
+            { path: 'owner', model: 'User' },
+            { path: 'readBy', model: 'User' }
+        ]).exec();
         res.status(201).json({ message: 'Book added', book: newBook, books: allBooks });
     }
     catch (error) {
@@ -83,7 +95,11 @@ const updateBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { params: { id }, body, } = req;
         const updateBook = yield book_1.default.findByIdAndUpdate({ _id: id }, body);
-        const allBooks = yield book_1.default.find();
+        const allBooks = yield book_1.default.find().populate([
+            { path: 'autor', model: 'Autor' },
+            { path: 'owner', model: 'User' },
+            { path: 'readBy', model: 'User' }
+        ]).exec();
         res.status(200).json({
             message: 'Book updated',
             book: updateBook,
@@ -99,7 +115,11 @@ const deleteBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { params: { id }, body, } = req;
         const deletedBook = yield book_1.default.findByIdAndUpdate({ _id: id }, Object.assign(Object.assign({}, body), { isDeleted: true }));
-        const allBooks = yield book_1.default.find();
+        const allBooks = yield book_1.default.find().populate([
+            { path: 'autor', model: 'Autor' },
+            { path: 'owner', model: 'User' },
+            { path: 'readBy', model: 'User' }
+        ]).exec();
         res.status(200).json({
             message: 'Book deleted',
             book: deletedBook,

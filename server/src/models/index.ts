@@ -3,3 +3,4 @@ export * from './autor';
 export * from './user';
 export * from './quote';
 export * from './user';
+export * from './lp';

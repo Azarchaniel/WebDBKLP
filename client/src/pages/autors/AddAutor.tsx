@@ -106,6 +106,7 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                             <div className="modal-body">
                                 <form onSubmit={(e) => {
                                     saveAutor(e, formData)
+                                    cleanFields();
                                 }}>
                                     <div className="row">
                                         <div className="col">
