@@ -1,38 +1,53 @@
-import React, {useEffect} from "react";
+// @ts-nocheck
+import React, {useEffect, useState} from "react";
 
 //https://docs.google.com/document/d/1Ph1gOGJcnxaUU1ec8433nXLbxSRwlZlBsjUMboMWHPA/edit
 
+interface SAprops {
+    data: any;
+    async: Boolean;
+    multiple: Boolean;
+    placeholder: string;
+    searchInAttr: string;
+    showTable: Boolean;
+    showAttrInDropdown?: string;
+    showAttrInTableOrResult?: string;
+}
+
 //TODO: FINISH
-const SearchAutocomplete = (
-    data: [],
-    multiple: Boolean = false,
-    placeholder: string,
-    searchInAttr: string,
-    showTable: Boolean,
-    showAttrInDropdown?: string,
-    showAttrInTableOrResult?: string
-    ) => {
+const SearchAutocomplete: (props: SAprops) => JSX.Element = (props) => {
+    const {data, multiple, placeholder, searchInAttr, showTable, showAttrInDropdown, showAttrInTableOrResult, async } = props;
+    const [dataLocal, setDataLocal] = useState<any[]>();
+    const [found, setFound] = useState<any[]>();
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+
     useEffect(() => {
-        document.addEventListener('click', handleClickOutside);
+        if (async) {
+            (async () => {
+                const dt = await data;
+                setDataLocal(dt.data.books)
+            })();
+        }
+        //document.addEventListener('click', handleClickOutside);
     }, []);
 
-    let isOpen: boolean = false;
-    let searchTerm: string = '';
-    let results: any[] = [];
     let selected: any[] = [];
-    let search: any = '';
     let isLoading: boolean = false;
 
-    const filterResults = () => {
-        const arrOfSearch = searchTerm.split(/[\s,]+/);
-        let result: any[] = [];
+    const filterResults = (input: string) => {
+        const arrOfSearch = input?.split(/[\s,]+/);
+        if (!dataLocal || !arrOfSearch) return;
+        let results: any[] = [];
+        console.log(arrOfSearch);
 
         for (let search of arrOfSearch) {
-            result = data.filter((item: any) => {
+            dataLocal?.forEach(item => {
+
+                //if in data, there are not {} but ""
                 if (typeof item === 'string') {
                     if (item.toLowerCase().indexOf(search.toLowerCase()) > -1) {
                         results.push(item);
-                    };
+                    }
                 } else {
                     if (searchInAttr) {
                         //if there are specified attributes to search in, split to array and iterate over them
@@ -63,42 +78,41 @@ const SearchAutocomplete = (
             });
 
             //remove duplicates and then remove from results, if item is selected
-            results = Array.from(new Set(results)).filter((fil: any) => {
+            /*results = Array.from(new Set(results)).filter((fil: any) => {
                 if (typeof fil === 'string') {
                     return selected.every((sel: any) => fil !== sel);
                 } else {
                     return selected.every((sel: any) => {
-                        return fil.id !== sel.id;
+                        return fil._id !== sel._id;
                     });
                 }
-            });
-            return result;
-
+            });*/
+            console.log(results);
+            return results;
+        }
     }
 
+    const onChange = (e: any) => {
+        setIsOpen(true);
+        setFound(filterResults(e.target?.value ?? ''))
     }
 
-    const onChange = () => {
-        filterResults();
-        isOpen = true;
-    }
-
-    const setSearch = (result: string) => {
+    /*const setSearch = (result: string) => {
         if (!multiple) {
             if (showAttrInTableOrResult) {
-                search = showValue([result], showAttrInTableOrResult);
+                setInput(showValue([result], showAttrInTableOrResult));
                 isOpen = false;
             }
         }
-    }
+    }*/
 
     const addItem = (item: any) => {
         selected.push(item);
         if (!multiple) {
-            search = '';
-            isOpen = false;
+            //setInput('');
+            setIsOpen(true);
         }
-        filterResults();
+        //filterResults();
     }
 
     const removeItem = (item: any) => {
@@ -110,11 +124,13 @@ const SearchAutocomplete = (
     }
 
     const showAll = () => {
-        filterResults();
-        isOpen = true;
+        setFound(filterResults(''));
+        setIsOpen(true);
     }
 
     const showValue = (array: any[], criteria: string | undefined) => {
+        //todo: support nested objects like - book.autor.first_name
+
         /**
          * Divide showAtrInDropdown into chunks (words, spaces, characters...)
          * Iterate over every item in result
@@ -146,25 +162,26 @@ const SearchAutocomplete = (
         });
     };
 
-    const handleClickOutside = (event: any) => {
+    /*const handleClickOutside = (event: any) => {
         console.trace(event);
-    }
+    }*/
 
     const resultsTable = () => {
+        console.log(isOpen);
         let loadingElement: JSX.Element = <></>;
         let noDataElement: JSX.Element = <></>;
-        let results: JSX.Element[] = [];
+        let results: any[] = [];
         if (!isOpen) return <></>;
         if (isLoading) loadingElement = <li className="loading">Načítam dáta</li>;
-        if (!isLoading && !results.length) noDataElement = <li className="loading">Žiadne výsledky</li>;
-        if (!isLoading && results.length) {
-            results.forEach((element: any) => {
+        if (!isLoading && !found?.length) noDataElement = <li className="loading">Žiadne výsledky</li>;
+        if (!isLoading && found?.length) {
+            found.forEach((element: any) => {
                 results.push(
                     <div className="row">
                         <li className="autocomplete-result"
-                        onClick={() => setSearch(element)}
+                            onClick={() => /*setInput(element)*/console.log()}
                         >
-                            {showValue([element], showAttrInDropdown)[0]}
+                            <span>{showValue([element], showAttrInDropdown)[0]}</span>
                             <i className="fas fa-plus plusSign" onClick={() => addItem(element)}/>
                         </li>
                     </div>);
@@ -192,7 +209,6 @@ const SearchAutocomplete = (
             <input
                 type="text"
                 onChange={onChange}
-                value={search}
                 className="autocomplete-input"
                 onDoubleClick={showAll}
                 placeholder={placeholder}

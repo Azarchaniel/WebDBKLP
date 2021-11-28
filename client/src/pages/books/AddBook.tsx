@@ -108,6 +108,8 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
         readByRef?.current?.resetSelectedValues();
     }
 
+    //TODO: there should be also Content. Chips?
+    //Dimensions
     const showAddBook = () => {
         return (
             <>

@@ -20,7 +20,7 @@ cd ./client; npm run
 - [X] CRUD for Quotes
 - [X] add Owner
 - [X] proper pages and router
-- -[ ] implement table library (https://material-table.com/#/)
+- -[X] implement table library (https://material-table.com/#/)
 - [X] clean form after saving item
 - [X] create all models and interfaces
 - [ ] fix router not fetching data when changing Owner

@@ -1,13 +1,14 @@
 import AddAutor from "./AddAutor";
 import React, {useEffect, useState} from "react";
 import {IAutor} from "../../type";
-import AutorItem from "./AutorItem";
 import {addAutor, deleteAutor, getAutor, getAutors} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
 import Sidebar from "../../components/Sidebar";
 import {Link} from "react-router-dom";
 import Toast from "../../components/Toast";
+import MaterialTableCustom from "../../components/MaterialTableCustom";
+import {shortenStringKeepWord} from "../../utils/utils";
 
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
@@ -19,7 +20,7 @@ export default function AutorPage() {
     // ### AUTORS ###
     const fetchAutors = (): void => {
         getAutors()
-            .then(({data: {autors}}: IAutor[] | any) => {
+            .then(({data: {autors}}: any) => {
                 setAutors(autors);
             })
             .catch((err: Error) => console.trace(err))
@@ -42,7 +43,8 @@ export default function AutorPage() {
             })
     }
 
-    const handleUpdateAutor = (): any => {
+    const handleUpdateAutor = (autor: IAutor): any => {
+        console.log('todo: update autor', autor);
     }
 
     const handleDeleteAutor = (_id: string): void => {
@@ -88,20 +90,79 @@ export default function AutorPage() {
 
     return (
         <main className='App'>
-            <Sidebar />
+            <Sidebar/>
             <h1><Link className='customLink' to='/'>WebDBKLP</Link></h1>
-
             <AddAutor saveAutor={handleSaveAutor}/>
-            {autors.sort((a, b) => a.lastName.localeCompare(b.lastName)).map((autor: IAutor) => {
-                if (autor?.isDeleted) return null;
-                return <AutorItem
-                    key={autor._id}
-                    updateAutor={handleUpdateAutor}
-                    deleteAutor={handleDeleteAutor}
-                    autor={autor}
+            <MaterialTableCustom
+                title="Autori"
+                columns={[
+                    {
+                        title: 'Meno',
+                        field: 'firstName',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                    },
+                    {
+                        title: 'Priezvisko',
+                        field: 'lastName',
+                        defaultSort: 'asc',
+                        customSort: (a: IAutor, b: IAutor) => a.lastName.localeCompare(b.lastName),
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    },
+                    {
+                        title: 'Národnosť',
+                        field: 'nationality',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    },
+                    {
+                        title: 'Narodenie',
+                        field: 'dateOfBirth',
+                        type: 'date',
+                        dateSetting: {locale: "sk-SK"},
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    },
+                    {
+                        title: 'Úmrtie',
+                        field: 'dateOfDeath',
+                        type: 'date',
+                        dateSetting: {locale: "sk-SK"},
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    },
+                    {
+                        title: 'Poznámka',
+                        field: 'note',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        render: (rowData: IAutor) => {
+                            if (rowData.note) return shortenStringKeepWord(rowData.note, 30);
+                        }
+                    }
+                ]}
+                data={autors}
+                actions={[
+                    {
+                        icon: 'create',
+                        tooltip: 'Upraviť',
+                        onClick: (_: any, rowData: unknown) => handleUpdateAutor(rowData as IAutor),
+                    },
+                    {
+                        icon: 'delete',
+                        tooltip: 'Vymazať',
+                        onClick: (_: any, rowData: unknown) => handleDeleteAutor((rowData as IAutor)._id),
+                    }
+                ]}
                 />
-            })}
-            <Toast />
+            <Toast/>
         </main>
     )
 }

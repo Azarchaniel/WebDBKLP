@@ -135,6 +135,7 @@ body, html, main, #root {
   margin: -4rem 0 0 -2.5vw;
   padding: 3rem 0 1rem 1rem;
   transition: 0.5s;
+  z-index: 3000;
 
   .closeIcon {
     color: white;
@@ -227,3 +228,33 @@ body, html, main, #root {
   right: 40%;
 }
 
+.autocomplete-result {
+  list-style: none;
+  margin-left: -1.9rem;
+  span {
+    margin-right: 1rem;
+  }
+}
+
+.showHideColumns {
+  border: solid 1px black;
+  position: absolute;
+  z-index: 100;
+  background: white;
+  color: black;
+  right: 3rem;
+  top: 12.5rem;
+  padding: 1rem 1rem 0;
+
+  input {
+    margin-right: 1rem;
+  }
+}
+
+.shown {
+  visibility: visible;
+}
+
+.hidden {
+  visibility: hidden !important;
+}

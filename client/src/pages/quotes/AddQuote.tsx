@@ -5,6 +5,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {Multiselect} from "multiselect-react-dropdown";
 import {getBooks} from "../../API";
+import SearchAutocomplete from '../../components/SearchAutocomplete';
 
 type Props = {
     saveQuote: (e: React.FormEvent, formData: IQuote | any) => void
@@ -12,7 +13,7 @@ type Props = {
 
 const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
     const [formData, setFormData] = useState<IQuote | {}>();
-    const [books, setBooks] = useState<IBook | {}>();
+    const [books, setBooks] = useState<IBook[]>();
     const [error, setError] = useState<string | undefined>(undefined);
     const bookRef = useRef(null);
 
@@ -28,6 +29,7 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                 }))
                     .filter((book:IBook) => !book.isDeleted)
                     .sort((a: Partial<IBook>, b: Partial<IBook>) => a.title!.localeCompare(b.title!)));
+
             })
             .catch(err => {
                 toast.error('Nepodarilo sa nacitat knihy!');
@@ -129,6 +131,18 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                                     />
                                 </div>
                                 <div style={{height: '5px', width: '100%'}}/>
+                                <div className="row">
+                                    <SearchAutocomplete
+                                        data={getBooks()}
+                                        async={true}
+                                        multiple={false}
+                                        placeholder="Skuska autocomplete"
+                                        searchInAttr="title"
+                                        showTable={true}
+                                        showAttrInDropdown="title /"
+                                        showAttrInTableOrResult="title"
+                                    />
+                                </div>
                                 {showError()}
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary"

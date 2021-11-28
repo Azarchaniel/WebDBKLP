@@ -1,5 +1,4 @@
-import {IBook, IUser} from "../../type";
-import BookItem from "./BookItem";
+import {IAutor, IBook, IUser} from "../../type";
 import React, {useEffect, useState} from "react";
 import {addBook, deleteBook, getBook, getBooks, updateBook} from "../../API";
 import {toast} from "react-toastify";
@@ -8,24 +7,45 @@ import AddBook from "./AddBook";
 import Sidebar from "../../components/Sidebar";
 import Toast from "../../components/Toast";
 import {Link} from "react-router-dom";
+import MaterialTableCustom from "../../components/MaterialTableCustom";
+import {shortenStringKeepWord} from "../../utils/utils";
 
-//add prop for User
+interface IBookHidden {
+    control: boolean,
+    editor: boolean,
+    ilustrator: boolean,
+    translator: boolean,
+    subtitle: boolean,
+    content: boolean,
+    dimensions: boolean,
+    createdAt: boolean
+}
+
 export default function BookPage() {
     const [books, setBooks] = useState<IBook[]>([]);
+    const [clonedBooks, setClonedBooks] = useState<any[]>();
+    const [hidden, setHidden] = useState<IBookHidden>({
+        control: true,
+        editor: true,
+        ilustrator: true,
+        translator: false,
+        subtitle: true,
+        content: true,
+        dimensions: true,
+        createdAt: true
+    });
 
     useEffect(() => {
-        console.log('#######');
         fetchBooks();
-    }, [window.location.href])
+    }, [window.location.href, books])
 
     // ### BOOKS ###
     const fetchBooks = (): void => {
         getBooks()
-            .then(({ data: { books } }: IBook[] | any) => {
+            .then(({data: {books}}: IBook[] | any) => {
                 const userId = window.location.href.split('/')[4];
 
                 if (userId) {
-                    //todo: simplify
                     const booksArr: IBook[] = [];
                     books.forEach((book: IBook) => {
                         book.owner?.forEach((owner: IUser) => {
@@ -38,16 +58,38 @@ export default function BookPage() {
                     books = booksArr;
                 }
 
-                setBooks(books);
+                books = books.filter((bk: IBook) => bk.isDeleted !== true);
+
+                //use this method for deep clone
+                const deepClone = JSON.parse(JSON.stringify(books));
+                //create string of autors; if one autor, just add him; if more, add '; ' at the beginning of every next
+                deepClone.forEach((book: any) => {
+                    book['autorsFull'] = '';
+                    book.autor.forEach((autor: IAutor, index: number) =>
+                        index > 0 ? book['autorsFull'] += `; ${autor.lastName}, ${autor.firstName}`
+                            : book['autorsFull'] = `${autor.lastName}, ${autor.firstName}`)
+                    book['editorsFull'] = '';
+                    book.editor.forEach((editor: IAutor, index: number) =>
+                        index > 0 ? book['editorsFull'] += `; ${editor.lastName}, ${editor.firstName}`
+                            : book['editorsFull'] = `${editor.lastName}, ${editor.firstName}`)
+                    book['illustratorsFull'] = '';
+                    book.ilustrator.forEach((ilustrator: IAutor, index: number) =>
+                        index > 0 ? book['ilustratorsFull'] += `; ${ilustrator.lastName}, ${ilustrator.firstName}`
+                            : book['ilustratorsFull'] = `${ilustrator.lastName}, ${ilustrator.firstName}`)
+                    book['translatorsFull'] = '';
+                    book.translator.forEach((translator: IAutor, index: number) =>
+                        index > 0 ? book['translatorsFull'] += `; ${translator.lastName}, ${translator.firstName}`
+                            : book['translatorsFull'] = `${translator.lastName}, ${translator.firstName}`)
+                });
+                setClonedBooks(deepClone);
             })
             .catch((err: Error) => console.trace(err))
     }
 
     const handleSaveBook = (e: React.FormEvent, formData: IBook): void => {
         e.preventDefault()
-        console.trace('handle',formData);
         addBook(formData)
-            .then(({ status, data }) => {
+            .then(({status, data}) => {
                 if (status !== 201) {
                     toast.error('Chyba! Kniha nebola pridaná!')
                     throw new Error('Chyba! Kniha nebola pridaná!');
@@ -60,9 +102,9 @@ export default function BookPage() {
 
     const handleUpdateBook = (book: IBook): void => {
         updateBook(book)
-            .then(({ status, data }) => {
+            .then(({status, data}) => {
                 if (status !== 200) {
-                    throw new Error('Error! Todo not updated')
+                    throw new Error('Error! Book not updated')
                 }
                 setBooks(data.books)
             })
@@ -71,9 +113,9 @@ export default function BookPage() {
 
     const handleDeleteBook = (_id: string): void => {
         getBook(_id)
-            .then(({ status, data }) => {
+            .then(({status, data}) => {
                 if (status !== 200) {
-                    throw new Error('Error! Todo not deleted')
+                    throw new Error('Error! Book not deleted')
                 }
 
                 confirmAlert({
@@ -84,7 +126,7 @@ export default function BookPage() {
                             label: 'Ano',
                             onClick: () => {
                                 deleteBook(_id)
-                                    .then(({ status, data }) => {
+                                    .then(({status, data}) => {
                                         if (status !== 200) {
                                             throw new Error('Error! Book not deleted')
                                         }
@@ -99,7 +141,8 @@ export default function BookPage() {
                         },
                         {
                             label: 'Ne',
-                            onClick: () => {}
+                            onClick: () => {
+                            }
                         }
                     ]
                 });
@@ -109,18 +152,189 @@ export default function BookPage() {
 
     return (
         <main className='App'>
-            <Sidebar />
+            <Sidebar/>
             <h1><Link className='customLink' to='/'>WebDBKLP</Link></h1>
-            <AddBook saveBook={handleSaveBook} />
-            {books.sort((a,b) => a.title.localeCompare(b.title)).map((book: IBook) => {
-                return <BookItem
-                    key={book._id}
-                    updateBook={handleUpdateBook}
-                    deleteBook={handleDeleteBook}
-                    book={book}
-                />
-            })}
-            <Toast />
+            <AddBook saveBook={handleSaveBook}/>
+            <div className={`showHideColumns ${hidden.control ? 'hidden' : 'shown'}`}>
+                <p>
+                    <label>
+                        <input type='checkbox'
+                               checked={hidden.editor}
+                               onChange={() => setHidden({...hidden, editor: !hidden.editor})}
+                        />
+                        Editor
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <input type='checkbox'
+                               checked={hidden.ilustrator}
+                               onChange={() => setHidden({...hidden, ilustrator: !hidden.ilustrator})}
+                        />
+                        Ilustrátor
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <input type='checkbox'
+                               checked={hidden.translator}
+                               onChange={() => setHidden({...hidden, translator: !hidden.translator})}
+                        />
+                        Prekladateľ
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <input type='checkbox'
+                               checked={hidden.subtitle}
+                               onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})}
+                        />
+                        Podtitul
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <input type='checkbox'
+                               checked={hidden.content}
+                               onChange={() => setHidden({...hidden, content: !hidden.content})}
+                        />
+                        Obsah
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <input type='checkbox'
+                               checked={hidden.dimensions}
+                               onChange={() => setHidden({...hidden, dimensions: !hidden.dimensions})}
+                        />
+                        Rozmery
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <input type='checkbox'
+                               checked={hidden.createdAt}
+                               onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})}
+                        />
+                        Dátum pridania
+                    </label>
+                </p>
+            </div>
+            <MaterialTableCustom
+                title='Knihy'
+                data={clonedBooks ?? []}
+                columns={[
+                    {
+                        title: 'Autor',
+                        field: 'autorsFull',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                    },
+                    {
+                        title: 'Editor',
+                        field: 'editorsFull',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        hidden: hidden.editor
+                    },
+                    {
+                        title: 'Prekladateľ',
+                        field: 'translatorsFull',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        hidden: hidden.translator
+                    },
+                    {
+                        title: 'Ilustrátor',
+                        field: 'ilustratorsFull',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        hidden: hidden.ilustrator
+                    },
+                    {
+                        title: 'Názov',
+                        field: 'title',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        defaultSort: 'asc'
+                    },
+                    {
+                        title: 'Podnázov',
+                        field: 'subtitle',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        hidden: hidden.subtitle
+                    },
+                    {
+                        title: 'ISBN',
+                        field: 'ISBN',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    },
+                    {
+                        title: 'Jazyk',
+                        field: 'language',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    },
+                    {
+                        title: 'Poznámka',
+                        field: 'note',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        render: (rowData: IBook) => {
+                            if (rowData.note) return shortenStringKeepWord(rowData.note, 30);
+                        },
+                    },
+                    {
+                        title: 'Počet strán',
+                        field: 'numberOfPages',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    },
+                    {
+                        title: 'Pridané',
+                        field: 'createdAt',
+                        type: 'date',
+                        dateSetting: {locale: "sk-SK"},
+                        hidden: hidden.createdAt,
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    }
+                ]}
+                actions={[
+                    {
+                        icon: 'visibility',
+                        tooltip: 'Zobraz/Skry stĺpce',
+                        onClick: () => {
+                            setHidden({...hidden, control: !hidden.control})
+                        },
+                        isFreeAction: true
+                    },
+                    {
+                        icon: 'create',
+                        tooltip: 'Upraviť',
+                        onClick: (_: any, rowData: unknown) => handleUpdateBook(rowData as IBook),
+                    },
+                    {
+                        icon: 'delete',
+                        tooltip: 'Vymazať',
+                        onClick: (_: any, rowData: unknown) => handleDeleteBook((rowData as IBook)._id),
+                    }
+                ]}
+            />
+            <Toast/>
         </main>
     );
 }
