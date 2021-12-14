@@ -1,6 +1,7 @@
 import {Response, Request} from 'express';
 import {IBook} from '../types';
 import Book from '../models/book';
+import {loadavg} from "os";
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -46,7 +47,7 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
         //todo: there has to be a better way for cleaner code
         const {
             title, subtitle, ISBN, language, note, numberOfPages,
-            published, autor, owner, exLibris, readBy
+            published, autor, owner, exLibris, readBy, location
         } = req.body;
         console.trace(req.body);
 
@@ -62,6 +63,10 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
                 publisher: published?.publisher,
                 year: published?.year ?? undefined,
                 country: published?.country ?? ''
+            },
+            location: {
+                city: location?.city,
+                shelf: location?.shelf,
             },
             owner: owner,
             exLibris: exLibris,

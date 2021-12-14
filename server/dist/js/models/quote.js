@@ -8,6 +8,7 @@ const mongoose_2 = __importDefault(require("mongoose"));
 const quoteSchema = new mongoose_1.Schema({
     text: String,
     fromBook: { type: [mongoose_2.default.Schema.Types.ObjectId], ref: 'Book', required: false },
+    note: { type: String, required: false },
     isDeleted: { type: Boolean, defaut: false }
 }, { timestamps: true });
 exports.default = (0, mongoose_1.model)('Quote', quoteSchema);

@@ -16,3 +16,5 @@ __exportStar(require("./user"), exports);
 __exportStar(require("./quote"), exports);
 __exportStar(require("./editionSerie"), exports);
 __exportStar(require("./lp"), exports);
+__exportStar(require("./published"), exports);
+__exportStar(require("./location"), exports);

@@ -4,3 +4,5 @@ export * from './user';
 export * from './quote';
 export * from './user';
 export * from './lp';
+export * from './location';
+export * from './published';

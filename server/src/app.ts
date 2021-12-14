@@ -15,14 +15,21 @@ const uri: string = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO
 const options = {useNewUrlParser: true, useUnifiedTopology: true}
 mongoose.set('useFindAndModify', false)
 
-mongoose
-    .connect(uri, options)
-    .then(() =>
-        app.listen(PORT, () => {
-            console.log(`Server running on http://localhost:${PORT}`);
-            console.log(`Database URI is: ${uri}`);
+try {
+    mongoose
+        .connect(uri, options)
+        .then(() =>
+            app.listen(PORT, () => {
+                console.log(`Server running on http://localhost:${PORT}`);
+                console.log(`Database URI is: ${uri}`);
+            })
+        )
+        .catch((error) => {
+            console.error('NO CONNECTION TO THE DB !!!');
+            throw error
         })
-    )
-    .catch((error) => {
-        throw error
-    })
+
+} catch (err) {
+    console.error('Mongo DB Error')
+    throw err;
+}

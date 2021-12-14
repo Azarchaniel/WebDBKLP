@@ -3,6 +3,7 @@ import {model, Schema} from 'mongoose'
 import {publishedSchema} from "./published";
 import {editionSerieSchema} from "./editionSerie";
 import * as mongoose from "mongoose";
+import {locationSchema} from "./location";
 
 const bookSchema: Schema = new Schema({
     autor: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
@@ -20,6 +21,7 @@ const bookSchema: Schema = new Schema({
     numberOfPages: {type: Number, required: false},
     exLibris: {type: Boolean},
     published: {type: publishedSchema, required: false},
+    location: {type: locationSchema, required: false},
     isDeleted: {type: Boolean, default: false},
     owner: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: true},
     readBy: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false}

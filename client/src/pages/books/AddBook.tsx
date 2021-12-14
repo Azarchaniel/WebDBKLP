@@ -261,10 +261,36 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                     <div style={{height: '5px', width: '100%'}}/>
                                     <div className="row">
                                         <div className="col">
-                                            <textarea onChange={handleForm} id='note' placeholder='Poznámka'
+                                            <Multiselect
+                                                options={[{value: 'spisska', showValue: "Spišská"},
+                                                    {value: 'ostrava', showValue: "Ostrava"}]}
+                                                displayValue="showValue"
+                                                placeholder="Mesto"
+                                                closeIcon="cancel"
+                                                onSelect={(picked: any[]) => {
+                                                    setFormData({
+                                                        ...formData,
+                                                        "location.city": picked.map(v => v.value)
+                                                    })
+                                                }}
+                                            />
+                                        </div>
+                                        <div className="col">
+                                            <input onChange={handleForm} type='number' id='location.shelf'
+                                                   placeholder='Polica'
                                                    className="form-control"
                                                    autoComplete="off"
-                                                   value={formData && "note" in formData ? formData.note : ''}
+                                                   value={formData && "location.shelf" in formData ? formData["location.shelf"] : ''}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div style={{height: '5px', width: '100%'}}/>
+                                    <div className="row">
+                                        <div className="col">
+                                            <textarea onChange={handleForm} id='note' placeholder='Poznámka'
+                                                      className="form-control"
+                                                      autoComplete="off"
+                                                      value={formData && "note" in formData ? formData.note : ''}
                                             />
                                         </div>
                                     </div>
