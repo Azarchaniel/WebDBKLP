@@ -1,5 +1,5 @@
 import {IAutor, IBook, IUser} from "../../type";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {addBook, deleteBook, getBook, getBooks, updateBook} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
@@ -34,10 +34,27 @@ export default function BookPage() {
         dimensions: true,
         createdAt: true
     });
+    const popRef = useRef(null);
 
     useEffect(() => {
         fetchBooks();
     }, [window.location.href, books])
+
+    useEffect(() => {
+        function handleClickOutside(event: Event) {
+            if (popRef.current && !(popRef as any).current.contains(event.target)) {
+                //prevState, otherwise it was overwritting the checkboxes
+                setHidden(prevState => ({
+                    ...prevState,
+                    control: true
+                }));
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [popRef]);
 
     // ### BOOKS ###
     const fetchBooks = (): void => {
@@ -155,7 +172,7 @@ export default function BookPage() {
             <Sidebar/>
             <h1><Link className='customLink' to='/'>WebDBKLP</Link></h1>
             <AddBook saveBook={handleSaveBook}/>
-            <div className={`showHideColumns ${hidden.control ? 'hidden' : 'shown'}`}>
+            <div ref={popRef} className={`showHideColumns ${hidden.control ? 'hidden' : 'shown'}`}>
                 <p>
                     <label>
                         <input type='checkbox'
@@ -261,7 +278,7 @@ export default function BookPage() {
                         headerStyle: {
                             backgroundColor: '#bea24b'
                         },
-                        defaultSort: 'asc'
+
                     },
                     {
                         title: 'Podnázov',

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import MaterialTable, {Column} from "material-table";
 
 type PropsMT = {
@@ -9,6 +9,7 @@ type PropsMT = {
 }
 
 const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions}: PropsMT) => {
+    const [showFilter, setShowFilter] = useState(false);
 
     return (
         <MaterialTable
@@ -16,13 +17,23 @@ const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions}:
             columns={columns}
             data={data}
             options={{
-                filtering: true,
+                filtering: showFilter,
                 actionsColumnIndex: -1,
                 pageSize: 20,
                 paginationType: "stepped",
-                draggable: false
+                draggable: false,
+                rowStyle: {borderBottom: '2px solid lightgray'}
             }}
-            actions={actions}
+            actions={[
+                {
+                    icon: 'filter_list',
+                    tooltip: 'Zobraz/Skry filter',
+                    onClick: () => {
+                        setShowFilter(!showFilter)
+                    },
+                    isFreeAction: true
+                }, ...actions,
+            ]}
             localization={{
                 body: {emptyDataSourceMessage: 'Žiadne záznamy'},
                 header: {actions: 'Akcie'},

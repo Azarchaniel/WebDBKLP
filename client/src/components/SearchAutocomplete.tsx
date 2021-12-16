@@ -1,32 +1,36 @@
 // @ts-nocheck
 import React, {useEffect, useState} from "react";
+import {IBook} from "../type";
 
 //https://docs.google.com/document/d/1Ph1gOGJcnxaUU1ec8433nXLbxSRwlZlBsjUMboMWHPA/edit
 
+type SAstyle = {
+    input?: {}
+};
+
 interface SAprops {
     data: any;
-    async: Boolean;
     multiple: Boolean;
     placeholder: string;
     searchInAttr: string;
     showTable: Boolean;
+    async?: Boolean;
     showAttrInDropdown?: string;
     showAttrInTableOrResult?: string;
+    style?: SAstyle;
 }
 
 //TODO: FINISH
 const SearchAutocomplete: (props: SAprops) => JSX.Element = (props) => {
-    const {data, multiple, placeholder, searchInAttr, showTable, showAttrInDropdown, showAttrInTableOrResult, async } = props;
+    const {data, multiple, placeholder, searchInAttr, showTable, showAttrInDropdown, showAttrInTableOrResult, async, style } = props;
     const [dataLocal, setDataLocal] = useState<any[]>();
     const [found, setFound] = useState<any[]>();
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
-    useEffect(() => {
+    useEffect(async () => {
         if (async) {
-            (async () => {
-                const dt = await data;
-                setDataLocal(dt.data.books)
-            })();
+            let neco = await data;
+            setDataLocal(neco.data.books.filter((book: IBook) => !book.isDeleted));
         }
         //document.addEventListener('click', handleClickOutside);
     }, []);
@@ -38,7 +42,6 @@ const SearchAutocomplete: (props: SAprops) => JSX.Element = (props) => {
         const arrOfSearch = input?.split(/[\s,]+/);
         if (!dataLocal || !arrOfSearch) return;
         let results: any[] = [];
-        console.log(arrOfSearch);
 
         for (let search of arrOfSearch) {
             dataLocal?.forEach(item => {
@@ -144,6 +147,8 @@ const SearchAutocomplete: (props: SAprops) => JSX.Element = (props) => {
          * RESULT => 'John / Smith'
          */
 
+            //todo: here should be recursive function, if I put 'auutor.firstName'
+
         let arrOfAttrs = criteria!.match(/\w+|\s+|[^\s\w]+/g);
         return array.map((res: any) => {
             let strOfKeys: string = '';
@@ -212,6 +217,7 @@ const SearchAutocomplete: (props: SAprops) => JSX.Element = (props) => {
                 className="autocomplete-input"
                 onDoubleClick={showAll}
                 placeholder={placeholder}
+                style={style.input}
             />
             {resultsTable()}
         </div>

@@ -1,4 +1,4 @@
-import {IBook, IQuote} from "../../type";
+import {ApiBookDataType, IBook, IQuote} from "../../type";
 import React, {useEffect, useRef, useState} from "react";
 import {toast} from "react-toastify";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -139,8 +139,11 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                                         placeholder="Skuska autocomplete"
                                         searchInAttr="title"
                                         showTable={true}
-                                        showAttrInDropdown="title /"
+                                        showAttrInDropdown="title / "
                                         showAttrInTableOrResult="title"
+                                        style={{input: {
+                                            width: '100%'
+                                        }}}
                                     />
                                 </div>
                                 {showError()}

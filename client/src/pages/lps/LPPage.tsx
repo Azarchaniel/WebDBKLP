@@ -1,20 +1,43 @@
 import Sidebar from "../../components/Sidebar";
 import {Link} from "react-router-dom";
 import AddLP from "./AddLP";
-import {ILP} from "../../type";
-import LPItem from "./LPItem";
+import {IAutor, IBook, ILP} from "../../type";
 import Toast from "../../components/Toast";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {addLP, deleteLP, getLPs} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
+import {shortenStringKeepWord} from "../../utils/utils";
+import MaterialTableCustom from "../../components/MaterialTableCustom";
 
 export default function LPPage() {
     const [lps, setLPs] = useState<ILP[]>([]);
+    const [hidden, setHidden] = useState({
+        control: true,
+        subtitle: true,
+        createdAt: true
+    });
+    const popRef = useRef(null);
 
     useEffect(() => {
         fetchLPs();
     }, [])
+
+    useEffect(() => {
+        function handleClickOutside(event: Event) {
+            if (popRef.current && !(popRef as any).current.contains(event.target)) {
+                //prevState, otherwise it was overwritting the checkboxes
+                setHidden(prevState => ({
+                    ...prevState,
+                    control: true
+                }));
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [popRef]);
 
     // ### QUOTES ###
     const fetchLPs = (): void => {
@@ -41,7 +64,9 @@ export default function LPPage() {
             })
     }
 
-    const handleUpdateLP = (): any => {}
+    const handleUpdateLP = (lp: ILP): any => {
+        console.log(lp)
+    }
 
     const handleDeleteLP = (_id: string): void => {
         confirmAlert({
@@ -77,18 +102,117 @@ export default function LPPage() {
         <main className='App'>
             <Sidebar />
             <h1><Link className='customLink' to='/'>WebDBKLP</Link></h1>
-
             <AddLP saveLp={handleSaveLP} />
+            <div ref={popRef} className={`showHideColumns ${hidden.control ? 'hidden' : 'shown'}`}>
+                <p>
+                    <label>
+                        <input type='checkbox'
+                               checked={hidden.subtitle}
+                               onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})}
+                        />
+                        Podnázov
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <input type='checkbox'
+                               checked={hidden.createdAt}
+                               onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})}
+                        />
+                        Dátum pridania
+                    </label>
+                </p>
+            </div>
+            <MaterialTableCustom
+                title="LP"
+                columns={[
+                    {
+                        title: 'Autor',
+                        field: 'autorsFull',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                    },
+                    {
+                        title: 'Názov',
+                        field: 'title',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
 
-            {lps?.map((lp: ILP) => {
-                if (lp.isDeleted) return null;
-                return <LPItem
-                    key={lp._id}
-                    updateLP={handleUpdateLP}
-                    deleteLP={handleDeleteLP}
-                    lp={lp}
-                />
-            })}
+                    },
+                    {
+                        title: 'Podnázov',
+                        field: 'subtitle',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        hidden: hidden.subtitle
+                    },
+                    {
+                        title: 'ISBN',
+                        field: 'ISBN',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    },
+                    {
+                        title: 'Jazyk',
+                        field: 'language',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    },
+                    {
+                        title: 'Poznámka',
+                        field: 'note',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        render: (rowData: IBook) => {
+                            if (rowData.note) return shortenStringKeepWord(rowData.note, 30);
+                        },
+                    },
+                    {
+                        title: 'Počet strán',
+                        field: 'numberOfPages',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    },
+                    {
+                        title: 'Pridané',
+                        field: 'createdAt',
+                        type: 'date',
+                        dateSetting: {locale: "sk-SK"},
+                        hidden: hidden.createdAt,
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        }
+                    }
+                ]}
+                data={lps}
+                actions={[
+                    {
+                        icon: 'visibility',
+                        tooltip: 'Zobraz/Skry stĺpce',
+                        onClick: () => {
+                            setHidden({...hidden, control: !hidden.control})
+                        },
+                        isFreeAction: true
+                    },
+                    {
+                        icon: 'create',
+                        tooltip: 'Upraviť',
+                        onClick: (_: any, rowData: unknown) => handleUpdateLP(rowData as ILP),
+                    },
+                    {
+                        icon: 'delete',
+                        tooltip: 'Vymazať',
+                        onClick: (_: any, rowData: unknown) => handleDeleteLP((rowData as ILP)._id),
+                    }
+                ]}
+            />
             <Toast />
         </main>
     )
