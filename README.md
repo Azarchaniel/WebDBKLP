@@ -28,5 +28,8 @@ cd ./client; npm run
 - [ ] custom modal
 - [ ] webscrapper and autofilling
 - [ ] some reports, numbers, graphs on Main page
+- [ ] allow row to be clickable and add details to it (first pic, later comments)
 - [ ] (in far future) localization
 - [ ] (in far future) authorization/authentication
+- - [ ] add comments
+- - [ ] allow to add comments that is visible only for creator

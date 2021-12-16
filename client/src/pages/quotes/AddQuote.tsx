@@ -11,7 +11,7 @@ type Props = {
     saveQuote: (e: React.FormEvent, formData: IQuote | any) => void
 }
 
-const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
+const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
     const [formData, setFormData] = useState<IQuote | {}>();
     const [books, setBooks] = useState<IBook[]>();
     const [error, setError] = useState<string | undefined>(undefined);
@@ -27,7 +27,7 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                         ${book.autor && book.autor[0] && book.autor[0].lastName ? book.autor[0].lastName : ''} 
                         ${book.published && book.published?.year ? '/ ' + book.published?.year : ''}`
                 }))
-                    .filter((book:IBook) => !book.isDeleted)
+                    .filter((book: IBook) => !book.isDeleted)
                     .sort((a: Partial<IBook>, b: Partial<IBook>) => a.title!.localeCompare(b.title!)));
 
             })
@@ -100,8 +100,8 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                                 <div className="row">
                                     <div className="col">
                                         <textarea onChange={handleForm} id='text' placeholder='*Text'
-                                               className="form-control" autoComplete="off"
-                                               value={formData && "text" in formData ? formData.text : ''}/>
+                                                  className="form-control" autoComplete="off"
+                                                  value={formData && "text" in formData ? formData.text : ''}/>
                                     </div>
                                 </div>
                                 <div style={{height: '5px', width: '100%'}}/>
@@ -116,8 +116,10 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                                         emptyRecordMsg="Žiadne knihy nenájdené"
                                         selectionLimit={1}
                                         onSelect={(pickedBook: IBook[]) => {
-                                            setFormData({...formData, fromBook: pickedBook
-                                                    .map(v => v._id)})
+                                            setFormData({
+                                                ...formData, fromBook: pickedBook
+                                                    .map(v => v._id)
+                                            })
                                         }}
                                         style={{
                                             inputField: {marginLeft: "0.5rem"},
@@ -132,20 +134,26 @@ const AddQuote: React.FC<Props> = ({saveQuote}: {saveQuote: any}) => {
                                 </div>
                                 <div style={{height: '5px', width: '100%'}}/>
                                 <div className="row">
-                                    <SearchAutocomplete
-                                        data={getBooks()}
-                                        async={true}
-                                        multiple={false}
-                                        placeholder="Skuska autocomplete"
-                                        searchInAttr="title"
-                                        showTable={true}
-                                        showAttrInDropdown="title / "
-                                        showAttrInTableOrResult="title"
-                                        style={{input: {
-                                            width: '100%'
-                                        }}}
-                                    />
+                                    <div className="col">
+                                    <textarea onChange={handleForm} id="note" placeholder="Poznámka"
+                                              className="form-control" autoComplete="off"
+                                              value={formData && "note" in formData ? formData.note : ''}/>
+
+                                    </div>
                                 </div>
+                                <div className="row">
+                                    {/*<SearchAutocomplete*/}
+                                    {/*    data={getBooks()}*/}
+                                    {/*    async={true}*/}
+                                    {/*    multiple={false}*/}
+                                    {/*    placeholder="Skuska autocomplete"*/}
+                                    {/*    searchInAttr="title"*/}
+                                    {/*    showTable={true}*/}
+                                    {/*    showAttrInDropdown="title /"*/}
+                                    {/*    showAttrInTableOrResult="title"*/}
+                                    {/*/>*/}
+                                </div>
+
                                 {showError()}
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary"

@@ -38,11 +38,12 @@ const getQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getQuote = getQuote;
 const addQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { text, fromBook, isDeleted } = req.body;
+    const { text, fromBook, note, isDeleted } = req.body;
     try {
         const quote = new quote_1.default({
             text: text,
             fromBook: fromBook[0],
+            note: note,
             isDeleted: isDeleted
         });
         const newQuote = yield quote.save();

@@ -59,7 +59,7 @@ const addBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
         //todo: there has to be a better way for cleaner code
-        const { title, subtitle, ISBN, language, note, numberOfPages, published, autor, owner, exLibris, readBy } = req.body;
+        const { title, subtitle, ISBN, language, note, numberOfPages, published, autor, owner, exLibris, readBy, location } = req.body;
         console.trace(req.body);
         const book = new book_1.default({
             autor: autor,
@@ -73,6 +73,10 @@ const addBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 publisher: published === null || published === void 0 ? void 0 : published.publisher,
                 year: (_a = published === null || published === void 0 ? void 0 : published.year) !== null && _a !== void 0 ? _a : undefined,
                 country: (_b = published === null || published === void 0 ? void 0 : published.country) !== null && _b !== void 0 ? _b : ''
+            },
+            location: {
+                city: location === null || location === void 0 ? void 0 : location.city,
+                shelf: location === null || location === void 0 ? void 0 : location.shelf,
             },
             owner: owner,
             exLibris: exLibris,

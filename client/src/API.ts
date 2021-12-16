@@ -39,6 +39,10 @@ export const addBook = async (
         year: formData['published.year'] ?? undefined,
         country: formData['published.country'] ?? ''
       },
+      location: {
+        city: formData['location.city'] ?? '',
+        shelf: formData['location.shelf'] ?? '',
+      }
 
     }
     const saveBook: AxiosResponse<ApiBookDataType> = await axios.post(

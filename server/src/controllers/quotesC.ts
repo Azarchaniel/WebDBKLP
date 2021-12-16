@@ -24,12 +24,13 @@ const getQuote = async (req: Request, res: Response): Promise<void> => {
 }
 
 const addQuote = async (req: Request, res: Response): Promise<void> => {
-    const {text, fromBook, isDeleted} = req.body;
+    const {text, fromBook, note, isDeleted} = req.body;
 
     try {
         const quote: IQuote = new Quote({
            text: text,
             fromBook: fromBook[0],
+            note: note,
             isDeleted: isDeleted
         });
 

@@ -23,6 +23,7 @@ const mongoose_1 = require("mongoose");
 const published_1 = require("./published");
 const editionSerie_1 = require("./editionSerie");
 const mongoose = __importStar(require("mongoose"));
+const location_1 = require("./location");
 const bookSchema = new mongoose_1.Schema({
     autor: { type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false },
     editor: { type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false },
@@ -39,6 +40,7 @@ const bookSchema = new mongoose_1.Schema({
     numberOfPages: { type: Number, required: false },
     exLibris: { type: Boolean },
     published: { type: published_1.publishedSchema, required: false },
+    location: { type: location_1.locationSchema, required: false },
     isDeleted: { type: Boolean, default: false },
     owner: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: true },
     readBy: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false }

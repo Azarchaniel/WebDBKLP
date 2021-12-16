@@ -16,7 +16,7 @@ body, html, main, #root {
 
 .App {
   width: 97%;
-  margin: 2rem 3rem;
+  margin: 4rem 3rem;
 }
 
 .App > h1 {
@@ -132,7 +132,7 @@ body, html, main, #root {
   width: 16vw;
   height: 110vh;
   background-color: #343A40;
-  margin: -2rem 0 0 -2.5vw;
+  margin: -4rem 0 0 -3rem;
   padding: 3rem 0 1rem 1rem;
   transition: 0.5s;
   z-index: 3000;
@@ -178,8 +178,9 @@ body, html, main, #root {
   width: 50px;
   height: 110vh;
   background-color: #343A40;
-  margin: -2rem 0 0 -2.5vw;
+  margin: -4rem 0 0 -3rem;
   padding-top: 3rem;
+  z-index: 100;
 
   .closeIcon {
     color: white;
@@ -231,7 +232,6 @@ body, html, main, #root {
 .autocomplete-result {
   list-style: none;
   margin-left: -1.9rem;
-  line-height: 2rem;
   span {
     margin-right: 1rem;
   }
@@ -258,8 +258,4 @@ body, html, main, #root {
 
 .hidden {
   visibility: hidden !important;
-}
-
-.MuiTableCell-paddingCheckbox:last-child {
-  background: #BEA24B;
 }
