@@ -161,6 +161,16 @@ export default function AutorPage() {
                         onClick: (_: any, rowData: unknown) => handleDeleteAutor((rowData as IAutor)._id),
                     }
                 ]}
+                detailPanel={[
+                    {
+                        tooltip: 'Detaily',
+                        render: (rowData: any) => {return (
+                            <>
+                                <pre>{JSON.stringify(rowData, undefined, 3)}</pre>
+                            </>
+                        )}
+                    },
+                ]}
                 />
             <Toast/>
         </main>

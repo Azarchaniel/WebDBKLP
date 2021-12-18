@@ -6,9 +6,10 @@ type PropsMT = {
     data: any[],
     columns: Column<any>[],
     actions: any[],
+    detailPanel?: any,
 }
 
-const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions}: PropsMT) => {
+const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions, detailPanel}: PropsMT) => {
     const [showFilter, setShowFilter] = useState(false);
 
     return (
@@ -19,7 +20,9 @@ const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions}:
             options={{
                 filtering: showFilter,
                 actionsColumnIndex: -1,
-                pageSize: 20,
+                detailPanelColumnAlignment: "right",
+                pageSize: 50,
+                pageSizeOptions: [20, 50, 100],
                 paginationType: "stepped",
                 draggable: false,
                 rowStyle: {borderBottom: '2px solid lightgray'}
@@ -50,6 +53,7 @@ const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions}:
                     searchPlaceholder: 'Hľadať'
                 }
             }}
+            detailPanel={detailPanel}
         />)
 }
 

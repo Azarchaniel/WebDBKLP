@@ -1,7 +1,6 @@
 import {Response, Request} from 'express';
 import {IBook} from '../types';
 import Book from '../models/book';
-import {loadavg} from "os";
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {

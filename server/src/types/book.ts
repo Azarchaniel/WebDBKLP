@@ -1,7 +1,7 @@
 import { Document } from 'mongoose'
 import {TPublished} from "./published";
-import {TLocation} from "./location";
-import {TDimension} from "./dimension";
+import {ILocation} from "./location";
+import {IDimension} from "./dimension";
 import {TEditionSerie} from "./editionSerie";
 
 export interface IBook extends Document {
@@ -18,11 +18,12 @@ export interface IBook extends Document {
     published?: TPublished;
     language: string[];
     note?: string;
-    dimensions?: TDimension;
+    dimensions?: IDimension;
     numberOfPages?: number;
     exLibris: boolean;
-    location: TLocation;
+    location: ILocation;
     owner: string;
     isDeleted: boolean;
     readBy: string[];
+    picture?: string;
 }

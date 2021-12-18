@@ -1,4 +1,4 @@
-export type TLocation = {
+export interface ILocation {
     city: string;
     shelf?: string;
 }

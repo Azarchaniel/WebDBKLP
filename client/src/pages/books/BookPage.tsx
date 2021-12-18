@@ -9,6 +9,7 @@ import Toast from "../../components/Toast";
 import {Link} from "react-router-dom";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import {shortenStringKeepWord} from "../../utils/utils";
+import BookDetail from "./BookDetail";
 
 interface IBookHidden {
     control: boolean,
@@ -50,6 +51,7 @@ export default function BookPage() {
                 }));
             }
         }
+
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
@@ -320,6 +322,54 @@ export default function BookPage() {
                         }
                     },
                     {
+                        title: 'Výška',
+                        field: 'dimensions.height',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        render: (rowData: IBook) => {
+                            if (!rowData.dimensions?.height) return '';
+                            return rowData.dimensions?.height + 'cm';
+                        },
+                        hidden: hidden.dimensions
+                    },
+                    {
+                        title: 'Šírka',
+                        field: 'dimensions.width',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        render: (rowData: IBook) => {
+                            if (!rowData.dimensions?.width) return '';
+                            return rowData.dimensions?.width + 'cm'
+                        },
+                        hidden: hidden.dimensions
+                    },
+                    {
+                        title: 'Hrúbka',
+                        field: 'dimensions.depth',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        render: (rowData: IBook) => {
+                            if (!rowData.dimensions?.depth) return '';
+                            return  rowData.dimensions?.depth + 'cm'
+                        },
+                        hidden: hidden.dimensions
+                    },
+                    {
+                        title: 'Hmotnosť',
+                        field: 'dimensions.weight',
+                        headerStyle: {
+                            backgroundColor: '#bea24b'
+                        },
+                        render: (rowData: IBook) => {
+                            if (!rowData.dimensions?.weight) return '';
+                            return rowData.dimensions?.weight + 'g';
+                        },
+                        hidden: hidden.dimensions
+                    },
+                    {
                         title: 'Pridané',
                         field: 'createdAt',
                         type: 'date',
@@ -349,6 +399,16 @@ export default function BookPage() {
                         tooltip: 'Vymazať',
                         onClick: (_: any, rowData: unknown) => handleDeleteBook((rowData as IBook)._id),
                     }
+                ]}
+                detailPanel={[
+                    {
+                        tooltip: 'Detaily',
+                        render: (rowData: any) => {return (
+                            <>
+                                <BookDetail data={rowData} />
+                            </>
+                        )}
+                    },
                 ]}
             />
             <Toast/>

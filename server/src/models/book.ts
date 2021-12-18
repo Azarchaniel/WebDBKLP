@@ -24,7 +24,8 @@ const bookSchema: Schema = new Schema({
     location: {type: locationSchema, required: false},
     isDeleted: {type: Boolean, default: false},
     owner: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: true},
-    readBy: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false}
+    readBy: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false},
+    picture: {type: String, required: false}
 }, {timestamps: true})
 
 export default model<IBook>('Book', bookSchema);

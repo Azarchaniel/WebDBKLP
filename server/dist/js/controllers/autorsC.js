@@ -45,7 +45,8 @@ const addAutor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             dateOfBirth: dateOfBirth,
             dateOfDeath: dateOfDeath,
             note: note,
-            nationality: nationality !== null && nationality !== void 0 ? nationality : ''
+            nationality: nationality !== null && nationality !== void 0 ? nationality : '',
+            isDeleted: false
         });
         const newAutor = yield autor.save();
         const allAutors = yield autor_1.default.find();

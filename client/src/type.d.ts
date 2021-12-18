@@ -1,6 +1,3 @@
-import {TEditionSerie} from "../../server/src/types";
-import {TPublished} from "../../server/src/types/published";
-
 interface IBaseType {
     _id: string;
     isDeleted?: boolean;
@@ -16,10 +13,12 @@ export interface IBook extends IBaseType {
     language: string[];
     numberOfPages: number;
     note: string;
-    published: Published;
+    published: IPublished;
     exLibris: boolean;
     owner: IUser[];
     readBy: IUser[];
+    picture: string;
+    dimensions: IDimension;
 }
 
 export interface ILP extends IBaseType {
@@ -94,13 +93,20 @@ type AutorProps = {
     autor: IAutor
 }
 
-export type Published = {
+interface IPublished {
     publisher?: string;
     year?: number;
     country?: string;
 }
 
-export type ILangCode = {
+interface IDimension {
+    height: number;
+    width: number;
+    depth: number;
+    weight?: number;
+}
+
+export interface ILangCode {
     key: string;
     value: string;
 }

@@ -259,3 +259,12 @@ body, html, main, #root {
 .hidden {
   visibility: hidden !important;
 }
+
+//for material Table, Action column
+th.MuiTableCell-root:last-child,th.MuiTableCell-root:nth-last-child(2) {
+  background-color: #bea24b !important;
+}
+
+.BookDetail {
+  padding: 1rem;
+}

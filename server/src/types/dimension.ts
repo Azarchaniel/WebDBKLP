@@ -1,4 +1,4 @@
-export type TDimension = {
+export interface IDimension {
     height: number;
     width: number;
     depth: number;

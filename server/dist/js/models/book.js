@@ -43,6 +43,7 @@ const bookSchema = new mongoose_1.Schema({
     location: { type: location_1.locationSchema, required: false },
     isDeleted: { type: Boolean, default: false },
     owner: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: true },
-    readBy: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false }
+    readBy: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false },
+    picture: { type: String, required: false }
 }, { timestamps: true });
 exports.default = (0, mongoose_1.model)('Book', bookSchema);
