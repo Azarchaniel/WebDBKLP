@@ -1,6 +1,9 @@
 import React, {useEffect, useState} from "react";
 import {IBook, IQuote} from "../../type";
 import {getBook} from "../../API";
+import {Tooltip} from "@material-ui/core";
+import {getRandomColor} from "../../utils/utils";
+import {isNumber} from "util";
 
 type Props = { quote: IQuote } & {
     updateQuote: (quote: IQuote) => void
@@ -16,25 +19,31 @@ const Quote: React.FC<Props> = ({quote, deleteQuote, updateQuote}) => {
         }).catch(err => {throw new Error('Cant find book in QuoteItem' + err)});
     }, [quote])
 
+    //todo: small etc. are just numbers. So try to divide or something, make bigger granularity
+    const cssGrid = () => {
+        if (quote.text.length < 300) {
+            return 'Quote smallQ';
+        } else if (quote.text.length < 500) {
+            return 'Quote mediumQ';
+        } else {
+            return 'Quote largeQ';
+        }
+    }
+
     return (
-        <div className='Quote'>
+        <div className={cssGrid()} style={{backgroundColor: getRandomColor()}}>
             <div className='text'>
-                <h1>Text: {quote.text}</h1>
-                <p>Z knihy: {bookTitle?.title}</p>
+                <p>Text: {quote.text}</p>
+                <p>Z knihy: {bookTitle?.title}{isNumber(quote.pageNo) ? ', ' + quote.pageNo : ''}</p>
             </div>
             <div className='Card--button'>
-                <button
-                    onClick={() => updateQuote(quote)}
-                    className='Card--button__done'
-                >
-                    Editovat
-                </button>
-                <button
-                    onClick={() => deleteQuote(quote._id)}
-                    className='Card--button__delete'
-                >
-                    Zmazat
-                </button>
+                <Tooltip title="Upraviť" placement="bottom">
+                    <i className="fas fa-pen" onClick={() => updateQuote(quote)}/>
+                </Tooltip>
+                &nbsp;&nbsp;&nbsp;
+                <Tooltip title="Vymazať" placement="bottom">
+                    <i className="fas fa-trash" onClick={() => deleteQuote(quote._id)}/>
+                </Tooltip>
             </div>
         </div>
     )

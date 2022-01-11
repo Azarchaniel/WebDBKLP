@@ -31,7 +31,7 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                 //constructing fullName for autocomplete
                 setAutors(aut.data.autors.map((aut: IAutor) => ({
                     ...aut,
-                    fullName: `${aut.lastName}, ${aut.firstName}`
+                    fullName: `${aut.lastName ?? ''} ${aut.firstName ? ', ' + aut.firstName : ''}`
                 })).sort((a: Partial<IAutor>, b: Partial<IAutor>) => a.fullName!.localeCompare(b.fullName!)));
             })
             .catch(err => {
@@ -276,7 +276,7 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                             />
                                         </div>
                                         <div className="col">
-                                            <input onChange={handleForm} type='number' id='location.shelf'
+                                            <input onChange={handleForm} type='text' id='location.shelf'
                                                    placeholder='Polica'
                                                    className="form-control"
                                                    autoComplete="off"

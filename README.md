@@ -23,13 +23,22 @@ cd ./client; npm run
 - -[X] implement table library (https://material-table.com/#/)
 - [X] clean form after saving item
 - [X] create all models and interfaces
+- [X] there is problem with fetchAll in Quotes when deleting
+- [ ] UPDATE
+- [ ] fork material-table
+- -[ ] custom pagination - numberOfPagesAroundCurrent
+- -[ ] range in filtering dates, numbers...
+- - [X] allow row to be clickable and add details to it (first pic, later comments)
+- [ ] in BookDetail, when clicking on Edice/Serie, filter every book from Edice/Serie
+- -[ ] but this requires to have Edice/Serie as entry in DB with ID
+- -[ ] which require CRUD form Edice/Serie
+- -[X] a href to DatabazeKnih and GoodReads
 - [ ] fix router not fetching data when changing Owner
 - [ ] rework Autocomplete - custom
-- [ ] custom modal
+- [ ] custom modal - grid system
 - [ ] webscrapper and autofilling
-- [ ] some reports, numbers, graphs on Main page
-- [ ] allow row to be clickable and add details to it (first pic, later comments)
+- [ ] some reports, numbers, graph on Main page
 - [ ] (in far future) localization
 - [ ] (in far future) authorization/authentication
 - - [ ] add comments
-- - [ ] allow to add comments that is visible only for creator
+- - [ ] allow adding comments that is visible only for creator

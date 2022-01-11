@@ -62,8 +62,8 @@ const updateQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const allQuotes = yield quote_1.default.find();
         res.status(200).json({
             message: 'Quote updated',
-            Autor: updateQuote,
-            Autors: allQuotes,
+            quote: updateQuote,
+            quotes: allQuotes,
         });
     }
     catch (error) {
@@ -78,8 +78,8 @@ const deleteQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const allQuote = yield quote_1.default.find();
         res.status(200).json({
             message: 'Quote deleted',
-            autor: deletedQuote,
-            autors: allQuote,
+            quote: deletedQuote,
+            quotes: allQuote,
         });
     }
     catch (error) {

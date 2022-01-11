@@ -1,4 +1,4 @@
-import {IAutor, IBook, IUser} from "../../type";
+import {IBook, IUser} from "../../type";
 import React, {useEffect, useRef, useState} from "react";
 import {addBook, deleteBook, getBook, getBooks, updateBook} from "../../API";
 import {toast} from "react-toastify";
@@ -8,7 +8,7 @@ import Sidebar from "../../components/Sidebar";
 import Toast from "../../components/Toast";
 import {Link} from "react-router-dom";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
-import {shortenStringKeepWord} from "../../utils/utils";
+import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import BookDetail from "./BookDetail";
 
 interface IBookHidden {
@@ -23,7 +23,6 @@ interface IBookHidden {
 }
 
 export default function BookPage() {
-    const [books, setBooks] = useState<IBook[]>([]);
     const [clonedBooks, setClonedBooks] = useState<any[]>();
     const [hidden, setHidden] = useState<IBookHidden>({
         control: true,
@@ -39,7 +38,7 @@ export default function BookPage() {
 
     useEffect(() => {
         fetchBooks();
-    }, [window.location.href, books])
+    }, [])
 
     useEffect(() => {
         function handleClickOutside(event: Event) {
@@ -79,28 +78,7 @@ export default function BookPage() {
 
                 books = books.filter((bk: IBook) => bk.isDeleted !== true);
 
-                //use this method for deep clone
-                const deepClone = JSON.parse(JSON.stringify(books));
-                //create string of autors; if one autor, just add him; if more, add '; ' at the beginning of every next
-                deepClone.forEach((book: any) => {
-                    book['autorsFull'] = '';
-                    book.autor.forEach((autor: IAutor, index: number) =>
-                        index > 0 ? book['autorsFull'] += `; ${autor.lastName}, ${autor.firstName}`
-                            : book['autorsFull'] = `${autor.lastName}, ${autor.firstName}`)
-                    book['editorsFull'] = '';
-                    book.editor.forEach((editor: IAutor, index: number) =>
-                        index > 0 ? book['editorsFull'] += `; ${editor.lastName}, ${editor.firstName}`
-                            : book['editorsFull'] = `${editor.lastName}, ${editor.firstName}`)
-                    book['illustratorsFull'] = '';
-                    book.ilustrator.forEach((ilustrator: IAutor, index: number) =>
-                        index > 0 ? book['ilustratorsFull'] += `; ${ilustrator.lastName}, ${ilustrator.firstName}`
-                            : book['ilustratorsFull'] = `${ilustrator.lastName}, ${ilustrator.firstName}`)
-                    book['translatorsFull'] = '';
-                    book.translator.forEach((translator: IAutor, index: number) =>
-                        index > 0 ? book['translatorsFull'] += `; ${translator.lastName}, ${translator.firstName}`
-                            : book['translatorsFull'] = `${translator.lastName}, ${translator.firstName}`)
-                });
-                setClonedBooks(deepClone);
+                setClonedBooks(stringifyAutors(books));
             })
             .catch((err: Error) => console.trace(err))
     }
@@ -114,18 +92,18 @@ export default function BookPage() {
                     throw new Error('Chyba! Kniha nebola pridaná!');
                 }
                 toast.success(`Kniha ${data.book?.title} bola úspešne pridaná.`);
-                setBooks(data.books)
+                //setBooks(data.books)
             })
             .catch((err) => console.trace(err))
     }
 
     const handleUpdateBook = (book: IBook): void => {
         updateBook(book)
-            .then(({status, data}) => {
+            .then(({status/*, data*/}) => {
                 if (status !== 200) {
                     throw new Error('Error! Book not updated')
                 }
-                setBooks(data.books)
+                //setBooks(data.books)
             })
             .catch((err) => console.trace(err))
     }
@@ -150,7 +128,7 @@ export default function BookPage() {
                                             throw new Error('Error! Book not deleted')
                                         }
                                         toast.success(`Kniha ${data.book?.title} bola uspesne vymazana.`);
-                                        setBooks(data.books)
+                                        //setBooks(data.books)
                                     })
                                     .catch((err) => {
                                         toast.error('Chyba! Knihu nemožno vymazať!');

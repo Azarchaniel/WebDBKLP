@@ -3,7 +3,6 @@
 * {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 body, html, main, #root {
@@ -35,29 +34,6 @@ body, html, main, #root {
   border-bottom: 1px solid #333333;
 }
 
-.Card--text h1 {
-  color: #bea24b;
-  font-weight: bold;
-}
-
-.Card--button button {
-  background: #f5f6f7;
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
-  cursor: pointer;
-}
-
-.Card--button__delete {
-  border: 1px solid #ca0000;
-  color: #ca0000;
-}
-
-.Card--button__done {
-  border: 1px solid #00aa69;
-  color: #00aa69;
-  margin-right: 1rem;
-}
-
 .checkBox {
   width: 1rem;
   height: 1rem;
@@ -77,13 +53,31 @@ body, html, main, #root {
   }
 }
 
+.quote_container {
+  padding: 10px;
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
+  grid-auto-rows: minmax(90px, 350px);
+}
+
 .Quote {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: aqua;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #333333;
+  padding: 10px;
+  color: black;
+  border-radius: 10px;
+  font-size: 110%;
+}
+
+.smallQ {
+  grid-row-end: span 1;
+}
+
+.mediumQ {
+  grid-row-end: span 2;
+}
+
+.largeQ {
+  grid-row-end: span 3;
 }
 
 .LP {
@@ -267,4 +261,20 @@ th.MuiTableCell-root:last-child,th.MuiTableCell-root:nth-last-child(2) {
 
 .BookDetail {
   padding: 1rem;
+}
+
+.detailDimensions {
+  margin-left: 2rem;
+}
+
+.trueMark::after {
+  content: "\2713"
+}
+
+.falseMark::after {
+  content: "\2716"
+}
+
+.detailHrefs {
+  text-align: left;
 }

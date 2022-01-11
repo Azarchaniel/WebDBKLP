@@ -1,10 +1,10 @@
-import {ApiBookDataType, IBook, IQuote} from "../../type";
+import {ApiBookDataType, IBook, IQuote, IUser} from "../../type";
 import React, {useEffect, useRef, useState} from "react";
 import {toast} from "react-toastify";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {Multiselect} from "multiselect-react-dropdown";
-import {getBooks} from "../../API";
+import {getBooks, getUsers} from "../../API";
 import SearchAutocomplete from '../../components/SearchAutocomplete';
 
 type Props = {
@@ -15,6 +15,8 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
     const [formData, setFormData] = useState<IQuote | {}>();
     const [books, setBooks] = useState<IBook[]>();
     const [error, setError] = useState<string | undefined>(undefined);
+    const [users, setUsers] = useState<IUser[] | undefined>();
+    const ownerRef = useRef(null);
     const bookRef = useRef(null);
 
     useEffect(() => {
@@ -35,6 +37,12 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
                 toast.error('Nepodarilo sa nacitat knihy!');
                 console.error('Couldnt fetch books', err)
             });
+        getUsers().then(user => {
+            setUsers(user.data.users.map((user: IUser) => ({
+                ...user,
+                fullName: `${user.lastName}, ${user.firstName}`
+            })).sort((a: any, b: any) => a.fullName!.localeCompare(b.fullName!)));
+        }).catch();
     }, [formData])
 
     useEffect(() => {
@@ -74,6 +82,8 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
         setFormData({});
         //@ts-ignore
         bookRef?.current?.resetSelectedValues();
+        //@ts-ignore
+        ownerRef?.current?.resetSelectedValues();
     }
 
     const showAddQuote = () => {
@@ -106,31 +116,61 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
                                 </div>
                                 <div style={{height: '5px', width: '100%'}}/>
                                 <div className="row">
-                                    <Multiselect
-                                        options={books}
-                                        isObject={true}
-                                        displayValue="showName"
-                                        closeOnSelect={true}
-                                        placeholder="Z knihy"
-                                        closeIcon="cancel"
-                                        emptyRecordMsg="Žiadne knihy nenájdené"
-                                        selectionLimit={1}
-                                        onSelect={(pickedBook: IBook[]) => {
-                                            setFormData({
-                                                ...formData, fromBook: pickedBook
-                                                    .map(v => v._id)
-                                            })
-                                        }}
-                                        style={{
-                                            inputField: {marginLeft: "0.5rem"},
-                                            optionContainer: {
-                                                backgroundColor: "transparent",
-                                            },
-                                            option: {},
-                                            multiselectContainer: {maxWidth: '100%'},
-                                        }}
-                                        ref={bookRef}
-                                    />
+                                    <div className="col">
+                                        <Multiselect
+                                            options={books}
+                                            isObject={true}
+                                            displayValue="showName"
+                                            closeOnSelect={true}
+                                            placeholder="Z knihy"
+                                            closeIcon="cancel"
+                                            emptyRecordMsg="Žiadne knihy nenájdené"
+                                            selectionLimit={1}
+                                            onSelect={(pickedBook: IBook[]) => {
+                                                setFormData({
+                                                    ...formData, fromBook: pickedBook
+                                                        .map(v => v._id)
+                                                })
+                                            }}
+                                            style={{
+                                                inputField: {marginLeft: "0.5rem"},
+                                                optionContainer: {
+                                                    backgroundColor: "transparent",
+                                                },
+                                                option: {},
+                                                multiselectContainer: {maxWidth: '100%'},
+                                            }}
+                                            ref={bookRef}
+                                        />
+                                    </div>
+                                    <div className="col">
+                                        <input type="number" id="pageNo" onChange={handleForm} placeholder="Strana"
+                                               className="form-control" autoComplete="off"/>
+                                    </div>
+                                </div>
+                                <div style={{height: '5px', width: '100%'}}/>
+                                <div className="row">
+                                    <div className="col">
+                                        <Multiselect
+                                            options={users}
+                                            displayValue="fullName"
+                                            placeholder="Vlastník"
+                                            closeIcon="cancel"
+                                            onSelect={(picked: IUser[]) => {
+                                                setFormData({...formData, owner: picked.map(v => v._id)})
+                                            }}
+                                            style={{
+                                                inputField: {marginLeft: "0.5rem"},
+                                                searchBox: {
+                                                    width: "100%",
+                                                    paddingRight: '5px',
+                                                    marginRight: '-5px',
+                                                    borderRadius: '3px'
+                                                }
+                                            }}
+                                            ref={ownerRef}
+                                        />
+                                    </div>
                                 </div>
                                 <div style={{height: '5px', width: '100%'}}/>
                                 <div className="row">
@@ -141,6 +181,7 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
 
                                     </div>
                                 </div>
+                                <div style={{height: '5px', width: '100%'}}/>
                                 <div className="row">
                                     {/*<SearchAutocomplete*/}
                                     {/*    data={getBooks()}*/}

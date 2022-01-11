@@ -55,8 +55,8 @@ const updateQuote = async (req: Request, res: Response): Promise<void> => {
         const allQuotes: IQuote[] = await Quote.find()
         res.status(200).json({
             message: 'Quote updated',
-            Autor: updateQuote,
-            Autors: allQuotes,
+            quote: updateQuote,
+            quotes: allQuotes,
         })
     } catch (error) {
         throw error
@@ -79,8 +79,8 @@ const deleteQuote = async (req: Request, res: Response): Promise<void> => {
         const allQuote: IQuote[] = await Quote.find()
         res.status(200).json({
             message: 'Quote deleted',
-            autor: deletedQuote,
-            autors: allQuote,
+            quote: deletedQuote,
+            quotes: allQuote,
         })
     } catch (error) {
         throw error

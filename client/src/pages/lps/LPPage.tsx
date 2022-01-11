@@ -7,11 +7,12 @@ import React, {useEffect, useRef, useState} from "react";
 import {addLP, deleteLP, getLPs} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
-import {shortenStringKeepWord} from "../../utils/utils";
+import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 
 export default function LPPage() {
     const [lps, setLPs] = useState<ILP[]>([]);
+    const [clonedLps, setClonedLps] = useState<ILP[]>([]);
     const [hidden, setHidden] = useState({
         control: true,
         subtitle: true,
@@ -43,7 +44,9 @@ export default function LPPage() {
     const fetchLPs = (): void => {
         getLPs()
             .then(({ data: { lps } }: ILP[] | any) => {
-                setLPs(lps);
+                lps = lps.filter((lp: ILP) => lp.isDeleted !== true);
+
+                setClonedLps(stringifyAutors(lps));
             })
             .catch((err: Error) => console.trace(err))
     }
@@ -191,7 +194,7 @@ export default function LPPage() {
                         }
                     }
                 ]}
-                data={lps}
+                data={clonedLps}
                 actions={[
                     {
                         icon: 'visibility',

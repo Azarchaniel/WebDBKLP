@@ -1,4 +1,4 @@
-export type TEditionSerie = {
-    no?: number,
-    title: string
+export interface IEditionSerie {
+    no?: number;
+    title: string;
 }

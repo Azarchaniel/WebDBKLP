@@ -110,6 +110,9 @@ export default function AutorPage() {
                         customSort: (a: IAutor, b: IAutor) => a.lastName.localeCompare(b.lastName),
                         headerStyle: {
                             backgroundColor: '#bea24b'
+                        },
+                        render: (rowData: IAutor) => {
+                            if (rowData.lastName) return <b>{rowData.lastName}</b>
                         }
                     },
                     {

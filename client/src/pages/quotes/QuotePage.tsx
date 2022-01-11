@@ -30,13 +30,13 @@ export default function QuotePage() {
         addQuote(formData)
             .then(({status, data}) => {
                 if (status !== 201) {
-                    throw new Error('Citat sa nepodarilo pridať!')
+                    throw new Error('Citát sa nepodarilo pridať!')
                 }
-                toast.success(`Citat bol úspešne pridaný.`);
+                toast.success(`Citát bol úspešne pridaný.`);
                 setQuotes(data.quotes);
             })
             .catch((err) => {
-                toast.error(`Citat sa nepodarilo pridať!`);
+                toast.error(`Citát sa nepodarilo pridať!`);
                 console.trace(err);
             })
     }
@@ -45,8 +45,8 @@ export default function QuotePage() {
 
     const handleDeleteQuote = (_id: string): void => {
         confirmAlert({
-            title: 'Vymazat citat?',
-            message: `Naozaj chceš vymazať citat?`,
+            title: 'Vymazať citát?',
+            message: `Naozaj chceš vymazať citát?`,
             buttons: [
                 {
                     label: 'Ano',
@@ -56,7 +56,7 @@ export default function QuotePage() {
                                 if (status !== 200) {
                                     throw new Error('Error! Quote not deleted')
                                 }
-                                toast.success(`Citat bol úspešne vymazaný.`);
+                                toast.success(`Citát bol úspešne vymazaný.`);
                                 setQuotes(data.quotes)
                             })
                             .catch((err) => {
@@ -79,16 +79,17 @@ export default function QuotePage() {
             <h1><Link className='customLink' to='/'>WebDBKLP</Link></h1>
 
             <AddQuote saveQuote={handleSaveQuote} />
-
-            {quotes?.map((quote: IQuote) => {
-                if (quote.isDeleted) return null;
-                return <QuoteItem
-                    key={quote._id}
-                    updateQuote={handleUpdateQuote}
-                    deleteQuote={handleDeleteQuote}
-                    quote={quote}
-                />
-            })}
+            <div className="quote_container">
+                {quotes?.map((quote: IQuote) => {
+                    if (quote.isDeleted) return null;
+                    return <QuoteItem
+                        key={quote._id}
+                        updateQuote={handleUpdateQuote}
+                        deleteQuote={handleDeleteQuote}
+                        quote={quote}
+                    />
+                })}
+            </div>
             <Toast />
         </main>
     )

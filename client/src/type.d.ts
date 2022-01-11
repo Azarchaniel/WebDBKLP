@@ -1,3 +1,5 @@
+import {IEditionSerie} from "../../server/src/types";
+
 interface IBaseType {
     _id: string;
     isDeleted?: boolean;
@@ -7,6 +9,9 @@ interface IBaseType {
 
 export interface IBook extends IBaseType {
     autor: IAutor[];
+    editor?: string[];
+    ilustrator?: string[];
+    translator?: string[];
     title: string;
     subtitle?: string;
     ISBN?: string;
@@ -14,23 +19,31 @@ export interface IBook extends IBaseType {
     numberOfPages: number;
     note: string;
     published: IPublished;
+    location: ILocation;
     exLibris: boolean;
     owner: IUser[];
     readBy: IUser[];
     picture: string;
-    dimensions: IDimension;
+    dimensions?: IDimension;
+    hrefGoodReads?: string;
+    hrefDatabazeKnih?: string;
 }
 
 export interface ILP extends IBaseType {
     autor?: IAutor[];
     title: string;
     subtitle?: string;
-    edition?: TEditionSerie;
+    edition?: IEditionSerie;
     countLp: number;
     speed: number;
     published: TPublished;
     language: string;
     note: string;
+}
+
+interface ILocation {
+    city: string;
+    shelf?: string;
 }
 
 export interface IAutor extends IBaseType {
@@ -52,6 +65,7 @@ export interface IUser extends IBaseType {
 export interface IQuote extends IBaseType {
     text: string; //text or URL to pic
     fromBook: string; //id
+    pageNo?: number;
     note?: string;
 }
 
@@ -99,7 +113,7 @@ interface IPublished {
     country?: string;
 }
 
-interface IDimension {
+export interface IDimension {
     height: number;
     width: number;
     depth: number;
@@ -116,4 +130,9 @@ export interface ISideMenuItems {
     icon?: string;
     route: string;
     children?: ISideMenuItems[];
+}
+
+interface IEditionSerie {
+    no?: number;
+    title: string;
 }

@@ -1,12 +1,12 @@
 import { Document } from 'mongoose'
-import {TEditionSerie} from "./editionSerie";
+import {IEditionSerie} from "./editionSerie";
 import {TPublished} from "./published";
 
 export interface ILp extends Document {
     autor?: string[];
     title: string;
     subtitle?: string;
-    edition?: TEditionSerie;
+    edition?: IEditionSerie;
     countLp: number;
     speed: number;
     published: TPublished;

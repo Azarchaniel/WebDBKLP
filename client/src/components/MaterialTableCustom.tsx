@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 import MaterialTable, {Column} from "material-table";
+import LoadingBooks from "./LoadingBooks";
 
 type PropsMT = {
     title: string,
@@ -17,6 +18,7 @@ const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions, 
             title={title}
             columns={columns}
             data={data}
+            isLoading={Boolean(!data.length)}
             options={{
                 filtering: showFilter,
                 actionsColumnIndex: -1,
@@ -25,7 +27,8 @@ const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions, 
                 pageSizeOptions: [20, 50, 100],
                 paginationType: "stepped",
                 draggable: false,
-                rowStyle: {borderBottom: '2px solid lightgray'}
+                rowStyle: {borderBottom: '2px solid lightgray'},
+                emptyRowsWhenPaging: false,
             }}
             actions={[
                 {
@@ -54,6 +57,11 @@ const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions, 
                 }
             }}
             detailPanel={detailPanel}
+            components={{
+                OverlayLoading: () => {
+                    return <LoadingBooks />
+                }
+            }}
         />)
 }
 

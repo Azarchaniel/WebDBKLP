@@ -2,7 +2,7 @@ import { Document } from 'mongoose'
 import {TPublished} from "./published";
 import {ILocation} from "./location";
 import {IDimension} from "./dimension";
-import {TEditionSerie} from "./editionSerie";
+import {IEditionSerie} from "./editionSerie";
 
 export interface IBook extends Document {
     autor?: string[]; //IDs
@@ -12,8 +12,8 @@ export interface IBook extends Document {
     title: string;
     subtitle?: string;
     content?: string[];
-    edition?: TEditionSerie;
-    serie?: TEditionSerie;
+    edition?: IEditionSerie;
+    serie?: IEditionSerie;
     ISBN?: string;
     published?: TPublished;
     language: string[];
@@ -26,4 +26,6 @@ export interface IBook extends Document {
     isDeleted: boolean;
     readBy: string[];
     picture?: string;
+    hrefGoodReads?: string;
+    hrefDatabazeKnih?: string;
 }
