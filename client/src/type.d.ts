@@ -14,6 +14,9 @@ export interface IBook extends IBaseType {
     translator?: string[];
     title: string;
     subtitle?: string;
+    content?: string[];
+    edition?: IEditionSerie;
+    serie?: IEditionSerie;
     ISBN?: string;
     language: string[];
     numberOfPages: number;

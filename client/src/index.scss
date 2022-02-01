@@ -40,7 +40,7 @@ body, html, main, #root {
   margin-right: .5rem;
 }
 
-.Autor {
+.AutorTable {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -57,7 +57,7 @@ body, html, main, #root {
   padding: 10px;
   display: grid;
   grid-gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(300px,1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   grid-auto-rows: minmax(90px, 350px);
 }
 
@@ -101,6 +101,7 @@ body, html, main, #root {
 }
 
 .modal-content {
+  width: 170% !important;
   margin: 0 auto;
 }
 
@@ -160,8 +161,9 @@ body, html, main, #root {
     cursor: pointer;
     border: 1px solid transparent;
   }
+
   .SB-chevron:hover {
-    border: 1px solid rgba(255,255,255,0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 15%;
     padding: .5rem;
   }
@@ -211,6 +213,7 @@ body, html, main, #root {
 .customLink {
   text-decoration: none;
   color: white;
+
   &:hover {
     color: #bea24b !important;
     text-decoration: none !important;
@@ -226,6 +229,7 @@ body, html, main, #root {
 .autocomplete-result {
   list-style: none;
   margin-left: -1.9rem;
+
   span {
     margin-right: 1rem;
   }
@@ -255,7 +259,7 @@ body, html, main, #root {
 }
 
 //for material Table, Action column
-th.MuiTableCell-root:last-child,th.MuiTableCell-root:nth-last-child(2) {
+th.MuiTableCell-root:last-child, th.MuiTableCell-root:nth-last-child(2) {
   background-color: #bea24b !important;
 }
 
@@ -277,4 +281,126 @@ th.MuiTableCell-root:last-child,th.MuiTableCell-root:nth-last-child(2) {
 
 .detailHrefs {
   text-align: left;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 10px 10px !important;
+  grid-auto-flow: row;
+}
+
+.Nazov {
+  grid-area: 1 / 1 / 2 / 3;
+}
+
+.Podnazov {
+  grid-area: 1 / 3 / 2 / 4;
+}
+
+.Autor {
+  grid-area: 2 / 1 / 3 / 4;
+}
+
+.Translator {
+  grid-area: 3 / 1 / 4 / 1;
+}
+
+.Editor {
+  grid-area: 3 / 2 / 4 / 2;
+}
+
+.Ilustrator {
+  grid-area: 3 / 3 / 4 / 4;
+}
+
+.Edice {
+  grid-area: 4 / 1 / 6 / 2;
+}
+
+.Name {
+  grid-area: 4 / 1 / 5 / 2;
+}
+
+.No {
+  grid-area: 5 / 1 / 6 / 2;
+}
+
+.Serie {
+  grid-area: 4 / 2 / 6 / 3;
+}
+
+.NameS {
+  grid-area: 4 / 2 / 5 / 3;
+}
+
+.NoS {
+  grid-area: 5 / 2 / 6 / 3;
+}
+
+.ISBN {
+  grid-area: 4 / 3 / 5 / 4;
+}
+
+.Page-no {
+  grid-area: 5 / 3 / 6 / 4;
+}
+
+.Vydavatel {
+  grid-area: 6 / 1 / 7 / 2;
+}
+
+.Rok {
+  grid-area: 6 / 2 / 7 / 3;
+}
+
+.Krajina {
+  grid-area: 6 / 3 / 7 / 4;
+}
+
+.Lokace {
+  grid-area: 7 / 1 / 8 / 2;
+}
+
+.Mesto {
+  grid-area: 7 / 1 / 8 / 2;
+}
+
+.language {
+  grid-area: 7 / 3 / 8 / 4;
+}
+
+.Police {
+  grid-area: 7 / 2 / 8 / 3;
+}
+
+.Poznamka {
+  grid-area: 8 / 1 / 9 / 4;
+}
+
+.Precitane {
+  grid-area: 9 / 1 / 10 / 2;
+}
+
+.Vlastnik {
+  grid-area: 9 / 2 / 10 / 3;
+}
+
+.Ex-Libris {
+  display: flex;
+  align-items: center;
+  grid-area: 9 / 3 / 10 / 4;
+}
+
+.pic {
+  grid-area: 10 / 1 / 11 / 2;
+}
+
+.DK {
+  grid-area: 10 / 2 / 11 / 3;
+}
+
+.GR {
+  grid-area: 10 / 3 / 11 / 4;
 }

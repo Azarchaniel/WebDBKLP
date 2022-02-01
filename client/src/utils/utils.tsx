@@ -1,4 +1,4 @@
-import {IAutor, IBook, ILP} from "../type";
+import {IAutor} from "../type";
 
 export const shortenStringKeepWord = (text: string, maxLength: number) => {
     //if the text is longer than 30 chars, shorten it. ELSE return unchanged
@@ -8,13 +8,6 @@ export const shortenStringKeepWord = (text: string, maxLength: number) => {
     } else {
         return text;
     }
-}
-
-export const getRandomColor = () => {
-    const pastelArray = ['#77dd77', '#836953', '#89cff0', '#99c5c4', '#9adedb', '#aa9499', '#aaf0d1', '#b2fba5', '#b39eb5', '#bdb0d0',
-        '#bee7a5', '#befd73', '#c1c6fc', '#c6a4a4', '#c8ffb0', '#cb99c9', '#cef0cc', '#cfcfc4', '#d6fffe', '#d8a1c4', '#dea5a4', '#deece1',
-        '#dfd8e1', '#e5d9d3', '#e9d1bf', '#f49ac2', '#f4bfff', '#fdfd96', '#ff6961', '#ff964f', '#ff9899', '#ffb7ce', '#ca9bf7'];
-    return pastelArray[Math.floor(Math.random() * pastelArray.length)];
 }
 
 export const stringifyAutors = (data: any) => {
@@ -48,4 +41,24 @@ export const stringifyAutors = (data: any) => {
     });
 
     return dataM;
+}
+
+export const darkenLightenColor = (color: string, percent: number) => {
+    let R = parseInt(color.substring(1,3),16);
+    let G = parseInt(color.substring(3,5),16);
+    let B = parseInt(color.substring(5,7),16);
+
+    R = R * (100 + percent) / 100;
+    G = G * (100 + percent) / 100;
+    B = B * (100 + percent) / 100;
+
+    R = (R<255)?R:255;
+    G = (G<255)?G:255;
+    B = (B<255)?B:255;
+
+    let RR = ((R.toString(16).length===1)?"0"+R.toString(16):R.toString(16));
+    let GG = ((G.toString(16).length===1)?"0"+G.toString(16):G.toString(16));
+    let BB = ((B.toString(16).length===1)?"0"+B.toString(16):B.toString(16));
+
+    return "#"+RR+GG+BB;
 }

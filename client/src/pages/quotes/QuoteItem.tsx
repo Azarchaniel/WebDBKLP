@@ -2,15 +2,14 @@ import React, {useEffect, useState} from "react";
 import {IBook, IQuote} from "../../type";
 import {getBook} from "../../API";
 import {Tooltip} from "@material-ui/core";
-import {getRandomColor} from "../../utils/utils";
 import {isNumber} from "util";
 
-type Props = { quote: IQuote } & {
+type Props = { quote: IQuote, bcgrClr: string } & {
     updateQuote: (quote: IQuote) => void
     deleteQuote: (_id: string) => void
 }
 
-const Quote: React.FC<Props> = ({quote, deleteQuote, updateQuote}) => {
+const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, updateQuote}) => {
     const [bookTitle, setBookTitle] = useState<IBook>();
 
     useEffect(() => {
@@ -31,7 +30,7 @@ const Quote: React.FC<Props> = ({quote, deleteQuote, updateQuote}) => {
     }
 
     return (
-        <div className={cssGrid()} style={{backgroundColor: getRandomColor()}}>
+        <div className={cssGrid()} style={{backgroundColor: bcgrClr}}>
             <div className='text'>
                 <p>Text: {quote.text}</p>
                 <p>Z knihy: {bookTitle?.title}{isNumber(quote.pageNo) ? ', ' + quote.pageNo : ''}</p>

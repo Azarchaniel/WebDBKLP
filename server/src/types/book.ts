@@ -28,4 +28,6 @@ export interface IBook extends Document {
     picture?: string;
     hrefGoodReads?: string;
     hrefDatabazeKnih?: string;
+    binding?: string;
 }
+//vazba: vazana, brozovana, sesit, kruzkovana, leporelo

@@ -1,11 +1,10 @@
-import {ApiBookDataType, IBook, IQuote, IUser} from "../../type";
+import {IBook, IQuote, IUser} from "../../type";
 import React, {useEffect, useRef, useState} from "react";
 import {toast} from "react-toastify";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {Multiselect} from "multiselect-react-dropdown";
 import {getBooks, getUsers} from "../../API";
-import SearchAutocomplete from '../../components/SearchAutocomplete';
 
 type Props = {
     saveQuote: (e: React.FormEvent, formData: IQuote | any) => void

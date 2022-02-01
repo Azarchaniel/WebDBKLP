@@ -8,9 +8,14 @@ import React, {useEffect, useState} from "react";
 import {addQuote, deleteQuote, getQuotes} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
+import {darkenLightenColor} from "../../utils/utils";
 
 export default function QuotePage() {
     const [quotes, setQuotes] = useState<IQuote[]>([]);
+
+    let colors = ['#77dd77', '#836953', '#89cff0', '#99c5c4', '#9adedb', '#aa9499', '#aaf0d1', '#b2fba5', '#b39eb5', '#bdb0d0',
+        '#bee7a5', '#befd73', '#c1c6fc', '#c6a4a4', '#c8ffb0', '#cb99c9', '#cef0cc', '#cfcfc4', '#d6fffe', '#d8a1c4', '#dea5a4', '#deece1',
+        '#dfd8e1', '#e5d9d3', '#e9d1bf', '#f49ac2', '#f4bfff', '#fdfd96', '#ff6961', '#ff964f', '#ff9899', '#ffb7ce', '#ca9bf7'];
 
     useEffect(() => {
         fetchQuotes();
@@ -73,6 +78,19 @@ export default function QuotePage() {
         });
     }
 
+    const getRndColor = () => {
+        while (colors.length < quotes.length) {
+            // if there are more quotes than colors, duplicate arr of colors, but randomly change shade of a color by +- 40 perc
+            colors = colors.flatMap((item: string) => [item, darkenLightenColor(item, Math.round(Math.random()) ? 40 : -40)]);
+        }
+        let toChooseFrom = colors.slice(0, quotes.length);
+        const choosenColor = toChooseFrom[Math.floor(Math.random() * toChooseFrom.length)];
+        //when you pick a color, remove it from list
+        colors = colors.filter((item: string) => choosenColor !== item);
+
+        return choosenColor;
+    }
+
     return (
         <main className='App'>
             <Sidebar />
@@ -87,6 +105,7 @@ export default function QuotePage() {
                         updateQuote={handleUpdateQuote}
                         deleteQuote={handleDeleteQuote}
                         quote={quote}
+                        bcgrClr={getRndColor()}
                     />
                 })}
             </div>

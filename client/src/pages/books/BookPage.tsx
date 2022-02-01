@@ -1,6 +1,6 @@
 import {IBook, IUser} from "../../type";
 import React, {useEffect, useRef, useState} from "react";
-import {addBook, deleteBook, getBook, getBooks, updateBook} from "../../API";
+import {addBook, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
 import AddBook from "./AddBook";
@@ -97,15 +97,16 @@ export default function BookPage() {
             .catch((err) => console.trace(err))
     }
 
-    const handleUpdateBook = (book: IBook): void => {
-        updateBook(book)
-            .then(({status/*, data*/}) => {
-                if (status !== 200) {
-                    throw new Error('Error! Book not updated')
-                }
-                //setBooks(data.books)
-            })
-            .catch((err) => console.trace(err))
+    const handleUpdateBook = (/*book: IBook*/): void => {
+        toast.error('Zatial nefunguje');
+        // updateBook(book)
+        //     .then(({status/*, data*/}) => {
+        //         if (status !== 200) {
+        //             throw new Error('Error! Book not updated')
+        //         }
+        //         //setBooks(data.books)
+        //     })
+        //     .catch((err) => console.trace(err))
     }
 
     const handleDeleteBook = (_id: string): void => {
@@ -258,7 +259,9 @@ export default function BookPage() {
                         headerStyle: {
                             backgroundColor: '#bea24b'
                         },
-
+                        render: (rowData: IBook) => {
+                            if (rowData.title) return <b>{rowData.title}</b>
+                        }
                     },
                     {
                         title: 'Podnázov',
@@ -360,6 +363,12 @@ export default function BookPage() {
                 ]}
                 actions={[
                     {
+                        icon: 'add',
+                        tooltip: 'Pridaj knihu',
+                        onClick: () => toast('TODO'),
+                        isFreeAction: true
+                    },
+                    {
                         icon: 'visibility',
                         tooltip: 'Zobraz/Skry stĺpce',
                         onClick: () => {
@@ -370,22 +379,18 @@ export default function BookPage() {
                     {
                         icon: 'create',
                         tooltip: 'Upraviť',
-                        onClick: (_: any, rowData: unknown) => handleUpdateBook(rowData as IBook),
+                        onClick: () => handleUpdateBook(),
                     },
                     {
                         icon: 'delete',
                         tooltip: 'Vymazať',
-                        onClick: (_: any, rowData: unknown) => handleDeleteBook((rowData as IBook)._id),
+                        onClick: (_: any, rowData: IBook) => handleDeleteBook(rowData._id),
                     }
                 ]}
                 detailPanel={[
                     {
                         tooltip: 'Detaily',
-                        render: (rowData: any) => {return (
-                            <>
-                                <BookDetail data={rowData} />
-                            </>
-                        )}
+                        render: (rowData: any) => <BookDetail data={rowData} />
                     },
                 ]}
             />

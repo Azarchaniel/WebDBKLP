@@ -59,29 +59,16 @@ const addBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
         //todo: there has to be a better way for cleaner code
-        const { title, subtitle, ISBN, language, note, numberOfPages, published, autor, owner, exLibris, readBy, location } = req.body;
+        const { published, location } = req.body;
         console.trace(req.body);
-        const book = new book_1.default({
-            autor: autor,
-            title: title,
-            subtitle: subtitle,
-            ISBN: ISBN,
-            language: language,
-            note: note,
-            numberOfPages: numberOfPages,
-            published: {
+        const book = new book_1.default(Object.assign({ published: {
                 publisher: published === null || published === void 0 ? void 0 : published.publisher,
                 year: (_a = published === null || published === void 0 ? void 0 : published.year) !== null && _a !== void 0 ? _a : undefined,
                 country: (_b = published === null || published === void 0 ? void 0 : published.country) !== null && _b !== void 0 ? _b : ''
-            },
-            location: {
+            }, location: {
                 city: location === null || location === void 0 ? void 0 : location.city,
                 shelf: location === null || location === void 0 ? void 0 : location.shelf,
-            },
-            owner: owner,
-            exLibris: exLibris,
-            readBy: readBy
-        });
+            } }, req.body));
         const newBook = yield book.save();
         const allBooks = yield book_1.default.find().populate([
             { path: 'autor', model: 'Autor' },

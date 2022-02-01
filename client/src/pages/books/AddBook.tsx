@@ -19,10 +19,14 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
     const [error, setError] = useState<string | undefined>('Názov knihy musí obsahovať aspoň jeden znak!');
     const [exLibrisValue, setExLibrisValue] = useState(false);
     const autorRef = useRef(null);
+    const editorRef = useRef(null);
+    const translatorRef = useRef(null);
+    const ilustratorRef = useRef(null);
     const langRef = useRef(null);
     const countryRef = useRef(null);
     const ownerRef = useRef(null);
     const readByRef = useRef(null);
+    const cityRef = useRef(null);
 
     //param [] will make useEffect to go only once
     useEffect(() => {
@@ -31,7 +35,7 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                 //constructing fullName for autocomplete
                 setAutors(aut.data.autors.map((aut: IAutor) => ({
                     ...aut,
-                    fullName: `${aut.lastName ?? ''} ${aut.firstName ? ', ' + aut.firstName : ''}`
+                    fullName: `${aut.lastName ?? ''}${aut.firstName ? ', ' + aut.firstName : ''}`
                 })).sort((a: Partial<IAutor>, b: Partial<IAutor>) => a.fullName!.localeCompare(b.fullName!)));
             })
             .catch(err => {
@@ -80,6 +84,7 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
     }
 
     const handleForm = (e: any): void => {
+        console.log('Handle Form');
         setFormData({
             ...formData,
             [e.currentTarget.id]: e.currentTarget.value,
@@ -106,6 +111,8 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
         ownerRef?.current?.resetSelectedValues();
         // @ts-ignore
         readByRef?.current?.resetSelectedValues();
+        // @ts-ignore
+        cityRef?.current?.resetSelectedValues();
     }
 
     //TODO: there should be also Content. Chips?
@@ -128,71 +135,151 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                 </button>
                             </div>
                             <div className="modal-body">
-                                <form onSubmit={(e) => {
+                                <form className="modal-body" onSubmit={(e) => {
                                     saveBook(e, formData);
                                     cleanFields();
                                 }}>
-                                    <div className="row">
-                                        <div className="col">
-                                            <input onChange={handleForm} type='text' id='title' placeholder='*Názov'
-                                                   className="form-control" autoComplete="off"
-                                                   value={formData && "title" in formData ? formData.title : ''}/>
+                                    <div className="container">
+                                        <div className="Nazov">
+                                            <input
+                                                onChange={handleForm} type='text' id='title' placeholder='*Názov'
+                                                className="form-control" autoComplete="off"
+                                                value={formData && "title" in formData ? formData.title : ''}
+                                            />
                                         </div>
-                                        <div className="col">
+                                        <div className="Podnazov">
                                             <input onChange={handleForm} type='text' id='subtitle'
                                                    placeholder='Podnázov'
-                                                   className="form-control"
-                                                   autoComplete="off"
+                                                   className="form-control" autoComplete="off"
                                                    value={formData && "subtitle" in formData ? formData.subtitle : ''}
                                             />
                                         </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-                                    <div className="row">
-                                        <Multiselect
-                                            options={autors}
-                                            isObject={true}
-                                            displayValue="fullName"
-                                            closeOnSelect={true}
-                                            placeholder="Autor"
-                                            closeIcon="cancel"
-                                            emptyRecordMsg="Žiadny autor nenájdený"
-                                            onSelect={(pickedAut: IAutor[]) => {
-                                                setFormData({...formData, autor: pickedAut.map(v => v._id)})
-                                            }}
-                                            style={{
-                                                inputField: {marginLeft: "0.5rem"},
-                                                optionContainer: {
-                                                    backgroundColor: "transparent",
-                                                },
-                                                option: {},
-                                                multiselectContainer: {maxWidth: '100%'},
-                                            }}
-                                            ref={autorRef}
-                                        />
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-
-                                    <div className="row">
-                                        <div className="col">
-                                            <input onChange={handleForm} type='text' id='ISBN' placeholder='ISBN'
+                                        <div className="Autor">
+                                            <Multiselect
+                                                options={autors}
+                                                isObject={true}
+                                                displayValue="fullName"
+                                                closeOnSelect={true}
+                                                placeholder="Autor"
+                                                closeIcon="cancel"
+                                                emptyRecordMsg="Žiadny autor nenájdený"
+                                                onSelect={(pickedAut: IAutor[]) => {
+                                                    setFormData({...formData, autor: pickedAut.map(v => v._id)})
+                                                }}
+                                                style={{
+                                                    inputField: {marginLeft: "0.5rem"},
+                                                    optionContainer: {
+                                                        backgroundColor: "transparent",
+                                                    },
+                                                    option: {},
+                                                    multiselectContainer: {maxWidth: '100%'},
+                                                }}
+                                                ref={autorRef}
+                                            />
+                                        </div>
+                                        <div className="Translator">
+                                            <Multiselect
+                                                options={autors}
+                                                isObject={true}
+                                                displayValue="fullName"
+                                                closeOnSelect={true}
+                                                placeholder="Prekladateľ"
+                                                closeIcon="cancel"
+                                                emptyRecordMsg="Žiadny autor nenájdený"
+                                                onSelect={(pickedAut: IAutor[]) => {
+                                                    setFormData({...formData, translator: pickedAut.map(v => v._id)})
+                                                }}
+                                                style={{
+                                                    inputField: {marginLeft: "0.5rem"},
+                                                    optionContainer: {
+                                                        backgroundColor: "transparent",
+                                                    },
+                                                    option: {},
+                                                    multiselectContainer: {maxWidth: '100%'},
+                                                }}
+                                                ref={translatorRef}
+                                            />
+                                        </div>
+                                        <div className="Editor">
+                                            <Multiselect
+                                                options={autors}
+                                                isObject={true}
+                                                displayValue="fullName"
+                                                closeOnSelect={true}
+                                                placeholder="Editor"
+                                                closeIcon="cancel"
+                                                emptyRecordMsg="Žiadny autor nenájdený"
+                                                onSelect={(pickedAut: IAutor[]) => {
+                                                    setFormData({...formData, editor: pickedAut.map(v => v._id)})
+                                                }}
+                                                style={{
+                                                    inputField: {marginLeft: "0.5rem"},
+                                                    optionContainer: {
+                                                        backgroundColor: "transparent",
+                                                    },
+                                                    option: {},
+                                                    multiselectContainer: {maxWidth: '100%'},
+                                                }}
+                                                ref={editorRef}
+                                            />
+                                        </div>
+                                        <div className="Ilustrator">
+                                            <Multiselect
+                                                options={autors}
+                                                isObject={true}
+                                                displayValue="fullName"
+                                                closeOnSelect={true}
+                                                placeholder="Ilustrátor"
+                                                closeIcon="cancel"
+                                                emptyRecordMsg="Žiadny autor nenájdený"
+                                                onSelect={(pickedAut: IAutor[]) => {
+                                                    setFormData({...formData, ilustrator: pickedAut.map(v => v._id)})
+                                                }}
+                                                style={{
+                                                    inputField: {marginLeft: "0.5rem"},
+                                                    optionContainer: {
+                                                        backgroundColor: "transparent",
+                                                    },
+                                                    option: {},
+                                                    multiselectContainer: {maxWidth: '100%'},
+                                                }}
+                                                ref={ilustratorRef}
+                                            />
+                                        </div>
+                                        <div className="Name">
+                                            <input onChange={handleForm} type='text' id='edition.title'
+                                                   placeholder='Názov edície'
+                                                   className="form-control" autoComplete="off"
+                                                   value={formData && "edition.title" in formData ?
+                                                       formData["edition.title"] : ''}
+                                            />
+                                        </div>
+                                        <div className="No">
+                                            <input onChange={handleForm} type='text' id='serie.no'
+                                                   placeholder='Číslo edície'
+                                                   className="form-control" autoComplete="off"
+                                                   value={formData && "serie.no" in formData ?
+                                                       formData["serie.no"] : ''}
+                                            />
+                                        </div>
+                                        <div className="NameS">
+                                            <input onChange={handleForm} type='text' id='serie.title'
+                                                   placeholder='Názov série'
+                                                   className="form-control" autoComplete="off"
+                                                   value={formData && "serie.title" in formData ?
+                                                       formData["serie.title"] : ''}
+                                            />
+                                        </div>
+                                        <div className="NoS"><input className="form-control" placeholder="Číslo série"/>
+                                        </div>
+                                        <div className="ISBN">
+                                            <input onChange={handleForm} type='text' id='ISBN'
+                                                   placeholder='ISBN'
                                                    className="form-control"
                                                    autoComplete="off"
                                                    value={formData && "ISBN" in formData ? formData.ISBN : ''}
-                                            />
-                                        </div>
-                                        <div className="col">
-                                            <input onChange={handleForm} type='text' id='published.publisher'
-                                                   placeholder='Vydavateľ'
-                                                   className="form-control"
-                                                   autoComplete="off"
-                                                   value={formData && "published.publisher" in formData ? formData["published.publisher"] : ''}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-                                    <div className="row">
-                                        <div className="col">
+                                            /></div>
+                                        <div className="Page-no">
                                             <input onChange={handleForm} type='number' id='numberOfPages'
                                                    placeholder='Počet strán'
                                                    className="form-control"
@@ -200,7 +287,15 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                    value={formData && "numberOfPages" in formData ? formData.numberOfPages : ''}
                                             />
                                         </div>
-                                        <div className="col">
+                                        <div className="Vydavatel">
+                                            <input onChange={handleForm} type='text' id='published.publisher'
+                                                   placeholder='Vydavateľ'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "published.publisher" in formData ? formData["published.publisher"] : ''}
+                                            />
+                                        </div>
+                                        <div className="Rok">
                                             <input onChange={handleForm} type='number' id='published.year'
                                                    placeholder='Rok vydania'
                                                    className="form-control"
@@ -208,15 +303,105 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                    value={formData && "published.year" in formData ? formData["published.year"] : ''}
                                             />
                                         </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-                                    <div className="row">
-                                        <div className="col">
+                                        <div className="Krajina">
+                                            <Multiselect
+                                                options={countryCode}
+                                                displayValue="value"
+                                                placeholder="Krajina vydania"
+                                                closeIcon="cancel"
+                                                onSelect={(picked: ILangCode[]) => {
+                                                    setFormData({
+                                                        ...formData,
+                                                        "published.country": picked.map(v => v.key)
+                                                    })
+                                                }}
+                                                style={{
+                                                    inputField: {marginLeft: "0.5rem"},
+                                                    optionContainer: {
+                                                        backgroundColor: "transparent",
+                                                    },
+                                                    option: {},
+                                                    multiselectContainer: {maxWidth: '100%'},
+                                                }}
+                                                ref={countryRef}
+                                            />
+                                        </div>
+
+                                        <div className="Vyska">
+                                            <input onChange={handleForm} type='number' id='dimensions.height'
+                                                   placeholder='Výška'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "dimensions.height" in formData ? formData["dimensions.height"] : ''}
+                                            />
+                                        </div>
+                                        <div className="Sirka">
+                                            <input onChange={handleForm} type='number' id='dimensions.width'
+                                                   placeholder='Šírka'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "dimensions.width" in formData ? formData["dimensions.width"] : ''}
+                                            />
+                                        </div>
+                                        <div className="Hrubka">
+                                            <input onChange={handleForm} type='number' id='dimensions.depth'
+                                                   placeholder='Hrúbka'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "dimensions.depth" in formData ? formData["dimensions.depth"] : ''}
+                                            />
+                                        </div>
+                                        <div className="Hmotnost">
+                                            <input onChange={handleForm} type='number' id='dimensions.weight'
+                                                   placeholder='Hmotnosť'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "dimensions.weight" in formData ? formData["dimensions.weight"] : ''}
+                                            />
+                                        </div>
+
+                                        <div className="Mesto">
+                                            <Multiselect
+                                                options={[{value: 'spisska', showValue: "Spišská"},
+                                                    {value: 'ostrava', showValue: "Ostrava"}]}
+                                                displayValue="showValue"
+                                                placeholder="Mesto"
+                                                closeIcon="cancel"
+                                                singleSelect={true}
+                                                onSelect={(picked: any[]) => {
+                                                    setFormData({
+                                                        ...formData,
+                                                        location: {
+                                                            city: picked.map(v => v.value)
+                                                        }
+                                                    })
+                                                }}
+                                                style={{
+                                                    inputField: {marginLeft: "0.5rem"},
+                                                    optionContainer: {
+                                                        backgroundColor: "transparent",
+                                                    },
+                                                    option: {},
+                                                    multiselectContainer: {maxWidth: '100%'},
+                                                }}
+                                                ref={cityRef}
+                                            />
+                                        </div>
+                                        <div className="Police">
+                                            <input onChange={handleForm} type='text' id='location.shelf'
+                                                   placeholder='Polica'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "location.shelf" in formData ? formData["location.shelf"] : ''}
+                                            />
+                                        </div>
+                                        <div className="language">
                                             <Multiselect
                                                 options={langCode}
                                                 displayValue="value"
                                                 placeholder="Jazyk"
                                                 closeIcon="cancel"
+                                                closeOnSelect={true}
                                                 onSelect={(picked: ILangCode[]) => {
                                                     setFormData({...formData, language: picked.map(v => v.key)})
                                                 }}
@@ -232,76 +417,21 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                 ref={langRef}
                                             />
                                         </div>
-                                        <div className="col">
-                                            <Multiselect
-                                                options={countryCode}
-                                                displayValue="value"
-                                                placeholder="Krajina vydania"
-                                                closeIcon="cancel"
-                                                onSelect={(picked: ILangCode[]) => {
-                                                    setFormData({
-                                                        ...formData,
-                                                        "published.country": picked.map(v => v.key)
-                                                    })
-                                                }}
-                                                style={{
-                                                    inputField: {marginLeft: "0.5rem"},
-                                                    searchBox: {
-                                                        width: "100%",
-                                                        paddingRight: '5px',
-                                                        marginRight: '-5px',
-                                                        borderRadius: '3px'
-                                                    }
-                                                }}
-                                                ref={countryRef}
-                                            />
-
+                                        <div className="Poznamka">
+                                        <textarea onChange={handleForm} id='note' placeholder='Poznámka'
+                                                  className="form-control"
+                                                  autoComplete="off"
+                                                  rows={1}
+                                                  value={formData && "note" in formData ? formData.note : ''}
+                                        />
                                         </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-                                    <div className="row">
-                                        <div className="col">
-                                            <Multiselect
-                                                options={[{value: 'spisska', showValue: "Spišská"},
-                                                    {value: 'ostrava', showValue: "Ostrava"}]}
-                                                displayValue="showValue"
-                                                placeholder="Mesto"
-                                                closeIcon="cancel"
-                                                onSelect={(picked: any[]) => {
-                                                    setFormData({
-                                                        ...formData,
-                                                        "location.city": picked.map(v => v.value)
-                                                    })
-                                                }}
-                                            />
-                                        </div>
-                                        <div className="col">
-                                            <input onChange={handleForm} type='text' id='location.shelf'
-                                                   placeholder='Polica'
-                                                   className="form-control"
-                                                   autoComplete="off"
-                                                   value={formData && "location.shelf" in formData ? formData["location.shelf"] : ''}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-                                    <div className="row">
-                                        <div className="col">
-                                            <textarea onChange={handleForm} id='note' placeholder='Poznámka'
-                                                      className="form-control"
-                                                      autoComplete="off"
-                                                      value={formData && "note" in formData ? formData.note : ''}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-                                    <div className="row">
-                                        <div className="col">
+                                        <div className="Precitane">
                                             <Multiselect
                                                 options={users}
                                                 displayValue="fullName"
                                                 placeholder="Prečítané"
                                                 closeIcon="cancel"
+                                                closeOnSelect={true}
                                                 onSelect={(picked: IUser[]) => {
                                                     setFormData({...formData, readBy: picked.map(v => v._id)})
                                                 }}
@@ -317,12 +447,13 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                 ref={readByRef}
                                             />
                                         </div>
-                                        <div className="col">
+                                        <div className="Vlastnik">
                                             <Multiselect
                                                 options={users}
                                                 displayValue="fullName"
                                                 placeholder="Vlastník"
                                                 closeIcon="cancel"
+                                                closeOnSelect={true}
                                                 onSelect={(picked: IUser[]) => {
                                                     setFormData({...formData, owner: picked.map(v => v._id)})
                                                 }}
@@ -338,10 +469,7 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                 ref={ownerRef}
                                             />
                                         </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-                                    <div className="row">
-                                        <div className="col">
+                                        <div className="Ex-Libris">
                                             <input type="checkbox"
                                                    id="exLibris"
                                                    className="checkBox"
@@ -349,9 +477,36 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                    onChange={changeExLibris}
                                             />Ex Libris
                                         </div>
+                                        <div className="pic">
+                                            <input onChange={handleForm} type='text' id='picture'
+                                                   placeholder='Obrázok'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "picture" in formData ? formData["picture"] : ''}
+                                            />
+                                        </div>
+                                        <div className="DK">
+                                            <input onChange={handleForm} type='text' id='hrefDatabazeKnih'
+                                                   placeholder='URL Databáze knih'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "hrefDatabazeKnih" in formData ? formData["hrefDatabazeKnih"] : ''}
+                                            />
+                                        </div>
+                                        <div className="GR">
+                                            <input onChange={handleForm} type='text' id='hrefGoodReads'
+                                                   placeholder='URL GoodReads'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "hrefGoodReads" in formData ? formData["hrefGoodReads"] : ''}
+                                            />
+                                        </div>
                                     </div>
                                     <div style={{height: '5px', width: '100%'}}/>
-                                    {showError()}
+                                    <div className="row">
+                                        {showError()}
+                                    </div>
+
                                     <div className="modal-footer">
                                         <button type="button" className="btn btn-secondary"
                                                 onClick={cleanFields}>Vymazať polia

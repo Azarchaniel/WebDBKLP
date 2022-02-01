@@ -45,19 +45,11 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
     try {
         //todo: there has to be a better way for cleaner code
         const {
-            title, subtitle, ISBN, language, note, numberOfPages,
-            published, autor, owner, exLibris, readBy, location
+            published, location
         } = req.body;
         console.trace(req.body);
 
         const book: IBook = new Book({
-            autor: autor,
-            title: title,
-            subtitle: subtitle,
-            ISBN: ISBN,
-            language: language,
-            note: note,
-            numberOfPages: numberOfPages,
             published: {
                 publisher: published?.publisher,
                 year: published?.year ?? undefined,
@@ -67,9 +59,7 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
                 city: location?.city,
                 shelf: location?.shelf,
             },
-            owner: owner,
-            exLibris: exLibris,
-            readBy: readBy
+            ...req.body,
         })
 
         const newBook: IBook = await book.save()

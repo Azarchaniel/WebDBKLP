@@ -40,7 +40,7 @@ export const addBook = async (
         country: formData['published.country'] ?? ''
       },
       location: {
-        city: formData['location.city'] ?? '',
+        city: formData['location.city'][0] ?? '',
         shelf: formData['location.shelf'] ?? '',
       }
 

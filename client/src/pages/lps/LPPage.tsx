@@ -1,7 +1,7 @@
 import Sidebar from "../../components/Sidebar";
 import {Link} from "react-router-dom";
 import AddLP from "./AddLP";
-import {IAutor, IBook, ILP} from "../../type";
+import {IBook, ILP} from "../../type";
 import Toast from "../../components/Toast";
 import React, {useEffect, useRef, useState} from "react";
 import {addLP, deleteLP, getLPs} from "../../API";
@@ -11,8 +11,8 @@ import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 
 export default function LPPage() {
-    const [lps, setLPs] = useState<ILP[]>([]);
-    const [clonedLps, setClonedLps] = useState<ILP[]>([]);
+
+    const [LPs, setLPs] = useState<ILP[]>([]);
     const [hidden, setHidden] = useState({
         control: true,
         subtitle: true,
@@ -45,8 +45,7 @@ export default function LPPage() {
         getLPs()
             .then(({ data: { lps } }: ILP[] | any) => {
                 lps = lps.filter((lp: ILP) => lp.isDeleted !== true);
-
-                setClonedLps(stringifyAutors(lps));
+                setLPs(stringifyAutors(lps));
             })
             .catch((err: Error) => console.trace(err))
     }
@@ -59,7 +58,7 @@ export default function LPPage() {
                     throw new Error('LP sa nepodarilo pridať!')
                 }
                 toast.success(`LP bolo úspešne pridaný.`);
-                setLPs(data.lps);
+                setLPs(stringifyAutors(data.lps));
             })
             .catch((err) => {
                 toast.error(`LP sa nepodarilo pridať!`);
@@ -85,7 +84,7 @@ export default function LPPage() {
                                     throw new Error('Error! LP not deleted')
                                 }
                                 toast.success(`LP bolo úspešne vymazaný.`);
-                                setLPs(data.lps)
+                                setLPs(stringifyAutors(data.lps));
                             })
                             .catch((err) => {
                                 toast.error('Došlo k chybe!');
@@ -194,7 +193,7 @@ export default function LPPage() {
                         }
                     }
                 ]}
-                data={clonedLps}
+                data={LPs}
                 actions={[
                     {
                         icon: 'visibility',

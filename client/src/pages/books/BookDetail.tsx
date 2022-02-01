@@ -54,8 +54,8 @@ const BookDetail: React.FC<Props> = ({data}) => {
                 </p>
             </div>
             <div className="w-25">
-                <p><h1>{data.title}</h1></p>
-                <p><h4>{data.subtitle ?? ''}</h4></p>
+                <h1>{data.title}</h1>
+                <h4>{data.subtitle ?? ''}</h4>
                 <h3>{showAutorRow('autor', 'autorsFull', 'Autor: ', 'Autori: ')}</h3>
                 {showAutorRow('editor', 'editorsFull', 'Editor: ', 'Editori: ')}
                 {showAutorRow('ilustrator', 'ilustratorsFull', 'Ilustrátor: ', 'Ilustrátori: ')}

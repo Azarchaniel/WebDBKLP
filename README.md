@@ -24,7 +24,9 @@ cd ./client; npm run
 - [X] clean form after saving item
 - [X] create all models and interfaces
 - [X] there is problem with fetchAll in Quotes when deleting
-- [ ] UPDATE
+- 
+- [ ] import books from DBKLP
+- -[ ] write script, that will get ID of every author
 - [ ] fork material-table
 - -[ ] custom pagination - numberOfPagesAroundCurrent
 - -[ ] range in filtering dates, numbers...
@@ -32,10 +34,11 @@ cd ./client; npm run
 - [ ] in BookDetail, when clicking on Edice/Serie, filter every book from Edice/Serie
 - -[ ] but this requires to have Edice/Serie as entry in DB with ID
 - -[ ] which require CRUD form Edice/Serie
+- -[ ] I need it in DB for MultiSelect anyway
 - -[X] a href to DatabazeKnih and GoodReads
 - [ ] fix router not fetching data when changing Owner
 - [ ] rework Autocomplete - custom
-- [ ] custom modal - grid system
+- [X] custom modal - grid system
 - [ ] webscrapper and autofilling
 - [ ] some reports, numbers, graph on Main page
 - [ ] (in far future) localization
