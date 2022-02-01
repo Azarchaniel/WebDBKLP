@@ -1,6 +1,8 @@
 import React, {useState} from "react";
-import MaterialTable, {Column} from "material-table";
+
 import LoadingBooks from "./LoadingBooks";
+import MaterialTable, {Column} from "@material-table/core";
+
 
 type PropsMT = {
     title: string,
