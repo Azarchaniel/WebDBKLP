@@ -1,4 +1,3 @@
-
 ### Work in progress
 # WebDBKLP
 
@@ -24,17 +23,13 @@ cd ./client; npm run
 - [X] clean form after saving item
 - [X] create all models and interfaces
 - [X] there is problem with fetchAll in Quotes when deleting
-- 
 - [ ] import books from DBKLP
 - -[ ] write script, that will get ID of every author
-- [ ] fork material-table
-- -[ ] custom pagination - numberOfPagesAroundCurrent
-- - [X] allow row to be clickable and add details to it (first pic, later comments)
 - [ ] in BookDetail, when clicking on Edice/Serie, filter every book from Edice/Serie
 - -[ ] but this requires to have Edice/Serie as entry in DB with ID
 - -[ ] which require CRUD form Edice/Serie
 - -[ ] I need it in DB for MultiSelect anyway
-- -[X] a href to DatabazeKnih and GoodReads
+- [X] a href to DatabazeKnih and GoodReads
 - [ ] fix router not fetching data when changing Owner
 - [ ] rework Autocomplete - custom
 - [X] custom modal - grid system

@@ -77,7 +77,11 @@ export default function BookPage() {
                 }
 
                 books = books.filter((bk: IBook) => bk.isDeleted !== true);
-
+                for (let book of books) {
+                    if (book.note) {
+                        book.note = shortenStringKeepWord(book.note, 30)
+                    }
+                }
                 setClonedBooks(stringifyAutors(books));
             })
             .catch((err: Error) => console.trace(err))
@@ -259,8 +263,8 @@ export default function BookPage() {
                         headerStyle: {
                             backgroundColor: '#bea24b'
                         },
-                        render: (rowData: IBook) => {
-                            if (rowData.title) return <b>{rowData.title}</b>
+                        cellStyle: {
+                            fontWeight: "bold"
                         }
                     },
                     {
@@ -286,16 +290,6 @@ export default function BookPage() {
                         }
                     },
                     {
-                        title: 'Poznámka',
-                        field: 'note',
-                        headerStyle: {
-                            backgroundColor: '#bea24b'
-                        },
-                        render: (rowData: IBook) => {
-                            if (rowData.note) return shortenStringKeepWord(rowData.note, 30);
-                        },
-                    },
-                    {
                         title: 'Počet strán',
                         field: 'numberOfPages',
                         headerStyle: {
@@ -303,69 +297,19 @@ export default function BookPage() {
                         }
                     },
                     {
-                        title: 'Výška',
-                        field: 'dimensions.height',
+                        title: 'Poznámka',
+                        field: 'note',
                         headerStyle: {
                             backgroundColor: '#bea24b'
                         },
-                        render: (rowData: IBook) => {
-                            if (!rowData.dimensions?.height) return '';
-                            return rowData.dimensions?.height + 'cm';
-                        },
-                        hidden: hidden.dimensions
                     },
-                    {
-                        title: 'Šírka',
-                        field: 'dimensions.width',
-                        headerStyle: {
-                            backgroundColor: '#bea24b'
-                        },
-                        render: (rowData: IBook) => {
-                            if (!rowData.dimensions?.width) return '';
-                            return rowData.dimensions?.width + 'cm'
-                        },
-                        hidden: hidden.dimensions
-                    },
-                    {
-                        title: 'Hrúbka',
-                        field: 'dimensions.depth',
-                        headerStyle: {
-                            backgroundColor: '#bea24b'
-                        },
-                        render: (rowData: IBook) => {
-                            if (!rowData.dimensions?.depth) return '';
-                            return  rowData.dimensions?.depth + 'cm'
-                        },
-                        hidden: hidden.dimensions
-                    },
-                    {
-                        title: 'Hmotnosť',
-                        field: 'dimensions.weight',
-                        headerStyle: {
-                            backgroundColor: '#bea24b'
-                        },
-                        render: (rowData: IBook) => {
-                            if (!rowData.dimensions?.weight) return '';
-                            return rowData.dimensions?.weight + 'g';
-                        },
-                        hidden: hidden.dimensions
-                    },
-                    {
-                        title: 'Pridané',
-                        field: 'createdAt',
-                        type: 'date',
-                        dateSetting: {locale: "sk-SK"},
-                        hidden: hidden.createdAt,
-                        headerStyle: {
-                            backgroundColor: '#bea24b'
-                        }
-                    }
+
                 ]}
                 actions={[
                     {
                         icon: 'add',
                         tooltip: 'Pridaj knihu',
-                        onClick: () => toast('TODO'),
+                        onClick: () => null,
                         isFreeAction: true
                     },
                     {

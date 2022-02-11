@@ -111,8 +111,8 @@ export default function AutorPage() {
                         headerStyle: {
                             backgroundColor: '#bea24b'
                         },
-                        render: (rowData: IAutor) => {
-                            if (rowData.lastName) return <b>{rowData.lastName}</b>
+                        cellStyle: {
+                            fontWeight: "bold"
                         }
                     },
                     {

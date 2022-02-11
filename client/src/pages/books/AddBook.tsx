@@ -7,9 +7,10 @@ import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {langCode, countryCode} from "../../utils/locale";
 //@ts-ignore
 import {Multiselect} from 'multiselect-react-dropdown';
+import ChipInput from "material-ui-chip-input";
 
 type Props = {
-    saveBook: (e: React.FormEvent, formData: IBook | any) => void
+    saveBook: (e: React.FormEvent, formData: IBook | any) => void;
 }
 
 const AddBook: React.FC<Props> = ({saveBook}) => {
@@ -84,7 +85,6 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
     }
 
     const handleForm = (e: any): void => {
-        console.log('Handle Form');
         setFormData({
             ...formData,
             [e.currentTarget.id]: e.currentTarget.value,
@@ -327,39 +327,6 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                             />
                                         </div>
 
-                                        <div className="Vyska">
-                                            <input onChange={handleForm} type='number' id='dimensions.height'
-                                                   placeholder='Výška'
-                                                   className="form-control"
-                                                   autoComplete="off"
-                                                   value={formData && "dimensions.height" in formData ? formData["dimensions.height"] : ''}
-                                            />
-                                        </div>
-                                        <div className="Sirka">
-                                            <input onChange={handleForm} type='number' id='dimensions.width'
-                                                   placeholder='Šírka'
-                                                   className="form-control"
-                                                   autoComplete="off"
-                                                   value={formData && "dimensions.width" in formData ? formData["dimensions.width"] : ''}
-                                            />
-                                        </div>
-                                        <div className="Hrubka">
-                                            <input onChange={handleForm} type='number' id='dimensions.depth'
-                                                   placeholder='Hrúbka'
-                                                   className="form-control"
-                                                   autoComplete="off"
-                                                   value={formData && "dimensions.depth" in formData ? formData["dimensions.depth"] : ''}
-                                            />
-                                        </div>
-                                        <div className="Hmotnost">
-                                            <input onChange={handleForm} type='number' id='dimensions.weight'
-                                                   placeholder='Hmotnosť'
-                                                   className="form-control"
-                                                   autoComplete="off"
-                                                   value={formData && "dimensions.weight" in formData ? formData["dimensions.weight"] : ''}
-                                            />
-                                        </div>
-
                                         <div className="Mesto">
                                             <Multiselect
                                                 options={[{value: 'spisska', showValue: "Spišská"},
@@ -417,13 +384,56 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                 ref={langRef}
                                             />
                                         </div>
+
+                                        <div className="Vyska">
+                                            <input onChange={handleForm} type='number' id='dimensions.height'
+                                                   placeholder='Výška'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "dimensions.height" in formData ? formData["dimensions.height"] : ''}
+                                            />
+                                        </div>
+                                        <div className="Sirka">
+                                            <input onChange={handleForm} type='number' id='dimensions.width'
+                                                   placeholder='Šírka'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "dimensions.width" in formData ? formData["dimensions.width"] : ''}
+                                            />
+                                        </div>
+                                        <div className="Hrubka">
+                                            <input onChange={handleForm} type='number' id='dimensions.depth'
+                                                   placeholder='Hrúbka'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "dimensions.depth" in formData ? formData["dimensions.depth"] : ''}
+                                            />
+                                        </div>
+                                        <div className="Hmotnost">
+                                            <input onChange={handleForm} type='number' id='dimensions.weight'
+                                                   placeholder='Hmotnosť'
+                                                   className="form-control"
+                                                   autoComplete="off"
+                                                   value={formData && "dimensions.weight" in formData ? formData["dimensions.weight"] : ''}
+                                            />
+                                        </div>
+                                        <div className="Obsah">
+                                            <ChipInput
+                                                className="form-control-important"
+                                                defaultValue={[]}
+                                                placeholder="Obsah"
+                                                onChange={(content: string[]) => {
+                                                    setFormData({...formData, content})
+                                                }}
+                                            />
+                                        </div>
                                         <div className="Poznamka">
-                                        <textarea onChange={handleForm} id='note' placeholder='Poznámka'
-                                                  className="form-control"
-                                                  autoComplete="off"
-                                                  rows={1}
-                                                  value={formData && "note" in formData ? formData.note : ''}
-                                        />
+                                            <textarea onChange={handleForm} id='note' placeholder='Poznámka'
+                                                      className="form-control"
+                                                      autoComplete="off"
+                                                      rows={1}
+                                                      value={formData && "note" in formData ? formData.note : ''}
+                                            />
                                         </div>
                                         <div className="Precitane">
                                             <Multiselect
@@ -447,6 +457,7 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                                 ref={readByRef}
                                             />
                                         </div>
+
                                         <div className="Vlastnik">
                                             <Multiselect
                                                 options={users}

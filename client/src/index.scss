@@ -375,32 +375,74 @@ th.MuiTableCell-root:last-child, th.MuiTableCell-root:nth-last-child(2) {
   grid-area: 7 / 2 / 8 / 3;
 }
 
+.Vyska {
+  grid-area: 8 / 1 / 9 / 2;
+}
+
+.Hrubka {
+  grid-area: 8 / 2 / 9 / 3;
+}
+
+.Sirka {
+  grid-area: 8 / 3 / 9 / 4;
+}
+
+.Hmotnost {
+  grid-area: 9 / 2 / 10 / 3;
+}
+
+.Obsah {
+  grid-area: 10 / 1 / 11 / 4;
+}
+
 .Poznamka {
-  grid-area: 8 / 1 / 9 / 4;
+  grid-area: 11 / 1 / 12 / 4;
 }
 
 .Precitane {
-  grid-area: 9 / 1 / 10 / 2;
+  grid-area: 12 / 1 / 13 / 2;
 }
 
 .Vlastnik {
-  grid-area: 9 / 2 / 10 / 3;
+  grid-area: 12 / 2 / 13 / 3;
 }
 
 .Ex-Libris {
   display: flex;
   align-items: center;
-  grid-area: 9 / 3 / 10 / 4;
+  grid-area: 12 / 3 / 13 / 4;
 }
 
 .pic {
-  grid-area: 10 / 1 / 11 / 2;
+  grid-area: 13 / 1 / 14 / 2;
 }
 
 .DK {
-  grid-area: 10 / 2 / 11 / 3;
+  grid-area: 13 / 2 / 14 / 3;
 }
 
 .GR {
-  grid-area: 10 / 3 / 11 / 4;
+  grid-area: 13 / 3 / 14 / 4;
+}
+
+.form-control-important {
+  display: block !important;
+  width: 100% !important;
+  padding: 0.375rem 0.75rem !important;
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+  line-height: 1.5 !important;
+  color: #212529 !important;
+  background-color: #fff !important;
+  background-clip: padding-box !important;
+  border: 1px solid #ced4da !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  border-radius: 0.25rem !important;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
+}
+
+.WAMuiChipInput-underline-14::before .WAMuiChipInput-underline-14::after {
+  border-bottom: none;
 }
