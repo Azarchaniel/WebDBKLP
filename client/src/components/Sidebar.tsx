@@ -72,16 +72,6 @@ const Sidebar = () => {
             title: 'Knihy',
             icon: 'fas fa-book',
             route: '/books',
-            children: [
-                {
-                    title: 'Ľuboš',
-                    route: '/books/619800d46aba58b905cc2455',
-                },
-                {
-                    title: 'Žaneta',
-                    route: '/books/619802656aba58b905cc245e',
-                },
-            ],
         },
         {
             title: 'Autori',
@@ -97,18 +87,21 @@ const Sidebar = () => {
             title: 'Úryvky',
             icon: 'fas fa-pen-nib',
             route: '/quotes',
-            children: [
+        }
+    ];
+
+    /*
+    children: [
                 {
                     title: 'Ľuboš',
-                    route: '/quotes/lubos',
+                    route: '/books/619800d46aba58b905cc2455',
                 },
                 {
                     title: 'Žaneta',
-                    route: '/quotes/zaneta',
+                    route: '/books/619802656aba58b905cc245e',
                 },
             ],
-        }
-    ];
+     */
 
     const showContent = (contentItems: ISideMenuItems[]) => {
         return contentItems.map((item: ISideMenuItems, index) => {

@@ -6,10 +6,10 @@ import {confirmAlert} from "react-confirm-alert";
 import AddBook from "./AddBook";
 import Sidebar from "../../components/Sidebar";
 import Toast from "../../components/Toast";
-import {Link} from "react-router-dom";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import BookDetail from "./BookDetail";
+import Header from "../../components/Header";
 
 interface IBookHidden {
     control: boolean,
@@ -24,6 +24,7 @@ interface IBookHidden {
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>();
+    const [openModal, setOpenModal] = useState<boolean>(false);
     const [hidden, setHidden] = useState<IBookHidden>({
         control: true,
         editor: true,
@@ -101,17 +102,9 @@ export default function BookPage() {
             .catch((err) => console.trace(err))
     }
 
-    const handleUpdateBook = (/*book: IBook*/): void => {
-        toast.error('Zatial nefunguje');
-        // updateBook(book)
-        //     .then(({status/*, data*/}) => {
-        //         if (status !== 200) {
-        //             throw new Error('Error! Book not updated')
-        //         }
-        //         //setBooks(data.books)
-        //     })
-        //     .catch((err) => console.trace(err))
-    }
+    /*const handleUpdateBook = (bookId: string): JSX.Element => {
+        return (<AddBook saveBook={handleSaveBook} bookId={bookId} open={true}/>);
+    }*/
 
     const handleDeleteBook = (_id: string): void => {
         getBook(_id)
@@ -154,9 +147,9 @@ export default function BookPage() {
 
     return (
         <main className='App'>
+            <Header/>
             <Sidebar/>
-            <h1><Link className='customLink' to='/'>WebDBKLP</Link></h1>
-            <AddBook saveBook={handleSaveBook}/>
+            <AddBook saveBook={handleSaveBook} open={openModal}/>
             <div ref={popRef} className={`showHideColumns ${hidden.control ? 'hidden' : 'shown'}`}>
                 <p>
                     <label>
@@ -307,23 +300,17 @@ export default function BookPage() {
                 ]}
                 actions={[
                     {
-                        icon: 'add',
-                        tooltip: 'Pridaj knihu',
-                        onClick: () => null,
-                        isFreeAction: true
-                    },
-                    {
                         icon: 'visibility',
                         tooltip: 'Zobraz/Skry stĺpce',
                         onClick: () => {
                             setHidden({...hidden, control: !hidden.control})
                         },
-                        isFreeAction: true
+                        isFreeAction: true,
                     },
                     {
                         icon: 'create',
                         tooltip: 'Upraviť',
-                        onClick: () => handleUpdateBook(),
+                        onClick: (_: any, rowData: IBook) => /*handleUpdateBook(rowData._id)*/console.log(rowData),
                     },
                     {
                         icon: 'delete',
@@ -334,7 +321,7 @@ export default function BookPage() {
                 detailPanel={[
                     {
                         tooltip: 'Detaily',
-                        render: (rowData: any) => <BookDetail data={rowData} />
+                        render: (rowData: any) => <BookDetail data={rowData}/>
                     },
                 ]}
             />

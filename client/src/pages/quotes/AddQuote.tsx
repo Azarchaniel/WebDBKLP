@@ -5,15 +5,17 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {Multiselect} from "multiselect-react-dropdown";
 import {getBooks, getUsers} from "../../API";
+import ReactTooltip from "react-tooltip";
 
 type Props = {
     saveQuote: (e: React.FormEvent, formData: IQuote | any) => void
 }
 
 const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
+    const [showModal, setShowModal] = useState<boolean>(false);
     const [formData, setFormData] = useState<IQuote | {}>();
     const [books, setBooks] = useState<IBook[]>();
-    const [error, setError] = useState<string | undefined>(undefined);
+    const [error, setError] = useState<string | undefined>('Text citátu musí obsahovať aspoň jeden znak!');
     const [users, setUsers] = useState<IUser[] | undefined>();
     const ownerRef = useRef(null);
     const bookRef = useRef(null);
@@ -87,131 +89,127 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
 
     const showAddQuote = () => {
         return (<>
-            <button type="button" className="btn btn-dark" data-toggle="modal" data-target="#quoteModal">
-                Pridaj citát
-            </button>
+            <button type="button" className="addQuote" onClick={() => setShowModal(true)} data-tip="Pridaj citát"/>
 
-            <div className="modal fade" id="quoteModal" tabIndex={-1} role="dialog"
-                 aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="exampleModalLabel"><b>Pridať citát</b></h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <form onSubmit={(e) => {
-                                saveQuote(e, formData);
-                                cleanFields();
-                            }}>
-                                <div className="row">
-                                    <div className="col">
+            {showModal ?
+                <>
+                    <div className="modalBgr"/>
+                    <div className="modalBody">
+                        <form onSubmit={(e) => {
+                            saveQuote(e, formData);
+                            cleanFields();
+                        }}>
+                            <div className="row">
+                                <div className="col">
                                         <textarea onChange={handleForm} id='text' placeholder='*Text'
                                                   className="form-control" autoComplete="off"
                                                   value={formData && "text" in formData ? formData.text : ''}/>
-                                    </div>
                                 </div>
-                                <div style={{height: '5px', width: '100%'}}/>
-                                <div className="row">
-                                    <div className="col">
-                                        <Multiselect
-                                            options={books}
-                                            isObject={true}
-                                            displayValue="showName"
-                                            closeOnSelect={true}
-                                            placeholder="Z knihy"
-                                            closeIcon="cancel"
-                                            emptyRecordMsg="Žiadne knihy nenájdené"
-                                            selectionLimit={1}
-                                            onSelect={(pickedBook: IBook[]) => {
-                                                setFormData({
-                                                    ...formData, fromBook: pickedBook
-                                                        .map(v => v._id)
-                                                })
-                                            }}
-                                            style={{
-                                                inputField: {marginLeft: "0.5rem"},
-                                                optionContainer: {
-                                                    backgroundColor: "transparent",
-                                                },
-                                                option: {},
-                                                multiselectContainer: {maxWidth: '100%'},
-                                            }}
-                                            ref={bookRef}
-                                        />
-                                    </div>
-                                    <div className="col">
-                                        <input type="number" id="pageNo" onChange={handleForm} placeholder="Strana"
-                                               className="form-control" autoComplete="off"/>
-                                    </div>
+                            </div>
+                            <div style={{height: '5px', width: '100%'}}/>
+                            <div className="row">
+                                <div className="col">
+                                    <Multiselect
+                                        options={books}
+                                        isObject={true}
+                                        displayValue="showName"
+                                        closeOnSelect={true}
+                                        placeholder="Z knihy"
+                                        closeIcon="cancel"
+                                        emptyRecordMsg="Žiadne knihy nenájdené"
+                                        selectionLimit={1}
+                                        onSelect={(pickedBook: IBook[]) => {
+                                            setFormData({
+                                                ...formData, fromBook: pickedBook
+                                                    .map(v => v._id)
+                                            })
+                                        }}
+                                        style={{
+                                            inputField: {marginLeft: "0.5rem"},
+                                            optionContainer: {
+                                                backgroundColor: "transparent",
+                                            },
+                                            option: {},
+                                            multiselectContainer: {maxWidth: '100%'},
+                                        }}
+                                        ref={bookRef}
+                                    />
                                 </div>
-                                <div style={{height: '5px', width: '100%'}}/>
-                                <div className="row">
-                                    <div className="col">
-                                        <Multiselect
-                                            options={users}
-                                            displayValue="fullName"
-                                            placeholder="Vlastník"
-                                            closeIcon="cancel"
-                                            onSelect={(picked: IUser[]) => {
-                                                setFormData({...formData, owner: picked.map(v => v._id)})
-                                            }}
-                                            style={{
-                                                inputField: {marginLeft: "0.5rem"},
-                                                searchBox: {
-                                                    width: "100%",
-                                                    paddingRight: '5px',
-                                                    marginRight: '-5px',
-                                                    borderRadius: '3px'
-                                                }
-                                            }}
-                                            ref={ownerRef}
-                                        />
-                                    </div>
+                                <div className="col">
+                                    <input type="number" id="pageNo" onChange={handleForm} placeholder="Strana"
+                                           className="form-control" autoComplete="off"/>
                                 </div>
-                                <div style={{height: '5px', width: '100%'}}/>
-                                <div className="row">
-                                    <div className="col">
+                            </div>
+                            <div style={{height: '5px', width: '100%'}}/>
+                            <div className="row">
+                                <div className="col">
+                                    <Multiselect
+                                        options={users}
+                                        displayValue="fullName"
+                                        placeholder="Vlastník"
+                                        closeIcon="cancel"
+                                        onSelect={(picked: IUser[]) => {
+                                            setFormData({...formData, owner: picked.map(v => v._id)})
+                                        }}
+                                        style={{
+                                            inputField: {marginLeft: "0.5rem"},
+                                            searchBox: {
+                                                width: "100%",
+                                                paddingRight: '5px',
+                                                marginRight: '-5px',
+                                                borderRadius: '3px'
+                                            }
+                                        }}
+                                        ref={ownerRef}
+                                    />
+                                </div>
+                            </div>
+                            <div style={{height: '5px', width: '100%'}}/>
+                            <div className="row">
+                                <div className="col">
                                     <textarea onChange={handleForm} id="note" placeholder="Poznámka"
                                               className="form-control" autoComplete="off"
                                               value={formData && "note" in formData ? formData.note : ''}/>
 
-                                    </div>
                                 </div>
-                                <div style={{height: '5px', width: '100%'}}/>
-                                <div className="row">
-                                    {/*<SearchAutocomplete*/}
-                                    {/*    data={getBooks()}*/}
-                                    {/*    async={true}*/}
-                                    {/*    multiple={false}*/}
-                                    {/*    placeholder="Skuska autocomplete"*/}
-                                    {/*    searchInAttr="title"*/}
-                                    {/*    showTable={true}*/}
-                                    {/*    showAttrInDropdown="title /"*/}
-                                    {/*    showAttrInTableOrResult="title"*/}
-                                    {/*/>*/}
-                                </div>
+                            </div>
+                            <div style={{height: '5px', width: '100%'}}/>
+                            <div className="row">
+                                {/*<SearchAutocomplete*/}
+                                {/*    data={getBooks()}*/}
+                                {/*    async={true}*/}
+                                {/*    multiple={false}*/}
+                                {/*    placeholder="Skuska autocomplete"*/}
+                                {/*    searchInAttr="title"*/}
+                                {/*    showTable={true}*/}
+                                {/*    showAttrInDropdown="title /"*/}
+                                {/*    showAttrInTableOrResult="title"*/}
+                                {/*/>*/}
+                            </div>
 
-                                {showError()}
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary"
-                                            onClick={cleanFields}>Vymazať polia
-                                    </button>
-                                    <button type="button" className="btn btn-secondary" data-dismiss="modal">Zavrieť
-                                    </button>
-                                    {/* TODO: add button Save and add another */}
-                                    <button type="submit"
-                                            disabled={Boolean(error)}
-                                            className="btn btn-success">Uložiť citát
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+                            {showError()}
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary"
+                                        onClick={cleanFields}>Vymazať polia
+                                </button>
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Zavrieť
+                                </button>
+                                {/* TODO: add button Save and add another */}
+                                <button type="submit"
+                                        disabled={Boolean(error)}
+                                        className="btn btn-success">Uložiť citát
+                                </button>
+                                <button type="submit"
+                                        disabled={Boolean(error)}
+                                        onClick={() => setShowModal(true)}
+                                        className="btn btn-success">Uložiť a pridať
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </div>
-            </div>
+                </>
+                : <></>}
+            <ReactTooltip place="bottom" effect="solid"/>
         </>);
     }
 

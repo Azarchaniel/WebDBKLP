@@ -1,5 +1,4 @@
 import Sidebar from "../../components/Sidebar";
-import {Link} from "react-router-dom";
 import AddLP from "./AddLP";
 import {IBook, ILP} from "../../type";
 import Toast from "../../components/Toast";
@@ -9,6 +8,7 @@ import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
 import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
+import Header from "../../components/Header";
 
 export default function LPPage() {
 
@@ -102,8 +102,8 @@ export default function LPPage() {
 
     return (
         <main className='App'>
+            <Header/>
             <Sidebar />
-            <h1><Link className='customLink' to='/'>WebDBKLP</Link></h1>
             <AddLP saveLp={handleSaveLP} />
             <div ref={popRef} className={`showHideColumns ${hidden.control ? 'hidden' : 'shown'}`}>
                 <p>
@@ -201,7 +201,7 @@ export default function LPPage() {
                         onClick: () => {
                             setHidden({...hidden, control: !hidden.control})
                         },
-                        isFreeAction: true
+                        isFreeAction: true,
                     },
                     {
                         icon: 'create',

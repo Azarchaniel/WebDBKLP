@@ -31,16 +31,21 @@ const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions, 
                 draggable: false,
                 rowStyle: {borderBottom: '2px solid lightgray'},
                 emptyRowsWhenPaging: false,
+                numberOfPagesAround: 2
             }}
             actions={[
+                ...actions,
                 {
                     icon: 'filter_list',
                     tooltip: 'Zobraz/Skry filter',
                     onClick: () => {
                         setShowFilter(!showFilter)
                     },
-                    isFreeAction: true
-                }, ...actions,
+                    isFreeAction: true,
+                    iconProps: {
+                        className: "moveToLeft"
+                    }
+                },
             ]}
             localization={{
                 body: {emptyDataSourceMessage: 'Žiadne záznamy'},

@@ -1,5 +1,4 @@
 import Sidebar from "../../components/Sidebar";
-import {Link} from "react-router-dom";
 import AddQuote from "./AddQuote";
 import {IQuote} from "../../type";
 import QuoteItem from "./QuoteItem";
@@ -9,9 +8,12 @@ import {addQuote, deleteQuote, getQuotes} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
 import {darkenLightenColor} from "../../utils/utils";
+import Header from "../../components/Header";
+import LoadingBooks from "../../components/LoadingBooks";
 
 export default function QuotePage() {
     const [quotes, setQuotes] = useState<IQuote[]>([]);
+    const [loading, setLoading] = useState(true);
 
     let colors = ['#77dd77', '#836953', '#89cff0', '#99c5c4', '#9adedb', '#aa9499', '#aaf0d1', '#b2fba5', '#b39eb5', '#bdb0d0',
         '#bee7a5', '#befd73', '#c1c6fc', '#c6a4a4', '#c8ffb0', '#cb99c9', '#cef0cc', '#cfcfc4', '#d6fffe', '#d8a1c4', '#dea5a4', '#deece1',
@@ -26,6 +28,7 @@ export default function QuotePage() {
         getQuotes()
             .then(({ data: { quotes } }: IQuote[] | any) => {
                 setQuotes(quotes);
+                setLoading(false);
             })
             .catch((err: Error) => console.trace(err))
     }
@@ -93,10 +96,12 @@ export default function QuotePage() {
 
     return (
         <main className='App'>
+            <Header/>
             <Sidebar />
-            <h1><Link className='customLink' to='/'>WebDBKLP</Link></h1>
-
             <AddQuote saveQuote={handleSaveQuote} />
+            <div style={{position: "fixed", top: "20rem", zIndex: 1000}}>
+                {loading ? <LoadingBooks /> : <></>}
+            </div>
             <div className="quote_container">
                 {quotes?.map((quote: IQuote) => {
                     if (quote.isDeleted) return null;

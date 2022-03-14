@@ -42,8 +42,8 @@ const addQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const quote = new quote_1.default({
             text: text,
-            fromBook: fromBook[0],
             note: note,
+            fromBook: fromBook ? fromBook[0] : [],
             isDeleted: isDeleted
         });
         const newQuote = yield quote.save();

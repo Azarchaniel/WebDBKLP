@@ -78,9 +78,7 @@ const AddLp: React.FC<Props> = ({saveLp}: { saveLp: any }) => {
 
     const showAddLp = () => {
         return (<>
-            <button type="button" className="btn btn-dark" data-toggle="modal" data-target="#quoteModal">
-                Pridaj LP
-            </button>
+            <button type="button" className="addBtnTable" data-toggle="modal" data-target="#quoteModal"/>
 
             <div className="modal fade" id="quoteModal" tabIndex={-1} role="dialog"
                  aria-labelledby="exampleModalLabel" aria-hidden="true">

@@ -11,9 +11,12 @@ import ChipInput from "material-ui-chip-input";
 
 type Props = {
     saveBook: (e: React.FormEvent, formData: IBook | any) => void;
+    open: boolean;
+    bookId?: string | undefined;
 }
 
-const AddBook: React.FC<Props> = ({saveBook}) => {
+const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
+    const [openedModal, setOpenedModal] = useState<boolean>(open);
     const [formData, setFormData] = useState<IBook | {}>()
     const [autors, setAutors] = useState<IAutor[] | any>();
     const [users, setUsers] = useState<IUser[] | undefined>();
@@ -31,6 +34,7 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
 
     //param [] will make useEffect to go only once
     useEffect(() => {
+        console.log(open, bookId);
         getAutors()
             .then(aut => {
                 //constructing fullName for autocomplete
@@ -115,27 +119,16 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
         cityRef?.current?.resetSelectedValues();
     }
 
-    //TODO: there should be also Content. Chips?
-    //Dimensions
     const showAddBook = () => {
         return (
             <>
-                <button type="button" className="btn btn-dark" data-toggle="modal" data-target="#bookModal">
-                    Pridaj knihu
-                </button>
-
-                <div className="modal fade" id="bookModal" tabIndex={-1} role="dialog"
-                     aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog" role="document">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title" id="exampleModalLabel"><b>Pridať knihu</b></h5>
-                                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div className="modal-body">
-                                <form className="modal-body" onSubmit={(e) => {
+                <button className="addBtnTable" onClick={() => setOpenedModal(!openedModal)}/>
+                {
+                    openedModal ?
+                        <>
+                            <div className="modalBgr"/>
+                            <div className="modalBody">
+                                <form onSubmit={(e) => {
                                     saveBook(e, formData);
                                     cleanFields();
                                 }}>
@@ -522,7 +515,8 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                         <button type="button" className="btn btn-secondary"
                                                 onClick={cleanFields}>Vymazať polia
                                         </button>
-                                        <button type="button" className="btn btn-secondary" data-dismiss="modal">Zavrieť
+                                        <button type="button" className="btn btn-secondary"
+                                                onClick={() => setOpenedModal(false)}>Zavrieť
                                         </button>
                                         {/* TODO: add button Save and add another */}
                                         <button type="submit"
@@ -532,9 +526,9 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
                                     </div>
                                 </form>
                             </div>
-                        </div>
-                    </div>
-                </div>
+                        </>
+                        : <></>
+                }
             </>
         );
     }

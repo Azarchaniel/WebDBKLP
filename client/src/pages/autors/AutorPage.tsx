@@ -5,10 +5,10 @@ import {addAutor, deleteAutor, getAutor, getAutors} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
 import Sidebar from "../../components/Sidebar";
-import {Link} from "react-router-dom";
 import Toast from "../../components/Toast";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import {shortenStringKeepWord} from "../../utils/utils";
+import Header from "../../components/Header";
 
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
@@ -90,8 +90,8 @@ export default function AutorPage() {
 
     return (
         <main className='App'>
+            <Header/>
             <Sidebar/>
-            <h1><Link className='customLink' to='/'>WebDBKLP</Link></h1>
             <AddAutor saveAutor={handleSaveAutor}/>
             <MaterialTableCustom
                 title="Autori"

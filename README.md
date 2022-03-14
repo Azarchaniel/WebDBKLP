@@ -23,8 +23,8 @@ cd ./client; npm run
 - [X] clean form after saving item
 - [X] create all models and interfaces
 - [X] there is problem with fetchAll in Quotes when deleting
-- [ ] import books from DBKLP
-- -[ ] write script, that will get ID of every author
+- [ ] divide CSS into chunks based on page
+- [ ] updating book - fix modal AddBook
 - [ ] in BookDetail, when clicking on Edice/Serie, filter every book from Edice/Serie
 - -[ ] but this requires to have Edice/Serie as entry in DB with ID
 - -[ ] which require CRUD form Edice/Serie
@@ -35,6 +35,8 @@ cd ./client; npm run
 - [X] custom modal - grid system
 - [ ] webscrapper and autofilling
 - [ ] some reports, numbers, graph on Main page
+- [ ] import books from DBKLP
+- -[ ] write script, that will get ID of every author
 - [ ] (in far future) localization
 - [ ] (in far future) authorization/authentication
 - - [ ] add comments

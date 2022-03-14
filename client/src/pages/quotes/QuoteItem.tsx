@@ -13,6 +13,8 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, updateQuote}) => {
     const [bookTitle, setBookTitle] = useState<IBook>();
 
     useEffect(() => {
+        //don't try to fetch when there is no book
+        if (!quote.fromBook.length) return;
         getBook(quote.fromBook).then((book) => {
             setBookTitle(book.data.book);
         }).catch(err => {throw new Error('Cant find book in QuoteItem' + err)});
@@ -33,7 +35,8 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, updateQuote}) => {
         <div className={cssGrid()} style={{backgroundColor: bcgrClr}}>
             <div className='text'>
                 <p>Text: {quote.text}</p>
-                <p>Z knihy: {bookTitle?.title}{isNumber(quote.pageNo) ? ', ' + quote.pageNo : ''}</p>
+                {bookTitle ? <p>Z knihy: {bookTitle?.title}{isNumber(quote.pageNo) ? ', ' + quote.pageNo : ''}</p>
+                    : <></>}
             </div>
             <div className='Card--button'>
                 <Tooltip title="Upraviť" placement="bottom">

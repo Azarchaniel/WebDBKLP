@@ -1,6 +1,6 @@
 $thickness : 5px;
 $duration : 2500;
-$delay : $duration/6;
+$delay : $duration*0.16;
 $baseColor: #BEA24B;
 
 @mixin polka($size, $dot, $base, $accent){
@@ -41,6 +41,7 @@ body {
   transform-origin: bottom left;
   transform: translateX(300px);
   animation: travel #{$duration}ms linear infinite;
+  left: 41vw;
 
   &.first {
     top: -140px;
@@ -178,21 +179,29 @@ body {
 
 .textPatience {
   font-size: 1.5rem;
-  padding: 1rem;
-  height: 5rem;
+  padding: 1rem 1rem 4rem 1rem;
+  height: 17vw;
   margin: 0 auto;
-  color: $baseColor;
+  color: #BEA24B;
   background-color: white;
   position: absolute;
-  left: 40vw;
+  left: 39vw;
   font-weight: bold;
+  width: 17vw;
+  top: -10vw;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  border-radius: 50%;
+  z-index: -1;
+  border: 4px solid #bea24b;
 }
 
 .shelf {
   width: 300px;
   height: $thickness;
   margin: 0 auto;
-  background-color: white;
+  display: none;
   position: relative;
 
   &:before,
@@ -204,7 +213,7 @@ body {
     @include polka(10px, 30%, $baseColor, rgba(255,255,255,0.5));
     top: 200%;
     left: 5%;
-    animation: move #{$duration/10}ms linear infinite;
+    animation: move #{$duration*0.1}ms linear infinite;
   }
 
   &:after {

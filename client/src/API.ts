@@ -181,10 +181,10 @@ export const addQuote = async (
     formData: any
 ): Promise<AxiosResponse<ApiQuoteDataType>> => {
   try {
-    console.trace('add autor', formData);
+    console.trace('add quote', formData);
     const quote: any = {
       text: formData.text,
-      fromBook: formData.fromBook
+      fromBook: formData.fromBook ?? []
     }
     const saveQuote: AxiosResponse<ApiQuoteDataType> = await axios.post(
         baseUrl + '/add-quote',

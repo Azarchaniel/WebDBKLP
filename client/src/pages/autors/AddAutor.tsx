@@ -89,9 +89,7 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
     const showAddAutor = () => {
         return (
             <>
-                <button type="button" className="btn btn-dark" data-toggle="modal" data-target="#autorModal">
-                    Pridaj autora
-                </button>
+                <button type="button" className="addBtnTable" data-toggle="modal" data-target="#autorModal"/>
 
                 <div className="modal fade" id="autorModal" tabIndex={-1} role="dialog"
                      aria-labelledby="autorModalLabel" aria-hidden="true">

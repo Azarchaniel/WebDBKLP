@@ -22,7 +22,7 @@ const getUser = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
-// USERS WILL BE MANAGED DIRECTLY IN DB
+// TODO: frontend
 
 // const addUser = async (req: Request, res: Response): Promise<void> => {
 //     const {firstName, lastName, hashedPassword} = req.body;

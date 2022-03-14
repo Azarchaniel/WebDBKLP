@@ -28,9 +28,9 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
 
     try {
         const quote: IQuote = new Quote({
-           text: text,
-            fromBook: fromBook[0],
+            text: text,
             note: note,
+            fromBook: fromBook ? fromBook[0] : [],
             isDeleted: isDeleted
         });
 
