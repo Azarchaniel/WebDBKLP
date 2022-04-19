@@ -1,9 +1,12 @@
 import { Document } from 'mongoose'
+import { IBook } from './book';
+import { IUser } from './user';
 
 export interface IQuote extends Document {
     text: string; //text or URL to pic
-    fromBook: string; //id
+    fromBook: IBook[]; //id
     pageNo?: number;
     note?: string;
-    isDeleted: boolean;
+    deletedAt: Date;
+    owner: IUser[];
 }

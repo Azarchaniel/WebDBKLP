@@ -32,7 +32,7 @@ const addAutor = async (req: Request, res: Response): Promise<void> => {
             dateOfDeath: dateOfDeath,
             note: note,
             nationality: nationality ?? '',
-            isDeleted: false
+            deletedAt: null
         });
 
         const newAutor: IAutor = await autor.save()
@@ -75,7 +75,7 @@ const deleteAutor = async (req: Request, res: Response): Promise<void> => {
             {_id: id},
             {
                 ...body,
-                isDeleted: true
+                deletedAt: new Date()
             }
         )
         const allAutors: IAutor[] = await Autor.find()

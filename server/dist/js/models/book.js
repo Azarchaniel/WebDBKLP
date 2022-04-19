@@ -41,7 +41,7 @@ const bookSchema = new mongoose_1.Schema({
     exLibris: { type: Boolean },
     published: { type: published_1.publishedSchema, required: false },
     location: { type: location_1.locationSchema, required: false },
-    isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: false },
     owner: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: true },
     readBy: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false },
     picture: { type: String, required: false }

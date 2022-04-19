@@ -23,7 +23,6 @@ router.post('/delete-autor/:id', controllers_2.deleteAutor);
 router.get('/quote/:id', controllers_3.getQuote);
 router.get('/quotes', controllers_3.getAllQuotes);
 router.post('/add-quote', controllers_3.addQuote);
-router.put('/edit-quote/:id', controllers_3.updateQuote);
 router.post('/delete-quote/:id', controllers_3.deleteQuote);
 // ### USERS ###
 router.get('/user/:id', controllers_4.getUser);
@@ -34,4 +33,5 @@ router.get('/lps', controllers_5.getAllLps);
 router.post('/add-lp', controllers_5.addLp);
 router.put('/edit-lp/:id', controllers_5.updateLp);
 router.post('/delete-lp/:id', controllers_5.deleteLp);
+router.get('/webScrapper');
 exports.default = router;

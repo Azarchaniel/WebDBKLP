@@ -2,7 +2,7 @@ import {IEditionSerie} from "../../server/src/types";
 
 interface IBaseType {
     _id: string;
-    isDeleted?: boolean;
+    deletedAt?: string;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -67,9 +67,10 @@ export interface IUser extends IBaseType {
 
 export interface IQuote extends IBaseType {
     text: string; //text or URL to pic
-    fromBook: string; //id
+    fromBook: IBook[];
     pageNo?: number;
     note?: string;
+    owner: IUser[];
 }
 
 type BookProps = {

@@ -1,7 +1,7 @@
 import {Router} from 'express'
 import {getAllBooks, addBook, updateBook, deleteBook, getBook} from '../controllers'
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
-import {addQuote, deleteQuote, getAllQuotes, getQuote, updateQuote} from "../controllers";
+import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
 import {getAllUsers, getUser} from "../controllers";
 import {addLp, deleteLp, getAllLps, getLp, updateLp} from "../controllers";
 
@@ -25,7 +25,6 @@ router.post('/delete-autor/:id', deleteAutor)
 router.get('/quote/:id', getQuote)
 router.get('/quotes', getAllQuotes)
 router.post('/add-quote', addQuote)
-router.put('/edit-quote/:id', updateQuote)
 router.post('/delete-quote/:id', deleteQuote)
 
 // ### USERS ###
@@ -38,5 +37,7 @@ router.get('/lps', getAllLps)
 router.post('/add-lp', addLp)
 router.put('/edit-lp/:id', updateLp)
 router.post('/delete-lp/:id', deleteLp)
+
+router.get('/webScrapper', )
 
 export default router;

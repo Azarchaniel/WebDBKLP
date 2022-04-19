@@ -2,7 +2,7 @@ import {Response, Request} from 'express';
 import {ILp} from '../types';
 import Lp from '../models/lp';
 
-const getAllLps = async (req: Request, res: Response): Promise<void> => {
+const getAllLps = async (_: Request, res: Response): Promise<void> => {
     try {
         const lps: ILp[] = await Lp
             .find()
@@ -102,7 +102,7 @@ const deleteLp = async (req: Request, res: Response): Promise<void> => {
             {_id: id},
             {
                 ...body,
-                isDeleted: true
+                deletedAt: new Date()
             }
         )
         const allLps: ILp[] = await Lp.find().populate([

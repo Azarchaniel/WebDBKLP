@@ -18,3 +18,4 @@ __exportStar(require("./editionSerie"), exports);
 __exportStar(require("./lp"), exports);
 __exportStar(require("./published"), exports);
 __exportStar(require("./location"), exports);
+;

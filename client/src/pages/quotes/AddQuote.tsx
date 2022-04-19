@@ -4,16 +4,19 @@ import {toast} from "react-toastify";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {Multiselect} from "multiselect-react-dropdown";
-import {getBooks, getUsers} from "../../API";
+import {getBooks, getQuote, getUsers} from "../../API";
 import ReactTooltip from "react-tooltip";
+import ToggleButton from "../../components/ToggleButton";
 
 type Props = {
-    saveQuote: (e: React.FormEvent, formData: IQuote | any) => void
+    saveQuote: (e: React.FormEvent, formData: IQuote | any) => void;
+    id?: string | undefined;
 }
 
-const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
+const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: string | undefined }) => {
     const [showModal, setShowModal] = useState<boolean>(false);
-    const [formData, setFormData] = useState<IQuote | {}>();
+    const [isText, setIsText] = useState<boolean>(true);
+    const [formData, setFormData] = useState<IQuote | any>({fromBook: null, owner: null, _id: null, text: '', note: '', pageNo: null});
     const [books, setBooks] = useState<IBook[]>();
     const [error, setError] = useState<string | undefined>('Text citátu musí obsahovať aspoň jeden znak!');
     const [users, setUsers] = useState<IUser[] | undefined>();
@@ -23,29 +26,46 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
     useEffect(() => {
         getBooks()
             .then(books => {
-                setBooks(books.data.books.map((book: IBook) => ({
+               setBooks(books.data.books.map((book: IBook) => ({
                     ...book,
                     showName: `${book.title} 
                         ${book.autor && book.autor[0] && book.autor[0].firstName ? '/ ' + book.autor[0].firstName : ''} 
                         ${book.autor && book.autor[0] && book.autor[0].lastName ? book.autor[0].lastName : ''} 
                         ${book.published && book.published?.year ? '/ ' + book.published?.year : ''}`
                 }))
-                    .filter((book: IBook) => !book.isDeleted)
+                    .filter((book: IBook) => !book.deletedAt)
                     .sort((a: Partial<IBook>, b: Partial<IBook>) => a.title!.localeCompare(b.title!)));
-
             })
             .catch(err => {
                 toast.error('Nepodarilo sa nacitat knihy!');
                 console.error('Couldnt fetch books', err)
             });
+
         getUsers().then(user => {
             setUsers(user.data.users.map((user: IUser) => ({
                 ...user,
                 fullName: `${user.lastName}, ${user.firstName}`
             })).sort((a: any, b: any) => a.fullName!.localeCompare(b.fullName!)));
-        }).catch();
-    }, [formData])
+        }).catch(err => console.trace("Error while fetching Users", err));
 
+        if (id) {
+            setShowModal(true);
+            getQuote(id).then(quote => {
+                const currentQuote = quote.data.quote;
+                setFormData({
+                    _id: currentQuote?._id, 
+                    text: currentQuote?.text || undefined, 
+                    fromBook: currentQuote?.fromBook || undefined,
+                    pageNo: currentQuote?.pageNo || undefined,
+                    owner: currentQuote?.owner || undefined,
+                    note: currentQuote?.note || undefined
+                });
+            })
+            .catch(err => console.trace("Error while fetching Quotes", err));
+        }
+    }, [])
+
+    //ERROR HANDLING
     useEffect(() => {
         //shortcut
         const data = (formData as unknown as IQuote);
@@ -87,57 +107,72 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
         ownerRef?.current?.resetSelectedValues();
     }
 
+    const onChange = (selected: any, type: "user" | "book") => {
+        //todo: merge with "handleForm"
+        type === "user" ? 
+            setFormData({...formData, user: selected}) : 
+            setFormData({...formData, book: selected});
+    }
+
     const showAddQuote = () => {
         return (<>
-            <button type="button" className="addQuote" onClick={() => setShowModal(true)} data-tip="Pridaj citát"/>
+            {id ? <></> : <button type="button" className="addQuote" onClick={() => setShowModal(true)} data-tip="Pridaj citát"/>}
 
             {showModal ?
                 <>
                     <div className="modalBgr"/>
                     <div className="modalBody">
-                        <form onSubmit={(e) => {
+                        <form
+                            onSubmit={(e) => {
                             saveQuote(e, formData);
                             cleanFields();
                         }}>
+                            <input type="hidden" name="id" value={id} onLoad={() => console.log('##########################')}/>
                             <div className="row">
                                 <div className="col">
-                                        <textarea onChange={handleForm} id='text' placeholder='*Text'
-                                                  className="form-control" autoComplete="off"
-                                                  value={formData && "text" in formData ? formData.text : ''}/>
+                                    {isText ? <textarea onChange={handleForm} id='text' placeholder='*Text'
+                                                        className="form-control" autoComplete="off"
+                                                        value={formData && "text" in formData ? formData.text : ''}/> :
+                                        <label className="btn btn-dark">
+                                            <i className="fa fa-image"/> Nahraj obrázky
+                                            <input type="file" style={{display: "none"}} name="image" accept="image/*"/>
+                                        </label>
+                                    }
                                 </div>
                             </div>
                             <div style={{height: '5px', width: '100%'}}/>
                             <div className="row">
-                                <div className="col">
+                                <div className="col-3">
+                                    <ToggleButton labelLeft="Text" labelRight="Obrázek"
+                                                  state={() => setIsText(!isText)}/>
+                                </div>
+                                <div className="col-6">
                                     <Multiselect
                                         options={books}
                                         isObject={true}
-                                        displayValue="showName"
+                                        displayValue="title"
                                         closeOnSelect={true}
                                         placeholder="Z knihy"
                                         closeIcon="cancel"
                                         emptyRecordMsg="Žiadne knihy nenájdené"
                                         selectionLimit={1}
-                                        onSelect={(pickedBook: IBook[]) => {
-                                            setFormData({
-                                                ...formData, fromBook: pickedBook
-                                                    .map(v => v._id)
-                                            })
-                                        }}
+                                        onSelect={(value: IBook) => onChange(value, "book")}
+                                        onRemove={(value: IBook) => onChange(value, "book")}
                                         style={{
                                             inputField: {marginLeft: "0.5rem"},
                                             optionContainer: {
                                                 backgroundColor: "transparent",
                                             },
-                                            option: {},
+                                            option: {color: "black"},
                                             multiselectContainer: {maxWidth: '100%'},
                                         }}
                                         ref={bookRef}
+                                        selectedValues={formData.fromBook}
                                     />
                                 </div>
-                                <div className="col">
+                                <div className="col-3">
                                     <input type="number" id="pageNo" onChange={handleForm} placeholder="Strana"
-                                           className="form-control" autoComplete="off"/>
+                                           className="form-control" autoComplete="off" value={formData && "pageNo" in formData ? formData.pageNo : ''}/>
                                 </div>
                             </div>
                             <div style={{height: '5px', width: '100%'}}/>
@@ -145,12 +180,12 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
                                 <div className="col">
                                     <Multiselect
                                         options={users}
-                                        displayValue="fullName"
                                         placeholder="Vlastník"
+                                        displayValue="firstName"
+                                        emptyRecordMsg="Žiadni užívatelia nenájdení"
                                         closeIcon="cancel"
-                                        onSelect={(picked: IUser[]) => {
-                                            setFormData({...formData, owner: picked.map(v => v._id)})
-                                        }}
+                                        onSelect={(value: IUser) => onChange(value, "user")}
+                                        onRemove={(value: IUser) => onChange(value, "user")}
                                         style={{
                                             inputField: {marginLeft: "0.5rem"},
                                             searchBox: {
@@ -158,9 +193,11 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
                                                 paddingRight: '5px',
                                                 marginRight: '-5px',
                                                 borderRadius: '3px'
-                                            }
+                                            },
+                                            option: {color: "black"}
                                         }}
                                         ref={ownerRef}
+                                        selectedValues={formData.owner}
                                     />
                                 </div>
                             </div>
@@ -174,27 +211,15 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any }) => {
                                 </div>
                             </div>
                             <div style={{height: '5px', width: '100%'}}/>
-                            <div className="row">
-                                {/*<SearchAutocomplete*/}
-                                {/*    data={getBooks()}*/}
-                                {/*    async={true}*/}
-                                {/*    multiple={false}*/}
-                                {/*    placeholder="Skuska autocomplete"*/}
-                                {/*    searchInAttr="title"*/}
-                                {/*    showTable={true}*/}
-                                {/*    showAttrInDropdown="title /"*/}
-                                {/*    showAttrInTableOrResult="title"*/}
-                                {/*/>*/}
-                            </div>
 
                             {showError()}
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary"
                                         onClick={cleanFields}>Vymazať polia
                                 </button>
-                                <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Zavrieť
+                                <button type="button" className="btn btn-secondary"
+                                        onClick={() => {setShowModal(false); id = undefined}}>Zavrieť
                                 </button>
-                                {/* TODO: add button Save and add another */}
                                 <button type="submit"
                                         disabled={Boolean(error)}
                                         className="btn btn-success">Uložiť citát

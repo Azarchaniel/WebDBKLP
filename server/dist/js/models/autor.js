@@ -8,6 +8,6 @@ const autorSchema = new mongoose_1.Schema({
     dateOfBirth: { type: Date, required: false },
     dateOfDeath: { type: Date, required: false },
     note: { type: String, required: false },
-    isDeleted: { type: Boolean, defaut: false }
+    deletedAt: { type: Date, defaut: false }
 }, { timestamps: true });
 exports.default = (0, mongoose_1.model)('Autor', autorSchema);

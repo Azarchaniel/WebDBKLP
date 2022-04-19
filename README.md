@@ -23,6 +23,7 @@ cd ./client; npm run
 - [X] clean form after saving item
 - [X] create all models and interfaces
 - [X] there is problem with fetchAll in Quotes when deleting
+- [ ] allow uploading picture instead of text in Quotes - [url]:https://www.bezkoder.com/node-js-upload-store-images-mongodb/
 - [ ] divide CSS into chunks based on page
 - [ ] updating book - fix modal AddBook
 - [ ] in BookDetail, when clicking on Edice/Serie, filter every book from Edice/Serie
@@ -30,6 +31,7 @@ cd ./client; npm run
 - -[ ] which require CRUD form Edice/Serie
 - -[ ] I need it in DB for MultiSelect anyway
 - [X] a href to DatabazeKnih and GoodReads
+- [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend)
 - [ ] fix router not fetching data when changing Owner
 - [ ] rework Autocomplete - custom
 - [X] custom modal - grid system

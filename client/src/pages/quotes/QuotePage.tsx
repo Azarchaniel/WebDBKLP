@@ -49,8 +49,6 @@ export default function QuotePage() {
             })
     }
 
-    const handleUpdateQuote = (): any => {}
-
     const handleDeleteQuote = (_id: string): void => {
         confirmAlert({
             title: 'Vymazať citát?',
@@ -98,16 +96,15 @@ export default function QuotePage() {
         <main className='App'>
             <Header/>
             <Sidebar />
-            <AddQuote saveQuote={handleSaveQuote} />
+            <AddQuote saveQuote={handleSaveQuote}/>
             <div style={{position: "fixed", top: "20rem", zIndex: 1000}}>
                 {loading ? <LoadingBooks /> : <></>}
             </div>
             <div className="quote_container">
                 {quotes?.map((quote: IQuote) => {
-                    if (quote.isDeleted) return null;
+                    if (quote.deletedAt) return null;
                     return <QuoteItem
                         key={quote._id}
-                        updateQuote={handleUpdateQuote}
                         deleteQuote={handleDeleteQuote}
                         quote={quote}
                         bcgrClr={getRndColor()}

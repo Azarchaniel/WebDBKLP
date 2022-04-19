@@ -1,18 +1,22 @@
 import {Response, Request} from 'express';
-import {IBook} from '../types';
+import {IBook, IPopulateOptions} from '../types';
 import Book from '../models/book';
 
-const getAllBooks = async (req: Request, res: Response): Promise<void> => {
+const populateOptions: IPopulateOptions[] = [
+    {path: 'autor', model: 'Autor'},
+    {path: 'editor', model: 'Autor'},
+    {path: 'ilustrator', model: 'Autor'},
+    {path: 'translator', model: 'Autor'},
+    {path: 'owner', model: 'User'},
+    {path: 'readBy', model: 'User'}
+];
+
+const getAllBooks = async (_: Request, res: Response): Promise<void> => {
     try {
         //remember: when populating, and NameOfField != Model, define it with {}
-        //todo: populate also editor, translator...
         const books: IBook[] = await Book
             .find()
-            .populate([
-                {path: 'autor', model: 'Autor'},
-                {path: 'owner', model: 'User'},
-                {path: 'readBy', model: 'User'}
-            ])
+            .populate(populateOptions)
             .exec();
         res.status(200).json({books: books})
     } catch (error) {
@@ -24,17 +28,12 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
     try {
         const book = await Book
             .findById(req.params.id)
-            .populate([
-                {path: 'autor', model: 'Autor'},
-                {path: 'owner', model: 'User'},
-                {path: 'readBy', model: 'User'}
-            ])
+            .populate(populateOptions)
             .exec();
-        const allBooks: IBook[] = await Book.find().populate([
-            {path: 'autor', model: 'Autor'},
-            {path: 'owner', model: 'User'},
-            {path: 'readBy', model: 'User'}
-        ]).exec()
+        const allBooks: IBook[] = await Book
+            .find()
+            .populate(populateOptions)
+            .exec()
         res.status(200).json({book: book, books: allBooks})
     } catch (err) {
         throw err;
@@ -43,7 +42,6 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
 
 const addBook = async (req: Request, res: Response): Promise<void> => {
     try {
-        //todo: there has to be a better way for cleaner code
         const {
             published, location
         } = req.body;
@@ -63,11 +61,10 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
         })
 
         const newBook: IBook = await book.save()
-        const allBooks: IBook[] = await Book.find().populate([
-            {path: 'autor', model: 'Autor'},
-            {path: 'owner', model: 'User'},
-            {path: 'readBy', model: 'User'}
-        ]).exec();
+        const allBooks: IBook[] = await Book
+            .find()
+            .populate([populateOptions])
+            .exec();
 
         res.status(201).json({message: 'Book added', book: newBook, books: allBooks})
     } catch (error) {
@@ -85,11 +82,10 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
             {_id: id},
             body
         )
-        const allBooks: IBook[] = await Book.find().populate([
-            {path: 'autor', model: 'Autor'},
-            {path: 'owner', model: 'User'},
-            {path: 'readBy', model: 'User'}
-        ]).exec();
+        const allBooks: IBook[] = await Book
+            .find()
+            .populate(populateOptions)
+            .exec();
 
         res.status(200).json({
             message: 'Book updated',
@@ -111,14 +107,13 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
             {_id: id},
             {
                 ...body,
-                isDeleted: true
+                deletedAt: new Date()
             }
         )
-        const allBooks: IBook[] = await Book.find().populate([
-            {path: 'autor', model: 'Autor'},
-            {path: 'owner', model: 'User'},
-            {path: 'readBy', model: 'User'}
-        ]).exec();
+        const allBooks: IBook[] = await Book
+            .find()
+            .populate(populateOptions)
+            .exec();
 
         res.status(200).json({
             message: 'Book deleted',

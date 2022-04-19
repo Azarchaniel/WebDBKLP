@@ -25,7 +25,7 @@ const Header: React.FC = () => {
     }
 
     return (
-        <div className="header">
+        <div className="header" style={{userSelect: "none", msUserSelect: "none"}}>
             <h1><Link className='customLink appHeader' to='/'>WebDBKLP</Link></h1>
             {owners?.map((owner: IUser) =>
                 <span

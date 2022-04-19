@@ -10,6 +10,7 @@ const quoteSchema = new mongoose_1.Schema({
     fromBook: { type: [mongoose_2.default.Schema.Types.ObjectId], ref: 'Book', required: false },
     pageNo: { type: Number, required: false },
     note: { type: String, required: false },
-    isDeleted: { type: Boolean, defaut: false }
+    owner: { type: [mongoose_2.default.Schema.Types.ObjectId], ref: 'User', required: false },
+    deletedAt: { type: Date, defaut: false }
 }, { timestamps: true });
 exports.default = (0, mongoose_1.model)('Quote', quoteSchema);

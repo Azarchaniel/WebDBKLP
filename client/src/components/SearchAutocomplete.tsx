@@ -30,7 +30,7 @@ const SearchAutocomplete: (props: SAprops) => JSX.Element = (props) => {
     useEffect(async () => {
         if (async) {
             let neco = await data;
-            setDataLocal(neco.data.books.filter((book: IBook) => !book.isDeleted));
+            setDataLocal(neco.data.books.filter((book: IBook) => !book.deletedAt));
         }
         //document.addEventListener('click', handleClickOutside);
     }, []);

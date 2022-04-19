@@ -1,7 +1,7 @@
-import {IAutor} from "../type";
+import {IAutor, IUser} from "../type";
 
 export const shortenStringKeepWord = (text: string, maxLength: number) => {
-    //if the text is longer than 30 chars, shorten it. ELSE return unchanged
+    //if the text is longer than maxLength chars, shorten it. ELSE return unchanged
     if (text.length > maxLength) {
         //shorten the string but keep the whole word
         return text.slice(0,maxLength).split(' ').slice(0, -1).join(' ') + '...'
@@ -41,6 +41,14 @@ export const stringifyAutors = (data: any) => {
     });
 
     return dataM;
+}
+
+export const stringifyUsers = (data: IUser[], withSurname: boolean) => {
+    let names = '';
+    data.forEach((autor: IAutor, index: number) =>
+        index > 0 ? names += `; ${withSurname ? autor.lastName + ',' : ''} ${autor.firstName}`
+            : names = `${withSurname ? autor.lastName + ',' : ''} ${autor.firstName}`);
+    return names;
 }
 
 export const darkenLightenColor = (color: string, percent: number) => {

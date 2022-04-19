@@ -140,10 +140,10 @@ const Sidebar = () => {
             {sidebarOpened ? <span
                 className="closeIcon"
                 onClick={() => setSidebarOpened(!sidebarOpened)}
-            ><i className="fas fa-times"></i></span> : <span
+            ><i className="fas fa-times customLink"/></span> : <span
                 className="closeIcon"
                 onClick={() => setSidebarOpened(!sidebarOpened)}
-            ><i className="fas fa-bars"></i></span>}
+            ><i className="fas fa-bars customLink"/></span>}
             {showContent(content)}
         </div>
     );

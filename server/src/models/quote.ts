@@ -7,7 +7,8 @@ const quoteSchema: Schema = new Schema({
     fromBook: {type: [mongoose.Schema.Types.ObjectId], ref: 'Book', required: false},
     pageNo: {type: Number, required: false},
     note: {type: String, required: false},
-    isDeleted: { type: Boolean, defaut: false }
+    owner: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false},
+    deletedAt: { type: Date, defaut: false }
 }, {timestamps: true})
 
 export default model<IQuote>('Quote', quoteSchema);

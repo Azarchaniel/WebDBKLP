@@ -23,7 +23,7 @@ export interface IBook extends Document {
     exLibris: boolean;
     location: ILocation;
     owner: string;
-    isDeleted: boolean;
+    deletedAt: Date;
     readBy: string[];
     picture?: string;
     hrefGoodReads?: string;

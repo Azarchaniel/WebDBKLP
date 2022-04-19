@@ -8,7 +8,7 @@ const autorSchema: Schema = new Schema({
     dateOfBirth: { type: Date, required: false },
     dateOfDeath: { type: Date, required: false },
     note: { type: String, required: false },
-    isDeleted: { type: Boolean, defaut: false }
+    deletedAt: { type: Date, defaut: false }
 }, {timestamps: true})
 
 export default model<IAutor>('Autor', autorSchema);

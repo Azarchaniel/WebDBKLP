@@ -8,5 +8,5 @@ export interface IAutor extends Document {
     dateOfDeath?: Date;
     note?: string;
     fullName?: string;
-    isDeleted?: boolean;
+    deletedAt?: Date;
 }

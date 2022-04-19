@@ -13,7 +13,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "mongoose": "^5.9.20"
+    "mongoose": "^5.9.20",
+    "puppeteer": "^13.5.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.6",

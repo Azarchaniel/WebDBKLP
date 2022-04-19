@@ -25,6 +25,7 @@ interface IBookHidden {
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>();
     const [openModal, setOpenModal] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
     const [hidden, setHidden] = useState<IBookHidden>({
         control: true,
         editor: true,
@@ -76,8 +77,8 @@ export default function BookPage() {
                     })
                     books = booksArr;
                 }
-
-                books = books.filter((bk: IBook) => bk.isDeleted !== true);
+                books = books.filter((bk: IBook) => !bk.deletedAt);
+                
                 for (let book of books) {
                     if (book.note) {
                         book.note = shortenStringKeepWord(book.note, 30)
@@ -86,6 +87,7 @@ export default function BookPage() {
                 setClonedBooks(stringifyAutors(books));
             })
             .catch((err: Error) => console.trace(err))
+            .finally(() => setLoading(false))
     }
 
     const handleSaveBook = (e: React.FormEvent, formData: IBook): void => {
@@ -126,7 +128,7 @@ export default function BookPage() {
                                             throw new Error('Error! Book not deleted')
                                         }
                                         toast.success(`Kniha ${data.book?.title} bola uspesne vymazana.`);
-                                        //setBooks(data.books)
+                                        fetchBooks();
                                     })
                                     .catch((err) => {
                                         toast.error('Chyba! Knihu nemožno vymazať!');
@@ -216,6 +218,7 @@ export default function BookPage() {
                 </p>
             </div>
             <MaterialTableCustom
+                loading={loading}
                 title='Knihy'
                 data={clonedBooks ?? []}
                 columns={[

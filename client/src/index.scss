@@ -235,6 +235,7 @@ body, html, main, #root {
 .customLink {
   text-decoration: none;
   color: white;
+  user-select: none;
 
   &:hover {
     color: #bea24b !important;
@@ -509,11 +510,11 @@ th.MuiTableCell-root:last-child, th.MuiTableCell-root:nth-last-child(2) {
     color: #bea24b;
     margin: 0 1rem;
     font-size: 2rem;
+
     &:hover {
       color: #766230FF !important;
       text-decoration: none !important;
     }
-
   }
 }
 

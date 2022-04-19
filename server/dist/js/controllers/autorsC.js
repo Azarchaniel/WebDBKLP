@@ -46,7 +46,7 @@ const addAutor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             dateOfDeath: dateOfDeath,
             note: note,
             nationality: nationality !== null && nationality !== void 0 ? nationality : '',
-            isDeleted: false
+            deletedAt: null
         });
         const newAutor = yield autor.save();
         const allAutors = yield autor_1.default.find();
@@ -76,7 +76,7 @@ exports.updateAutor = updateAutor;
 const deleteAutor = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { params: { id }, body, } = req;
-        const deletedAutor = yield autor_1.default.findByIdAndUpdate({ _id: id }, Object.assign(Object.assign({}, body), { isDeleted: true }));
+        const deletedAutor = yield autor_1.default.findByIdAndUpdate({ _id: id }, Object.assign(Object.assign({}, body), { deletedAt: new Date() }));
         const allAutors = yield autor_1.default.find();
         res.status(200).json({
             message: 'Autor deleted',

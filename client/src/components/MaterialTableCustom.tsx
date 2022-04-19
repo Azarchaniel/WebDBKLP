@@ -3,16 +3,16 @@ import React, {useState} from "react";
 import LoadingBooks from "./LoadingBooks";
 import MaterialTable, {Column} from "@material-table/core";
 
-
 type PropsMT = {
     title: string,
     data: any[],
     columns: Column<any>[],
     actions: any[],
     detailPanel?: any,
+    loading?: boolean
 }
 
-const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions, detailPanel}: PropsMT) => {
+const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions, detailPanel, loading}: PropsMT) => {
     const [showFilter, setShowFilter] = useState(false);
 
     return (
@@ -20,7 +20,7 @@ const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions, 
             title={title}
             columns={columns}
             data={data}
-            isLoading={Boolean(!data.length)}
+            isLoading={loading}
             options={{
                 filtering: showFilter,
                 actionsColumnIndex: -1,
