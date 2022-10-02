@@ -14,6 +14,7 @@ type Props = {
 }
 
 const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: string | undefined }) => {
+    const [, updateState] = useState();
     const [showModal, setShowModal] = useState<boolean>(false);
     const [isText, setIsText] = useState<boolean>(true);
     const [formData, setFormData] = useState<IQuote | any>({fromBook: null, owner: null, _id: null, text: '', note: '', pageNo: null});
@@ -129,8 +130,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                         }}>
                             <input type="hidden" name="id" value={id} onLoad={() => console.log('##########################')}/>
                             <div className="row">
-                                <div className="col">
-                                    {isText ? <textarea onChange={handleForm} id='text' placeholder='*Text'
+                            {isText ? <textarea onChange={handleForm} id='text' placeholder='*Text'
                                                         className="form-control" autoComplete="off"
                                                         value={formData && "text" in formData ? formData.text : ''}/> :
                                         <label className="btn btn-dark">
@@ -138,7 +138,6 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                                             <input type="file" style={{display: "none"}} name="image" accept="image/*"/>
                                         </label>
                                     }
-                                </div>
                             </div>
                             <div style={{height: '5px', width: '100%'}}/>
                             <div className="row">

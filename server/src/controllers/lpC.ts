@@ -35,11 +35,9 @@ const getLp = async (req: Request, res: Response): Promise<void> => {
 
 const addLp = async (req: Request, res: Response): Promise<void> => {
     try {
-        //todo: there has to be a better way for cleaner code
         const {
             title, subtitle, edition, countLp, speed, published, language, note, autor
         } = req.body;
-        console.trace(req.body);
 
         const lp: ILp = new Lp({
             autor: autor,
@@ -54,7 +52,8 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
                 year: published?.year ?? undefined,
                 country: published?.country ?? ''
             },
-            speed: speed
+            speed: speed,
+            deletedAt: null
         })
 
         const newLp: ILp = await lp.save()

@@ -10,6 +10,8 @@ import MaterialTableCustom from "../../components/MaterialTableCustom";
 import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import BookDetail from "./BookDetail";
 import Header from "../../components/Header";
+import { tableHeaderColor } from "../../utils/constants";
+import { TooltipedText } from "../../utils/elements";
 
 interface IBookHidden {
     control: boolean,
@@ -26,6 +28,7 @@ export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>();
     const [openModal, setOpenModal] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
+    const [updateBookId, setUpdateBookId] = useState<string>('');
     const [hidden, setHidden] = useState<IBookHidden>({
         control: true,
         editor: true,
@@ -79,11 +82,6 @@ export default function BookPage() {
                 }
                 books = books.filter((bk: IBook) => !bk.deletedAt);
                 
-                for (let book of books) {
-                    if (book.note) {
-                        book.note = shortenStringKeepWord(book.note, 30)
-                    }
-                }
                 setClonedBooks(stringifyAutors(books));
             })
             .catch((err: Error) => console.trace(err))
@@ -226,14 +224,14 @@ export default function BookPage() {
                         title: 'Autor',
                         field: 'autorsFull',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                     },
                     {
                         title: 'Editor',
                         field: 'editorsFull',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                         hidden: hidden.editor
                     },
@@ -241,7 +239,7 @@ export default function BookPage() {
                         title: 'Prekladateľ',
                         field: 'translatorsFull',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                         hidden: hidden.translator
                     },
@@ -249,7 +247,7 @@ export default function BookPage() {
                         title: 'Ilustrátor',
                         field: 'ilustratorsFull',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                         hidden: hidden.ilustrator
                     },
@@ -257,7 +255,7 @@ export default function BookPage() {
                         title: 'Názov',
                         field: 'title',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                         cellStyle: {
                             fontWeight: "bold"
@@ -267,7 +265,7 @@ export default function BookPage() {
                         title: 'Podnázov',
                         field: 'subtitle',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                         hidden: hidden.subtitle
                     },
@@ -275,31 +273,34 @@ export default function BookPage() {
                         title: 'ISBN',
                         field: 'ISBN',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         }
                     },
                     {
                         title: 'Jazyk',
                         field: 'language',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         }
                     },
                     {
                         title: 'Počet strán',
                         field: 'numberOfPages',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         }
                     },
                     {
                         title: 'Poznámka',
                         field: 'note',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
+                        },
+                        //detail doesnt work if render is in table
+                        render: (rowData: IBook) => {
+                            return rowData.note?.length > 30 ? TooltipedText(shortenStringKeepWord(rowData.note, 30), rowData.note) : rowData.note;
                         },
                     },
-
                 ]}
                 actions={[
                     {
@@ -313,7 +314,7 @@ export default function BookPage() {
                     {
                         icon: 'create',
                         tooltip: 'Upraviť',
-                        onClick: (_: any, rowData: IBook) => /*handleUpdateBook(rowData._id)*/console.log(rowData),
+                        onClick: (_: any, rowData: IBook) => setUpdateBookId(rowData._id),
                     },
                     {
                         icon: 'delete',
@@ -328,6 +329,7 @@ export default function BookPage() {
                     },
                 ]}
             />
+            {Boolean(updateBookId) ? <AddBook saveBook={handleSaveBook} bookId={updateBookId} /> : <></>}
             <Toast/>
         </main>
     );

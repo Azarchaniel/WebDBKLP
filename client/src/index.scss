@@ -1,4 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+:root {
+  /* https://colorhunt.co/palette/2c36393f4e4fa27b5cdcd7c9 */
+  --background: #DCD7C9;
+  --menu: #2C3639;
+  --anchor: #A27B5C;
+}
 
 * {
   margin: 0;
@@ -10,12 +16,17 @@ body, html, main, #root {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #fff;
-  background-color: #838383;
+  background-color: var(--background);
 }
 
 .App {
   width: 97%;
   margin: 4rem 3rem;
+}
+
+.tooltipA {
+  max-width: 30vw;
+  font-size: 1rem !important;
 }
 
 .Card {
@@ -37,7 +48,7 @@ body, html, main, #root {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #bea24b;
+  background: var(--anchor);
   padding: 0.5rem 1rem;
   border-bottom: 1px solid #333333;
 
@@ -144,92 +155,105 @@ body, html, main, #root {
   display: none;
 }
 
-.sideBarOpened {
+.sideBar {
   position: fixed;
-  width: 10vw;
   height: 110vh;
-  background-color: #343A40;
+  background-color: var(--menu);
   margin: -4rem 0 0 -3rem;
   padding: 3rem 0 1rem 1rem;
   transition: 0.5s;
   z-index: 100;
-
-  .closeIcon {
-    color: white;
-    font-size: xx-large;
-    position: absolute;
-    right: 1rem;
-    top: 0;
-    cursor: pointer;
-  }
-
-  .SB-Parent {
-    font-size: 1.5rem;
-    margin-top: 1rem;
-    cursor: pointer;
-  }
-
-  .SB-Child {
-    color: gray;
-    font-size: 1.1rem;
-    padding-left: 3rem;
-    cursor: pointer;
-  }
-
-  .SB-chevron {
-    position: absolute;
-    right: 0.5rem;
-    padding: 0.5rem;
-    cursor: pointer;
-    border: 1px solid transparent;
-  }
-
-  .SB-chevron:hover {
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 15%;
-    padding: .5rem;
-  }
-}
-
-.sideBarClosed {
-  position: fixed;
-  width: 50px;
-  height: 110vh;
-  background-color: #343A40;
-  margin: -4rem 0 0 -3rem;
-  padding-top: 3rem;
-  z-index: 100;
-
-  .closeIcon {
-    color: white;
-    font-size: xx-large;
-    position: absolute;
-    right: 50%;
-    top: 0;
-    cursor: pointer;
+  &Opened {
+    position: fixed;
+    width: 10vw;
+    height: 110vh;
+    background-color: var(--menu);
+    margin: -4rem 0 0 -3rem;
+    padding: 3rem 0 1rem 1rem;
     transition: 0.5s;
+    z-index: 100;
+
+    .closeIcon {
+      color: white;
+      font-size: xx-large;
+      position: absolute;
+      right: 1rem;
+      top: 0;
+      cursor: pointer;
+      &:hover {
+        color: white;
+      }
+    }
+
+    .SB-Parent {
+      font-size: 1.5rem;
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+
+    .SB-Child {
+      color: gray;
+      font-size: 1.1rem;
+      padding-left: 3rem;
+      cursor: pointer;
+    }
+
+    .SB-chevron {
+      position: absolute;
+      right: 0.5rem;
+      padding: 0.5rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .SB-chevron:hover {
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15%;
+      padding: .5rem;
+    }
   }
 
-  .SB-Parent {
-    margin-left: 1rem;
-    font-size: 1.5rem;
-    cursor: pointer;
-
-    i {
+  &Closed {
+    position: fixed;
+    width: 50px;
+    height: 110vh;
+    background-color: var(--menu);
+    margin: -4rem 0 0 -3rem;
+    padding-top: 3rem;
+    z-index: 100;
+  
+    .closeIcon {
+      color: white;
+      font-size: xx-large;
+      position: absolute;
+      right: 50%;
+      top: 0;
+      cursor: pointer;
+      transition: 0.5s;
+      &:hover {
+        color: white;
+      }
+    }
+  
+    .SB-Parent {
+      margin-left: 1rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+  
+      i {
+        visibility: visible;
+        cursor: pointer;
+      }
+    }
+  
+    .SB-Child {
+      color: gray;
       visibility: visible;
       cursor: pointer;
     }
   }
+  
 
-  .SB-Child {
-    color: gray;
-    visibility: visible;
-    cursor: pointer;
-  }
-}
-
-.closeIcon:hover {
-  color: white;
 }
 
 .customLink {
@@ -238,7 +262,7 @@ body, html, main, #root {
   user-select: none;
 
   &:hover {
-    color: #bea24b !important;
+    color: var(--anchor) !important;
     text-decoration: none !important;
   }
 }
@@ -285,13 +309,17 @@ body, html, main, #root {
   margin-left: 0.5rem;
 }
 
+.MuiPaper-elevation2 {
+  box-shadow: none !important;
+}
+
 .MuiTable-root {
   width: 99.7% !important;
 }
 
 //for material Table, Action column
 th.MuiTableCell-root:last-child, th.MuiTableCell-root:nth-last-child(2) {
-  background-color: #bea24b !important;
+  background-color: var(--anchor) !important;
 }
 
 .BookDetail {
@@ -483,7 +511,7 @@ th.MuiTableCell-root:last-child, th.MuiTableCell-root:nth-last-child(2) {
   top: 0;
   width: 100%;
   height: 45px;
-  background-color: white;
+  background-color: var(--menu);
   display: flex;
   align-items: center;
   z-index: 100;
@@ -500,19 +528,19 @@ th.MuiTableCell-root:last-child, th.MuiTableCell-root:nth-last-child(2) {
 
   .activeUser {
     font-weight: bold;
-    color: black;
+    color: white;
   }
 
   .customLink.appHeader {
     font-family: "Lucida Handwriting", sans-serif;
     font-weight: bold;
     text-decoration: none;
-    color: #bea24b;
+    color: var(--anchor);
     margin: 0 1rem;
     font-size: 2rem;
 
     &:hover {
-      color: #766230FF !important;
+      filter: brightness(1.2) !important;
       text-decoration: none !important;
     }
   }

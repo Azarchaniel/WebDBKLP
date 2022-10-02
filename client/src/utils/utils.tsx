@@ -1,6 +1,7 @@
 import {IAutor, IUser} from "../type";
 
-export const shortenStringKeepWord = (text: string, maxLength: number) => {
+export const shortenStringKeepWord = (text: string, maxLength: number): string => {
+    if (!text) return "";
     //if the text is longer than maxLength chars, shorten it. ELSE return unchanged
     if (text.length > maxLength) {
         //shorten the string but keep the whole word

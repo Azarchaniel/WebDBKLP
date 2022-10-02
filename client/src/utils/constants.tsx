@@ -1,0 +1,1 @@
+export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue('--anchor');

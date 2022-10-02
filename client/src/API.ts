@@ -39,10 +39,7 @@ export const addBook = async (
         year: formData['published.year'] ?? undefined,
         country: formData['published.country'] ?? ''
       },
-      location: {
-        city: formData['location.city'][0] ?? '',
-        shelf: formData['location.shelf'] ?? '',
-      }
+      location: formData.location
 
     }
     const saveBook: AxiosResponse<ApiBookDataType> = await axios.post(
@@ -123,6 +120,10 @@ export const addAutor = async (
       firstName: formData.firstName ?? '',
       lastName: formData.lastName,
       nationality: formData.nationality ?? '',
+      location: formData.location ?? {
+        city: '',
+        shelf: ''
+      },
       note: formData.note ?? '',
       dateOfBirth: formData.dateOfBirth ?? undefined,
       dateOfDeath: formData.dateOfDeath ?? undefined

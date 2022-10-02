@@ -9,6 +9,8 @@ import Toast from "../../components/Toast";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import {shortenStringKeepWord} from "../../utils/utils";
 import Header from "../../components/Header";
+import { tableHeaderColor } from "../../utils/constants";
+import { TooltipedText } from "../../utils/elements";
 
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
@@ -100,7 +102,7 @@ export default function AutorPage() {
                         title: 'Meno',
                         field: 'firstName',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                     },
                     {
@@ -109,7 +111,7 @@ export default function AutorPage() {
                         defaultSort: 'asc',
                         customSort: (a: IAutor, b: IAutor) => a.lastName.localeCompare(b.lastName),
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                         cellStyle: {
                             fontWeight: "bold"
@@ -119,7 +121,7 @@ export default function AutorPage() {
                         title: 'Národnosť',
                         field: 'nationality',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         }
                     },
                     {
@@ -128,7 +130,7 @@ export default function AutorPage() {
                         type: 'date',
                         dateSetting: {locale: "sk-SK"},
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         }
                     },
                     {
@@ -137,17 +139,17 @@ export default function AutorPage() {
                         type: 'date',
                         dateSetting: {locale: "sk-SK"},
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         }
                     },
                     {
                         title: 'Poznámka',
                         field: 'note',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                         render: (rowData: IAutor) => {
-                            if (rowData.note) return shortenStringKeepWord(rowData.note, 30);
+                            return rowData.note && rowData.note?.length > 30 ? TooltipedText(shortenStringKeepWord(rowData.note, 30), rowData.note) : rowData.note;
                         }
                     }
                 ]}

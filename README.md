@@ -10,7 +10,7 @@ cd ./server; npm run
 cd ./client; npm run
 
 ### TODO
-- [X] redesign - add bootstrap
+- [X] redesign
 - [X] side menu
 - [X] adding / updating item
 - [X] Autocomplete
@@ -30,9 +30,10 @@ cd ./client; npm run
 - -[ ] but this requires to have Edice/Serie as entry in DB with ID
 - -[ ] which require CRUD form Edice/Serie
 - -[ ] I need it in DB for MultiSelect anyway
+- [ ] remove bootstrap
 - [X] a href to DatabazeKnih and GoodReads
 - [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend)
-- [ ] fix router not fetching data when changing Owner
+- [ ] fix router not fetching data when changing Owner - I need global store for ActiveUser
 - [ ] rework Autocomplete - custom
 - [X] custom modal - grid system
 - [ ] webscrapper and autofilling

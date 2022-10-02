@@ -22,7 +22,7 @@ const bookSchema: Schema = new Schema({
     exLibris: {type: Boolean},
     published: {type: publishedSchema, required: false},
     location: {type: locationSchema, required: false},
-    deletedAt: {type: Date, default: false},
+    deletedAt: {type: Date},
     owner: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: true},
     readBy: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false},
     picture: {type: String, required: false}

@@ -9,6 +9,7 @@ import {confirmAlert} from "react-confirm-alert";
 import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import Header from "../../components/Header";
+import { tableHeaderColor } from "../../utils/constants";
 
 export default function LPPage() {
 
@@ -133,14 +134,14 @@ export default function LPPage() {
                         title: 'Autor',
                         field: 'autorsFull',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                     },
                     {
                         title: 'Názov',
                         field: 'title',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                         cellStyle: {
                             fontWeight: "bold"
@@ -150,7 +151,7 @@ export default function LPPage() {
                         title: 'Podnázov',
                         field: 'subtitle',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                         hidden: hidden.subtitle
                     },
@@ -158,21 +159,21 @@ export default function LPPage() {
                         title: 'ISBN',
                         field: 'ISBN',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         }
                     },
                     {
                         title: 'Jazyk',
                         field: 'language',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         }
                     },
                     {
                         title: 'Poznámka',
                         field: 'note',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         },
                         render: (rowData: IBook) => {
                             if (rowData.note) return shortenStringKeepWord(rowData.note, 30);
@@ -182,7 +183,7 @@ export default function LPPage() {
                         title: 'Počet strán',
                         field: 'numberOfPages',
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         }
                     },
                     {
@@ -192,7 +193,7 @@ export default function LPPage() {
                         dateSetting: {locale: "sk-SK"},
                         hidden: hidden.createdAt,
                         headerStyle: {
-                            backgroundColor: '#bea24b'
+                            backgroundColor: tableHeaderColor
                         }
                     }
                 ]}

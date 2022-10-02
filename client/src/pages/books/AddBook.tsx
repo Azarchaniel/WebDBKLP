@@ -11,12 +11,12 @@ import ChipInput from "material-ui-chip-input";
 
 type Props = {
     saveBook: (e: React.FormEvent, formData: IBook | any) => void;
-    open: boolean;
+    open?: boolean;
     bookId?: string | undefined;
 }
 
 const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
-    const [openedModal, setOpenedModal] = useState<boolean>(open);
+    const [openedModal, setOpenedModal] = useState<boolean>(open || Boolean(bookId));
     const [formData, setFormData] = useState<IBook | {}>()
     const [autors, setAutors] = useState<IAutor[] | any>();
     const [users, setUsers] = useState<IUser[] | undefined>();
@@ -34,7 +34,6 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
 
     //param [] will make useEffect to go only once
     useEffect(() => {
-        console.log(open, bookId);
         getAutors()
             .then(aut => {
                 //constructing fullName for autocomplete
@@ -135,16 +134,14 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                     <div className="container">
                                         <div className="Nazov">
                                             <input
-                                                onChange={handleForm} type='text' id='title' placeholder='*Názov'
+                                                onBlur={handleForm} type='text' id='title' placeholder='*Názov'
                                                 className="form-control" autoComplete="off"
-                                                value={formData && "title" in formData ? formData.title : ''}
                                             />
                                         </div>
                                         <div className="Podnazov">
-                                            <input onChange={handleForm} type='text' id='subtitle'
+                                            <input onBlur={handleForm} type='text' id='subtitle'
                                                    placeholder='Podnázov'
                                                    className="form-control" autoComplete="off"
-                                                   value={formData && "subtitle" in formData ? formData.subtitle : ''}
                                             />
                                         </div>
                                         <div className="Autor">
@@ -348,11 +345,10 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                             />
                                         </div>
                                         <div className="Police">
-                                            <input onChange={handleForm} type='text' id='location.shelf'
+                                            <input onBlur={handleForm} type='text' id='location.shelf'
                                                    placeholder='Polica'
                                                    className="form-control"
                                                    autoComplete="off"
-                                                   value={formData && "location.shelf" in formData ? formData["location.shelf"] : ''}
                                             />
                                         </div>
                                         <div className="language">

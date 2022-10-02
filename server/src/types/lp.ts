@@ -12,5 +12,5 @@ export interface ILp extends Document {
     published: TPublished;
     language: string;
     note: string;
-    deletedAt: Date;
+    deletedAt?: Date;
 }

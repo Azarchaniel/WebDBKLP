@@ -12,7 +12,7 @@ const lpSchema: Schema = new Schema({
     speed: Number,
     language: {type: [String], required: true},
     note: {type: String, required: false},
-    deletedAt: {type: Date, default: false}
+    deletedAt: {type: Date, required: false}
 }, {timestamps: true})
 
 export default model<ILp>('LP', lpSchema);
