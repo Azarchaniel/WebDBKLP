@@ -2,7 +2,6 @@ import React, {useState} from "react";
 import {IQuote} from "../../type";
 import {addQuote} from "../../API";
 import {Tooltip} from "@material-ui/core";
-import {isNumber} from "util";
 import AddQuote from "./AddQuote";
 import { toast } from "react-toastify";
 import {stringifyUsers} from "../../utils/utils";
@@ -45,7 +44,7 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
         <div className={cssGrid()} style={{backgroundColor: bcgrClr}}>
             <div className='text'>
                 <p>Text: {quote?.text}</p>
-                {quote.fromBook && quote.fromBook[0]?.title ? <p>Z knihy: {quote.fromBook[0]?.title}{isNumber(quote.pageNo) ? ', ' + quote.pageNo : ''}</p>
+                {quote.fromBook && quote.fromBook[0]?.title ? <p>Z knihy: {quote.fromBook[0]?.title}{quote.pageNo ? ', ' + quote.pageNo : ''}</p>
                     : <></>}
                 {quote.owner ? <p>Majiteľ: {stringifyUsers(quote.owner, false)}</p> : <></>}
             </div>

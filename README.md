@@ -6,8 +6,8 @@ Once done it will be a **system for cataloging books** I own. Predecessor for th
 I'm using **MERN stack**.
 
 ## RUN
-cd ./server; npm run  
-cd ./client; npm run
+cd ./server; npm run start
+cd ./client; npx run start
 
 ### TODO
 - [X] redesign

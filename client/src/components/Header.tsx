@@ -29,7 +29,7 @@ const Header: React.FC = () => {
             <h1><Link className='customLink appHeader' to='/'>WebDBKLP</Link></h1>
             {owners?.map((owner: IUser) =>
                 <span
-                    className={activeOwners.includes(owner._id) ? "activeUser" : ""}
+                    className={activeOwners.includes(owner._id) ? "activeUser customLink" : "customLink"}
                     onClick={() => activateUsers(owner._id)}
                     key={owner._id}
                 >

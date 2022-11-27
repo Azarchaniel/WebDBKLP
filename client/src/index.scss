@@ -514,7 +514,7 @@ th.MuiTableCell-root:last-child, th.MuiTableCell-root:nth-last-child(2) {
   background-color: var(--menu);
   display: flex;
   align-items: center;
-  z-index: 100;
+  z-index: 99;
 
   span {
     display: flex;
@@ -555,9 +555,17 @@ th.MuiTableCell-root:last-child, th.MuiTableCell-root:nth-last-child(2) {
   border: none;
   position: fixed;
   right: 1rem;
+  top: 8vh;
   z-index: 2;
 
-  &:after {
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+    &::after {
+      color: var(--anchor);
+    }
+  }
+
+  &::after {
     content: '+';
     font-size: 2rem;
     position: absolute;
@@ -585,12 +593,19 @@ th.MuiTableCell-root:last-child, th.MuiTableCell-root:nth-last-child(2) {
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.7);
+    &::after {
+      color: var(--anchor);
+    }
   }
 
   &::after {
     content: '+';
     font-weight: bold;
     font-size: 2rem;
+    margin-top: -0.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
 
