@@ -25,6 +25,7 @@ cd ./client; npx run start
 - [X] there is problem with fetchAll in Quotes when deleting
 - [ ] allow uploading picture instead of text in Quotes - [url]:https://www.bezkoder.com/node-js-upload-store-images-mongodb/
 - [ ] divide CSS into chunks based on page
+- [ ] better granulating - what is possible, move to components
 - [ ] updating book - fix modal AddBook
 - [ ] in BookDetail, when clicking on Edice/Serie, filter every book from Edice/Serie
 - -[ ] but this requires to have Edice/Serie as entry in DB with ID

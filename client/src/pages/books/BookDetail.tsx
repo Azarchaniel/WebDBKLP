@@ -1,5 +1,5 @@
 import {IBook, IUser} from "../../type";
-import React from "react";
+import React, { useEffect } from "react";
 import {stringifyAutors} from "../../utils/utils";
 
 type Props = {
@@ -28,10 +28,10 @@ const BookDetail: React.FC<Props> = ({data}) => {
         return (
             <>
                 <p>Rozmery: </p>
-                <p className="detailDimensions">Výška: {dimensions.height}</p>
-                <p className="detailDimensions">Šírka: {dimensions.width}</p>
-                <p className="detailDimensions">Hrúbka: {dimensions.depth}</p>
-                {dimensions.weight ? <p className="detailDimensions">Hmotnosť: {dimensions.weight}</p> : null}
+                <p className="detailDimensions">Výška: {dimensions.height} cm</p>
+                <p className="detailDimensions">Šírka: {dimensions.width} cm</p>
+                <p className="detailDimensions">Hrúbka: {dimensions.depth} cm</p>
+                {dimensions.weight ? <p className="detailDimensions">Hmotnosť: {dimensions.weight} g</p> : null}
             </>
         )
     }

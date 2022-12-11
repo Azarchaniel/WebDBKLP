@@ -128,7 +128,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                             saveQuote(e, formData);
                             cleanFields();
                         }}>
-                            <input type="hidden" name="id" value={id} onLoad={() => console.log('##########################')}/>
+                            <input type="hidden" name="id" value={id}/>
                             <div className="row">
                             {isText ? <textarea onChange={handleForm} id='text' placeholder='*Text'
                                                         className="form-control" autoComplete="off"

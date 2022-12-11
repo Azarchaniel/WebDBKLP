@@ -90,19 +90,6 @@ const Sidebar = () => {
         }
     ];
 
-    /*
-    children: [
-                {
-                    title: 'Ľuboš',
-                    route: '/books/619800d46aba58b905cc2455',
-                },
-                {
-                    title: 'Žaneta',
-                    route: '/books/619802656aba58b905cc245e',
-                },
-            ],
-     */
-
     const showContent = (contentItems: ISideMenuItems[]) => {
         return contentItems.map((item: ISideMenuItems, index) => {
             if (sidebarOpened) {

@@ -8,10 +8,10 @@ import Sidebar from "../../components/Sidebar";
 import Toast from "../../components/Toast";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
-import BookDetail from "./BookDetail";
 import Header from "../../components/Header";
 import { tableHeaderColor } from "../../utils/constants";
 import { TooltipedText } from "../../utils/elements";
+import { useNavigate } from 'react-router-dom';
 
 interface IBookHidden {
     control: boolean,
@@ -40,6 +40,7 @@ export default function BookPage() {
         createdAt: true
     });
     const popRef = useRef(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchBooks();
@@ -296,7 +297,7 @@ export default function BookPage() {
                         headerStyle: {
                             backgroundColor: tableHeaderColor
                         },
-                        //detail doesnt work if render is in table
+                        //FIXME: detail doesnt work if render is in table
                         render: (rowData: IBook) => {
                             return rowData.note?.length > 30 ? TooltipedText(shortenStringKeepWord(rowData.note, 30), rowData.note) : rowData.note;
                         },
@@ -320,13 +321,12 @@ export default function BookPage() {
                         icon: 'delete',
                         tooltip: 'Vymazať',
                         onClick: (_: any, rowData: IBook) => handleDeleteBook(rowData._id),
-                    }
-                ]}
-                detailPanel={[
-                    {
-                        tooltip: 'Detaily',
-                        render: (rowData: any) => <BookDetail data={rowData}/>
                     },
+                    {
+                        icon: 'search',
+                        tooltip: 'Detaily',
+                        onClick: (_: any, rowData: IBook) => navigate(`/book/${rowData._id}`)
+                    }
                 ]}
             />
             {Boolean(updateBookId) ? <AddBook saveBook={handleSaveBook} bookId={updateBookId} /> : <></>}
