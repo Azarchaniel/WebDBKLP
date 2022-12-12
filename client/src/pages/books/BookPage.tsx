@@ -12,6 +12,7 @@ import Header from "../../components/Header";
 import { tableHeaderColor } from "../../utils/constants";
 import { TooltipedText } from "../../utils/elements";
 import { useNavigate } from 'react-router-dom';
+import { useReadLocalStorage } from "usehooks-ts";
 
 interface IBookHidden {
     control: boolean,
@@ -41,10 +42,17 @@ export default function BookPage() {
     });
     const popRef = useRef(null);
     const navigate = useNavigate();
+    const activeUser = useReadLocalStorage("activeUsers");
 
+    //fetch books on page init
     useEffect(() => {
         fetchBooks();
     }, [])
+
+    //fetch books when changed user
+    useEffect(() => {
+        fetchBooks();
+    }, [activeUser]);
 
     useEffect(() => {
         function handleClickOutside(event: Event) {
@@ -67,15 +75,14 @@ export default function BookPage() {
     const fetchBooks = (): void => {
         getBooks()
             .then(({data: {books}}: IBook[] | any) => {
-                const userId = window.location.href.split('/')[4];
-
-                if (userId) {
+                //TODO: CLEAN
+                if ((activeUser as string[])?.length) {
                     const booksArr: IBook[] = [];
                     books.forEach((book: IBook) => {
-                        book.owner?.forEach((owner: IUser) => {
-                            if (owner._id === userId) {
+                        //TODO: this filtering should be on BE
+                        book.owner?.filter((owner: IUser) => {
+                            if ((activeUser as string[]).includes(owner._id) || book.owner === undefined) {
                                 booksArr.push(book);
-                                return;
                             }
                         })
                     })

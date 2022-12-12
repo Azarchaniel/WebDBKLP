@@ -144,7 +144,7 @@ const AddLp: React.FC<Props> = ({saveLp}: { saveLp: any }) => {
                                         <input onChange={handleForm} type='text' id='edition.title'
                                                placeholder='Názov edície'
                                                className="form-control" autoComplete="off"
-                                               value={formData && "edition.title" in formData ? formData["edition.title"] : ''}
+                                               value={formData && "edition.title" in formData ? formData["edition.title"] as string : ''}
                                         />
                                     </div>
                                     <div className="col">
@@ -153,7 +153,7 @@ const AddLp: React.FC<Props> = ({saveLp}: { saveLp: any }) => {
                                                className="form-control"
                                                autoComplete="off"
                                                min="0"
-                                               value={formData && "edition.no" in formData ? formData["edition.no"] : ''}
+                                               value={formData && "edition.no" in formData ? formData["edition.no"] as number : ''}
                                         />
                                     </div>
                                 </div>
@@ -179,7 +179,7 @@ const AddLp: React.FC<Props> = ({saveLp}: { saveLp: any }) => {
                                                placeholder='Rok vydania'
                                                className="form-control"
                                                autoComplete="off"
-                                               value={formData && "published.year" in formData ? formData["published.year"] : ''}
+                                               value={formData && "published.year" in formData ? formData["published.year"] as number : ''}
                                         />
                                     </div>
                                     <div className="col">
@@ -214,7 +214,7 @@ const AddLp: React.FC<Props> = ({saveLp}: { saveLp: any }) => {
                                                placeholder='Vydavateľ'
                                                className="form-control"
                                                autoComplete="off"
-                                               value={formData && "published.publisher" in formData ? formData["published.publisher"] : ''}
+                                               value={formData && "published.publisher" in formData ? formData["published.publisher"] as string : ''}
                                         />
                                     </div>
                                     <div className="col">

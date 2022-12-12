@@ -17,7 +17,7 @@ type Props = {
 
 const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
     const [openedModal, setOpenedModal] = useState<boolean>(open || Boolean(bookId));
-    const [formData, setFormData] = useState<IBook | {}>()
+    const [formData, setFormData] = useState<Partial<IBook>>()
     const [autors, setAutors] = useState<IAutor[] | any>();
     const [users, setUsers] = useState<IUser[] | undefined>();
     const [error, setError] = useState<string | undefined>('Názov knihy musí obsahovať aspoň jeden znak!');
@@ -154,7 +154,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 closeIcon="cancel"
                                                 emptyRecordMsg="Žiadny autor nenájdený"
                                                 onSelect={(pickedAut: IAutor[]) => {
-                                                    setFormData({...formData, autor: pickedAut.map(v => v._id)})
+                                                    setFormData({...formData, autor: pickedAut})
                                                 }}
                                                 style={{
                                                     inputField: {marginLeft: "0.5rem"},
@@ -241,7 +241,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    placeholder='Názov edície'
                                                    className="form-control" autoComplete="off"
                                                    value={formData && "edition.title" in formData ?
-                                                       formData["edition.title"] : ''}
+                                                       formData["edition.title"] as string : ''}
                                             />
                                         </div>
                                         <div className="No">
@@ -249,7 +249,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    placeholder='Číslo edície'
                                                    className="form-control" autoComplete="off"
                                                    value={formData && "serie.no" in formData ?
-                                                       formData["serie.no"] : ''}
+                                                       formData["serie.no"] as number : ''}
                                             />
                                         </div>
                                         <div className="NameS">
@@ -257,7 +257,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    placeholder='Názov série'
                                                    className="form-control" autoComplete="off"
                                                    value={formData && "serie.title" in formData ?
-                                                       formData["serie.title"] : ''}
+                                                       formData["serie.title"] as string : ''}
                                             />
                                         </div>
                                         <div className="NoS"><input className="form-control" placeholder="Číslo série"/>
@@ -282,7 +282,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    placeholder='Vydavateľ'
                                                    className="form-control"
                                                    autoComplete="off"
-                                                   value={formData && "published.publisher" in formData ? formData["published.publisher"] : ''}
+                                                   value={formData && "published.publisher" in formData ? formData["published.publisher"] as string : ''}
                                             />
                                         </div>
                                         <div className="Rok">
@@ -290,7 +290,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    placeholder='Rok vydania'
                                                    className="form-control"
                                                    autoComplete="off"
-                                                   value={formData && "published.year" in formData ? formData["published.year"] : ''}
+                                                   value={formData && "published.year" in formData ? formData["published.year"] as number : ''}
                                             />
                                         </div>
                                         <div className="Krajina">
@@ -302,7 +302,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 onSelect={(picked: ILangCode[]) => {
                                                     setFormData({
                                                         ...formData,
-                                                        "published.country": picked.map(v => v.key)
+                                                        published: {country: picked.map(v => v.key)[0]}
                                                     })
                                                 }}
                                                 style={{
@@ -329,7 +329,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                     setFormData({
                                                         ...formData,
                                                         location: {
-                                                            city: picked.map(v => v.value)
+                                                            city: picked.map(v => v.value)[0]
                                                         }
                                                     })
                                                 }}
@@ -379,7 +379,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    placeholder='Výška'
                                                    className="form-control"
                                                    autoComplete="off"
-                                                   value={formData && "dimensions.height" in formData ? formData["dimensions.height"] : ''}
+                                                   value={formData && "dimensions.height" in formData ? formData["dimensions.height"] as number : ''}
                                             />
                                         </div>
                                         <div className="Sirka">
@@ -387,7 +387,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    placeholder='Šírka'
                                                    className="form-control"
                                                    autoComplete="off"
-                                                   value={formData && "dimensions.width" in formData ? formData["dimensions.width"] : ''}
+                                                   value={formData && "dimensions.width" in formData ? formData["dimensions.width"] as number : ''}
                                             />
                                         </div>
                                         <div className="Hrubka">
@@ -395,7 +395,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    placeholder='Hrúbka'
                                                    className="form-control"
                                                    autoComplete="off"
-                                                   value={formData && "dimensions.depth" in formData ? formData["dimensions.depth"] : ''}
+                                                   value={formData && "dimensions.depth" in formData ? formData["dimensions.depth"] as number : ''}
                                             />
                                         </div>
                                         <div className="Hmotnost">
@@ -403,7 +403,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    placeholder='Hmotnosť'
                                                    className="form-control"
                                                    autoComplete="off"
-                                                   value={formData && "dimensions.weight" in formData ? formData["dimensions.weight"] : ''}
+                                                   value={formData && "dimensions.weight" in formData ? formData["dimensions.weight"] as number : ''}
                                             />
                                         </div>
                                         <div className="Obsah">
@@ -432,7 +432,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 closeIcon="cancel"
                                                 closeOnSelect={true}
                                                 onSelect={(picked: IUser[]) => {
-                                                    setFormData({...formData, readBy: picked.map(v => v._id)})
+                                                    setFormData({...formData, readBy: picked})
                                                 }}
                                                 style={{
                                                     inputField: {marginLeft: "0.5rem"},
@@ -455,7 +455,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 closeIcon="cancel"
                                                 closeOnSelect={true}
                                                 onSelect={(picked: IUser[]) => {
-                                                    setFormData({...formData, owner: picked.map(v => v._id)})
+                                                    setFormData({...formData, owner: picked})
                                                 }}
                                                 style={{
                                                     inputField: {marginLeft: "0.5rem"},
