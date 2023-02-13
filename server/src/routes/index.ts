@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import {getAllBooks, addBook, updateBook, deleteBook, getBook} from '../controllers'
+import {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard} from '../controllers'
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
 import {getAllUsers, getUser} from "../controllers";
@@ -39,5 +39,7 @@ router.put('/edit-lp/:id', updateLp)
 router.post('/delete-lp/:id', deleteLp)
 
 router.get('/webScrapper', )
+
+router.get('/count-books/:id', dashboard.countBooks)
 
 export default router;

@@ -5,6 +5,7 @@ import './index.scss'
 import Toast from "./components/Toast";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
+import DashboardPage from './pages/dashboard/DashboardPage';
 
 const App: React.FC = () => {
 
@@ -12,7 +13,7 @@ const App: React.FC = () => {
     <main className='App'>
         <Sidebar />
         <Header />
-        <div className='futureReports'>Here shall be reports, numbers, graphs etc.</div>
+        <DashboardPage />
         <Toast />
     </main>
   )

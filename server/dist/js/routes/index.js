@@ -34,4 +34,5 @@ router.post('/add-lp', controllers_5.addLp);
 router.put('/edit-lp/:id', controllers_5.updateLp);
 router.post('/delete-lp/:id', controllers_5.deleteLp);
 router.get('/webScrapper');
+router.get('/count-books/:id', controllers_1.dashboard.countBooks);
 exports.default = router;

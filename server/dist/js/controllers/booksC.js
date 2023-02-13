@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBook = exports.deleteBook = exports.updateBook = exports.addBook = exports.getAllBooks = void 0;
+exports.dashboard = exports.getBook = exports.deleteBook = exports.updateBook = exports.addBook = exports.getAllBooks = void 0;
 const book_1 = __importDefault(require("../models/book"));
 const populateOptions = [
     { path: 'autor', model: 'Autor' },
@@ -69,7 +69,7 @@ const addBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const newBook = yield book.save();
         const allBooks = yield book_1.default
             .find()
-            .populate([populateOptions])
+            .populate(populateOptions)
             .exec();
         res.status(201).json({ message: 'Book added', book: newBook, books: allBooks });
     }
@@ -116,3 +116,32 @@ const deleteBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteBook = deleteBook;
+const dashboard = {
+    countBooks: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const { params: { id }, body, } = req;
+            let countedBooks = 0;
+            console.log(id);
+            //FIXME: ugly as hell
+            if (id === "undefined") {
+                console.log("NO ID", id);
+                countedBooks = yield book_1.default
+                    .countDocuments();
+            }
+            else {
+                console.log("MAM ID", typeof id);
+                countedBooks = yield book_1.default
+                    .find({ owner: id })
+                    .countDocuments();
+            }
+            res.status(200).json({
+                message: "Count of Books",
+                count: countedBooks
+            });
+        }
+        catch (error) {
+            throw error;
+        }
+    })
+};
+exports.dashboard = dashboard;

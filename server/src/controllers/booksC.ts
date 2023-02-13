@@ -63,7 +63,7 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
         const newBook: IBook = await book.save()
         const allBooks: IBook[] = await Book
             .find()
-            .populate([populateOptions])
+            .populate(populateOptions)
             .exec();
 
         res.status(201).json({message: 'Book added', book: newBook, books: allBooks})
@@ -125,4 +125,37 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
-export {getAllBooks, addBook, updateBook, deleteBook, getBook}
+const dashboard = {
+    countBooks: async (req: Request, res: Response): Promise<void> => {
+        try {
+            const {
+                params: {id},
+                body,
+            } = req
+
+            let countedBooks: number = 0;
+            console.log(id);
+
+            //FIXME: ugly as hell
+            if (id === "undefined") {
+                console.log("NO ID", id);
+                countedBooks = await Book
+                    .countDocuments();
+            } else {
+                console.log("MAM ID", typeof id);
+                countedBooks = await Book
+                    .find({owner: id})
+                    .countDocuments();
+            } 
+            
+            res.status(200).json({
+                message: "Count of Books",
+                count: countedBooks
+            })
+        } catch (error) {
+            throw error;
+        }
+    }
+}
+
+export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard}
