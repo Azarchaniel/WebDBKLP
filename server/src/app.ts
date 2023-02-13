@@ -1,5 +1,5 @@
 import express, {Express} from 'express'
-import mongoose from 'mongoose'
+import mongoose, { ConnectOptions } from 'mongoose'
 import cors from 'cors'
 import todoRoutes from './routes'
 
@@ -13,23 +13,16 @@ app.use(todoRoutes)
 
 const uri: string = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
 const options = {useNewUrlParser: true, useUnifiedTopology: true}
-mongoose.set('useFindAndModify', false)
 
-try {
-    mongoose
-        .connect(uri, options)
-        .then(() =>
-            app.listen(PORT, () => {
-                console.log(`Server running on http://localhost:${PORT}`);
-                console.log(`Database URI is: ${uri}`);
-            })
+mongoose.set("strictQuery", false);
+
+mongoose
+    .connect(uri, options as ConnectOptions)
+    .then(() =>
+        app.listen(PORT, () =>
+            console.log(`Server running on http://localhost:${PORT}`)
         )
-        .catch((error) => {
-            console.error('NO CONNECTION TO THE DB !!!');
-            throw error
-        })
-
-} catch (err) {
-    console.error('Mongo DB Error')
-    throw err;
-}
+    )
+    .catch((error) => {
+        throw error
+    })
