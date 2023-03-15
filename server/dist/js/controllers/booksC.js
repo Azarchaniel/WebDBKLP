@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.dashboard = exports.getBook = exports.deleteBook = exports.updateBook = exports.addBook = exports.getAllBooks = void 0;
 const book_1 = __importDefault(require("../models/book"));
+const user_1 = __importDefault(require("../models/user"));
 const populateOptions = [
     { path: 'autor', model: 'Autor' },
     { path: 'editor', model: 'Autor' },
@@ -118,24 +119,26 @@ const deleteBook = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.deleteBook = deleteBook;
 const dashboard = {
     countBooks: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+        var _c;
         try {
             const { params: { id }, body, } = req;
             let countedBooks = 0;
-            console.log(id);
-            //FIXME: ugly as hell
+            let user = null;
             if (id === "undefined") {
-                console.log("NO ID", id);
                 countedBooks = yield book_1.default
                     .countDocuments();
             }
+            else if (id === "") {
+                //TODO: return every book with no Owner
+            }
             else {
-                console.log("MAM ID", typeof id);
+                user = yield user_1.default.findById(req.params.id);
                 countedBooks = yield book_1.default
                     .find({ owner: id })
                     .countDocuments();
             }
             res.status(200).json({
-                message: "Count of Books",
+                owner: (_c = user === null || user === void 0 ? void 0 : user.firstName) !== null && _c !== void 0 ? _c : "",
                 count: countedBooks
             });
         }

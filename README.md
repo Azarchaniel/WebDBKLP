@@ -23,10 +23,9 @@ cd ./client; npx run start
 - [X] clean form after saving item
 - [X] create all models and interfaces
 - [X] there is problem with fetchAll in Quotes when deleting
-- [ ] allow uploading picture instead of text in Quotes - [url]:https://www.bezkoder.com/node-js-upload-store-images-mongodb/
 - [ ] divide CSS into chunks based on page
 - [ ] better granulating - what is possible, move to components
-- [ ] updating book - fix modal AddBook
+- [ ] updating book - fix modal AddBook (MVP)
 - [ ] in BookDetail, when clicking on Edice/Serie, filter every book from Edice/Serie
 - -[ ] but this requires to have Edice/Serie as entry in DB with ID
 - -[ ] which require CRUD form Edice/Serie
@@ -34,14 +33,19 @@ cd ./client; npx run start
 - [ ] remove bootstrap
 - [X] a href to DatabazeKnih and GoodReads
 - [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend)
-- [ ] fix router not fetching data when changing Owner - I need global store for ActiveUser
+- [ ] fix router not fetching data when changing Owner - I need global store for ActiveUser (MVP)
 - [ ] rework Autocomplete - custom
 - [X] custom modal - grid system
-- [ ] webscrapper and autofilling
+- [ ] webscrapper and autofilling (MVP)
 - [ ] some reports, numbers, graph on Main page
-- [ ] import books from DBKLP
+- [ ] import books from DBKLP (MVP)
 - -[ ] write script, that will get ID of every author
 - [ ] (in far future) localization
 - [ ] (in far future) authorization/authentication
 - - [ ] add comments
 - - [ ] allow adding comments that is visible only for creator
+- [ ] WYSWIG editor for Quotes (with pictures)
+- [ ] generalize CRUD - first parameter is DB entity name, then ID, then requested params. In Error specify, what is missing in model. 
+- [ ] too many !importants in index.scss
+
+(MVP) - Minimum Viable Product

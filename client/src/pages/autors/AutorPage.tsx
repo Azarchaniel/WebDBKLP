@@ -92,6 +92,7 @@ export default function AutorPage() {
 
     return (
         <main className='App'>
+            {/* TODO: remove Header and Sidebar from here */}
             <Header/>
             <Sidebar/>
             <AddAutor saveAutor={handleSaveAutor}/>

@@ -1,6 +1,8 @@
 import {Response, Request} from 'express';
 import {IBook, IPopulateOptions} from '../types';
 import Book from '../models/book';
+import {IUser} from '../types';
+import User from '../models/user';
 
 const populateOptions: IPopulateOptions[] = [
     {path: 'autor', model: 'Autor'},
@@ -134,22 +136,22 @@ const dashboard = {
             } = req
 
             let countedBooks: number = 0;
-            console.log(id);
+            let user: IUser | null = null;
 
-            //FIXME: ugly as hell
             if (id === "undefined") {
-                console.log("NO ID", id);
                 countedBooks = await Book
                     .countDocuments();
+            } else if(id === "") {
+                //TODO: return every book with no Owner
             } else {
-                console.log("MAM ID", typeof id);
+                user = await User.findById(req.params.id);
                 countedBooks = await Book
                     .find({owner: id})
                     .countDocuments();
             } 
             
             res.status(200).json({
-                message: "Count of Books",
+                owner: user?.firstName ?? "",
                 count: countedBooks
             })
         } catch (error) {

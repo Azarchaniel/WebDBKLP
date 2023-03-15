@@ -26,7 +26,7 @@ interface IBookHidden {
 }
 
 export default function BookPage() {
-    const [clonedBooks, setClonedBooks] = useState<any[]>();
+    const [clonedBooks, setClonedBooks] = useState<any[]>([]);
     const [openModal, setOpenModal] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
     const [updateBookId, setUpdateBookId] = useState<string>('');
@@ -155,6 +155,7 @@ export default function BookPage() {
 
     return (
         <main className='App'>
+            {/* TODO: remove Header and Sidebar from here */}
             <Header/>
             <Sidebar/>
             <AddBook saveBook={handleSaveBook} open={openModal}/>
@@ -224,9 +225,8 @@ export default function BookPage() {
                 </p>
             </div>
             <MaterialTableCustom
-                loading={loading}
+                //loading={loading}
                 title='Knihy'
-                data={clonedBooks ?? []}
                 columns={[
                     {
                         title: 'Autor',
@@ -310,6 +310,7 @@ export default function BookPage() {
                         },
                     },
                 ]}
+                data={clonedBooks}
                 actions={[
                     {
                         icon: 'visibility',

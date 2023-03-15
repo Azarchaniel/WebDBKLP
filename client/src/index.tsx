@@ -8,6 +8,7 @@ import BookPage from "./pages/books/BookPage";
 import AutorPage from "./pages/autors/AutorPage";
 import QuotePage from "./pages/quotes/QuotePage";
 import LPPage from "./pages/lps/LPPage";
+import BookDetail from './pages/books/BookDetail';
 
 // const components = {
 //     '/books': <Books />,
@@ -19,7 +20,7 @@ ReactDOM.render(
         <Routes>
             <Route path="/" element={<App/>}/>
             <Route path="/books" element={<BookPage/>}/>
-            <Route path="/books/:id" element={<BookPage/>}/>
+            <Route path="/book/:id" element={<BookDetail/>}/>
             <Route path="/autors" element={<AutorPage/>}/>
             <Route path="/lp" element={<LPPage/>}/>
             <Route path="/quotes" element={<QuotePage/>}/>

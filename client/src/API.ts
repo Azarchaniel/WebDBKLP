@@ -303,9 +303,9 @@ export const deleteLP = async (
   }
 }
 
-export const countBooks = async (userId?: string): Promise<AxiosResponse<number>> => {
+export const countBooks = async (userId?: string): Promise<AxiosResponse<{message: string, count: number}>> => {
   try {
-    const count: AxiosResponse<number> = await axios.get(
+    const count: AxiosResponse<{message: string, count: number}> = await axios.get(
       `${baseUrl}/count-books/${userId}`
     )
     return count;
