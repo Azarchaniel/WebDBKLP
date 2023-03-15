@@ -35,6 +35,7 @@ export default function QuotePage() {
 
     const handleSaveQuote = (e: React.FormEvent, formData: IQuote): void => {
         e.preventDefault()
+        console.log(formData);
         addQuote(formData)
             .then(({status, data}) => {
                 if (status !== 201) {

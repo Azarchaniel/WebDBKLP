@@ -14,7 +14,6 @@ type Props = {
 }
 
 const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: string | undefined }) => {
-    const [, updateState] = useState();
     const [showModal, setShowModal] = useState<boolean>(false);
     const [isText, setIsText] = useState<boolean>(true);
     const [formData, setFormData] = useState<IQuote | any>({fromBook: null, owner: null, _id: null, text: '', note: '', pageNo: null});
@@ -111,7 +110,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
     const onChange = (selected: any, type: "user" | "book") => {
         //todo: merge with "handleForm"
         type === "user" ? 
-            setFormData({...formData, user: selected}) : 
+            setFormData({...formData, owner: selected}) : 
             setFormData({...formData, book: selected});
     }
 
@@ -142,7 +141,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                             <div style={{height: '5px', width: '100%'}}/>
                             <div className="row">
                                 <div className="col-3">
-                                    <ToggleButton labelLeft="Text" labelRight="Obrázek"
+                                    <ToggleButton labelLeft="Text" labelRight="Obrázok"
                                                   state={() => setIsText(!isText)}/>
                                 </div>
                                 <div className="col-6">
@@ -222,11 +221,6 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                                 <button type="submit"
                                         disabled={Boolean(error)}
                                         className="btn btn-success">Uložiť citát
-                                </button>
-                                <button type="submit"
-                                        disabled={Boolean(error)}
-                                        onClick={() => setShowModal(true)}
-                                        className="btn btn-success">Uložiť a pridať
                                 </button>
                             </div>
                         </form>

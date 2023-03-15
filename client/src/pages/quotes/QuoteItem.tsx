@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {IQuote} from "../../type";
 import {addQuote} from "../../API";
 import {Tooltip} from "@material-ui/core";
@@ -12,6 +12,8 @@ type Props = { quote: IQuote, bcgrClr: string } & {
 
 const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
     const [update, setUpdate] = useState(false);
+
+    useEffect(() => console.log(quote), []);
 
     //todo: small etc. are just numbers. So try to divide or something, make bigger granularity
     const cssGrid = () => {
@@ -31,11 +33,11 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
                 if (status !== 201) {
                     throw new Error('Citát sa nepodarilo pridať!')
                 }
-                toast.success(`Citát bol úspešne pridaný.`);
+                toast.success(`Citát bol úspešne ulozeny.`);
                 console.log(data);
             })
             .catch((err) => {
-                toast.error(`Citát sa nepodarilo pridať!`);
+                toast.error(`Citát sa nepodarilo ulozit!`);
                 console.trace(err);
             })
     }
@@ -62,4 +64,4 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
     )
 }
 
-export default Quote
+export default Quote;

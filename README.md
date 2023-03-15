@@ -30,9 +30,9 @@ cd ./client; npx run start
 - -[ ] but this requires to have Edice/Serie as entry in DB with ID
 - -[ ] which require CRUD form Edice/Serie
 - -[ ] I need it in DB for MultiSelect anyway
-- [ ] remove bootstrap
+- [ ] remove bootstrap (bootstrap is used in modals)
 - [X] a href to DatabazeKnih and GoodReads
-- [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend)
+- [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend) (MVP)
 - [ ] fix router not fetching data when changing Owner - I need global store for ActiveUser (MVP)
 - [ ] rework Autocomplete - custom
 - [X] custom modal - grid system

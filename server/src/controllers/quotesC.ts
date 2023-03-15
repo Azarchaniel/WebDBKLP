@@ -47,6 +47,7 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
                 owner: owner
             });
 
+            console.log(owner);
             const newQuote: IQuote = await quote.save();
             const allQuotes: IQuote[] = await Quote
                 .find()

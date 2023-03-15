@@ -57,6 +57,7 @@ const addQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 deletedAt: deletedAt,
                 owner: owner
             });
+            console.log(owner);
             const newQuote = yield quote.save();
             const allQuotes = yield quote_1.default
                 .find()
