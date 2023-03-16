@@ -7,7 +7,7 @@ const mongoose_1 = require("mongoose");
 const mongoose_2 = __importDefault(require("mongoose"));
 const quoteSchema = new mongoose_1.Schema({
     text: String,
-    fromBook: { type: [mongoose_2.default.Schema.Types.ObjectId], ref: 'Book', required: false },
+    fromBook: { type: mongoose_2.default.Schema.Types.ObjectId, ref: 'Book', required: false },
     pageNo: { type: Number, required: false },
     note: { type: String, required: false },
     owner: { type: [mongoose_2.default.Schema.Types.ObjectId], ref: 'User', required: false },

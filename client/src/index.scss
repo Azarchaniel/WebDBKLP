@@ -327,9 +327,14 @@ body, html, main, #root {
   width: 99.7% !important;
 }
 
-//for material Table, Action column
-th.MuiTableCell-root:last-child, th.MuiTableCell-root:nth-last-child(2) {
+.MuiTableCell-head, .MuiTableSortLabel-active{
+  font-weight: bold !important;
+  color: white !important;
   background-color: var(--anchor) !important;
+}
+
+.MuiTableSortLabel-icon {
+  color: white !important;
 }
 
 .BookDetail {

@@ -53,11 +53,10 @@ const addQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             const quote = new quote_1.default({
                 text: text,
                 note: note,
-                fromBook: fromBook ? fromBook[0] : [],
+                fromBook: fromBook,
                 deletedAt: deletedAt,
                 owner: owner
             });
-            console.log(owner);
             const newQuote = yield quote.save();
             const allQuotes = yield quote_1.default
                 .find()
@@ -71,7 +70,7 @@ const addQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 .find()
                 .populate(populateOptions)
                 .exec();
-            res.status(200).json({
+            res.status(201).json({
                 message: 'Quote updated',
                 quote: updateQuote,
                 quotes: allQuotes,

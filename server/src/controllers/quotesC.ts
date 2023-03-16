@@ -42,12 +42,11 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
             const quote: IQuote = new Quote({
                 text: text,
                 note: note,
-                fromBook: fromBook ? fromBook[0] : [],
+                fromBook: fromBook,
                 deletedAt: deletedAt,
                 owner: owner
             });
 
-            console.log(owner);
             const newQuote: IQuote = await quote.save();
             const allQuotes: IQuote[] = await Quote
                 .find()
@@ -64,7 +63,7 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
                 .find()
                 .populate(populateOptions)
                 .exec();
-            res.status(200).json({
+            res.status(201).json({
                 message: 'Quote updated',
                 quote: updateQuote,
                 quotes: allQuotes,

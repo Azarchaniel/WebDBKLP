@@ -111,7 +111,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
         //todo: merge with "handleForm"
         type === "user" ? 
             setFormData({...formData, owner: selected}) : 
-            setFormData({...formData, book: selected});
+            setFormData({...formData, fromBook: selected});
     }
 
     const showAddQuote = () => {

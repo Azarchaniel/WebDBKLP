@@ -67,7 +67,7 @@ export interface IUser extends IBaseType {
 
 export interface IQuote extends IBaseType {
     text: string; //text or URL to pic
-    fromBook: IBook[];
+    fromBook: IBook;
     pageNo?: number;
     note?: string;
     owner: IUser[];

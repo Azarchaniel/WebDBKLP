@@ -13,8 +13,6 @@ type Props = { quote: IQuote, bcgrClr: string } & {
 const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
     const [update, setUpdate] = useState(false);
 
-    useEffect(() => console.log(quote), []);
-
     //todo: small etc. are just numbers. So try to divide or something, make bigger granularity
     const cssGrid = () => {
         if (quote.text.length < 300) {
@@ -29,12 +27,12 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
     const handleSaveQuote = (e: React.FormEvent, formData: IQuote): void => {
         e.preventDefault()
         addQuote(formData)
-            .then(({status, data}) => {
+            .then(({status}) => {
                 if (status !== 201) {
                     throw new Error('Citát sa nepodarilo pridať!')
                 }
                 toast.success(`Citát bol úspešne ulozeny.`);
-                console.log(data);
+                //TODO: call parent to refresh quotes
             })
             .catch((err) => {
                 toast.error(`Citát sa nepodarilo ulozit!`);
@@ -46,7 +44,7 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
         <div className={cssGrid()} style={{backgroundColor: bcgrClr}}>
             <div className='text'>
                 <p>Text: {quote?.text}</p>
-                {quote.fromBook && quote.fromBook[0]?.title ? <p>Z knihy: {quote.fromBook[0]?.title}{quote.pageNo ? ', ' + quote.pageNo : ''}</p>
+                {quote.fromBook && quote.fromBook?.title ? <p>Z knihy: {quote.fromBook?.title}{quote.pageNo ? ', ' + quote.pageNo : ''}</p>
                     : <></>}
                 {quote.owner ? <p>Majiteľ: {stringifyUsers(quote.owner, false)}</p> : <></>}
             </div>

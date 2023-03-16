@@ -4,7 +4,7 @@ import { IUser } from './user';
 
 export interface IQuote extends Document {
     text: string; //text or URL to pic
-    fromBook: IBook[]; //id
+    fromBook: IBook;
     pageNo?: number;
     note?: string;
     deletedAt: Date;

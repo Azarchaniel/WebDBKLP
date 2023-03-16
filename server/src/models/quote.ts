@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 const quoteSchema: Schema = new Schema({
     text: String,
-    fromBook: {type: [mongoose.Schema.Types.ObjectId], ref: 'Book', required: false},
+    fromBook: {type: mongoose.Schema.Types.ObjectId, ref: 'Book', required: false},
     pageNo: {type: Number, required: false},
     note: {type: String, required: false},
     owner: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false},
