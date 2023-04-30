@@ -6,7 +6,8 @@ const LoadingBooks: React.FC = () => {
 
     useEffect(() => {
         //delay, so it's not flickering in case of very short loading time
-        setTimeout(() => setHidden(false), 250)
+        const timer = setTimeout(() => setHidden(false), 250)
+        return () => clearTimeout(timer);
     }, []);
 
     return (

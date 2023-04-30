@@ -185,7 +185,7 @@ export const addQuote = async (
     const quote: any = {
       id: formData._id,
       text: formData.text,
-      fromBook: formData.fromBook.map((book: IBook) => book._id),
+      fromBook: formData.fromBook,
       pageNo: formData.pageNo ?? null,
       owner: formData.owner ?? [],
       note: formData.note

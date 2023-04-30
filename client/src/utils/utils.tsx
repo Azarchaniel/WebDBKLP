@@ -71,3 +71,7 @@ export const darkenLightenColor = (color: string, percent: number) => {
 
     return "#"+RR+GG+BB;
 }
+
+export const getCssPropertyValue = (propertyName: string) => {
+    return getComputedStyle(document.body).getPropertyValue(propertyName);
+}

@@ -7,6 +7,7 @@ import {Multiselect} from "multiselect-react-dropdown";
 import {getBooks, getQuote, getUsers} from "../../API";
 import ReactTooltip from "react-tooltip";
 import ToggleButton from "../../components/ToggleButton";
+import { getCssPropertyValue } from "../../utils/utils";
 
 type Props = {
     saveQuote: (e: React.FormEvent, formData: IQuote | any) => void;
@@ -67,17 +68,16 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
 
     //ERROR HANDLING
     useEffect(() => {
-        //shortcut
         const data = (formData as unknown as IQuote);
+        if (!data || !Object.keys(data).length) return;
 
-        //if there is no filled field, its disabled
-        if (!data) return;
-
-        if (data?.text && data.text.trim().length > 0) {
-            setError(undefined);
-        } else {
-            setError('Text citátu musí obsahovať aspoň jeden znak!')
+        if (!data?.text && data?.text.trim().length < 1) {
+            return setError('Text citátu musí obsahovať aspoň jeden znak!')
         }
+        if (!data?.fromBook) {
+            return setError('Musí byť vybraná kniha!');
+        }
+        return setError(undefined);
     }, [formData])
 
     const handleForm = (e: any): void => {
@@ -111,7 +111,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
         //todo: merge with "handleForm"
         type === "user" ? 
             setFormData({...formData, owner: selected}) : 
-            setFormData({...formData, fromBook: selected});
+            setFormData({...formData, fromBook: selected ? selected._id : null});
     }
 
     const showAddQuote = () => {
@@ -126,12 +126,13 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                             onSubmit={(e) => {
                             saveQuote(e, formData);
                             cleanFields();
+                            setShowModal(false);
                         }}>
                             <input type="hidden" name="id" value={id}/>
                             <div className="row">
                             {isText ? <textarea onChange={handleForm} id='text' placeholder='*Text'
                                                         className="form-control" autoComplete="off"
-                                                        value={formData && "text" in formData ? formData.text : ''}/> :
+                                                        value={formData && "text" in formData ? formData?.text : ''}/> :
                                         <label className="btn btn-dark">
                                             <i className="fa fa-image"/> Nahraj obrázky
                                             <input type="file" style={{display: "none"}} name="image" accept="image/*"/>
@@ -150,22 +151,21 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                                         isObject={true}
                                         displayValue="title"
                                         closeOnSelect={true}
-                                        placeholder="Z knihy"
+                                        placeholder="*Z knihy"
                                         closeIcon="cancel"
                                         emptyRecordMsg="Žiadne knihy nenájdené"
-                                        selectionLimit={1}
-                                        onSelect={(value: IBook) => onChange(value, "book")}
-                                        onRemove={(value: IBook) => onChange(value, "book")}
+                                        singleSelect={true}
+                                        onSelect={(value: IBook[]) => onChange(value[0], "book")}
+                                        onRemove={(value: IBook[]) => onChange(value[0], "book")}
                                         style={{
                                             inputField: {marginLeft: "0.5rem"},
-                                            optionContainer: {
-                                                backgroundColor: "transparent",
-                                            },
-                                            option: {color: "black"},
+                                            optionContainer: {backgroundColor: "transparent"},
+                                            option: {color: 'black'},
                                             multiselectContainer: {maxWidth: '100%'},
+                                            chips: {backgroundColor: getCssPropertyValue("--anchor")}
                                         }}
                                         ref={bookRef}
-                                        selectedValues={formData.fromBook}
+                                        selectedValues={formData.fromBook ? [formData.fromBook] : []}
                                     />
                                 </div>
                                 <div className="col-3">
@@ -192,7 +192,8 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                                                 marginRight: '-5px',
                                                 borderRadius: '3px'
                                             },
-                                            option: {color: "black"}
+                                            option: {color: "black"},
+                                            chips: {backgroundColor: getCssPropertyValue("--anchor")}
                                         }}
                                         ref={ownerRef}
                                         selectedValues={formData.owner}

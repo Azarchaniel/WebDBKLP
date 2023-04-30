@@ -7,13 +7,13 @@ import { toast } from "react-toastify";
 import {stringifyUsers} from "../../utils/utils";
 
 type Props = { quote: IQuote, bcgrClr: string } & {
-    deleteQuote: (_id: string) => void
+    deleteQuote: (_id: string) => void,
+    saveQuote: (e: React.FormEvent, formData: IQuote) => void
 }
 
-const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
+const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {
     const [update, setUpdate] = useState(false);
 
-    //todo: small etc. are just numbers. So try to divide or something, make bigger granularity
     const cssGrid = () => {
         if (quote.text.length < 300) {
             return 'Quote smallQ';
@@ -24,7 +24,7 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
         }
     }
 
-    const handleSaveQuote = (e: React.FormEvent, formData: IQuote): void => {
+    /*const handleSaveQuote = (e: React.FormEvent, formData: IQuote): void => {
         e.preventDefault()
         addQuote(formData)
             .then(({status}) => {
@@ -32,13 +32,12 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
                     throw new Error('Citát sa nepodarilo pridať!')
                 }
                 toast.success(`Citát bol úspešne ulozeny.`);
-                //TODO: call parent to refresh quotes
             })
             .catch((err) => {
                 toast.error(`Citát sa nepodarilo ulozit!`);
                 console.trace(err);
             })
-    }
+    }*/
 
     return (
         <div className={cssGrid()} style={{backgroundColor: bcgrClr}}>
@@ -46,7 +45,7 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
                 <p>Text: {quote?.text}</p>
                 {quote.fromBook && quote.fromBook?.title ? <p>Z knihy: {quote.fromBook?.title}{quote.pageNo ? ', ' + quote.pageNo : ''}</p>
                     : <></>}
-                {quote.owner ? <p>Majiteľ: {stringifyUsers(quote.owner, false)}</p> : <></>}
+                {quote.owner ? <span>Majiteľ: {stringifyUsers(quote.owner, false)}</span> : <></>}
             </div>
             <div className='Card--button'>
                 <Tooltip title="Upraviť" placement="bottom">
@@ -57,7 +56,7 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote}) => {
                     <i className="fas fa-trash" onClick={() => deleteQuote(quote._id)}/>
                 </Tooltip>
             </div>
-            {update ? <AddQuote saveQuote={handleSaveQuote} id={quote._id}/> : <></>}
+            {update ? <AddQuote saveQuote={saveQuote} id={quote._id}/> : <></>}
         </div>
     )
 }

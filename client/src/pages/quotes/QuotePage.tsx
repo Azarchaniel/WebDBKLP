@@ -39,12 +39,14 @@ export default function QuotePage() {
         getQuotes()
             .then(({ data: { quotes } }: IQuote[] | any) => {
                 //TODO: do on BE
-                const validQuotes = quotes.filter((quote: IQuote) => !quote.deletedAt);
+                const validQuotes = quotes
+                    .filter((quote: IQuote) => !quote.deletedAt)
+                    .sort((a: IQuote, b: IQuote) => a.fromBook?._id > b.fromBook?._id ? 1 : -1);
                 setInitQuotes(validQuotes);
                 setFilteredQuotes(validQuotes);
-                setLoading(false);
             })
             .catch((err: Error) => console.trace(err))
+            .finally(() => setLoading(false))
     }
 
     useEffect(() => {     
@@ -52,7 +54,6 @@ export default function QuotePage() {
 
         let filteredQuotes = initQuotes.filter((quote: IQuote) => {
             if (!quote.fromBook) return;
-            //console.log(quote.fromBook._id, booksToFilter, booksToFilter.includes(quote.fromBook._id));
             return booksToFilter.includes(quote.fromBook._id);
         })
         
@@ -63,12 +64,12 @@ export default function QuotePage() {
     const handleSaveQuote = (e: React.FormEvent, formData: IQuote): void => {
         e.preventDefault()
         addQuote(formData)
-            .then(({status, data}) => {
+            .then(({status}) => {
                 if (status !== 201) {
                     throw new Error('Citát sa nepodarilo pridať!')
                 }
                 toast.success(`Citát bol úspešne pridaný.`);
-                setInitQuotes(data.quotes);
+                refresh();
             })
             .catch((err) => {
                 toast.error(`Citát sa nepodarilo pridať!`);
@@ -86,13 +87,12 @@ export default function QuotePage() {
                     label: 'Ano',
                     onClick: () => {
                         deleteQuote(_id)
-                            .then(({ status, data }) => {
+                            .then(({ status }) => {
                                 if (status !== 200) {
                                     throw new Error('Error! Quote not deleted')
                                 }
                                 toast.success(`Citát bol úspešne vymazaný.`);
-                                setInitQuotes([]);
-                                setInitQuotes(data.quotes);
+                                refresh();
                             })
                             .catch((err) => {
                                 toast.error('Došlo k chybe!');
@@ -119,6 +119,11 @@ export default function QuotePage() {
         colors = colors.filter((item: string) => choosenColor !== item);
 
         return choosenColor;
+    }
+
+    const refresh = () => {
+        setInitQuotes([]);
+        fetchQuotes();
     }
 
     return (
@@ -162,10 +167,12 @@ export default function QuotePage() {
                 }}
             />
             <div className="quote_container">
-                {filteredQuotes?.map((quote: IQuote) => {
+                {
+                filteredQuotes?.map((quote: IQuote) => {
                     return <QuoteItem
                         key={quote._id}
                         deleteQuote={handleDeleteQuote}
+                        saveQuote={handleSaveQuote}
                         quote={quote}
                         bcgrClr={getRndColor()}
                     />

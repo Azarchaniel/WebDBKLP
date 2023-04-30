@@ -47,5 +47,6 @@ cd ./client; npx run start
 - [ ] WYSWIG editor for Quotes (with pictures)
 - [ ] generalize CRUD - first parameter is DB entity name, then ID, then requested params. In Error specify, what is missing in model. 
 - [ ] too many !importants in index.scss
+- [ ] translations
 
 (MVP) - Minimum Viable Product
