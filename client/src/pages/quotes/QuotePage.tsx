@@ -1,6 +1,6 @@
 import Sidebar from "../../components/Sidebar";
 import AddQuote from "./AddQuote";
-import {IBook, IQuote} from "../../type";
+import {IBook, IQuote, IUser} from "../../type";
 import QuoteItem from "./QuoteItem";
 import Toast from "../../components/Toast";
 import React, {useEffect, useState} from "react";
@@ -11,12 +11,14 @@ import {darkenLightenColor} from "../../utils/utils";
 import Header from "../../components/Header";
 import LoadingBooks from "../../components/LoadingBooks";
 import Multiselect from "multiselect-react-dropdown";
+import { useReadLocalStorage } from "usehooks-ts";
 
 export default function QuotePage() {
     const [books, setBooks] = useState<IBook[]>([]);
     const [booksToFilter, setBooksToFilter] = useState<string[]>([]);
     const [initQuotes, setInitQuotes] = useState<IQuote[]>([]);
     const [filteredQuotes, setFilteredQuotes] = useState<IQuote[]>([]);
+    const activeUser = useReadLocalStorage("activeUsers");
 
     const [loading, setLoading] = useState(true);
 
@@ -31,13 +33,29 @@ export default function QuotePage() {
             })
             .catch((err: Error) => console.trace(err))
         fetchQuotes();
-    }, [])
+    }, []);
+
+    useEffect(() => {
+        fetchQuotes();
+    }, [activeUser]);
 
     // ### QUOTES ###
     const fetchQuotes = (): void => {
         setLoading(true);
         getQuotes()
             .then(({ data: { quotes } }: IQuote[] | any) => {
+                if ((activeUser as string[])?.length) {
+                    const quotesArr: IQuote[] = [];
+                    quotes.forEach((qoute: IQuote) => {
+                        //TODO: this filtering should be on BE
+                        qoute.owner?.filter((owner: IUser) => {
+                            if ((activeUser as string[]).includes(owner._id) || qoute.owner === undefined) {
+                                quotesArr.push(qoute);
+                            }
+                        })
+                    })
+                    quotes = quotesArr;
+                }
                 //TODO: do on BE
                 const validQuotes = quotes
                     .filter((quote: IQuote) => !quote.deletedAt)
@@ -168,15 +186,17 @@ export default function QuotePage() {
             />
             <div className="quote_container">
                 {
-                filteredQuotes?.map((quote: IQuote) => {
-                    return <QuoteItem
-                        key={quote._id}
-                        deleteQuote={handleDeleteQuote}
-                        saveQuote={handleSaveQuote}
-                        quote={quote}
-                        bcgrClr={getRndColor()}
-                    />
-                })}
+                    filteredQuotes.length ?
+                        filteredQuotes?.map((quote: IQuote) => {
+                            return <QuoteItem
+                                key={quote._id}
+                                deleteQuote={handleDeleteQuote}
+                                saveQuote={handleSaveQuote}
+                                quote={quote}
+                                bcgrClr={getRndColor()}
+                            />}) :
+                            <span style={{color: 'black'}}>Žiadne citáty neboli nájdené!</span>
+            }
             </div>
             <Toast />
         </main>
