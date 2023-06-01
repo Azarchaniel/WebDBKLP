@@ -111,7 +111,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
         //todo: merge with "handleForm"
         type === "user" ? 
             setFormData({...formData, owner: selected}) : 
-            setFormData({...formData, fromBook: selected ? selected._id : null});
+            setFormData({...formData, fromBook: selected ? selected[0]._id : null});
     }
 
     const showAddQuote = () => {
@@ -147,6 +147,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                                 </div>
                                 <div className="col-6">
                                     <Multiselect
+                                        selectionLimit={1} /* searching doesnt work on single select */
                                         options={books}
                                         isObject={true}
                                         displayValue="title"
@@ -154,9 +155,8 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                                         placeholder="*Z knihy"
                                         closeIcon="cancel"
                                         emptyRecordMsg="Žiadne knihy nenájdené"
-                                        singleSelect={true}
-                                        onSelect={(value: IBook[]) => onChange(value[0], "book")}
-                                        onRemove={(value: IBook[]) => onChange(value[0], "book")}
+                                        onSelect={(value: IBook[]) => onChange(value, "book")}
+                                        onRemove={(value: IBook[]) => onChange(value, "book")}
                                         style={{
                                             inputField: {marginLeft: "0.5rem"},
                                             optionContainer: {backgroundColor: "transparent"},
@@ -165,7 +165,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                                             chips: {backgroundColor: getCssPropertyValue("--anchor")}
                                         }}
                                         ref={bookRef}
-                                        selectedValues={formData.fromBook ? [formData.fromBook] : []}
+                                        selectedValues={books?.filter((book: IBook) => formData?.fromBook?._id === book?._id)}
                                     />
                                 </div>
                                 <div className="col-3">
