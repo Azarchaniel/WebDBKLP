@@ -24,21 +24,6 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {
         }
     }
 
-    /*const handleSaveQuote = (e: React.FormEvent, formData: IQuote): void => {
-        e.preventDefault()
-        addQuote(formData)
-            .then(({status}) => {
-                if (status !== 201) {
-                    throw new Error('Citát sa nepodarilo pridať!')
-                }
-                toast.success(`Citát bol úspešne ulozeny.`);
-            })
-            .catch((err) => {
-                toast.error(`Citát sa nepodarilo ulozit!`);
-                console.trace(err);
-            })
-    }*/
-
     return (
         <div className={cssGrid()} style={{backgroundColor: bcgrClr}}>
             <div className='text'>
