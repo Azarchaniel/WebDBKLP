@@ -10,38 +10,41 @@ interface IUserStats {
 
 export default function DashboardPage() {
     const [countAllBooks, setCountAllBooks] = useState<number>(0);
-    const [usersCounts, setUsersCounts] = useState<IUserStats[] | any[]>();
+    const [usersCounts, setUsersCounts] = useState<IUserStats[]>([]);
 
     useEffect(() => {
         countBooks()
             .then((result: any) => setCountAllBooks(result.data.count))
             .catch((err: any) => console.error("error counting books FE", err));
 
-        let allusersStats: IUserStats[] = [];
+        const fetchUsers = async () => {
+            return await getUsers();
+        }
 
-        getUsers()
-            .then((result: AxiosResponse<ApiUserDataType>) => {
-                const { data } = result;
-                data.users.forEach((user: IUser) => {
+        fetchUsers()
+            .then(response => {
+                for (let user of response.data.users) {
                     countBooks(user._id)
-                        .then((result: AxiosResponse<{message: string, count: number}>) => { 
-                            allusersStats.push({ name: user.firstName ?? "", count: result.data.count }) 
+                        .then((counted: any) => {
+                            console.log(counted.data, usersCounts);
+                            setUsersCounts(prevUser => {
+                                return [
+                                    ...prevUser,
+                                    {name: counted.data.owner as string, count: counted.data.count as number}
+                                ]
+                            });
+
                         })
-                        .catch((err: any) => console.error("error counting books FE", err));
-                });
-                setUsersCounts(allusersStats)
-                console.log(usersCounts);
+                        .catch(err => console.error(err))
+                }
             })
-            .catch((err: any) => console.error("error fetching users FE", err));
+            .catch(err => console.error(err));
     }, [])
 
     return (
-        <>
-            <p style={{ color: "black", marginLeft: "1rem" }}>Počet kníh celkovo: {countAllBooks}</p>
-            {usersCounts?.forEach((userStat: IUserStats) => {
-                console.log("element",userStat);
-            return <p style={{ color: "black", marginLeft: "1rem" }}>{userStat.name}: {userStat.count}</p>
-        })}
-        </>
+        <div style={{ color: "black", marginLeft: "1rem" }}>
+            <p>Počet kníh celkovo: {countAllBooks}</p>
+            {usersCounts.sort((a,b) => a.name.localeCompare(b.name)).map(usrCnt => <p>{usrCnt.name}: {usrCnt.count}</p>)}
+        </div>
     );
 }
