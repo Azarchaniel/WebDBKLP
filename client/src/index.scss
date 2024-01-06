@@ -58,9 +58,8 @@ body, html, main, #root {
 
 .quote_container {
   padding: 10px;
-  display: grid;
-  grid-gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  column-count: 4;
+  column-gap: .5rem;
 }
 
 .Quote {
@@ -69,6 +68,13 @@ body, html, main, #root {
   border-radius: 10px;
   font-size: 110%;
   position: relative;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+  break-inside: avoid;
+  margin-bottom: .4rem;
 
   .Card--button {
     position: absolute;
@@ -76,18 +82,6 @@ body, html, main, #root {
     right: 1rem;
     cursor: pointer;
   }
-}
-
-.smallQ {
-  grid-row-end: span 1;
-}
-
-.mediumQ {
-  grid-row-end: span 2;
-}
-
-.largeQ {
-  grid-row-end: span 3;
 }
 
 .LP {
