@@ -122,6 +122,12 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                 <>
                     <div className="modalBgr"/>
                     <div className="modalBody">
+                        <div className="modal-header" style={{marginBottom: "1rem"}}>
+                            <h5 className="modal-title" id="exampleModalLabel"><b>Pridať LP</b></h5>
+                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
                         <form
                             onSubmit={(e) => {
                             saveQuote(e, formData);
@@ -130,7 +136,8 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                         }}>
                             <input type="hidden" name="id" value={id}/>
                             <div className="row">
-                            {isText ? <textarea onChange={handleForm} id='text' placeholder='*Text'
+                                <div className="col-12">
+                                    {isText ? <textarea onChange={handleForm} id='text' placeholder='*Text'
                                                         className="form-control" autoComplete="off"
                                                         value={formData && "text" in formData ? formData?.text : ''}/> :
                                         <label className="btn btn-dark">
@@ -138,6 +145,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                                             <input type="file" style={{display: "none"}} name="image" accept="image/*"/>
                                         </label>
                                     }
+                                </div>
                             </div>
                             <div style={{height: '5px', width: '100%'}}/>
                             <div className="row">

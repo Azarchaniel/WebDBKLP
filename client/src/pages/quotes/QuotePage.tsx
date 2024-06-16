@@ -12,6 +12,7 @@ import Header from "../../components/Header";
 import LoadingBooks from "../../components/LoadingBooks";
 import Multiselect from "multiselect-react-dropdown";
 import { useReadLocalStorage } from "usehooks-ts";
+import { ScrollToTopBtn } from "../../utils/elements";
 
 export default function QuotePage() {
     const [books, setBooks] = useState<IBook[]>([]);
@@ -139,6 +140,10 @@ export default function QuotePage() {
         return choosenColor;
     }
 
+    const scrollToTopOfPage = () => {
+        window.scroll(0,0)
+    }
+
     const refresh = () => {
         setInitQuotes([]);
         fetchQuotes();
@@ -198,6 +203,7 @@ export default function QuotePage() {
                             <span style={{color: 'black'}}>Žiadne citáty neboli nájdené!</span>
             }
             </div>
+            <ScrollToTopBtn scrollToTop={() => scrollToTopOfPage()} />
             <Toast />
         </main>
     )

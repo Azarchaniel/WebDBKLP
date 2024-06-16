@@ -48,5 +48,6 @@ cd ./client; npx run start
 - [ ] generalize CRUD - first parameter is DB entity name, then ID, then requested params. In Error specify, what is missing in model. 
 - [ ] too many !importants in index.scss
 - [ ] translations
+- [ ] allow user to add tags - "fantasy", "read2012"
 
 (MVP) - Minimum Viable Product

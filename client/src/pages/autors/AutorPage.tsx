@@ -23,7 +23,10 @@ export default function AutorPage() {
     const fetchAutors = (): void => {
         getAutors()
             .then(({data: {autors}}: any) => {
-                setAutors(autors);
+                //TODO: filtering on BE
+                setAutors(
+                    autors.filter((autor: IAutor) => !autor.deletedAt)
+                );
             })
             .catch((err: Error) => console.trace(err))
     }

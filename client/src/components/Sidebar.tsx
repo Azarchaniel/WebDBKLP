@@ -1,7 +1,8 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import '../styles/font-awesome/css/all.css';
 import {ISideMenuItems} from "../type";
 import {Link} from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 type PropsSB = {
     parent: ISideMenuItems
@@ -15,6 +16,8 @@ const hasChildren = (item: ISideMenuItems) => {
 }
 
 const MenuItem: React.FC<PropsSB> = ({parent}) => {
+    const location = useLocation();
+
     const [open, setOpen] = useState<boolean>(false)
 
     if (hasChildren(parent)) {
@@ -54,7 +57,7 @@ const MenuItem: React.FC<PropsSB> = ({parent}) => {
         //single item
         return (
             <div className="SB-Parent">
-                <Link className='customLink' to={parent.route}>
+                <Link className={parent.route === location.pathname ? 'customLink activeLink' : 'customLink'} to={parent.route}>
                     {parent.icon ? <i className={parent.icon}>&nbsp;</i> : <></>}
                     <span>{parent.title}</span>
                     &nbsp;
@@ -64,6 +67,8 @@ const MenuItem: React.FC<PropsSB> = ({parent}) => {
 }
 
 const Sidebar = () => {
+    const location = useLocation();
+
     const [sidebarOpened, setSidebarOpened] = useState<boolean>(false);
 
     //todo: this shouldn't be here - separate data and component
@@ -99,8 +104,11 @@ const Sidebar = () => {
                 if (!item.children) {
                     return <div className="SB-Parent">
                         <Link className='customLink' to={item.route}>
+                            {/* if Menu item has icon, show it. Otherwise show only first letter of title */}
                             {item.icon ?
-                                <i key={index} className={item.icon}>&nbsp;</i> : <>{item.title.substring(0, 1)}</>}
+                                <i key={index} className={item.route === location.pathname ? 
+                                    item.icon + ' customLink activeLink' : item.icon}>&nbsp;</i> : 
+                                    <>{item.title.substring(0, 1)}</>}
                         </Link>
                     </div>
                 } else {
@@ -124,6 +132,7 @@ const Sidebar = () => {
 
     return (
         <div className={sidebarOpened ? "sideBarOpened" : "sideBarClosed"} id='SS'>
+            {/* controls icon in the upper right of the Menu */}
             {sidebarOpened ? <span
                 className="closeIcon"
                 onClick={() => setSidebarOpened(!sidebarOpened)}
@@ -131,7 +140,7 @@ const Sidebar = () => {
                 className="closeIcon"
                 onClick={() => setSidebarOpened(!sidebarOpened)}
             ><i className="fas fa-bars customLink"/></span>}
-            {showContent(content)}
+            {showContent(content)} {/* show content of menu - Knihy, Autori etc */}
         </div>
     );
 }

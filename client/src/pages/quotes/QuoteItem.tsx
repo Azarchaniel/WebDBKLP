@@ -1,9 +1,7 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {IQuote} from "../../type";
-import {addQuote} from "../../API";
 import {Tooltip} from "@material-ui/core";
 import AddQuote from "./AddQuote";
-import { toast } from "react-toastify";
 import {stringifyUsers} from "../../utils/utils";
 
 type Props = { quote: IQuote, bcgrClr: string } & {
@@ -27,10 +25,10 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {
     return (
         <div className={cssGrid()} style={{backgroundColor: bcgrClr}}>
             <div className='text'>
-                <p>Text: {quote?.text}</p>
-                {quote.fromBook && quote.fromBook?.title ? <p>Z knihy: {quote.fromBook?.title}{quote.pageNo ? ', ' + quote.pageNo : ''}</p>
-                    : <></>}
-                {quote.owner ? <span>Majiteľ: {stringifyUsers(quote.owner, false)}</span> : <></>}
+                {quote.fromBook && quote.fromBook?.title ?<h4>{quote.fromBook?.title}{quote.pageNo ? ', s. ' + quote.pageNo : ''}</h4> : <></>}
+                <p>{quote?.text}</p>
+                {quote.owner ? <p><span className="quoteOwner">Pridal: {stringifyUsers(quote.owner, false)}</span></p> : <></>}
+                {quote.note ? <p><span className="quoteOwner">Poznámka: {quote.note}</span></p> : <></>}
             </div>
             <div className='Card--button'>
                 <Tooltip title="Upraviť" placement="bottom">
