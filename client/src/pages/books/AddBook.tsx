@@ -5,7 +5,6 @@ import {getAutors, getUsers} from "../../API";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {langCode, countryCode} from "../../utils/locale";
-//@ts-ignore
 import {Multiselect} from 'multiselect-react-dropdown';
 import ChipInput from "material-ui-chip-input";
 
@@ -15,12 +14,22 @@ type Props = {
     bookId?: string | undefined;
 }
 
+const multiselectStyle = {
+    inputField: {marginLeft: "0.5rem"},
+    optionContainer: {
+        backgroundColor: "transparent",
+    },
+    chips: {background: '#00ADB5'},
+    option: {color: 'black'},
+    multiselectContainer: {maxWidth: '100%'},
+};
+
 const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
     const [openedModal, setOpenedModal] = useState<boolean>(open || Boolean(bookId));
     const [formData, setFormData] = useState<Partial<IBook>>()
     const [autors, setAutors] = useState<IAutor[] | any>();
     const [users, setUsers] = useState<IUser[] | undefined>();
-    const [error, setError] = useState<string | undefined>('Názov knihy musí obsahovať aspoň jeden znak!');
+    const [error, setError] = useState<string | undefined>();
     const [exLibrisValue, setExLibrisValue] = useState(false);
     const autorRef = useRef(null);
     const editorRef = useRef(null);
@@ -62,17 +71,21 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
         //if there is no filled field, its disabled
         if (!data) return;
 
-        if (data?.title && data.title.trim().length > 0) {
-            setError(undefined);
+        if (!(data?.title && data.title.trim().length > 0)) {
+            setError('Názov knihy musí obsahovať aspoň jeden znak!');
+            return;
         } else {
-            setError('Názov knihy musí obsahovať aspoň jeden znak!')
+            setError(undefined);
         }
 
-        /*if (data?.numberOfPages && typeof data?.numberOfPages === 'number') {
-            setError(undefined);
-        } else {
+        if (!(data?.numberOfPages && !isNaN(parseInt(data?.numberOfPages as unknown as string)))) {
             setError('Počet strán musí byť číslo!');
-        }*/
+            return;
+        } else {
+            setError(undefined);
+        }
+
+
     }, [formData])
 
     useEffect(() => {
@@ -156,14 +169,8 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 onSelect={(pickedAut: IAutor[]) => {
                                                     setFormData({...formData, autor: pickedAut})
                                                 }}
-                                                style={{
-                                                    inputField: {marginLeft: "0.5rem"},
-                                                    optionContainer: {
-                                                        backgroundColor: "transparent",
-                                                    },
-                                                    option: {},
-                                                    multiselectContainer: {maxWidth: '100%'},
-                                                }}
+                                                style={multiselectStyle}
+                                                avoidHighlightFirstOption={true}
                                                 ref={autorRef}
                                             />
                                         </div>
@@ -179,14 +186,8 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 onSelect={(pickedAut: IAutor[]) => {
                                                     setFormData({...formData, translator: pickedAut.map(v => v._id)})
                                                 }}
-                                                style={{
-                                                    inputField: {marginLeft: "0.5rem"},
-                                                    optionContainer: {
-                                                        backgroundColor: "transparent",
-                                                    },
-                                                    option: {},
-                                                    multiselectContainer: {maxWidth: '100%'},
-                                                }}
+                                                style={multiselectStyle}
+                                                avoidHighlightFirstOption={true}
                                                 ref={translatorRef}
                                             />
                                         </div>
@@ -202,14 +203,8 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 onSelect={(pickedAut: IAutor[]) => {
                                                     setFormData({...formData, editor: pickedAut.map(v => v._id)})
                                                 }}
-                                                style={{
-                                                    inputField: {marginLeft: "0.5rem"},
-                                                    optionContainer: {
-                                                        backgroundColor: "transparent",
-                                                    },
-                                                    option: {},
-                                                    multiselectContainer: {maxWidth: '100%'},
-                                                }}
+                                                style={multiselectStyle}
+                                                avoidHighlightFirstOption={true}
                                                 ref={editorRef}
                                             />
                                         </div>
@@ -225,14 +220,8 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 onSelect={(pickedAut: IAutor[]) => {
                                                     setFormData({...formData, ilustrator: pickedAut.map(v => v._id)})
                                                 }}
-                                                style={{
-                                                    inputField: {marginLeft: "0.5rem"},
-                                                    optionContainer: {
-                                                        backgroundColor: "transparent",
-                                                    },
-                                                    option: {},
-                                                    multiselectContainer: {maxWidth: '100%'},
-                                                }}
+                                                style={multiselectStyle}
+                                                avoidHighlightFirstOption={true}
                                                 ref={ilustratorRef}
                                             />
                                         </div>
@@ -305,14 +294,8 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                         published: {country: picked.map(v => v.key)[0]}
                                                     })
                                                 }}
-                                                style={{
-                                                    inputField: {marginLeft: "0.5rem"},
-                                                    optionContainer: {
-                                                        backgroundColor: "transparent",
-                                                    },
-                                                    option: {},
-                                                    multiselectContainer: {maxWidth: '100%'},
-                                                }}
+                                                style={multiselectStyle}
+                                                avoidHighlightFirstOption={true}
                                                 ref={countryRef}
                                             />
                                         </div>
@@ -333,14 +316,8 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                         }
                                                     })
                                                 }}
-                                                style={{
-                                                    inputField: {marginLeft: "0.5rem"},
-                                                    optionContainer: {
-                                                        backgroundColor: "transparent",
-                                                    },
-                                                    option: {},
-                                                    multiselectContainer: {maxWidth: '100%'},
-                                                }}
+                                                style={multiselectStyle}
+                                                avoidHighlightFirstOption={true}
                                                 ref={cityRef}
                                             />
                                         </div>
@@ -370,6 +347,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                         borderRadius: '3px'
                                                     }
                                                 }}
+                                                avoidHighlightFirstOption={true}
                                                 ref={langRef}
                                             />
                                         </div>
@@ -443,6 +421,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                         borderRadius: '3px'
                                                     }
                                                 }}
+                                                avoidHighlightFirstOption={true}
                                                 ref={readByRef}
                                             />
                                         </div>
@@ -466,6 +445,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                         borderRadius: '3px'
                                                     }
                                                 }}
+                                                avoidHighlightFirstOption={true}
                                                 ref={ownerRef}
                                             />
                                         </div>

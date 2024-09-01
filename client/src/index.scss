@@ -365,9 +365,9 @@ body, html, main, #root {
 
 .container {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: minmax(0, 1fr);
-  gap: 10px 10px !important;
+  gap: 0.5rem 1rem;
   grid-auto-flow: row;
 }
 
@@ -376,7 +376,7 @@ body, html, main, #root {
 }
 
 .Podnazov {
-  grid-area: 1 / 3 / 2 / 4;
+  grid-area: 1 / 3 / 2 / 3;
 }
 
 .Autor {
@@ -392,7 +392,7 @@ body, html, main, #root {
 }
 
 .Ilustrator {
-  grid-area: 3 / 3 / 4 / 4;
+  grid-area: 3 / 3 / 4 / 3;
 }
 
 .Edice {
@@ -420,11 +420,11 @@ body, html, main, #root {
 }
 
 .ISBN {
-  grid-area: 4 / 3 / 5 / 4;
+  grid-area: 4 / 3 / 5 / 3;
 }
 
 .Page-no {
-  grid-area: 5 / 3 / 6 / 4;
+  grid-area: 5 / 3 / 6 / 3;
 }
 
 .Vydavatel {
@@ -436,7 +436,7 @@ body, html, main, #root {
 }
 
 .Krajina {
-  grid-area: 6 / 3 / 7 / 4;
+  grid-area: 6 / 3 / 7 / 3;
 }
 
 .Lokace {
@@ -448,7 +448,7 @@ body, html, main, #root {
 }
 
 .language {
-  grid-area: 7 / 3 / 8 / 4;
+  grid-area: 7 / 3 / 8 / 3;
 }
 
 .Police {
@@ -464,7 +464,7 @@ body, html, main, #root {
 }
 
 .Sirka {
-  grid-area: 8 / 3 / 9 / 4;
+  grid-area: 8 / 3 / 9 / 3;
 }
 
 .Hmotnost {
@@ -488,6 +488,7 @@ body, html, main, #root {
 }
 
 .Ex-Libris {
+  color: black;
   display: flex;
   align-items: center;
   grid-area: 12 / 3 / 13 / 4;
@@ -665,4 +666,15 @@ body, html, main, #root {
 
 .moveToLeft {
   margin-right: 3rem !important;
+}
+
+//for Multiselect
+.option {
+  //background-color: var(--anchor) !important;
+  &:hover {
+    background-color: var(--anchor) !important;
+  }
+  &::selection {
+    background-color: var(--anchor) !important;
+  }
 }
