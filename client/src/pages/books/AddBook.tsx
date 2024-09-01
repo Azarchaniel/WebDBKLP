@@ -110,7 +110,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
     const showError = () => {
         if (!error) return <></>;
         return (
-            <div className="alert alert-danger"><FontAwesomeIcon icon={faExclamationTriangle}/> {error}</div>
+            <div className="errorAddBook alert alert-danger"><FontAwesomeIcon icon={faExclamationTriangle}/> {error}</div>
         );
     }
 
@@ -481,9 +481,6 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    value={formData && "hrefGoodReads" in formData ? formData["hrefGoodReads"] : ''}
                                             />
                                         </div>
-                                    </div>
-                                    <div style={{height: '5px', width: '100%'}}/>
-                                    <div className="row">
                                         {showError()}
                                     </div>
 

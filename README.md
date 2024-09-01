@@ -10,6 +10,7 @@ cd ./server; npm run start
 cd ./client; npx run start
 
 ### TODO
+- [ ] zjednotit modaly
 - [X] redesign
 - [X] side menu
 - [X] adding / updating item

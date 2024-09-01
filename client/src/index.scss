@@ -130,6 +130,10 @@ body, html, main, #root {
   align-items: center;
 }
 
+.modal-footer {
+  padding: 1rem 0.8rem 1rem 1rem !important;
+}
+
 .modal-content {
   width: 170% !important;
   margin: 0 auto;
@@ -504,6 +508,10 @@ body, html, main, #root {
 
 .GR {
   grid-area: 13 / 3 / 14 / 4;
+}
+
+.errorAddBook {
+  grid-area: 14 / 1 / 15 / 4;
 }
 
 .form-control-important {

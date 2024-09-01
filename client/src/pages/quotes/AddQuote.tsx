@@ -123,7 +123,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, id}: { saveQuote: any, id?: strin
                     <div className="modalBgr"/>
                     <div className="modalBody">
                         <div className="modal-header" style={{marginBottom: "1rem"}}>
-                            <h5 className="modal-title" id="exampleModalLabel"><b>Pridať LP</b></h5>
+                            <h5 className="modal-title" id="exampleModalLabel"><b>Pridať citát</b></h5>
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
