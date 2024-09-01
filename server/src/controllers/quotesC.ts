@@ -35,7 +35,7 @@ const getQuote = async (req: Request, res: Response): Promise<void> => {
 }
 
 const addQuote = async (req: Request, res: Response): Promise<void> => {
-    const { id, text, fromBook, note, deletedAt, owner } = req.body;
+    const { id, text, fromBook, note, deletedAt, owner, pageNo } = req.body;
 
     try {
         if (!id) {
@@ -44,7 +44,8 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
                 note: note,
                 fromBook: fromBook,
                 deletedAt: deletedAt,
-                owner: owner
+                owner: owner,
+                pageNo: pageNo
             });
 
             const newQuote: IQuote = await quote.save();

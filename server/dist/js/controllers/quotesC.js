@@ -47,7 +47,7 @@ const getQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getQuote = getQuote;
 const addQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id, text, fromBook, note, deletedAt, owner } = req.body;
+    const { id, text, fromBook, note, deletedAt, owner, pageNo } = req.body;
     try {
         if (!id) {
             const quote = new quote_1.default({
@@ -55,7 +55,8 @@ const addQuote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 note: note,
                 fromBook: fromBook,
                 deletedAt: deletedAt,
-                owner: owner
+                owner: owner,
+                pageNo: pageNo
             });
             const newQuote = yield quote.save();
             const allQuotes = yield quote_1.default
