@@ -17,7 +17,7 @@ const user_1 = __importDefault(require("../models/user"));
 const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield user_1.default.find();
-        res.status(200).json({ users: users });
+        res.status(200).json({ users: users.sort((a, b) => a.lastName > b.lastName ? 1 : -1) });
     }
     catch (error) {
         res.status(400);

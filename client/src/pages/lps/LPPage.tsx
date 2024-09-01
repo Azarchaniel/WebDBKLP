@@ -8,7 +8,7 @@ import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
 import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
-import Header from "../../components/Header";
+import Header from "../../components/AppHeader";
 import { tableHeaderColor } from "../../utils/constants";
 
 export default function LPPage() {

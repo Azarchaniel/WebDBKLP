@@ -8,7 +8,7 @@ import {addQuote, deleteQuote, getBooks, getQuotes} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
 import {darkenLightenColor} from "../../utils/utils";
-import Header from "../../components/Header";
+import Header from "../../components/AppHeader";
 import LoadingBooks from "../../components/LoadingBooks";
 import Multiselect from "multiselect-react-dropdown";
 import { useReadLocalStorage } from "usehooks-ts";

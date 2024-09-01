@@ -8,7 +8,7 @@ import Sidebar from "../../components/Sidebar";
 import Toast from "../../components/Toast";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
-import Header from "../../components/Header";
+import Header from "../../components/AppHeader";
 import { tableHeaderColor } from "../../utils/constants";
 import { TooltipedText } from "../../utils/elements";
 import { useNavigate } from 'react-router-dom';
