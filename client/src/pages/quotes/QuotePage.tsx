@@ -19,6 +19,7 @@ export default function QuotePage() {
     const [booksToFilter, setBooksToFilter] = useState<string[]>([]);
     const [initQuotes, setInitQuotes] = useState<IQuote[]>([]);
     const [filteredQuotes, setFilteredQuotes] = useState<IQuote[]>([]);
+    const [countAll, setCountAll] = useState<number>(0);
     const activeUser = useReadLocalStorage("activeUsers");
 
     const [loading, setLoading] = useState(true);
@@ -44,7 +45,7 @@ export default function QuotePage() {
     const fetchQuotes = (): void => {
         setLoading(true);
         getQuotes()
-            .then(({ data: { quotes } }: IQuote[] | any) => {
+            .then(({ data: { quotes, count } }: IQuote[] | any) => {
                 if ((activeUser as string[])?.length) {
                     const quotesArr: IQuote[] = [];
                     quotes.forEach((qoute: IQuote) => {
@@ -59,10 +60,10 @@ export default function QuotePage() {
                 }
                 //TODO: do on BE
                 const validQuotes = quotes
-                    .filter((quote: IQuote) => !quote.deletedAt)
                     .sort((a: IQuote, b: IQuote) => a.fromBook?._id > b.fromBook?._id ? 1 : -1);
                 setInitQuotes(validQuotes);
                 setFilteredQuotes(validQuotes);
+                setCountAll(count);
             })
             .catch((err: Error) => console.trace(err))
             .finally(() => setLoading(false))
@@ -157,6 +158,7 @@ export default function QuotePage() {
             <div style={{position: "fixed", top: "20rem", zIndex: 1000}}>
                 {loading ? <LoadingBooks /> : <></>}
             </div>
+            <h6 className="h6MaterialClone">Citáty ({countAll})</h6>
             <Multiselect
                 closeOnSelect={true}
                 options={books}

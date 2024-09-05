@@ -1,10 +1,11 @@
 import {Response, Request} from 'express';
 import {IUser} from '../types';
 import User from '../models/user';
+import { optionFetchAllExceptDeleted } from '../utils/constants';
 
 const getAllUsers = async (req: Request, res: Response): Promise<void> => {
     try {
-        const users: IUser[] = await User.find()
+        const users: IUser[] = await User.find(optionFetchAllExceptDeleted)
         res.status(200).json({users: users.sort((a: IUser, b: IUser) => a.lastName > b.lastName ? 1 : -1)})
     } catch (error) {
         res.status(400);

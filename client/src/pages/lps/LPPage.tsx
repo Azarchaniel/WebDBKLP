@@ -14,6 +14,7 @@ import { tableHeaderColor } from "../../utils/constants";
 export default function LPPage() {
 
     const [LPs, setLPs] = useState<ILP[]>([]);
+    const [countAll, setCountAll] = useState<number>(0);
     const [hidden, setHidden] = useState({
         control: true,
         subtitle: true,
@@ -45,9 +46,9 @@ export default function LPPage() {
     // ### QUOTES ###
     const fetchLPs = (): void => {
         getLPs()
-            .then(({ data: { lps } }: ILP[] | any) => {
-                lps = lps.filter((lp: ILP) => !lp.deletedAt);
+            .then(({ data: { lps, count } }: ILP[] | any) => {
                 setLPs(stringifyAutors(lps));
+                setCountAll(count);
             })
             .catch((err: Error) => console.trace(err))
     }
@@ -128,7 +129,7 @@ export default function LPPage() {
                 </p>
             </div>
             <MaterialTableCustom
-                title="LP"
+                title={`LP (${countAll})`}
                 columns={[
                     {
                         title: 'Autor',

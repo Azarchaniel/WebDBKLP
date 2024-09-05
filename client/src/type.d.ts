@@ -81,24 +81,28 @@ type ApiBookDataType = {
     message: string
     books: IBook[]
     book?: IBook
+    count?: number
 }
 
 type ApiAutorDataType = {
     message: string
     autors: IAutor[]
     autor?: IAutor
+    count?: number
 }
 
 type ApiQuoteDataType = {
     message: string
     quotes: IQuote[]
     quote?: IQuote
+    count?: number
 }
 
 type ApiLPDataType = {
     message: string
     lps: ILP[]
     lp?: ILP
+    count?: number
 }
 
 type ApiUserDataType = {

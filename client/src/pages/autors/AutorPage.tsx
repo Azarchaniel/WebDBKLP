@@ -14,6 +14,7 @@ import { TooltipedText } from "../../utils/elements";
 
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
+    const [countAll, setCountAll] = useState<number>(0);
 
     useEffect(() => {
         fetchAutors();
@@ -22,8 +23,8 @@ export default function AutorPage() {
     // ### AUTORS ###
     const fetchAutors = (): void => {
         getAutors()
-            .then(({data: {autors}}: any) => {
-                //TODO: filtering on BE
+            .then(({data: {autors, count}}: any) => {
+                setCountAll(count);
                 setAutors(
                     autors.filter((autor: IAutor) => !autor.deletedAt)
                 );
@@ -100,7 +101,7 @@ export default function AutorPage() {
             <Sidebar/>
             <AddAutor saveAutor={handleSaveAutor}/>
             <MaterialTableCustom
-                title="Autori"
+                title={`Autori (${countAll})`}
                 columns={[
                     {
                         title: 'Meno',

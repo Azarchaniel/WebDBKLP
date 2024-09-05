@@ -686,3 +686,13 @@ body, html, main, #root {
     background-color: var(--anchor) !important;
   }
 }
+
+.h6MaterialClone {
+  font-size: 1.25rem;
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.0075em;
+  color: rgba(0, 0, 0, 0.87);
+  margin-left: .5rem;
+}

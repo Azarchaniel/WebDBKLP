@@ -27,6 +27,7 @@ interface IBookHidden {
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
+    const [countAll, setCountAll] = useState<number>(0);
     const [openModal, setOpenModal] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
     const [updateBookId, setUpdateBookId] = useState<string>('');
@@ -74,7 +75,7 @@ export default function BookPage() {
     // ### BOOKS ###
     const fetchBooks = (): void => {
         getBooks()
-            .then(({data: {books}}: IBook[] | any) => {
+            .then(({data: {books, count}}: IBook[] | any) => {
                 //TODO: CLEAN
                 if ((activeUser as string[])?.length) {
                     const booksArr: IBook[] = [];
@@ -88,8 +89,8 @@ export default function BookPage() {
                     })
                     books = booksArr;
                 }
-                books = books.filter((bk: IBook) => !bk.deletedAt);
                 
+                setCountAll(count);
                 setClonedBooks(stringifyAutors(books));
             })
             .catch((err: Error) => console.trace(err))
@@ -226,7 +227,7 @@ export default function BookPage() {
             </div>
             <MaterialTableCustom
                 //loading={loading}
-                title='Knihy'
+                title={`Knihy (${countAll})`}
                 columns={[
                     {
                         title: 'Autor',

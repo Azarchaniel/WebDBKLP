@@ -1,13 +1,15 @@
 import {Response, Request} from 'express';
 import {IAutor} from '../types';
 import Autor from "../models/autor";
+import { optionFetchAllExceptDeleted } from '../utils/constants';
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
-        const autors: IAutor[] = await Autor.find()
-        res.status(200).json({autors: autors})
+        const autors: IAutor[] = await Autor.find(optionFetchAllExceptDeleted)
+        const count: number = await Autor.count(optionFetchAllExceptDeleted)
+        res.status(200).json({autors: autors, count: count})
     } catch (error) {
-        res.status(400);
+        res.status(400); //TODO: it's not 400, it's 5xx
         throw error
     }
 }

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IPopulateOptions, IQuote } from "../types";
 import Quote from "../models/quote"
+import { optionFetchAllExceptDeleted } from "../utils/constants";
 
 const populateOptions: IPopulateOptions[] = [
     { path: 'fromBook', model: 'Book' },
@@ -10,10 +11,11 @@ const populateOptions: IPopulateOptions[] = [
 const getAllQuotes = async (_: Request, res: Response): Promise<void> => {
     try {
         const quotes: IQuote[] =
-            await Quote.find()
+            await Quote.find(optionFetchAllExceptDeleted)
                 .populate(populateOptions)
                 .exec();
-        res.status(200).json({ quotes: quotes })
+        const count = await Quote.count(optionFetchAllExceptDeleted);
+        res.status(200).json({ quotes, count })
     } catch (error) {
         res.status(400);
         console.error(error);

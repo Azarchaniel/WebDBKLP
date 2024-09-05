@@ -3,6 +3,7 @@ import {IBook, IPopulateOptions} from '../types';
 import Book from '../models/book';
 import {IUser} from '../types';
 import User from '../models/user';
+import { optionFetchAllExceptDeleted } from '../utils/constants';
 
 const populateOptions: IPopulateOptions[] = [
     {path: 'autor', model: 'Autor'},
@@ -17,10 +18,11 @@ const getAllBooks = async (_: Request, res: Response): Promise<void> => {
     try {
         //remember: when populating, and NameOfField != Model, define it with {}
         const books: IBook[] = await Book
-            .find()
+            .find(optionFetchAllExceptDeleted)
             .populate(populateOptions)
             .exec();
-        res.status(200).json({books: books})
+        const count: number = await Book.count(optionFetchAllExceptDeleted)
+        res.status(200).json({books, count})
     } catch (error) {
         throw error
     }

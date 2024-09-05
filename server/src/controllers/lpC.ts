@@ -1,16 +1,19 @@
 import {Response, Request} from 'express';
 import {ILp} from '../types';
 import Lp from '../models/lp';
+import { optionFetchAllExceptDeleted } from '../utils/constants';
 
 const getAllLps = async (_: Request, res: Response): Promise<void> => {
     try {
         const lps: ILp[] = await Lp
-            .find()
+            .find(optionFetchAllExceptDeleted)
             .populate([
                 {path: 'autor', model: 'Autor'},
             ])
             .exec();
-        res.status(200).json({lps: lps})
+        const count: number = await Lp.count(optionFetchAllExceptDeleted);
+
+        res.status(200).json({lps: lps, count: count})
     } catch (error) {
         throw error
     }
