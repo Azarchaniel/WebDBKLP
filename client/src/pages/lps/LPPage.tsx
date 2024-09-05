@@ -46,7 +46,7 @@ export default function LPPage() {
     const fetchLPs = (): void => {
         getLPs()
             .then(({ data: { lps } }: ILP[] | any) => {
-                lps = lps.filter((lp: ILP) => lp.deletedAt);
+                lps = lps.filter((lp: ILP) => !lp.deletedAt);
                 setLPs(stringifyAutors(lps));
             })
             .catch((err: Error) => console.trace(err))
