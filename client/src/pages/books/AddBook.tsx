@@ -77,15 +77,6 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
         } else {
             setError(undefined);
         }
-
-        if (!(data?.numberOfPages && !isNaN(parseInt(data?.numberOfPages as unknown as string)))) {
-            setError('Počet strán musí byť číslo!');
-            return;
-        } else {
-            setError(undefined);
-        }
-
-
     }, [formData])
 
     useEffect(() => {
@@ -387,6 +378,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                         <div className="Obsah">
                                             <ChipInput
                                                 className="form-control-important"
+                                                disableUnderline
                                                 defaultValue={[]}
                                                 placeholder="Obsah"
                                                 onChange={(content: string[]) => {
@@ -450,12 +442,12 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                             />
                                         </div>
                                         <div className="Ex-Libris">
-                                            <input type="checkbox"
+                                            <label><input type="checkbox"
                                                    id="exLibris"
                                                    className="checkBox"
                                                    checked={exLibrisValue}
                                                    onChange={changeExLibris}
-                                            />Ex Libris
+                                            />Ex Libris</label>
                                         </div>
                                         <div className="pic">
                                             <input onChange={handleForm} type='text' id='picture'
