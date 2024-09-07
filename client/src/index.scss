@@ -297,8 +297,8 @@ body, html, main, #root {
   z-index: 100;
   background: white;
   color: black;
-  right: 3rem;
-  top: 12.5rem;
+  right: 8.7rem;
+  top: 6.4rem;
   padding: 1rem 1rem 0;
 
   input {
@@ -351,8 +351,39 @@ body, html, main, #root {
   padding: 1rem;
 }
 
-.detailDimensions {
-  margin-left: 2rem;
+.bookDimensions {
+  td {
+    padding: 0 1rem;
+  }
+}
+
+.hideShowCheckbox {
+  appearance: none;
+  -webkit-appearance: none;
+  color: gray;
+  width: 2rem;
+  font-size: 1.5rem;
+  border: transparent;
+  border-radius: 0.1rem;
+}
+
+.hideShowCheckbox::before {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  content: "᭸";
+  width: 2rem;
+  height: 2rem;
+}
+
+.hideShowCheckbox:checked::before {
+  content: "👁";
+  width: 2rem;
+  height: 2rem;
+}
+
+.hideShowCheckbox:hover {
+  color: darkslategray !important;
 }
 
 .trueMark::after {

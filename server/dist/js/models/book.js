@@ -28,6 +28,7 @@ const published_1 = require("./published");
 const editionSerie_1 = require("./editionSerie");
 const mongoose = __importStar(require("mongoose"));
 const location_1 = require("./location");
+//FIXME: dimension
 const bookSchema = new mongoose_1.Schema({
     autor: { type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false },
     editor: { type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false },
@@ -48,6 +49,8 @@ const bookSchema = new mongoose_1.Schema({
     deletedAt: { type: Date },
     owner: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: true },
     readBy: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false },
-    picture: { type: String, required: false }
+    picture: { type: String, required: false },
+    hrefGoodReads: { type: String, required: false },
+    hrefDatabazeKnih: { type: String, required: false },
 }, { timestamps: true });
 exports.default = (0, mongoose_1.model)('Book', bookSchema);

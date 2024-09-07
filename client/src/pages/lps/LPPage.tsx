@@ -10,6 +10,7 @@ import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import Header from "../../components/AppHeader";
 import { tableHeaderColor } from "../../utils/constants";
+import { ShowHideRow } from "../../components/ShowHideRow";
 
 export default function LPPage() {
 
@@ -109,24 +110,8 @@ export default function LPPage() {
             <Sidebar />
             <AddLP saveLp={handleSaveLP} />
             <div ref={popRef} className={`showHideColumns ${hidden.control ? 'hidden' : 'shown'}`}>
-                <p>
-                    <label>
-                        <input type='checkbox'
-                               checked={hidden.subtitle}
-                               onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})}
-                        />
-                        Podnázov
-                    </label>
-                </p>
-                <p>
-                    <label>
-                        <input type='checkbox'
-                               checked={hidden.createdAt}
-                               onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})}
-                        />
-                        Dátum pridania
-                    </label>
-                </p>
+                <ShowHideRow label="Podnázov" init={hidden.subtitle} onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})} />
+                <ShowHideRow label="Dátum pridania" init={hidden.createdAt} onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})} />
             </div>
             <MaterialTableCustom
                 title={`LP (${countAll})`}

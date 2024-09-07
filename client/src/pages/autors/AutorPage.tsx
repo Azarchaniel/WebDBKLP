@@ -15,6 +15,7 @@ import { TooltipedText } from "../../utils/elements";
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         fetchAutors();
@@ -22,6 +23,7 @@ export default function AutorPage() {
 
     // ### AUTORS ###
     const fetchAutors = (): void => {
+        setLoading(true);
         getAutors()
             .then(({data: {autors, count}}: any) => {
                 setCountAll(count);
@@ -30,6 +32,7 @@ export default function AutorPage() {
                 );
             })
             .catch((err: Error) => console.trace(err))
+            .finally(() => setLoading(false));
     }
 
     const handleSaveAutor = (e: React.FormEvent, formData: IAutor): void => {
@@ -102,6 +105,7 @@ export default function AutorPage() {
             <AddAutor saveAutor={handleSaveAutor}/>
             <MaterialTableCustom
                 title={`Autori (${countAll})`}
+                loading={loading}
                 columns={[
                     {
                         title: 'Meno',

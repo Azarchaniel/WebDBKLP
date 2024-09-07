@@ -7,12 +7,13 @@ import AddBook from "./AddBook";
 import Sidebar from "../../components/Sidebar";
 import Toast from "../../components/Toast";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
-import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
+import {stringifyAutors, stringifyUsers} from "../../utils/utils";
 import Header from "../../components/AppHeader";
 import { tableHeaderColor } from "../../utils/constants";
-import { TooltipedText } from "../../utils/elements";
 import { useNavigate } from 'react-router-dom';
 import { useReadLocalStorage } from "usehooks-ts";
+import BookDetail from "./BookDetail";
+import { ShowHideRow } from "../../components/ShowHideRow";
 
 interface IBookHidden {
     control: boolean,
@@ -22,7 +23,9 @@ interface IBookHidden {
     subtitle: boolean,
     content: boolean,
     dimensions: boolean,
-    createdAt: boolean
+    createdAt: boolean,
+    location: boolean,
+    owner: boolean
 }
 
 export default function BookPage() {
@@ -39,7 +42,9 @@ export default function BookPage() {
         subtitle: true,
         content: true,
         dimensions: true,
-        createdAt: true
+        createdAt: true,
+        location: true,
+        owner: true
     });
     const popRef = useRef(null);
     const navigate = useNavigate();
@@ -91,7 +96,11 @@ export default function BookPage() {
                 }
                 
                 setCountAll(count);
+                
+                books.map((book: any) => book['ownersFull'] = stringifyUsers(book.owner, false))
+
                 setClonedBooks(stringifyAutors(books));
+                console.log(clonedBooks)
             })
             .catch((err: Error) => console.trace(err))
             .finally(() => setLoading(false))
@@ -161,72 +170,18 @@ export default function BookPage() {
             <Sidebar/>
             <AddBook saveBook={handleSaveBook} open={openModal}/>
             <div ref={popRef} className={`showHideColumns ${hidden.control ? 'hidden' : 'shown'}`}>
-                <p>
-                    <label>
-                        <input type='checkbox'
-                               checked={hidden.editor}
-                               onChange={() => setHidden({...hidden, editor: !hidden.editor})}
-                        />
-                        Editor
-                    </label>
-                </p>
-                <p>
-                    <label>
-                        <input type='checkbox'
-                               checked={hidden.ilustrator}
-                               onChange={() => setHidden({...hidden, ilustrator: !hidden.ilustrator})}
-                        />
-                        Ilustrátor
-                    </label>
-                </p>
-                <p>
-                    <label>
-                        <input type='checkbox'
-                               checked={hidden.translator}
-                               onChange={() => setHidden({...hidden, translator: !hidden.translator})}
-                        />
-                        Prekladateľ
-                    </label>
-                </p>
-                <p>
-                    <label>
-                        <input type='checkbox'
-                               checked={hidden.subtitle}
-                               onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})}
-                        />
-                        Podtitul
-                    </label>
-                </p>
-                <p>
-                    <label>
-                        <input type='checkbox'
-                               checked={hidden.content}
-                               onChange={() => setHidden({...hidden, content: !hidden.content})}
-                        />
-                        Obsah
-                    </label>
-                </p>
-                <p>
-                    <label>
-                        <input type='checkbox'
-                               checked={hidden.dimensions}
-                               onChange={() => setHidden({...hidden, dimensions: !hidden.dimensions})}
-                        />
-                        Rozmery
-                    </label>
-                </p>
-                <p>
-                    <label>
-                        <input type='checkbox'
-                               checked={hidden.createdAt}
-                               onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})}
-                        />
-                        Dátum pridania
-                    </label>
-                </p>
+                <ShowHideRow label="Editor" init={hidden.editor} onChange={() => setHidden({...hidden, editor: !hidden.editor})} />
+                <ShowHideRow label="Ilustrátor" init={hidden.ilustrator} onChange={() => setHidden({...hidden, ilustrator: !hidden.ilustrator})} />
+                <ShowHideRow label="Prekladateľ" init={hidden.translator} onChange={() => setHidden({...hidden, translator: !hidden.translator})} />
+                <ShowHideRow label="Podtitul" init={hidden.subtitle} onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})} />
+                <ShowHideRow label="Obsah" init={hidden.content} onChange={() => setHidden({...hidden, content: !hidden.content})} />
+                <ShowHideRow label="Rozmery" init={hidden.dimensions} onChange={() => setHidden({...hidden, dimensions: !hidden.dimensions})} />
+                <ShowHideRow label="Dátum pridania" init={hidden.createdAt} onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})} />
+                <ShowHideRow label="Umiestnenie" init={hidden.location} onChange={() => setHidden({...hidden, location: !hidden.location})} />
+                <ShowHideRow label="Majiteľ" init={hidden.owner} onChange={() => setHidden({...hidden, owner: !hidden.owner})} />
             </div>
             <MaterialTableCustom
-                //loading={loading}
+                loading={loading}
                 title={`Knihy (${countAll})`}
                 columns={[
                     {
@@ -279,6 +234,14 @@ export default function BookPage() {
                         hidden: hidden.subtitle
                     },
                     {
+                        title: 'Podtitul',
+                        field: 'content',
+                        headerStyle: {
+                            backgroundColor: tableHeaderColor
+                        },
+                        hidden: hidden.content
+                    },
+                    {
                         title: 'ISBN',
                         field: 'ISBN',
                         headerStyle: {
@@ -300,15 +263,43 @@ export default function BookPage() {
                         }
                     },
                     {
+                        title: 'Rozmery',
+                        field: 'dimensions',
+                        headerStyle: {
+                            backgroundColor: tableHeaderColor
+                        },
+                        hidden: hidden.dimensions
+                    },
+                    {
                         title: 'Poznámka',
                         field: 'note',
                         headerStyle: {
                             backgroundColor: tableHeaderColor
                         },
-                        //FIXME: detail doesnt work if render is in table
-                        render: (rowData: IBook) => {
-                            return rowData.note?.length > 30 ? TooltipedText(shortenStringKeepWord(rowData.note, 30), rowData.note) : rowData.note;
+                    },
+                    {
+                        title: 'Datum pridania',
+                        field: 'createdAt',
+                        headerStyle: {
+                            backgroundColor: tableHeaderColor
                         },
+                        hidden: hidden.createdAt
+                    },
+                    {
+                        title: 'umiestnenie',
+                        field: 'location',
+                        headerStyle: {
+                            backgroundColor: tableHeaderColor
+                        },
+                        hidden: hidden.location
+                    },
+                    {
+                        title: 'Majiteľ',
+                        field: 'ownersFull',
+                        headerStyle: {
+                            backgroundColor: tableHeaderColor
+                        },
+                        hidden: hidden.owner
                     },
                 ]}
                 data={clonedBooks}
@@ -330,11 +321,13 @@ export default function BookPage() {
                         icon: 'delete',
                         tooltip: 'Vymazať',
                         onClick: (_: any, rowData: IBook) => handleDeleteBook(rowData._id),
-                    },
+                    }
+                ]}
+                detailPanel={[
                     {
                         icon: 'search',
                         tooltip: 'Detaily',
-                        onClick: (_: any, rowData: IBook) => navigate(`/book/${rowData._id}`)
+                        render: (rowData: any) => <BookDetail data={rowData}/>
                     }
                 ]}
             />

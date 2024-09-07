@@ -5,6 +5,7 @@ import {editionSerieSchema} from "./editionSerie";
 import * as mongoose from "mongoose";
 import {locationSchema} from "./location";
 
+//FIXME: dimension
 const bookSchema: Schema = new Schema({
     autor: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
     editor: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
@@ -25,7 +26,9 @@ const bookSchema: Schema = new Schema({
     deletedAt: {type: Date},
     owner: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: true},
     readBy: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false},
-    picture: {type: String, required: false}
+    picture: {type: String, required: false},
+    hrefGoodReads: {type: String, required: false},
+    hrefDatabazeKnih: {type: String, required: false},
 }, {timestamps: true})
 
 export default model<IBook>('Book', bookSchema);

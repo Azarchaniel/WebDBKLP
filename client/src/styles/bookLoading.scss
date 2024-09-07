@@ -1,7 +1,8 @@
+@import '../index.scss';
+
 $thickness : 5px;
 $duration : 2500;
 $delay : $duration*0.16;
-$baseColor: #BEA24B;
 
 @mixin polka($size, $dot, $base, $accent){
   background-size:$size $size;
@@ -16,10 +17,8 @@ body {
 }
 
 .bookshelf_wrapper {
-  position: relative;
-  top: 60%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: absolute;
+  top: 50vh;
 }
 
 .books_list {
@@ -36,7 +35,7 @@ body {
   width: 40px;
   height: 120px;
   opacity: 0;
-  background-color: $baseColor;
+  background-color: var(--anchor);
   border: $thickness solid white;
   transform-origin: bottom left;
   transform: translateX(300px);
@@ -180,21 +179,21 @@ body {
 .textPatience {
   font-size: 1.5rem;
   padding: 1rem 1rem 4rem 1rem;
-  height: 17vw;
+  height: 20rem;
   margin: 0 auto;
-  color: #BEA24B;
+  color: var(--anchor);
   background-color: white;
   position: absolute;
   left: 39vw;
   font-weight: bold;
-  width: 17vw;
-  top: -10vw;
+  width: 20rem;
+  top: -12rem;
   display: flex;
   justify-content: center;
   align-items: flex-end;
   border-radius: 50%;
   z-index: -1;
-  border: 4px solid #bea24b;
+  border: 4px solid var(--anchor);
 }
 
 .shelf {
@@ -210,7 +209,7 @@ body {
     position : absolute;
     width: 100%;
     height: 100%;
-    @include polka(10px, 30%, $baseColor, rgba(255,255,255,0.5));
+    @include polka(10px, 30%, var(--anchor), rgba(255,255,255,0.5));
     top: 200%;
     left: 5%;
     animation: move #{$duration*0.1}ms linear infinite;
