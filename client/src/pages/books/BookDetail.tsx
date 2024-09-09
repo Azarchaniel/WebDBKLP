@@ -40,7 +40,7 @@ const BookDetail: React.FC<Props> = ({data}) => {
         <div className="row BookDetail">
             <div className="w-25">
                 <p>{data.rowData.picture ? <img src={data.rowData.picture} alt='titulka'/> :
-                    <img src="img/no_thumbnail.svg" alt="no_thumbnail"/>}
+                    <img src="img/no_thumbnail.svg" alt="no_thumbnail" style={{maxWidth: "20rem"}}/>}
                 </p>
                 <p className="detailHrefs">
                     {data.rowData.hrefDatabazeKnih ?

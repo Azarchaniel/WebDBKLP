@@ -211,9 +211,7 @@ const AddAutor: React.FC<Props> = ({saveAutor}: { saveAutor: any }) => {
                                         <button type="button" className="btn btn-secondary"
                                                 onClick={cleanFields}>Vymazať polia
                                         </button>
-                                        <button type="button" className="btn btn-secondary" data-dismiss="modal">Zavrieť
-                                        </button>
-                                        {/* TODO: add button Save and add another */}
+                                        <button type="button" className="btn btn-secondary" data-dismiss="modal">Zavrieť</button>
                                         <button type="submit"
                                                 disabled={Boolean(error)}
                                                 className="btn btn-success">Uložiť autora

@@ -58,11 +58,8 @@ export default function QuotePage() {
                     })
                     quotes = quotesArr;
                 }
-                //TODO: do on BE
-                const validQuotes = quotes
-                    .sort((a: IQuote, b: IQuote) => a.fromBook?._id > b.fromBook?._id ? 1 : -1);
-                setInitQuotes(validQuotes);
-                setFilteredQuotes(validQuotes);
+                setInitQuotes(quotes);
+                setFilteredQuotes(quotes);
                 setCountAll(count);
             })
             .catch((err: Error) => console.trace(err))
@@ -98,7 +95,6 @@ export default function QuotePage() {
     }
 
     const handleDeleteQuote = (_id: string): void => {
-        //TODO: reload Quotes after success delete
         confirmAlert({
             title: 'Vymazať citát?',
             message: `Naozaj chceš vymazať citát?`,

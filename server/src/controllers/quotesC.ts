@@ -14,10 +14,11 @@ const getAllQuotes = async (_: Request, res: Response): Promise<void> => {
             await Quote.find(optionFetchAllExceptDeleted)
                 .populate(populateOptions)
                 .exec();
+        quotes.sort((a: IQuote, b: IQuote) => a.createdAt < b.createdAt ? 1 : -1);
         const count = await Quote.count(optionFetchAllExceptDeleted);
         res.status(200).json({ quotes, count })
     } catch (error) {
-        res.status(400);
+        res.status(500);
         console.error(error);
     }
 }

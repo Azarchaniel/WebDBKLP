@@ -9,7 +9,7 @@ const getAllAutors = async (req: Request, res: Response): Promise<void> => {
         const count: number = await Autor.count(optionFetchAllExceptDeleted)
         res.status(200).json({autors: autors, count: count})
     } catch (error) {
-        res.status(400); //TODO: it's not 400, it's 5xx
+        res.status(500);
         throw error
     }
 }

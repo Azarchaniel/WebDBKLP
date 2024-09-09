@@ -5,7 +5,6 @@ import {Link} from "react-router-dom";
 import { useLocalStorage } from "usehooks-ts";
 
 const Header: React.FC = () => {
-    //TODO: redux
     const [owners, setOwners] = useState<IUser[]>();
     const [activeOwners, setActiveOwners] = useLocalStorage("activeUsers", [] as string[]);
 

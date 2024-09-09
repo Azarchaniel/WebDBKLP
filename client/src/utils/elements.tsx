@@ -29,6 +29,6 @@ export const ScrollToTopBtn = ({scrollToTop = () => {}}) => {
     }, []);
 
     return (
-        showScrollToTop ? <button className="scrollToTop" onClick={() => scrollToTop()}/> : <></>
+        showScrollToTop ? <button title="Skrolovať navrch" className="scrollToTop" onClick={() => scrollToTop()}/> : <></>
     )
 }

@@ -8,5 +8,7 @@ export interface IQuote extends Document {
     pageNo?: number;
     note?: string;
     deletedAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
     owner: IUser[];
 }

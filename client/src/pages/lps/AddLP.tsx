@@ -247,7 +247,6 @@ const AddLp: React.FC<Props> = ({saveLp}: { saveLp: any }) => {
                                     </button>
                                     <button type="button" className="btn btn-secondary" data-dismiss="modal">Zavrieť
                                     </button>
-                                    {/* TODO: add button Save and add another */}
                                     <button type="submit"
                                             disabled={Boolean(error)}
                                             className="btn btn-success">Uložiť LP

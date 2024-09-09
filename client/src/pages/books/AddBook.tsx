@@ -483,7 +483,6 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                         <button type="button" className="btn btn-secondary"
                                                 onClick={() => setOpenedModal(false)}>Zavrieť
                                         </button>
-                                        {/* TODO: add button Save and add another */}
                                         <button type="submit"
                                                 disabled={Boolean(error)}
                                                 className="btn btn-success">Uložiť knihu
