@@ -13,6 +13,7 @@ router.get('/books', controllers_1.getAllBooks);
 router.post('/add-book', controllers_1.addBook);
 router.put('/edit-book/:id', controllers_1.updateBook);
 router.post('/delete-book/:id', controllers_1.deleteBook);
+router.get('/get-book-info/:isbn', controllers_1.getInfoFromISBN);
 // ### AUTORS ###
 router.get('/autor/:id', controllers_2.getAutor);
 router.get('/autors', controllers_2.getAllAutors);

@@ -4,6 +4,8 @@ import Book from '../models/book';
 import {IUser} from '../types';
 import User from '../models/user';
 import { optionFetchAllExceptDeleted } from '../utils/constants';
+import {webScrapper} from "../utils";
+import mongoose from 'mongoose';
 
 const populateOptions: IPopulateOptions[] = [
     {path: 'autor', model: 'Autor'},
@@ -21,7 +23,7 @@ const getAllBooks = async (_: Request, res: Response): Promise<void> => {
             .find(optionFetchAllExceptDeleted)
             .populate(populateOptions)
             .exec();
-        const count: number = await Book.count(optionFetchAllExceptDeleted)
+        const count: number = await Book.countDocuments(optionFetchAllExceptDeleted)
         res.status(200).json({books, count})
     } catch (error) {
         throw error
@@ -129,37 +131,78 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
+const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const {
+            params: {isbn}
+        } = req;
+
+        console.log("controller/getInfoFromISBN");
+        const bookInfo = await webScrapper(isbn);
+
+        res.status(200).json(bookInfo);
+    } catch(err) {
+        throw "Problem at web scrapping: " + err;
+    }
+}
+
 const dashboard = {
     countBooks: async (req: Request, res: Response): Promise<void> => {
         try {
             const {
-                params: {id},
-                body,
+                params: {userId}
             } = req
 
-            let countedBooks: number = 0;
-            let user: IUser | null = null;
+            let users: IUser[] = await User.find({});
+            let response: {owner: {id: string, firstName: string, lastName: string} | null, count: number}[] = [];
 
-            if (id === "undefined") {
-                countedBooks = await Book
-                    .countDocuments();
-            } else if(id === "") {
-                //TODO: return every book with no Owner
+           if (userId) {
+                const currUser: IUser | undefined = users.find(u => u._id === userId);
+                if (!currUser) throw Error("User not found");
+
+                response.push({
+                    owner: {id: userId, firstName: currUser.firstName ?? "", lastName: currUser.lastName}, 
+                    count: await Book.countDocuments({owner: userId})
+                });
             } else {
-                user = await User.findById(req.params.id);
-                countedBooks = await Book
-                    .find({owner: id})
-                    .countDocuments();
-            } 
-            
-            res.status(200).json({
-                owner: user?.firstName ?? "",
-                count: countedBooks
-            })
+                let tempRes = [];
+                for (let user of users) {
+                    tempRes.push(
+                        {
+                            owner: {id: user._id, firstName: user.firstName ?? "", lastName: user.lastName},
+                            count: await Book.countDocuments({owner: user._id})
+                        }
+                    )
+                }
+
+                const query: mongoose.FilterQuery<IBook> = {
+                    $or: [
+                        { owner: { $exists: false } },
+                        { owner: { $size: 0 } as any }
+                      ]
+                }
+
+                tempRes.push(
+                    {
+                        owner: {id: '', firstName: '', lastName: ''},
+                        count: await Book.countDocuments(query)
+                    }
+                )
+
+                response = tempRes;
+            }
+
+            response.push({owner: null, count: await Book.countDocuments()});
+            response.sort((a,b) => {
+                if (a.owner === null || b.owner === null) return 0
+                return a.owner?.lastName?.localeCompare(b.owner?.lastName)
+            });
+
+            res.status(200).json(response);
         } catch (error) {
             throw error;
         }
     }
 }
 
-export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard}
+export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN}

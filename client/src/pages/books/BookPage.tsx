@@ -100,7 +100,6 @@ export default function BookPage() {
                 books.map((book: any) => book['ownersFull'] = stringifyUsers(book.owner, false))
 
                 setClonedBooks(stringifyAutors(books));
-                console.log(clonedBooks)
             })
             .catch((err: Error) => console.trace(err))
             .finally(() => setLoading(false))

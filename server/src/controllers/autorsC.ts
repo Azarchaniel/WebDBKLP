@@ -6,7 +6,7 @@ import { optionFetchAllExceptDeleted } from '../utils/constants';
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
         const autors: IAutor[] = await Autor.find(optionFetchAllExceptDeleted)
-        const count: number = await Autor.count(optionFetchAllExceptDeleted)
+        const count: number = await Autor.countDocuments(optionFetchAllExceptDeleted)
         res.status(200).json({autors: autors, count: count})
     } catch (error) {
         res.status(500);

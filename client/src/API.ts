@@ -52,7 +52,7 @@ export const addBook = async (
   }
 }
 
-//todo: fill the form with every data from Book; If _id is filled, it's not adding, but updating;
+//TODO: fill the form with every data from Book; If _id is filled, it's not adding, but updating;
 // Therefore I need Hidden Input field with _id and IF in creating
 export const updateBook = async (
   book: IBook
@@ -79,6 +79,19 @@ export const deleteBook = async (
       `${baseUrl}/delete-book/${_id}`
     )
     return deletedBook
+  } catch (error: any) {
+    throw new Error(error)
+  }
+}
+
+//TODO: types
+export const getInfoAboutBook = async (isbn: string): Promise<any> => {
+  try {
+    console.log("API/getInfoAboutBook");
+    const bookInfo: AxiosResponse<any> = await axios.get(
+      `${baseUrl}/get-book-info/${isbn}`
+    )
+    return bookInfo
   } catch (error: any) {
     throw new Error(error)
   }
@@ -303,9 +316,9 @@ export const deleteLP = async (
   }
 }
 
-export const countBooks = async (userId?: string): Promise<AxiosResponse<{message: string, count: number}>> => {
+export const countBooks = async (userId?: string): Promise<AxiosResponse> => {
   try {
-    const count: AxiosResponse<{message: string, count: number}> = await axios.get(
+    const count: AxiosResponse = await axios.get(
       `${baseUrl}/count-books/${userId}`
     )
     return count;

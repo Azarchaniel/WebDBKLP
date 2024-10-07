@@ -103,8 +103,9 @@ export default function QuotePage() {
                     label: 'Ano',
                     onClick: () => {
                         deleteQuote(_id)
-                            .then(({ status }) => {
-                                if (status !== 200) {
+                            .then(res => {
+                                console.log(res.data.quotes)
+                                if (res.status !== 200) {
                                     throw new Error('Error! Quote not deleted')
                                 }
                                 toast.success(`Citát bol úspešne vymazaný.`);

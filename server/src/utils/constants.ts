@@ -1,1 +1,1 @@
-export const optionFetchAllExceptDeleted = {deletedAt: null};
+export const optionFetchAllExceptDeleted = {deletedAt: undefined};

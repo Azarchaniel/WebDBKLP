@@ -15,7 +15,7 @@ const getAllQuotes = async (_: Request, res: Response): Promise<void> => {
                 .populate(populateOptions)
                 .exec();
         quotes.sort((a: IQuote, b: IQuote) => a.createdAt < b.createdAt ? 1 : -1);
-        const count = await Quote.count(optionFetchAllExceptDeleted);
+        const count = await Quote.countDocuments(optionFetchAllExceptDeleted);
         res.status(200).json({ quotes, count })
     } catch (error) {
         res.status(500);
@@ -38,7 +38,7 @@ const getQuote = async (req: Request, res: Response): Promise<void> => {
 }
 
 const addQuote = async (req: Request, res: Response): Promise<void> => {
-    const { id, text, fromBook, note, deletedAt, owner, pageNo } = req.body;
+    const { id, text, fromBook, note, owner, pageNo } = req.body;
 
     try {
         if (!id) {
@@ -46,7 +46,6 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
                 text: text,
                 note: note,
                 fromBook: fromBook,
-                deletedAt: deletedAt,
                 owner: owner,
                 pageNo: pageNo
             });
@@ -79,26 +78,28 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
 };
 
 const deleteQuote = async (req: Request, res: Response): Promise<void> => {
+    console.log("AAAAAAAAAAAAAAAA");
     try {
         const {
-            params: { id },
+            params: {id},
             body,
         } = req
         const deletedQuote: IQuote | null = await Quote.findByIdAndUpdate(
-            { _id: id },
+            {_id: id},
             {
-                ...body,
                 deletedAt: new Date()
             }
         )
-        const allQuote: IQuote[] = await Quote
+
+        const allQuotes: IQuote[] = await Quote
             .find()
             .populate(populateOptions)
             .exec();
+
         res.status(200).json({
             message: 'Quote deleted',
             quote: deletedQuote,
-            quotes: allQuote,
+            quotes: allQuotes,
         })
     } catch (error) {
         throw error

@@ -1,50 +1,70 @@
-import { AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
-import { countBooks, getUsers } from "../../API";
-import { ApiUserDataType, IUser } from "../../type";
-
-interface IUserStats {
-    name: string,
-    count: number
-}
+import { countBooks } from "../../API";
+import 'chart.js/auto'; //for react-chart
+import { Pie } from 'react-chartjs-2';
 
 export default function DashboardPage() {
-    const [countAllBooks, setCountAllBooks] = useState<number>(0);
-    const [usersCounts, setUsersCounts] = useState<IUserStats[]>([]);
-
+    const [countAllBooks, setCountAllBooks] = useState<{owner: {id: string, firstName: string, lastName: string} | null, count: number}[]>([]);
+    
     useEffect(() => {
         countBooks()
-            .then((result: any) => setCountAllBooks(result.data.count))
+            .then((result: any) => setCountAllBooks(result.data))
             .catch((err: any) => console.error("error counting books FE", err));
-
-        const fetchUsers = async () => {
-            return await getUsers();
-        }
-
-        fetchUsers()
-            .then(response => {
-                for (let user of response.data.users) {
-                    countBooks(user._id)
-                        .then((counted: any) => {
-                            console.log(counted.data, usersCounts);
-                            setUsersCounts(prevUser => {
-                                return [
-                                    ...prevUser,
-                                    {name: counted.data.owner as string, count: counted.data.count as number}
-                                ]
-                            });
-
-                        })
-                        .catch(err => console.error(err))
-                }
-            })
-            .catch(err => console.error(err));
     }, [])
 
+    const renderUserCount = () => {
+        if (!countAllBooks) return <p>Loading...</p>
+        console.log(countAllBooks)
+        console.log(countAllBooks.filter(c => c.owner).map(c => c.owner?.firstName || "Bez majiteľa"))
+        
+        // Check if countAllBooks is an object
+        if (typeof countAllBooks === 'object' && !Array.isArray(countAllBooks)) {
+            // If it's an object, convert it to an array of entries
+            return Object.entries(countAllBooks).map(([ownerId, bookCount]) => (
+                <p key={ownerId}>{`${ownerId}: ${bookCount}`}</p>
+            ))
+        }
+        
+        // If it's already an array, use the previous logic
+        return countAllBooks.map(c => {
+            if (c.owner && !c.owner?.lastName) {
+                return <p key={Math.random()}>{`Bez majiteľa: ${c.count}`}</p>
+            } else if (c.owner) {
+                return <p key={c.owner?.id}>{`${c.owner?.firstName}: ${c.count}`}</p> 
+            } //if it doesnt have owner, it is catch by find in HTML below
+        })
+    }
+
+    const data = {
+        labels: countAllBooks.length ? countAllBooks.filter(c => c.owner).map(c => c.owner?.firstName || "Bez majiteľa") : [],
+        datasets: [{
+          label: 'Počet kníh',
+          data: countAllBooks.filter(c => c.owner).map(c => c.count),
+          backgroundColor: [
+             'white', 'lightpurple', 'black', 'gray', 'red', 'pink'
+          ],
+          hoverOffset: 4
+        }]
+    };
+
+    const chartOptions = {
+        plugins: {
+            legend: {
+                position: 'left' as const
+            }
+        }
+    }
+
     return (
-        <div style={{ color: "black", marginLeft: "1rem" }}>
-            <p>Počet kníh celkovo: {countAllBooks}</p>
-            {usersCounts.sort((a,b) => a.name.localeCompare(b.name)).map(usrCnt => <p>{usrCnt.name}: {usrCnt.count}</p>)}
+        <div style={{ color: "black", marginLeft: "1rem", display: "flex", flexDirection: "row" }}>
+            <div style={{display: "flex", flexDirection: "column", width: "35%"}}>
+                <p>Počet kníh celkovo: {countAllBooks.find(bc => !bc.owner)?.count}</p>
+                {renderUserCount()}
+            </div>
+            
+            <div style={{width: "30rem", height: "30rem"}}>
+                <Pie data={data} options={chartOptions}/>
+            </div>
         </div>
     );
 }

@@ -11,7 +11,7 @@ const getAllLps = async (_: Request, res: Response): Promise<void> => {
                 {path: 'autor', model: 'Autor'},
             ])
             .exec();
-        const count: number = await Lp.count(optionFetchAllExceptDeleted);
+        const count: number = await Lp.countDocuments(optionFetchAllExceptDeleted);
 
         res.status(200).json({lps: lps, count: count})
     } catch (error) {

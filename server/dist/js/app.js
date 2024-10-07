@@ -13,8 +13,9 @@ app.use(express_1.default.json());
 app.use((0, cors_1.default)());
 app.use(routes_1.default);
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
-const options = { useNewUrlParser: true, useUnifiedTopology: true };
+const options = { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false };
 mongoose_1.default.set("strictQuery", false);
+mongoose_1.default.set('useFindAndModify', false);
 mongoose_1.default
     .connect(uri, options)
     .then(() => app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`)))

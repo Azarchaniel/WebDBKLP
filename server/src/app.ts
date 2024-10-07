@@ -12,9 +12,10 @@ app.use(cors())
 app.use(todoRoutes)
 
 const uri: string = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
-const options = {useNewUrlParser: true, useUnifiedTopology: true}
+const options = {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false}
 
 mongoose.set("strictQuery", false);
+mongoose.set('useFindAndModify', false);
 
 mongoose
     .connect(uri, options as ConnectOptions)
