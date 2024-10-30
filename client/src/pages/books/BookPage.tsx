@@ -10,7 +10,6 @@ import MaterialTableCustom from "../../components/MaterialTableCustom";
 import {stringifyAutors, stringifyUsers} from "../../utils/utils";
 import Header from "../../components/AppHeader";
 import { tableHeaderColor } from "../../utils/constants";
-import { useNavigate } from 'react-router-dom';
 import { useReadLocalStorage } from "usehooks-ts";
 import BookDetail from "./BookDetail";
 import { ShowHideRow } from "../../components/ShowHideRow";
@@ -47,7 +46,6 @@ export default function BookPage() {
         owner: true
     });
     const popRef = useRef(null);
-    const navigate = useNavigate();
     const activeUser = useReadLocalStorage("activeUsers");
 
     //fetch books on page init
@@ -86,7 +84,7 @@ export default function BookPage() {
                     const booksArr: IBook[] = [];
                     books.forEach((book: IBook) => {
                         //TODO: this filtering should be on BE
-                        book.owner?.filter((owner: IUser) => {
+                        book.owner?.forEach((owner: IUser) => {
                             if ((activeUser as string[]).includes(owner._id) || book.owner === undefined) {
                                 booksArr.push(book);
                             }

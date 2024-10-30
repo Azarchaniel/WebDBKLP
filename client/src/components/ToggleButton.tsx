@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {Grid, Switch} from "@material-ui/core";
+import {Switch} from "@material-ui/core";
 
 const ToggleButton: React.FC<{labelLeft: string; labelRight: string, state: () => void}> =
     ({labelLeft, labelRight, state}) => {

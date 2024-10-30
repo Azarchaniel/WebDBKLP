@@ -50,7 +50,7 @@ export default function QuotePage() {
                     const quotesArr: IQuote[] = [];
                     quotes.forEach((qoute: IQuote) => {
                         //TODO: this filtering should be on BE
-                        qoute.owner?.filter((owner: IUser) => {
+                        qoute.owner?.forEach((owner: IUser) => {
                             if ((activeUser as string[]).includes(owner._id) || qoute.owner === undefined) {
                                 quotesArr.push(qoute);
                             }
@@ -70,7 +70,7 @@ export default function QuotePage() {
         if (!booksToFilter.length) return setFilteredQuotes(initQuotes);
 
         let filteredQuotes = initQuotes.filter((quote: IQuote) => {
-            if (!quote.fromBook) return;
+            if (!quote.fromBook) return false;
             return booksToFilter.includes(quote.fromBook._id);
         })
         

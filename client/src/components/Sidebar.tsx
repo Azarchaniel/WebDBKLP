@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import '../styles/font-awesome/css/all.css';
 import {ISideMenuItems} from "../type";
 import {Link} from "react-router-dom";
