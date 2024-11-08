@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {Fragment, useEffect, useRef, useState} from "react";
 import {IAutor, IBook, ILangCode, IUser} from "../../type";
 import {toast} from "react-toastify";
 import {getAutors, getInfoAboutBook, getUsers} from "../../API";
@@ -7,6 +7,7 @@ import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {langCode, countryCode} from "../../utils/locale";
 import {Multiselect} from 'multiselect-react-dropdown';
 import ChipInput from "material-ui-chip-input";
+import {checkIsbnValidity} from "../../utils/utils";
 
 type Props = {
     saveBook: (e: React.FormEvent, formData: IBook | any) => void;
@@ -43,6 +44,9 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
 
     //param [] will make useEffect to go only once
     useEffect(() => {
+        cleanFields();
+
+        //TODO: move filtering to backend; start fetching at third char
         getAutors()
             .then(aut => {
                 //constructing fullName for autocomplete
@@ -62,7 +66,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                 fullName: `${user.lastName}, ${user.firstName}`
             })).sort((a: any, b: any) => a.fullName!.localeCompare(b.fullName!)));
         }).catch();
-    }, [formData])
+    }, [])
 
     useEffect(() => {
         //shortcut
@@ -73,7 +77,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
 
         if (!(data?.title && data.title.trim().length > 0)) {
             return setError('Názov knihy musí obsahovať aspoň jeden znak!');
-        } else if (!isISBNvalid(formData?.ISBN)) {
+        } else if (!checkIsbnValidity(formData?.ISBN)) {
             return setError("Nevalidné ISBN!");
         } else {
             setError(undefined);
@@ -90,10 +94,6 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                 });
         }
     }, [formData?.ISBN]);
-
-    useEffect(() => {
-        cleanFields();
-    }, []);
 
     const changeExLibris = () => {
         setExLibrisValue(!exLibrisValue);
@@ -132,53 +132,6 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
         readByRef?.current?.resetSelectedValues();
         // @ts-ignore
         cityRef?.current?.resetSelectedValues();
-    }
-
-    const isISBNvalid = (isbn: string | undefined) => {
-        if (!isbn) return true;
-
-        let sum,
-        weight,
-        digit,
-        check,
-        i;
-
-        isbn = isbn.replace(/[^0-9X]/gi, '');
-
-        if (isbn.length < 10) {
-            return true; //can't validate older/shorter ISBN, so just assume they are correct
-        }
-
-        if (isbn.length === 13) {
-            sum = 0;
-            for (i = 0; i < 12; i++) {
-                digit = parseInt(isbn[i]);
-                if (i % 2 === 1) {
-                    sum += 3*digit;
-                } else {
-                    sum += digit;
-                }
-            }
-            check = (10 - (sum % 10)) % 10;
-            return (check === parseInt(isbn[isbn.length-1]));
-        }
-
-        if (isbn.length === 10) {
-            weight = 10;
-            sum = 0;
-            for (i = 0; i < 9; i++) {
-                digit = parseInt(isbn[i]);
-                sum += weight*digit;
-                weight--;
-            }
-            check = (11 - (sum % 11)) % 11
-            if (check === 10) {
-                check = 'X';
-            }
-            return (check === isbn[isbn.length-1].toUpperCase());
-        }
-
-        return false;
     }
 
     const showAddBook = () => {
@@ -357,7 +310,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 displayValue="showValue"
                                                 placeholder="Mesto"
                                                 closeIcon="cancel"
-                                                singleSelect={true}
+                                                selectionLimit={1}
                                                 onSelect={(picked: any[]) => {
                                                     setFormData({
                                                         ...formData,
@@ -388,15 +341,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 onSelect={(picked: ILangCode[]) => {
                                                     setFormData({...formData, language: picked.map(v => v.key)})
                                                 }}
-                                                style={{
-                                                    inputField: {marginLeft: "0.5rem"},
-                                                    searchBox: {
-                                                        width: "100%",
-                                                        paddingRight: '5px',
-                                                        marginRight: '-5px',
-                                                        borderRadius: '3px'
-                                                    }
-                                                }}
+                                                style={multiselectStyle}
                                                 avoidHighlightFirstOption={true}
                                                 ref={langRef}
                                             />
@@ -463,15 +408,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 onSelect={(picked: IUser[]) => {
                                                     setFormData({...formData, readBy: picked})
                                                 }}
-                                                style={{
-                                                    inputField: {marginLeft: "0.5rem"},
-                                                    searchBox: {
-                                                        width: "100%",
-                                                        paddingRight: '5px',
-                                                        marginRight: '-5px',
-                                                        borderRadius: '3px'
-                                                    }
-                                                }}
+                                                style={multiselectStyle}
                                                 avoidHighlightFirstOption={true}
                                                 ref={readByRef}
                                             />
@@ -487,15 +424,7 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                 onSelect={(picked: IUser[]) => {
                                                     setFormData({...formData, owner: picked})
                                                 }}
-                                                style={{
-                                                    inputField: {marginLeft: "0.5rem"},
-                                                    searchBox: {
-                                                        width: "100%",
-                                                        paddingRight: '5px',
-                                                        marginRight: '-5px',
-                                                        borderRadius: '3px'
-                                                    }
-                                                }}
+                                                style={multiselectStyle}
                                                 avoidHighlightFirstOption={true}
                                                 ref={ownerRef}
                                             />
@@ -532,20 +461,22 @@ const AddBook: React.FC<Props> = ({saveBook, open, bookId}) => {
                                                    value={formData && "hrefGoodReads" in formData ? formData["hrefGoodReads"] : ''}
                                             />
                                         </div>
-                                        {showError()}
                                     </div>
 
-                                    <div className="modal-footer">
-                                        <button type="button" className="btn btn-secondary"
-                                                onClick={cleanFields}>Vymazať polia
-                                        </button>
-                                        <button type="button" className="btn btn-secondary"
-                                                onClick={() => setOpenedModal(false)}>Zavrieť
-                                        </button>
-                                        <button type="submit"
-                                                disabled={Boolean(error)}
-                                                className="btn btn-success">Uložiť knihu
-                                        </button>
+                                    <div className="modal-footer column">
+                                        {showError()}
+                                        <div className="row">
+                                            <button type="button" className="btn btn-secondary"
+                                                    onClick={cleanFields}>Vymazať polia
+                                            </button>
+                                            <button type="button" className="btn btn-secondary"
+                                                    onClick={() => setOpenedModal(false)}>Zavrieť
+                                            </button>
+                                            <button type="submit"
+                                                    disabled={Boolean(error)}
+                                                    className="btn btn-success">Uložiť knihu
+                                            </button>
+                                        </div>
                                     </div>
                                 </form>
                             </div>

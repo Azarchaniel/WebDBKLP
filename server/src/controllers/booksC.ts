@@ -4,7 +4,7 @@ import Book from '../models/book';
 import {IUser} from '../types';
 import User from '../models/user';
 import { optionFetchAllExceptDeleted } from '../utils/constants';
-import {webScrapper} from "../utils";
+import {webScrapper} from "../utils/utils";
 import mongoose from 'mongoose';
 
 const populateOptions: IPopulateOptions[] = [
