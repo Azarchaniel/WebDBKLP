@@ -35,8 +35,8 @@ export default function AutorPage() {
             .finally(() => setLoading(false));
     }
 
-    const handleSaveAutor = (e: React.FormEvent, formData: IAutor): void => {
-        e.preventDefault()
+    const handleSaveAutor = (formData: IAutor): void => {
+        console.log(formData)
         addAutor(formData)
             .then(({status, data}) => {
                 if (status !== 201) {
