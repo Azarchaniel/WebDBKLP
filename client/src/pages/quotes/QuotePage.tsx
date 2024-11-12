@@ -78,8 +78,7 @@ export default function QuotePage() {
 
     }, [booksToFilter]);
 
-    const handleSaveQuote = (e: React.FormEvent, formData: IQuote): void => {
-        e.preventDefault()
+    const handleSaveQuote = (formData: IQuote): void => {
         addQuote(formData)
             .then(({status}) => {
                 if (status !== 201) {

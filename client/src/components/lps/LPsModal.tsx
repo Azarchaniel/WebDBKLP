@@ -9,6 +9,7 @@ import {countryCode, langCode} from "../../utils/locale";
 import {Multiselect} from 'multiselect-react-dropdown';
 import {IAutor, ILangCode, ILP} from "../../type";
 import {getAutors} from "../../API";
+import {showError} from "../Modal";
 
 //for datepicker
 registerLocale('cs', cs)
@@ -17,7 +18,7 @@ interface BodyProps {
     data: ILP | Object;
     onChange: (data: ILP | Object) => void;
     error: (err: string | undefined) => void;
-    editedAutor?: ILP;
+    editedLP?: ILP;
 }
 
 interface ButtonsProps {
@@ -235,16 +236,9 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 }
 
 export const LPsModalButtons = ({saveLP, cleanFields, error}: ButtonsProps) => {
-    const showError = () => {
-        if (!error) return <></>;
-        return (
-            <div className="alert alert-danger"><FontAwesomeIcon icon={faExclamationTriangle}/> {error}</div>
-        );
-    }
-
     return (
         <div className="column">
-            <div>{showError()}</div>
+            <div>{showError(error)}</div>
 
             <div className="buttons">
                 <button type="button" className="btn btn-secondary"
@@ -256,7 +250,6 @@ export const LPsModalButtons = ({saveLP, cleanFields, error}: ButtonsProps) => {
                         className="btn btn-success">Uložiť LP
                 </button>
             </div>
-
         </div>
     )
 }

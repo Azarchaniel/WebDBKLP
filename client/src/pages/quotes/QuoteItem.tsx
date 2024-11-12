@@ -6,7 +6,7 @@ import {stringifyUsers} from "../../utils/utils";
 
 type Props = { quote: IQuote, bcgrClr: string } & {
     deleteQuote: (_id: string) => void,
-    saveQuote: (e: React.FormEvent, formData: IQuote) => void
+    saveQuote: (formData: IQuote) => void
 }
 
 const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {

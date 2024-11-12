@@ -1,5 +1,7 @@
 import {createPortal} from "react-dom";
 import React, {ReactElement} from "react";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 
 interface ModalProps {
     title: string;
@@ -9,8 +11,7 @@ interface ModalProps {
 }
 
 export const Modal: React.FC<ModalProps> = ({title, body, footer, onClose}: ModalProps) => {
-
-    return createPortal(<div className="customModal">
+    return createPortal(
         <div className="customModalWrapper">
             <div className="customModalBackdrop"
                  onClick={onClose}
@@ -31,7 +32,14 @@ export const Modal: React.FC<ModalProps> = ({title, body, footer, onClose}: Moda
                     {footer}
                 </div>}
             </div>
-        </div>
-    </div>, document.body);
+        </div>, document.body);
 
+}
+
+export const showError = (error: string | undefined) => {
+    if (!error) return <></>;
+
+    return (
+        <div className="alert alert-danger"><FontAwesomeIcon icon={faExclamationTriangle}/> {error}</div>
+    );
 }

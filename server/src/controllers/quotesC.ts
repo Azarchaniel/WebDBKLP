@@ -78,7 +78,6 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
 };
 
 const deleteQuote = async (req: Request, res: Response): Promise<void> => {
-    console.log("AAAAAAAAAAAAAAAA");
     try {
         const {
             params: {id},
