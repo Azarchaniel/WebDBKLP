@@ -13,34 +13,26 @@ const AddAutor: React.FC<Props> = ({saveAutor}: Props) => {
     const [autorData, setAutorData] = useState<IAutor | Object>();
     const [error, setError] = useState<string | undefined>('Priezvisko autora musí obsahovať aspoň jeden znak!');
 
-    const showAddAutor = () => {
-        return (
-            <>
-                <button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>
-                {showModal &&
-                    <Modal
-                        title="Pridaj autora"
-                        onClose={() => setShowModal(false)}
-                        body={<AutorsModalBody
-                            data={autorData as IAutor}
-                            onChange={setAutorData}
-                            error={setError}
-                        />}
-                        footer={<AutorsModalButtons
-                            saveAutor={() => saveAutor(autorData as IAutor)}
-                            cleanFields={() => setAutorData({})}
-                            error={error}
-                        />}
-                    />
-                }
-
-            </>
-        );
-    }
-
     return (
         <>
-            {showAddAutor()}
+            <button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>
+            {showModal &&
+                <Modal
+                    title="Pridaj autora"
+                    onClose={() => setShowModal(false)}
+                    body={<AutorsModalBody
+                        data={autorData as IAutor}
+                        onChange={setAutorData}
+                        error={setError}
+                    />}
+                    footer={<AutorsModalButtons
+                        saveAutor={() => saveAutor(autorData as IAutor)}
+                        cleanFields={() => setAutorData({})}
+                        error={error}
+                    />}
+                />
+            }
+
         </>
     )
 }

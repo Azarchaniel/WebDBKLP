@@ -49,7 +49,9 @@
         "extends": "react-app",
         "overrides": [
             {
-                "files": ["**/*.ts?(x)"]
+                "files": [
+                    "**/*.ts?(x)"
+                ]
             }
         ],
         "parserOptions": {

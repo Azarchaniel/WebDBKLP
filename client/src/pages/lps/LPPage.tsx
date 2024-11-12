@@ -54,8 +54,7 @@ export default function LPPage() {
             .catch((err: Error) => console.trace(err))
     }
 
-    const handleSaveLP = (e: React.FormEvent, formData: ILP): void => {
-        e.preventDefault()
+    const handleSaveLP = (formData: ILP): void => {
         addLP(formData)
             .then(({status, data}) => {
                 if (status !== 201) {

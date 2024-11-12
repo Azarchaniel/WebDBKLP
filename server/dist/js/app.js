@@ -14,6 +14,7 @@ app.use((0, cors_1.default)());
 app.use(routes_1.default);
 const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
 mongoose_1.default.set("strictQuery", false);
+console.log("MongoDB URI: " + uri);
 mongoose_1.default
     .connect(uri)
     .then(() => app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`)))

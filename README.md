@@ -52,3 +52,11 @@ cd ./client; npx run start
 - [ ] allow user to add tags - "fantasy", "read2012"
 
 (MVP) - Minimum Viable Product
+
+### Known problems and how to fix it
+
+`SyntaxError: Unexpected token '??='`
+Use Node newer than v15 (`nvm use 18.2.0`)
+
+`tsc command not found`
+Reinstall TS (`npm install typescript -g`)
