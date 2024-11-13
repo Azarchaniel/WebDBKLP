@@ -235,7 +235,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
     );
 }
 
-export const LPsModalButtons = ({saveLP, cleanFields, error}: ButtonsProps) => {
+export const LPsModalButtons: React.FC<ButtonsProps> = ({saveLP, cleanFields, error}: ButtonsProps) => {
     return (
         <div className="column">
             <div>{showError(error)}</div>

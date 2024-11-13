@@ -9,7 +9,7 @@ type ShowHideRowProps = {
 export const ShowHideRow = ({label, init, onChange}: ShowHideRowProps): ReactElement => {
     const [state, setState] = useState<boolean>(init);
 
-    return (<p>
+    return (<div className="showHideRow">
         <label>
             <input type='checkbox'
                     className="hideShowCheckbox"
@@ -19,5 +19,5 @@ export const ShowHideRow = ({label, init, onChange}: ShowHideRowProps): ReactEle
             />
             {label}
         </label>
-    </p>)
+    </div>)
 }

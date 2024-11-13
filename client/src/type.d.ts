@@ -144,3 +144,16 @@ interface IEditionSerie {
     no?: number;
     title: string;
 }
+
+export interface IBookHidden {
+    control: boolean,
+    editor: boolean,
+    ilustrator: boolean,
+    translator: boolean,
+    subtitle: boolean,
+    content: boolean,
+    dimensions: boolean,
+    createdAt: boolean,
+    location: boolean,
+    owner: boolean
+}

@@ -103,7 +103,6 @@ export default function QuotePage() {
                     onClick: () => {
                         deleteQuote(_id)
                             .then(res => {
-                                console.log(res.data.quotes)
                                 if (res.status !== 200) {
                                     throw new Error('Error! Quote not deleted')
                                 }
@@ -111,7 +110,7 @@ export default function QuotePage() {
                                 refresh();
                             })
                             .catch((err) => {
-                                toast.error('Došlo k chybe!');
+                                toast.error('Došlo k chybe pri mazaní citátu!');
                                 console.trace(err);
                             })
                     }
@@ -192,7 +191,6 @@ export default function QuotePage() {
                     filteredQuotes.length ?
                         filteredQuotes?.map((quote: IQuote) => {
                             return <QuoteItem
-                                key={quote._id}
                                 deleteQuote={handleDeleteQuote}
                                 saveQuote={handleSaveQuote}
                                 quote={quote}

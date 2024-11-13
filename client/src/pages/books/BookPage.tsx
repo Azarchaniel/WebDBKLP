@@ -1,4 +1,4 @@
-import {IBook, IUser} from "../../type";
+import {IBook, IBookHidden, IUser} from "../../type";
 import React, {useEffect, useRef, useState} from "react";
 import {addBook, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
@@ -9,28 +9,14 @@ import Toast from "../../components/Toast";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import {stringifyAutors, stringifyUsers} from "../../utils/utils";
 import Header from "../../components/AppHeader";
-import { tableHeaderColor } from "../../utils/constants";
 import { useReadLocalStorage } from "usehooks-ts";
 import BookDetail from "./BookDetail";
-import { ShowHideRow } from "../../components/ShowHideRow";
-
-interface IBookHidden {
-    control: boolean,
-    editor: boolean,
-    ilustrator: boolean,
-    translator: boolean,
-    subtitle: boolean,
-    content: boolean,
-    dimensions: boolean,
-    createdAt: boolean,
-    location: boolean,
-    owner: boolean
-}
+import { ShowHideRow } from "../../components/books/ShowHideRow";
+import {BookTableColumns} from "../../utils/constants";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
-    const [openModal, setOpenModal] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
     const [updateBookId, setUpdateBookId] = useState<string>('');
     const [hidden, setHidden] = useState<IBookHidden>({
@@ -103,8 +89,7 @@ export default function BookPage() {
             .finally(() => setLoading(false))
     }
 
-    const handleSaveBook = (e: React.FormEvent, formData: IBook): void => {
-        e.preventDefault()
+    const handleSaveBook = (formData: IBook): void => {
         addBook(formData)
             .then(({status, data}) => {
                 if (status !== 201) {
@@ -112,7 +97,7 @@ export default function BookPage() {
                     throw new Error('Chyba! Kniha nebola pridaná!');
                 }
                 toast.success(`Kniha ${data.book?.title} bola úspešne pridaná.`);
-                //setBooks(data.books)
+                fetchBooks()
             })
             .catch((err) => console.trace(err))
     }
@@ -165,7 +150,7 @@ export default function BookPage() {
             {/* TODO: remove Header and Sidebar from here */}
             <Header/>
             <Sidebar/>
-            <AddBook saveBook={handleSaveBook} open={openModal}/>
+            <AddBook saveBook={handleSaveBook}/>
             <div ref={popRef} className={`showHideColumns ${hidden.control ? 'hidden' : 'shown'}`}>
                 <ShowHideRow label="Editor" init={hidden.editor} onChange={() => setHidden({...hidden, editor: !hidden.editor})} />
                 <ShowHideRow label="Ilustrátor" init={hidden.ilustrator} onChange={() => setHidden({...hidden, ilustrator: !hidden.ilustrator})} />
@@ -180,125 +165,7 @@ export default function BookPage() {
             <MaterialTableCustom
                 loading={loading}
                 title={`Knihy (${countAll})`}
-                columns={[
-                    {
-                        title: 'Autor',
-                        field: 'autorsFull',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                    },
-                    {
-                        title: 'Editor',
-                        field: 'editorsFull',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                        hidden: hidden.editor
-                    },
-                    {
-                        title: 'Prekladateľ',
-                        field: 'translatorsFull',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                        hidden: hidden.translator
-                    },
-                    {
-                        title: 'Ilustrátor',
-                        field: 'ilustratorsFull',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                        hidden: hidden.ilustrator
-                    },
-                    {
-                        title: 'Názov',
-                        field: 'title',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                        cellStyle: {
-                            fontWeight: "bold"
-                        }
-                    },
-                    {
-                        title: 'Podnázov',
-                        field: 'subtitle',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                        hidden: hidden.subtitle
-                    },
-                    {
-                        title: 'Podtitul',
-                        field: 'content',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                        hidden: hidden.content
-                    },
-                    {
-                        title: 'ISBN',
-                        field: 'ISBN',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        }
-                    },
-                    {
-                        title: 'Jazyk',
-                        field: 'language',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        }
-                    },
-                    {
-                        title: 'Počet strán',
-                        field: 'numberOfPages',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        }
-                    },
-                    {
-                        title: 'Rozmery',
-                        field: 'dimensions',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                        hidden: hidden.dimensions
-                    },
-                    {
-                        title: 'Poznámka',
-                        field: 'note',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                    },
-                    {
-                        title: 'Datum pridania',
-                        field: 'createdAt',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                        hidden: hidden.createdAt
-                    },
-                    {
-                        title: 'umiestnenie',
-                        field: 'location',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                        hidden: hidden.location
-                    },
-                    {
-                        title: 'Majiteľ',
-                        field: 'ownersFull',
-                        headerStyle: {
-                            backgroundColor: tableHeaderColor
-                        },
-                        hidden: hidden.owner
-                    },
-                ]}
+                columns={BookTableColumns(hidden)}
                 data={clonedBooks}
                 actions={[
                     {
@@ -328,7 +195,7 @@ export default function BookPage() {
                     }
                 ]}
             />
-            {Boolean(updateBookId) ? <AddBook saveBook={handleSaveBook} bookId={updateBookId} /> : <></>}
+            {Boolean(updateBookId) && <AddBook saveBook={handleSaveBook} />}
             <Toast/>
         </main>
     );

@@ -22,14 +22,7 @@ interface ButtonsProps {
 
 export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
     const [isText, setIsText] = useState<boolean>(true);
-    const [formData, setFormData] = useState<IQuote | any>({
-        fromBook: null,
-        owner: null,
-        _id: null,
-        text: '',
-        note: '',
-        pageNo: null
-    });
+    const [formData, setFormData] = useState<IQuote | any>(data);
     const [books, setBooks] = useState<IBook[]>();
     const [users, setUsers] = useState<IUser[] | undefined>();
     const ownerRef = useRef(null);
@@ -39,13 +32,9 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         onChange(formData)
     }, [formData]);
 
-    /*useEffect(() => {
-        setFormData(data);
-    }, [data]);*/
-
     useEffect(() => {
-        console.log(data)
-    }, []);
+        setFormData(data);
+    }, [data]);
 
     useEffect(() => {
         getBooks()
@@ -139,11 +128,11 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         </div>
         <div style={{height: '5px', width: '100%'}}/>
         <div className="row">
-            <div className="col-3">
+            <div className="col-4">
                 <ToggleButton labelLeft="Text" labelRight="Obrázok"
                               state={() => setIsText(!isText)}/>
             </div>
-            <div className="col-6">
+            <div className="col-5">
                 <Multiselect
                     selectionLimit={1} /* searching doesnt work on single select */
                     options={books}

@@ -10,7 +10,7 @@ import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import Header from "../../components/AppHeader";
 import { tableHeaderColor } from "../../utils/constants";
-import { ShowHideRow } from "../../components/ShowHideRow";
+import { ShowHideRow } from "../../components/books/ShowHideRow";
 
 export default function LPPage() {
 
