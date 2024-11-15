@@ -13,7 +13,7 @@ const bookSchema: Schema = new Schema({
     translator: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
     title: {type: String, required: true},
     subtitle: {type: String, required: false},
-    content: {type: String, required: false},
+    content: {type: [String], required: false},
     edition: {type: editionSerieSchema, required: false},
     serie: {type: editionSerieSchema, required: false},
     ISBN: {type: String, required: false},

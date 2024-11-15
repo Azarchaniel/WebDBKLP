@@ -36,7 +36,7 @@ const bookSchema = new mongoose_1.Schema({
     translator: { type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false },
     title: { type: String, required: true },
     subtitle: { type: String, required: false },
-    content: { type: String, required: false },
+    content: { type: [String], required: false },
     edition: { type: editionSerie_1.editionSerieSchema, required: false },
     serie: { type: editionSerie_1.editionSerieSchema, required: false },
     ISBN: { type: String, required: false },

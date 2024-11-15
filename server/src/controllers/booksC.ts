@@ -4,7 +4,7 @@ import Book from '../models/book';
 import {IUser} from '../types';
 import User from '../models/user';
 import { optionFetchAllExceptDeleted } from '../utils/constants';
-import {webScrapper} from "../utils/utils";
+import {filterObject, getIdFromArray, webScrapper} from "../utils/utils";
 import mongoose from 'mongoose';
 
 const populateOptions: IPopulateOptions[] = [
@@ -48,25 +48,50 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
 
 const addBook = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {
-            published, location
-        } = req.body;
-        console.trace(req.body);
+        const data = req.body;
 
-        const book: IBook = new Book({
+        const book: IBook = {
+            autor: getIdFromArray(data.autor),
+            editor: getIdFromArray(data.editor),
+            translator: getIdFromArray(data.translator),
+            ilustrator: getIdFromArray(data.ilustrator),
+            readBy: getIdFromArray(data.readBy),
+            owner: getIdFromArray(data.owner),
             published: {
-                publisher: published?.publisher,
-                year: published?.year ?? undefined,
-                country: published?.country ?? ''
+                publisher: data["published.publisher"] ?? "",
+                year: data["published.year"] ?? undefined,
+                country: data["published.country"]?.[0]?.key ?? ''
             },
             location: {
-                city: location?.city,
-                shelf: location?.shelf,
+                city: data["location.city"]?.[0]?.value ?? '',
+                shelf: data["location.shelf"],
             },
-            ...req.body,
-        })
+            language: data.language?.map(lang => lang.key),
+            numberOfPages: data.numberOfPages ? parseInt(data.numberOfPages) : undefined,
+            title: data.title,
+            subtitle: data.subtitle,
+            content: data.content,
+            edition: {no: data["edition.no"],
+                title: data["edition.title"]},
+            serie: {no: data["serie.no"],
+                title: data["serie.title"]},
+            ISBN: data.ISBN,
+            note: data.note,
+            dimensions: {
+                height: data.dimensions?.height,
+                width: data.dimensions?.width,
+                depth: data.dimensions?.depth,
+                weight: data.dimensions?.weight
+            },
+            exLibris: data.exLibris,
+            picture: data.picture,
+            hrefGoodReads: data.hrefGoodReads,
+            hrefDatabazeKnih: data.hrefDatabazeKnih,
+        } as IBook;
 
-        const newBook: IBook = await book.save()
+        const bookToSave = new Book(book);
+
+        const newBook: IBook = await bookToSave.save()
         const allBooks: IBook[] = await Book
             .find()
             .populate(populateOptions)

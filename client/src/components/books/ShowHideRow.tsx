@@ -1,4 +1,4 @@
-import { ReactElement, useState } from "react";
+import React, { ReactElement, useState } from "react";
 
 type ShowHideRowProps = {
     label: string,
@@ -6,7 +6,7 @@ type ShowHideRowProps = {
     onChange: (state: boolean) => void
 }
 
-export const ShowHideRow = ({label, init, onChange}: ShowHideRowProps): ReactElement => {
+export const ShowHideRow = React.memo(({label, init, onChange}: ShowHideRowProps): ReactElement => {
     const [state, setState] = useState<boolean>(init);
 
     return (<div className="showHideRow">
@@ -20,4 +20,4 @@ export const ShowHideRow = ({label, init, onChange}: ShowHideRowProps): ReactEle
             {label}
         </label>
     </div>)
-}
+});

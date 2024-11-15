@@ -1,4 +1,4 @@
 export interface IEditionSerie {
-    no?: number;
+    no?: string;
     title: string;
 }

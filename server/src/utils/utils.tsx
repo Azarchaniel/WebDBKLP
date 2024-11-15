@@ -1,5 +1,14 @@
 import puppeteer from 'puppeteer';
 
+export const getIdFromArray = (arrOfObj: Object[]) => {
+    return arrOfObj?.map(obj => {
+        if (!("_id" in obj)) {
+            throw Error("Object does not have _id!");
+        }
+        return obj._id;
+    })
+}
+
 const databazeKnih = async (isbn: string) => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();

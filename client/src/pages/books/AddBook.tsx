@@ -1,4 +1,4 @@
-import React, {Fragment, useState} from "react";
+import React, {Fragment, useEffect, useState} from "react";
 import {IBook, ILP} from "../../type";
 import {Modal} from "../../components/Modal";
 import {BooksModalBody, BooksModalButtons} from "../../components/books/BooksModal";
@@ -12,6 +12,10 @@ const AddBook: React.FC<Props> = ({saveBook}) => {
     const [bookData, setBookData] = useState<IBook | Object>();
     //const [error, setError] = useState<string | undefined>('Názov knihy musí obsahovať aspoň jeden znak!');
     const [error, setError] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        console.log(bookData);
+    }, [bookData]);
 
     return (
         <>

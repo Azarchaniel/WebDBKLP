@@ -458,10 +458,6 @@ body, html, main, #root {
   grid-area: 4 / 11 / 4 / 13;
 }
 
-.Page-no {
-  grid-area: 5 / 3 / 6 / 3;
-}
-
 .Vydavatel {
   grid-area: 5 / 1 / 5 / 7;
 }
@@ -487,19 +483,23 @@ body, html, main, #root {
 }
 
 .Vyska {
-  grid-area: 7 / 1 / 7 / 4;
-}
-
-.Hrubka {
-  grid-area: 7 / 4 / 7 / 7;
+  grid-area: 7 / 1 / 7 / 3;
 }
 
 .Sirka {
-  grid-area: 7 / 7 / 7 / 10;
+  grid-area: 7 / 3 / 7 / 5;
+}
+
+.Hrubka {
+  grid-area: 7 / 5 / 7 / 7;
 }
 
 .Hmotnost {
-  grid-area: 7 / 10 / 7 / 13;
+  grid-area: 7 / 7 / 7 / 9;
+}
+
+.Page-no {
+  grid-area: 7 / 9 / 7 / 13;
 }
 
 .Obsah {

@@ -32,19 +32,10 @@ export const addBook = async (
   formData: /*IBook*/any
 ): Promise<AxiosResponse<ApiBookDataType>> => {
   try {
-    const book: any/*Omit<IBook, '_id'>*/ = {
-      ...formData,
-      published: {
-        publisher: formData['published.publisher'] ?? '',
-        year: formData['published.year'] ?? undefined,
-        country: formData['published.country'] ?? ''
-      },
-      location: formData.location
-
-    }
+    console.log(formData);
     const saveBook: AxiosResponse<ApiBookDataType> = await axios.post(
       baseUrl + '/add-book',
-      book
+      formData
     )
     return saveBook
   } catch (error: any) {
