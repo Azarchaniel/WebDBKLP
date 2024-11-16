@@ -1,5 +1,5 @@
 import React, {Fragment, useEffect, useState} from "react";
-import {IBook, ILP} from "../../type";
+import {IBook} from "../../type";
 import {Modal} from "../../components/Modal";
 import {BooksModalBody, BooksModalButtons} from "../../components/books/BooksModal";
 
@@ -10,12 +10,7 @@ type Props = {
 const AddBook: React.FC<Props> = ({saveBook}) => {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [bookData, setBookData] = useState<IBook | Object>();
-    //const [error, setError] = useState<string | undefined>('Názov knihy musí obsahovať aspoň jeden znak!');
-    const [error, setError] = useState<string | undefined>(undefined);
-
-    useEffect(() => {
-        console.log(bookData);
-    }, [bookData]);
+    const [error, setError] = useState<any[] | undefined>([{label: 'Názov knihy musí obsahovať aspoň jeden znak!', target: 'title'}]);
 
     return (
         <>

@@ -1,5 +1,5 @@
 import {createPortal} from "react-dom";
-import React, {ReactElement} from "react";
+import React, {ReactElement, useEffect} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 
@@ -36,8 +36,12 @@ export const Modal: React.FC<ModalProps> = ({title, body, footer, onClose}: Moda
 
 }
 
-export const showError = (error: string | undefined) => {
-    if (!error) return <></>;
+export const showError = (error: string | any[] | undefined) => {
+    if (!error || (Array.isArray(error) && error.length === 0)) return <></>;
+
+    if (Array.isArray(error) && error.length > 0) {
+        error = error[0].label;
+    }
 
     return (
         <div className="alert alert-danger"><FontAwesomeIcon icon={faExclamationTriangle}/> {error}</div>

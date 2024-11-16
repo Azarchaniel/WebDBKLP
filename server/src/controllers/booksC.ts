@@ -71,10 +71,14 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
             title: data.title,
             subtitle: data.subtitle,
             content: data.content,
-            edition: {no: data["edition.no"],
-                title: data["edition.title"]},
-            serie: {no: data["serie.no"],
-                title: data["serie.title"]},
+            edition: {
+                no: data.edition?.no,
+                title: data.edition?.title
+            },
+            serie: {
+                no: data.serie?.no,
+                title: data.serie?.title
+            },
             ISBN: data.ISBN,
             note: data.note,
             dimensions: {

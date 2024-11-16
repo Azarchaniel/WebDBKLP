@@ -1,8 +1,8 @@
 import {IAutor, IBook, IUser} from "../../type";
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {getAutors, getUsers} from "../../API";
 import {toast} from "react-toastify";
-import {checkIsbnValidity} from "../../utils/utils";
+import {checkIsbnValidity, isNumberOrEmpty, validateNumber} from "../../utils/utils";
 import {countryCode, langCode} from "../../utils/locale";
 import ChipInput from "material-ui-chip-input";
 import {showError} from "../Modal";
@@ -12,34 +12,35 @@ import {InputField, MultiselectField} from "../InputFields";
 interface BodyProps {
     data: IBook | Object;
     onChange: (data: IBook | Object) => void;
-    error: (err: string | undefined) => void;
+    error: (err: any[] | undefined) => void;
     editedLP?: IBook;
 }
 
 interface ButtonsProps {
     saveBook: () => void;
     cleanFields: () => void;
-    error?: string | undefined;
+    error?: any[] | undefined;
 }
 
-const multiselectStyle = {
-    inputField: {marginLeft: "0.5rem"},
-    optionContainer: {
-        backgroundColor: "transparent",
-    },
-    chips: {background: '#00ADB5'},
-    option: {color: 'black'},
-    multiselectContainer: {maxWidth: '100%'},
-};
+interface ValidationError {
+    label: string;
+    valid?: boolean;
+    target?: string;
+}
 
 export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
     const [formData, setFormData] = useState(data as any);
     const [autors, setAutors] = useState<IAutor[] | []>();
     const [users, setUsers] = useState<IUser[] | undefined>();
+    const [errors, setErrors] = useState<ValidationError[]>([{label: 'Názov knihy musí obsahovať aspoň jeden znak!', target: 'title'}]);
 
     useEffect(() => {
         onChange(formData);
     }, [formData]);
+
+    useEffect(() => {
+        setFormData(data);
+    }, [data]);
 
     useEffect(() => {
         //TODO: move filtering to backend; start fetching at third char
@@ -64,48 +65,119 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         }).catch();
     }, [])
 
+    //error handling
     useEffect(() => {
         //if there is no filled field, its disabled
         if (!formData) return;
 
-        if (!("title" in formData && formData?.title.trim().length > 0)) {
-            return error('Názov knihy musí obsahovať aspoň jeden znak!');
-        } else if ("ISBN" in formData && !checkIsbnValidity(formData?.ISBN)) {
-            return error("Nevalidné ISBN!");
-        } else {
-            error(undefined);
+        //default name error
+        let localErrors: ValidationError[] = [];
+
+        //some crazy defining ahead
+        let n1, n2, n3, n4, n5, n6;
+        n1 = n2 = n3 = n4 = n5 = n6 = {valid: true, label: ""} as ValidationError;
+
+        let [height, width, depth, weight]
+            = [formData.dimensions?.height, formData.dimensions?.width, formData.dimensions?.depth, formData.dimensions?.weight];
+
+        if (formData.dimensions || !(Object.keys(formData.dimensions ?? {}).length === 0)) {
+            n1 = {valid: validateNumber(height, {mustBePositive: true}), label: "Výška", target: "dimensions.height"};
+            n2 = {valid: validateNumber(width, {mustBePositive: true}), label: "Šírka", target: "dimensions.width"};
+            n3 = {valid: validateNumber(depth, {mustBePositive: true}), label: "Hrúbka", target: "dimensions.depth"};
+            n4 = {valid: validateNumber(weight, {mustBePositive: true}), label: "Hmotnosť", target: "dimensions.weight"};
         }
+        n5 = {
+            valid: validateNumber(formData.numberOfPages, {mustBeInteger: true, mustBePositive: true}),
+            label: "Počet strán",
+            target: "numberOfPages"
+        };
+        if (formData.published || !(Object.keys(formData.published ?? {}).length === 0))
+            n6 = {
+                valid: validateNumber(formData.published?.year, {mustBeInteger: true, mustBePositive: true}),
+                label: "Rok vydania",
+                target: "published.year"
+            };
+
+        const numberValidations = [n1, n2, n3, n4, n5, n6];
+
+        if (!("title" in formData && formData?.title.trim().length > 0)) {
+            localErrors.push({label: 'Názov knihy musí obsahovať aspoň jeden znak!', target: 'title'});
+        } else {
+            localErrors = localErrors?.filter((err: ValidationError) => err.target !== "title") ?? localErrors;
+        }
+
+        if ("ISBN" in formData && !checkIsbnValidity(formData?.ISBN)) {
+            localErrors.push({label: "Nevalidné ISBN!", target: 'ISBN'});
+        } else {
+            localErrors = localErrors?.filter((err: ValidationError) => err.target !== "ISBN") ?? localErrors;
+        }
+
+        if (!(numberValidations.every(n => n?.valid))) {
+            numberValidations.filter(n => !(n?.valid))
+                .map((numErr: ValidationError) => {
+                    return {
+                        label: numErr.label + " musí byť číslo!",
+                        target: numErr.target || ""
+                    }
+                })
+                .forEach(err => localErrors.push(err))
+        } else {
+            localErrors = localErrors?.filter((err: ValidationError) => !err.label.includes(" musí byť číslo!")) ?? localErrors;
+        }
+
+        setErrors(localErrors);
+        error(localErrors)
     }, [formData])
 
     const handleInputChange = useCallback((input) => {
         let name: string, value: string;
 
-        if ("target" in input) { //if it is regular event
-            const { name: targetName, value: targetValue } = input.target;
+        if ("target" in input) { // if it is a regular event
+            const {name: targetName, value: targetValue} = input.target;
             name = targetName;
             value = targetValue;
-        } else { //if it is MultiSelect custom answer
+        } else { // if it is MultiSelect custom answer
             name = input.name;
             value = input.value;
         }
-        console.log(name, value);
-        setFormData((prevData: any) => ({ ...prevData, [name]: value }));
+
+        setFormData((prevData: any) => {
+            // Helper function to create a nested object structure
+            const setNestedValue = (obj: any, keys: string[], value: any) => {
+                const key = keys.shift(); // Get the first key
+                if (!key) return value; // If no more keys, return the value
+                obj[key] = setNestedValue(obj[key] || {}, keys, value); // Recursively set the nested value
+                return obj;
+            };
+
+            const keys = name.split('.'); // Split name into keys
+            const updatedData = {...prevData}; // Clone previous data
+            setNestedValue(updatedData, keys, value); // Set nested value
+
+            return updatedData;
+        });
     }, []);
+
+    const getErrorMsg = (name: string): string => {
+        console.log(name, errors);
+        return errors.find(err => err.target === name)?.label || "";
+    }
 
     return (<form>
         <div className="container">
             <div className="Nazov">
                 <InputField
-                    value={formData?.title}
-                    label='*Názov'
+                    value={formData?.title || ""}
+                    placeholder='*Názov'
                     name="title"
                     onChange={handleInputChange}
+                    customerror={getErrorMsg("title")}
                 />
             </div>
             <div className="Podnazov">
                 <InputField
-                    value={formData?.subtitle}
-                    label='Podnázov'
+                    value={formData?.subtitle || ""}
+                    placeholder='Podnázov'
                     name="subtitle"
                     onChange={handleInputChange}
                 />
@@ -123,10 +195,11 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
             </div>
             <div className="ISBN">
                 <InputField
-                    value={formData?.ISBN}
-                    label='ISBN'
+                    value={formData?.ISBN || ""}
+                    placeholder='ISBN'
                     name="ISBN"
                     onChange={handleInputChange}
+                    customerror={getErrorMsg("ISBN")}
                 />
             </div>
             <div className="Translator">
@@ -164,51 +237,51 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
             </div>
             <div className="Name">
                 <InputField
-                    value={formData?.edition?.title}
-                    label='Názov edície'
+                    value={formData?.edition?.title || ""}
+                    placeholder='Názov edície'
                     name="edition.title"
                     onChange={handleInputChange}
                 />
             </div>
             <div className="No">
                 <InputField
-                    value={formData?.edition?.no}
-                    label='Číslo edície'
+                    value={formData?.edition?.no || ""}
+                    placeholder='Číslo edície'
                     name="edition.no"
                     onChange={handleInputChange}
                 />
             </div>
             <div className="NameS">
                 <InputField
-                    value={formData?.serie?.title}
-                    label='Názov série'
+                    value={formData?.serie?.title || ""}
+                    placeholder='Názov série'
                     name="serie.title"
                     onChange={handleInputChange}
                 />
             </div>
             <div className="NoS">
                 <InputField
-                    value={formData?.serie?.no}
-                    label='Číslo série'
+                    value={formData?.serie?.no || ""}
+                    placeholder='Číslo série'
                     name="serie.no"
                     onChange={handleInputChange}
                 />
             </div>
             <div className="Vydavatel">
                 <InputField
-                    value={formData?.published?.publisher}
-                    label='Vydavateľ'
+                    value={formData?.published?.publisher || ""}
+                    placeholder='Vydavateľ'
                     name="published.publisher"
                     onChange={handleInputChange}
                 />
             </div>
             <div className="Rok">
                 <InputField
-                    value={formData?.published?.year}
-                    label='Rok vydania'
+                    value={formData?.published?.year || ""}
+                    placeholder='Rok vydania'
                     name="published.year"
                     onChange={handleInputChange}
-                    type='number'
+                    customerror={getErrorMsg("published.year")}
                 />
             </div>
             <div className="Krajina">
@@ -235,8 +308,8 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
             </div>
             <div className="Police">
                 <InputField
-                    value={formData?.location?.shelf}
-                    label='Polica'
+                    value={formData?.location?.shelf || ""}
+                    placeholder='Polica'
                     name="location.shelf"
                     onChange={handleInputChange}
                 />
@@ -254,47 +327,47 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 
             <div className="Vyska">
                 <InputField
-                    value={formData?.dimensions?.height}
-                    label='Výška (cm)'
+                    value={formData?.dimensions?.height || ""}
+                    placeholder='Výška (cm)'
                     name="dimensions.height"
                     onChange={handleInputChange}
-                    type='number'
+                    customerror={getErrorMsg("dimensions.height")}
                 />
             </div>
             <div className="Sirka">
                 <InputField
-                    value={formData?.dimensions?.width}
-                    label='Šírka (cm)'
+                    value={formData?.dimensions?.width || ""}
+                    placeholder='Šírka (cm)'
                     name="dimensions.width"
                     onChange={handleInputChange}
-                    type='number'
+                    customerror={getErrorMsg("dimensions.width")}
                 />
             </div>
             <div className="Hrubka">
                 <InputField
-                    value={formData?.dimensions?.depth}
-                    label='Hrúbka (cm)'
+                    value={formData?.dimensions?.depth || ""}
+                    placeholder='Hrúbka (cm)'
                     name="dimensions.depth"
                     onChange={handleInputChange}
-                    type='number'
+                    customerror={getErrorMsg("dimensions.depth")}
                 />
             </div>
             <div className="Hmotnost">
                 <InputField
-                    value={formData?.dimensions?.weight}
-                    label='Hmotnosť (g)'
+                    value={formData?.dimensions?.weight || ""}
+                    placeholder='Hmotnosť (g)'
                     name="dimensions.weight"
                     onChange={handleInputChange}
-                    type='number'
+                    customerror={getErrorMsg("dimensions.weight")}
                 />
             </div>
             <div className="Page-no">
                 <InputField
-                    value={formData?.numberOfPages}
-                    label='Počet strán'
+                    value={formData?.numberOfPages || ""}
+                    placeholder='Počet strán'
                     name="numberOfPages"
                     onChange={handleInputChange}
-                    type='number'
+                    customerror={getErrorMsg("numberOfPages")}
                 />
             </div>
             <div className="Obsah">
@@ -303,6 +376,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     disableUnderline
                     placeholder="Obsah"
                     value={formData?.content}
+                    defaultValue={formData?.content}
                     onChange={(values) => handleInputChange({name: "content", value: values})}
                 />
             </div>
@@ -312,7 +386,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                                                       name="note"
                                                       autoComplete="off"
                                                       rows={1}
-                                                      value={formData?.note}
+                                                      value={formData?.note || ""}
                                                       onChange={handleInputChange}
                                             />
             </div>
@@ -347,24 +421,24 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
             </div>
             <div className="pic">
                 <InputField
-                    value={formData?.picture}
-                    label='Obrázok'
+                    value={formData?.picture || ""}
+                    placeholder='Obrázok'
                     name="picture"
                     onChange={handleInputChange}
                 />
             </div>
             <div className="DK">
                 <InputField
-                    value={formData?.hrefDatabazeKnih}
-                    label='URL Databáze knih'
+                    value={formData?.hrefDatabazeKnih || ""}
+                    placeholder='URL Databáze knih'
                     name="hrefDatabazeKnih"
                     onChange={handleInputChange}
                 />
             </div>
             <div className="GR">
                 <InputField
-                    value={formData?.hrefGoodReads}
-                    label='URL GoodReads'
+                    value={formData?.hrefGoodReads || ""}
+                    placeholder='URL GoodReads'
                     name="hrefGoodReads"
                     onChange={handleInputChange}
                 />

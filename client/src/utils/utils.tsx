@@ -78,6 +78,7 @@ export const getCssPropertyValue = (propertyName: string) => {
 
 export const checkIsbnValidity = (isbn: string | undefined)  => {
     if (!isbn) return true;
+    if (/[^0-9X]/gi.test(isbn)) return false; //contains invalid chars
 
     let sum,
         weight,
@@ -87,7 +88,7 @@ export const checkIsbnValidity = (isbn: string | undefined)  => {
 
     isbn = isbn.replace(/[^0-9X]/gi, '');
 
-    if (isbn.length < 10) {
+    if (isbn.length < 10 && isbn.length > 1) {
         return true; //can't validate older/shorter ISBN, so just assume they are correct
     }
 
@@ -121,4 +122,36 @@ export const checkIsbnValidity = (isbn: string | undefined)  => {
     }
 
     return false;
+}
+
+type ValidationOptions = {
+    mustBePositive?: boolean; // Optional: Ensure the number is greater than 0
+    mustBeInteger?: boolean; // Optional: Ensure the number is an integer
+};
+
+export const validateNumber = (value: any, options?: ValidationOptions): boolean => {
+    if (!value) return true;
+    const { mustBePositive = false, mustBeInteger = false } = options || {};
+
+    // Check if the value is a number
+    const numberValue = Number(value);
+    if (isNaN(numberValue)) {
+        return false;
+    }
+
+    // Check if the value is positive
+    if (mustBePositive && numberValue <= 0) {
+        return false;
+    }
+
+    // Check if the value is an integer
+    if (mustBeInteger && !Number.isInteger(numberValue)) {
+        return false;
+    }
+
+    return true;
+};
+
+export const isNumberOrEmpty = (num: any) => {
+    return (!isNaN(num) || num === "" || num === undefined);
 }

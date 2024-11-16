@@ -1,6 +1,5 @@
-import React from "react";
+import React, {useEffect, useRef} from "react";
 import {Multiselect} from "multiselect-react-dropdown";
-import {IBook} from "../type";
 
 const multiselectStyle = {
     inputField: {marginLeft: "0.5rem"},
@@ -12,29 +11,40 @@ const multiselectStyle = {
     multiselectContainer: {maxWidth: '100%'},
 };
 
-interface InputProps {
-    label: string;
-    value: any;
-    name: string;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    type?: string;
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    customerror?: string;
 }
 
 interface MultiselectInputProps extends Omit<InputProps, 'onChange'> {
+    label: string;
+    name: string;
     options: any[] | undefined;
     displayValue: string;
     emptyRecordMsg?: string;
-    //this is overcomplicated, so it works with on change in
     onChange: ({name, value}: {name: string, value: string}) => void;
 }
 
-export const InputField = React.memo(({label, value, name, onChange, type = "text"}: InputProps) => {
+export const InputField = React.memo((props: InputProps) => {
+    const inputRef = useRef(null);
+    useEffect(() => {
+        console.log(props.name, props.customerror);
+        if (props.customerror) {
+            if (inputRef.current) {
+                (inputRef.current as any).setCustomValidity(props.customerror);
+                (inputRef.current as any).reportValidity();
+                (inputRef.current as any).blur();
+            }
+        } else {
+            (inputRef.current as any).setCustomValidity("");
+            (inputRef.current as any).reportValidity();
+        }
+    }, [props.customerror]);
+
     return (
         <input
-            type={type} placeholder={label} name={name}
+            {...props}
+            ref={inputRef}
             className="form-control" autoComplete="off"
-            value={value}
-            onChange={onChange}
         />
     );
 });
