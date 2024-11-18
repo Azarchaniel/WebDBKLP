@@ -82,12 +82,12 @@ export default function LPPage() {
                     label: 'Ano',
                     onClick: () => {
                         deleteLP(_id)
-                            .then(({ status, data }) => {
+                            .then(({ status}) => {
                                 if (status !== 200) {
                                     throw new Error('Error! LP not deleted')
                                 }
                                 toast.success(`LP bolo úspešne vymazaný.`);
-                                setLPs(stringifyAutors(data.lps));
+                                fetchLPs();
                             })
                             .catch((err) => {
                                 toast.error('Došlo k chybe!');
@@ -160,9 +160,6 @@ export default function LPPage() {
                         headerStyle: {
                             backgroundColor: tableHeaderColor
                         },
-                        render: (rowData: IBook) => {
-                            if (rowData.note) return shortenStringKeepWord(rowData.note, 30);
-                        },
                     },
                     {
                         title: 'Počet strán',
@@ -200,8 +197,8 @@ export default function LPPage() {
                     {
                         icon: 'delete',
                         tooltip: 'Vymazať',
-                        onClick: (_: any, rowData: unknown) => handleDeleteLP((rowData as ILP)._id),
-                    }
+                        onClick: (_: any, rowData: unknown) =>
+                            handleDeleteLP((rowData as ILP)._id)}
                 ]}
             />
             <Toast />

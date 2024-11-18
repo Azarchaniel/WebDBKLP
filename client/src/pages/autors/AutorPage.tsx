@@ -177,6 +177,7 @@ export default function AutorPage() {
                 ]}
                 detailPanel={[
                     {
+                        icon: "search",
                         tooltip: 'Detaily',
                         render: (rowData: any) => {return (
                             <>
