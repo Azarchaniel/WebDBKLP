@@ -1,5 +1,5 @@
 import {createPortal} from "react-dom";
-import React, {ReactElement, useEffect} from "react";
+import React, {ReactElement} from "react";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 

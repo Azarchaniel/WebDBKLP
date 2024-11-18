@@ -827,3 +827,9 @@ body, html, main, #root {
 input:invalid {
   outline: 2px dotted red;
 }
+
+.multiSelectContainer ul {
+  position: fixed;
+  z-index: 1002;
+  background-color: white !important;
+}

@@ -1,4 +1,4 @@
-import React, {Fragment, useEffect, useState} from "react";
+import React, {Fragment, useState} from "react";
 import {IBook} from "../../type";
 import {Modal} from "../../components/Modal";
 import {BooksModalBody, BooksModalButtons} from "../../components/books/BooksModal";

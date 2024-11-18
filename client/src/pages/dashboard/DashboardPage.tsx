@@ -14,8 +14,6 @@ export default function DashboardPage() {
 
     const renderUserCount = () => {
         if (!countAllBooks) return <p>Loading...</p>
-        console.log(countAllBooks)
-        console.log(countAllBooks.filter(c => c.owner).map(c => c.owner?.firstName || "Bez majiteľa"))
         
         // Check if countAllBooks is an object
         if (typeof countAllBooks === 'object' && !Array.isArray(countAllBooks)) {

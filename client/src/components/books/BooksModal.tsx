@@ -1,8 +1,8 @@
 import {IAutor, IBook, IUser} from "../../type";
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {getAutors, getUsers} from "../../API";
 import {toast} from "react-toastify";
-import {checkIsbnValidity, isNumberOrEmpty, validateNumber} from "../../utils/utils";
+import {checkIsbnValidity, validateNumber} from "../../utils/utils";
 import {countryCode, langCode} from "../../utils/locale";
 import ChipInput from "material-ui-chip-input";
 import {showError} from "../Modal";
@@ -159,7 +159,6 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
     }, []);
 
     const getErrorMsg = (name: string): string => {
-        console.log(name, errors);
         return errors.find(err => err.target === name)?.label || "";
     }
 

@@ -27,18 +27,21 @@ interface MultiselectInputProps extends Omit<InputProps, 'onChange'> {
 export const InputField = React.memo((props: InputProps) => {
     const inputRef = useRef(null);
     useEffect(() => {
-        console.log(props.name, props.customerror);
         if (props.customerror) {
             if (inputRef.current) {
                 (inputRef.current as any).setCustomValidity(props.customerror);
                 (inputRef.current as any).reportValidity();
-                (inputRef.current as any).blur();
             }
         } else {
             (inputRef.current as any).setCustomValidity("");
             (inputRef.current as any).reportValidity();
+
         }
     }, [props.customerror]);
+
+    useEffect(() => {
+        (inputRef.current as any).blur(); // field Nazov is preselected on start, because it has error on start
+    }, []);
 
     return (
         <input
