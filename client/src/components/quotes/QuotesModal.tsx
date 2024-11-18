@@ -82,11 +82,12 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
     useEffect(() => {
         const data = (formData as unknown as IQuote);
         if (!data || !Object.keys(data).length) return;
+        console.log("data?",data);
 
-        if (!data?.text && data?.text.trim().length < 1) {
+        if (!("text" in data && data?.text?.trim().length > 0)) {
             return error('Text citátu musí obsahovať aspoň jeden znak!')
         }
-        console.log(data)
+
         if (!data?.fromBook) {
             return error('Musí byť vybraná kniha!');
         }
@@ -110,7 +111,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         //todo: merge with "handleForm"
         type === "user" ?
             setFormData({...formData, owner: selected}) :
-            setFormData({...formData, fromBook: selected ? selected[0]._id : null});
+            setFormData({...formData, fromBook: selected.length ? selected[0]._id : null});
     }
 
     return (<form>
