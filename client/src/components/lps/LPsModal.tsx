@@ -1,7 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
 import {toast} from "react-toastify";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 import {registerLocale} from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import cs from 'date-fns/locale/cs';

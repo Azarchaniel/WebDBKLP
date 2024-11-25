@@ -30,6 +30,7 @@ export default function DashboardPage() {
             } else if (c.owner) {
                 return <p key={c.owner?.id}>{`${c.owner?.firstName}: ${c.count}`}</p> 
             } //if it doesnt have owner, it is catch by find in HTML below
+            return null;
         })
     }
 

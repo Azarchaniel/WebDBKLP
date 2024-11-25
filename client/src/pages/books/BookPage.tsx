@@ -1,5 +1,5 @@
 import {IBook, IBookHidden, IUser} from "../../type";
-import React, {ReactElement, useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {addBook, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
@@ -9,9 +9,9 @@ import Toast from "../../components/Toast";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import {stringifyAutors, stringifyUsers} from "../../utils/utils";
 import Header from "../../components/AppHeader";
-import { useReadLocalStorage } from "usehooks-ts";
+import {useReadLocalStorage} from "usehooks-ts";
 import BookDetail from "./BookDetail";
-import { ShowHideRow } from "../../components/books/ShowHideRow";
+import {ShowHideRow} from "../../components/books/ShowHideRow";
 import {BookTableColumns} from "../../utils/constants";
 
 export default function BookPage() {
