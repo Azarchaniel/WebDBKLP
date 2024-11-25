@@ -1,20 +1,28 @@
-import React, {Fragment, useState} from "react";
+import React, {Fragment, useEffect, useState} from "react";
 import {IBook} from "../../type";
 import {Modal} from "../../components/Modal";
 import {BooksModalBody, BooksModalButtons} from "../../components/books/BooksModal";
 
 type Props = {
     saveBook: (formData: IBook | any) => void;
+    book?: IBook;
 }
 
-const AddBook: React.FC<Props> = ({saveBook}) => {
+const AddBook: React.FC<Props> = ({saveBook, book}) => {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [bookData, setBookData] = useState<IBook | Object>();
     const [error, setError] = useState<any[] | undefined>([{label: 'Názov knihy musí obsahovať aspoň jeden znak!', target: 'title'}]);
 
+    useEffect(() => {
+        if (book) {
+            setShowModal(true);
+            setBookData(book);
+        }
+    }, []);
+
     return (
         <>
-            <button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>
+            {!book && <button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>}
             {showModal &&
                 <Modal
                     title="Pridaj knihu"

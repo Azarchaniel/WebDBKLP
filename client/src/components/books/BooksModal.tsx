@@ -1,12 +1,13 @@
-import {IAutor, IBook, IUser} from "../../type";
+import {IAutor, IBook, ILangCode, IUser} from "../../type";
 import React, {useCallback, useEffect, useState} from "react";
 import {getAutors, getUsers} from "../../API";
 import {toast} from "react-toastify";
-import {checkIsbnValidity, validateNumber} from "../../utils/utils";
+import {checkIsbnValidity, formPersonsFullName, validateNumber} from "../../utils/utils";
 import {countryCode, langCode} from "../../utils/locale";
 import ChipInput from "material-ui-chip-input";
 import {showError} from "../Modal";
 import {InputField, MultiselectField} from "../InputFields";
+import {cities} from "../../utils/constants";
 
 //TODO: generalize with generics <T>
 interface BodyProps {
@@ -38,9 +39,31 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         onChange(formData);
     }, [formData]);
 
+    // clear form btn
     useEffect(() => {
-        setFormData(data);
+        if (!data) return;
+        if (Object.keys(data).length === 0 && data.constructor === Object) setFormData(data);
     }, [data]);
+
+    //edit book
+    useEffect(() => {
+        if (!data) return;
+
+        const toBeModified: IBook = {
+            ...data,
+            autor: formPersonsFullName((data as IBook)?.autor),
+            translator: formPersonsFullName((data as IBook)?.translator),
+            editor: formPersonsFullName((data as IBook)?.editor),
+            ilustrator: formPersonsFullName((data as IBook)?.ilustrator),
+            location: {city: cities.find(c => c.value === (data as IBook)?.location?.city)?.showValue},
+            published: {country: countryCode.find((country: ILangCode) => ((data as IBook)?.published?.country as unknown as string[])?.includes(country.key))},
+            language: langCode.filter((lang: ILangCode) => ((data as IBook)?.language as unknown as string[])?.includes(lang.key)),
+            readBy: formPersonsFullName((data as IBook)?.readBy),
+            owner: formPersonsFullName((data as IBook)?.owner),
+        } as IBook;
+
+        setFormData(toBeModified);
+    }, []);
 
     useEffect(() => {
         //TODO: move filtering to backend; start fetching at third char
@@ -49,7 +72,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                 //constructing fullName for autocomplete
                 setAutors(aut.data.autors.map((aut: IAutor) => ({
                     ...aut,
-                    fullName: `${aut.lastName ?? ''}${aut.firstName ? ', ' + aut.firstName : ''}`
+                    fullName: formPersonsFullName(aut) as string,
                 })).sort((a: Partial<IAutor>, b: Partial<IAutor>) => a.fullName!.localeCompare(b.fullName!)));
             })
             .catch(err => {
@@ -60,7 +83,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         getUsers().then(user => {
             setUsers(user.data.users.map((user: IUser) => ({
                 ...user,
-                fullName: `${user.lastName}, ${user.firstName}`
+                fullName: formPersonsFullName(user)
             })).sort((a: any, b: any) => a.fullName!.localeCompare(b.fullName!)));
         }).catch();
     }, [])
@@ -285,6 +308,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
             </div>
             <div className="Krajina">
                 <MultiselectField
+                    selectionLimit={1}
                     options={countryCode}
                     displayValue="value"
                     label="Krajina vydania"
@@ -296,8 +320,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 
             <div className="Mesto">
                 <MultiselectField
-                    options={[{value: 'spisska', showValue: "Spišská"},
-                        {value: 'bruchotin', showValue: "Břuchotín"}]}
+                    options={cities}
                     displayValue="showValue"
                     label="Mesto"
                     value={formData?.location?.city}
@@ -456,7 +479,7 @@ export const BooksModalButtons: React.FC<ButtonsProps> = ({saveBook, cleanFields
                         onClick={cleanFields}>Vymazať polia
                 </button>
                 <button type="submit"
-                        disabled={Boolean(error)}
+                        disabled={Boolean(error?.length)}
                         onClick={saveBook}
                         className="btn btn-success">Uložiť knihu
                 </button>

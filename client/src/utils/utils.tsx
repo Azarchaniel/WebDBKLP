@@ -155,3 +155,18 @@ export const validateNumber = (value: any, options?: ValidationOptions): boolean
 export const isNumberOrEmpty = (num: any) => {
     return (!isNaN(num) || num === "" || num === undefined);
 }
+
+export const formPersonsFullName = <T extends { firstName?: string; lastName?: string }>(
+    person: T | T[] | undefined
+): string | T[] | undefined => {
+    if (!person) return;
+
+    if (Array.isArray(person)) {
+        return person.map(p => ({
+            ...p,
+            fullName: `${p.lastName ?? ''}${p.firstName ? ', ' + p.firstName : ''}`,
+        }));
+    } else {
+        return `${person.lastName ?? ''}${person.firstName ? ', ' + person.firstName : ''}`;
+    }
+};

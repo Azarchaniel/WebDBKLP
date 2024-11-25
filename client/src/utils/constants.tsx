@@ -12,6 +12,9 @@ export const multiselectStyle = {
     multiselectContainer: {maxWidth: '100%'},
 };
 
+export const cities = [{value: 'spisska', showValue: "Spišská"},
+    {value: 'bruchotin', showValue: "Břuchotín"}];
+
 export const BookTableColumns = (hidden: IBookHidden) => [
     {
         title: 'Autor',

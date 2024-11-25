@@ -21,6 +21,7 @@ interface MultiselectInputProps extends Omit<InputProps, 'onChange'> {
     options: any[] | undefined;
     displayValue: string;
     emptyRecordMsg?: string;
+    selectionLimit?: number;
     onChange: ({name, value}: {name: string, value: string}) => void;
 }
 
@@ -59,12 +60,14 @@ export const MultiselectField = React.memo(({
                                                 label,
                                                 onChange,
                                                 name,
+                                                selectionLimit,
                                                 emptyRecordMsg = "Žiadny záznam nenájdený!"
                                             }: MultiselectInputProps) => {
     return (
         <Multiselect
             options={options}
             isObject={true}
+            selectionLimit={selectionLimit}
             displayValue={displayValue}
             closeOnSelect={true}
             placeholder={label}

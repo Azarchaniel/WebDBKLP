@@ -9,16 +9,16 @@ interface IBaseType {
 
 export interface IBook extends IBaseType {
     autor: IAutor[];
-    editor?: string[];
-    ilustrator?: string[];
-    translator?: string[];
+    editor?: IAutor[];
+    ilustrator?: IAutor[];
+    translator?: IAutor[];
     title: string;
     subtitle?: string;
     content?: string[];
     edition?: IEditionSerie;
     serie?: IEditionSerie;
     ISBN?: string;
-    language: string[];
+    language: ILangCode[];
     numberOfPages: number;
     note: string;
     published: IPublished;

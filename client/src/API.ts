@@ -29,35 +29,24 @@ export const getBook = async (
 }
 
 export const addBook = async (
-  formData: /*IBook*/any
-): Promise<AxiosResponse<ApiBookDataType>> => {
+  formData: IBook
+): Promise<any> => {
   try {
-    console.log(formData);
-    const saveBook: AxiosResponse<ApiBookDataType> = await axios.post(
-      baseUrl + '/add-book',
-      formData
-    )
-    return saveBook
-  } catch (error: any) {
-    throw new Error(error)
-  }
-}
-
-//TODO: fill the form with every data from Book; If _id is filled, it's not adding, but updating;
-// Therefore I need Hidden Input field with _id and IF in creating
-export const updateBook = async (
-  book: IBook
-): Promise<AxiosResponse<ApiBookDataType>> => {
-  try {
-    const bookUpdate: Pick<IBook, 'title'> = {
-        title: 'Upravena zatial takto2'
+    if (!formData._id) {
+      const saveBook: AxiosResponse<ApiBookDataType> = await axios.post(
+          baseUrl + '/add-book',
+          formData
+      )
+      return saveBook
+    } else {
+      const updatedBook: AxiosResponse<ApiBookDataType> = await axios.put(
+          `${baseUrl}/edit-book/${formData._id}`,
+          formData
+      )
+      return updatedBook
     }
-    const updatedBook: AxiosResponse<ApiBookDataType> = await axios.put(
-      `${baseUrl}/edit-book/${book._id}`,
-      bookUpdate
-    )
-    return updatedBook
   } catch (error: any) {
+    console.error(error);
     throw new Error(error)
   }
 }

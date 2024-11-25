@@ -1,5 +1,5 @@
 import {IBook, IBookHidden, IUser} from "../../type";
-import React, {useEffect, useRef, useState} from "react";
+import React, {ReactElement, useEffect, useRef, useState} from "react";
 import {addBook, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import {confirmAlert} from "react-confirm-alert";
@@ -18,7 +18,7 @@ export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
-    const [updateBookId, setUpdateBookId] = useState<string>('');
+    const [updateBook, setUpdateBook] = useState<IBook>();
     const [hidden, setHidden] = useState<IBookHidden>({
         control: true,
         editor: true,
@@ -92,19 +92,19 @@ export default function BookPage() {
     const handleSaveBook = (formData: IBook): void => {
         addBook(formData)
             .then(({status, data}) => {
-                if (status !== 201) {
-                    toast.error('Chyba! Kniha nebola pridaná!')
+                if (status !== 200) {
+                    toast.error(`Chyba! Kniha ${data.book?.title} nebola ${formData._id ? "uložená" : "pridaná"}.`)
                     throw new Error('Chyba! Kniha nebola pridaná!');
                 }
-                toast.success(`Kniha ${data.book?.title} bola úspešne pridaná.`);
+                toast.success(`Kniha ${data.book?.title} bola úspešne ${formData._id ? "uložená" : "pridaná"}.`);
                 fetchBooks()
             })
             .catch((err) => console.trace(err))
     }
 
-    /*const handleUpdateBook = (bookId: string): JSX.Element => {
-        return (<AddBook saveBook={handleSaveBook} bookId={bookId} open={true}/>);
-    }*/
+    const handleUpdateBook = (book: IBook): void => {
+        setUpdateBook(book)
+    }
 
     const handleDeleteBook = (_id: string): void => {
         getBook(_id)
@@ -179,7 +179,7 @@ export default function BookPage() {
                     {
                         icon: 'create',
                         tooltip: 'Upraviť',
-                        onClick: (_: any, rowData: IBook) => setUpdateBookId(rowData._id),
+                        onClick: (_: any, rowData: IBook) => handleUpdateBook(rowData),
                     },
                     {
                         icon: 'delete',
@@ -195,7 +195,7 @@ export default function BookPage() {
                     }
                 ]}
             />
-            {Boolean(updateBookId) && <AddBook saveBook={handleSaveBook} />}
+            {Boolean(updateBook) && <AddBook saveBook={handleSaveBook} book={updateBook} />}
             <Toast/>
         </main>
     );

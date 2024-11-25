@@ -4,7 +4,7 @@ import Book from '../models/book';
 import {IUser} from '../types';
 import User from '../models/user';
 import { optionFetchAllExceptDeleted } from '../utils/constants';
-import {filterObject, getIdFromArray, webScrapper} from "../utils/utils";
+import {getIdFromArray, webScrapper} from "../utils/utils";
 import mongoose from 'mongoose';
 
 const populateOptions: IPopulateOptions[] = [
@@ -16,14 +16,59 @@ const populateOptions: IPopulateOptions[] = [
     {path: 'readBy', model: 'User'}
 ];
 
+const normalizeBook = (data: any): IBook => {
+    return {
+        autor: getIdFromArray(data.autor),
+        editor: getIdFromArray(data.editor),
+        translator: getIdFromArray(data.translator),
+        ilustrator: getIdFromArray(data.ilustrator),
+        readBy: getIdFromArray(data.readBy),
+        owner: getIdFromArray(data.owner),
+        published: {
+            publisher: data["published.publisher"] ?? "",
+            year: data["published.year"] ?? undefined,
+            country: data["published.country"]?.[0]?.key ?? ''
+        },
+        location: {
+            city: data["location.city"]?.[0]?.value ?? '',
+            shelf: data["location.shelf"],
+        },
+        language: data.language?.map((lang: {key: string; value: string}) => lang.key),
+        numberOfPages: data.numberOfPages ? parseInt(data.numberOfPages) : undefined,
+        title: data.title,
+        subtitle: data.subtitle,
+        content: data.content,
+        edition: {
+            no: data.edition?.no,
+            title: data.edition?.title
+        },
+        serie: {
+            no: data.serie?.no,
+            title: data.serie?.title
+        },
+        ISBN: data.ISBN,
+        note: data.note,
+        dimensions: {
+            height: data.dimensions?.height,
+            width: data.dimensions?.width,
+            depth: data.dimensions?.depth,
+            weight: data.dimensions?.weight
+        },
+        exLibris: data.exLibris,
+        picture: data.picture,
+        hrefGoodReads: data.hrefGoodReads,
+        hrefDatabazeKnih: data.hrefDatabazeKnih,
+    } as unknown as IBook
+}
+
 const getAllBooks = async (_: Request, res: Response): Promise<void> => {
     try {
         //remember: when populating, and NameOfField != Model, define it with {}
-        const books: IBook[] = await Book
+        const books = await Book
             .find(optionFetchAllExceptDeleted)
             .populate(populateOptions)
             .exec();
-        const count: number = await Book.countDocuments(optionFetchAllExceptDeleted)
+        const count = await Book.countDocuments(optionFetchAllExceptDeleted)
         res.status(200).json({books, count})
     } catch (error) {
         throw error
@@ -36,7 +81,7 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
             .findById(req.params.id)
             .populate(populateOptions)
             .exec();
-        const allBooks: IBook[] = await Book
+        const allBooks = await Book
             .find()
             .populate(populateOptions)
             .exec()
@@ -50,58 +95,17 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
     try {
         const data = req.body;
 
-        const book: IBook = {
-            autor: getIdFromArray(data.autor),
-            editor: getIdFromArray(data.editor),
-            translator: getIdFromArray(data.translator),
-            ilustrator: getIdFromArray(data.ilustrator),
-            readBy: getIdFromArray(data.readBy),
-            owner: getIdFromArray(data.owner),
-            published: {
-                publisher: data["published.publisher"] ?? "",
-                year: data["published.year"] ?? undefined,
-                country: data["published.country"]?.[0]?.key ?? ''
-            },
-            location: {
-                city: data["location.city"]?.[0]?.value ?? '',
-                shelf: data["location.shelf"],
-            },
-            language: data.language?.map(lang => lang.key),
-            numberOfPages: data.numberOfPages ? parseInt(data.numberOfPages) : undefined,
-            title: data.title,
-            subtitle: data.subtitle,
-            content: data.content,
-            edition: {
-                no: data.edition?.no,
-                title: data.edition?.title
-            },
-            serie: {
-                no: data.serie?.no,
-                title: data.serie?.title
-            },
-            ISBN: data.ISBN,
-            note: data.note,
-            dimensions: {
-                height: data.dimensions?.height,
-                width: data.dimensions?.width,
-                depth: data.dimensions?.depth,
-                weight: data.dimensions?.weight
-            },
-            exLibris: data.exLibris,
-            picture: data.picture,
-            hrefGoodReads: data.hrefGoodReads,
-            hrefDatabazeKnih: data.hrefDatabazeKnih,
-        } as IBook;
+        const book: IBook = normalizeBook(data);
 
         const bookToSave = new Book(book);
 
         const newBook: IBook = await bookToSave.save()
-        const allBooks: IBook[] = await Book
+        const allBooks = await Book
             .find()
             .populate(populateOptions)
             .exec();
 
-        res.status(201).json({message: 'Book added', book: newBook, books: allBooks})
+        res.status(200).json({message: 'Book added', book: newBook, books: allBooks})
     } catch (error) {
         throw error
     }
@@ -112,12 +116,14 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
         const {
             params: {id},
             body,
-        } = req
-        const updateBook: IBook | null = await Book.findByIdAndUpdate(
+        } = req;
+
+        const book = normalizeBook(body);
+        const updateBook = await Book.findByIdAndUpdate(
             {_id: id},
-            body
+            book
         )
-        const allBooks: IBook[] = await Book
+        const allBooks = await Book
             .find()
             .populate(populateOptions)
             .exec();
@@ -138,14 +144,14 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
             params: {id},
             body,
         } = req
-        const deletedBook: IBook | null = await Book.findByIdAndUpdate(
+        const deletedBook = await Book.findByIdAndUpdate(
             {_id: id},
             {
                 ...body,
                 deletedAt: new Date()
             }
         )
-        const allBooks: IBook[] = await Book
+        const allBooks = await Book
             .find()
             .populate(populateOptions)
             .exec();
@@ -177,16 +183,17 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
 
 const dashboard = {
     countBooks: async (req: Request, res: Response): Promise<void> => {
+        //TODO: Types
         try {
             const {
                 params: {userId}
             } = req
 
-            let users: IUser[] = await User.find({});
-            let response: {owner: {id: string, firstName: string, lastName: string} | null, count: number}[] = [];
+            let users = await User.find({});
+            let response = [];
 
            if (userId) {
-                const currUser: IUser | undefined = users.find(u => u._id === userId);
+                const currUser = users.find(u => u._id === userId);
                 if (!currUser) throw Error("User not found");
 
                 response.push({
@@ -194,7 +201,7 @@ const dashboard = {
                     count: await Book.countDocuments({owner: userId})
                 });
             } else {
-                let tempRes = [];
+                let tempRes: any[] = [];
                 for (let user of users) {
                     tempRes.push(
                         {
