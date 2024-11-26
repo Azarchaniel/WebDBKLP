@@ -7,4 +7,4 @@ export * from './lp';
 export * from './published';
 export * from './location';
 
-export interface IPopulateOptions {path: string, model: string};
+export interface IPopulateOptions {path: string, model: string, populate?: IPopulateOptions}

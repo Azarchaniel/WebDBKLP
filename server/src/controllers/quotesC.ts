@@ -4,7 +4,7 @@ import Quote from "../models/quote"
 import { optionFetchAllExceptDeleted } from "../utils/constants";
 
 const populateOptions: IPopulateOptions[] = [
-    { path: 'fromBook', model: 'Book' },
+    { path: 'fromBook', model: 'Book', populate: {path: 'autor', model: 'Autor'} },
     { path: 'owner', model: 'User' }
 ];
 
@@ -42,10 +42,11 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
 
     try {
         if (!id) {
+            console.log(req.body);
             const quote: IQuote = new Quote({
                 text: text,
                 note: note,
-                fromBook: fromBook,
+                fromBook: fromBook[0]._id,
                 owner: owner,
                 pageNo: pageNo
             });

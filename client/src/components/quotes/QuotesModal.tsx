@@ -1,23 +1,25 @@
-import {IBook, IQuote, IUser} from "../../type";
-import React, {useEffect, useRef, useState} from "react";
+import {IBook, IQuote, IUser, ValidationError} from "../../type";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {getBooks, getUsers} from "../../API";
 import {toast} from "react-toastify";
 import {showError} from "../Modal";
 import {Multiselect} from "multiselect-react-dropdown";
 import ToggleButton from "../ToggleButton";
 import {getCssPropertyValue} from "../../utils/utils";
+import {countryCode} from "../../utils/locale";
+import {InputField, MultiselectField} from "../InputFields";
 
 interface BodyProps {
     data: IQuote | Object;
     onChange: (data: IQuote | Object) => void;
-    error: (err: string | undefined) => void;
+    error: (err: ValidationError[] | undefined) => void;
     editedQuote?: IQuote;
 }
 
 interface ButtonsProps {
     saveQuote: () => void;
     cleanFields: () => void;
-    error?: string | undefined;
+    error?: ValidationError[] | undefined;
 }
 
 export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
@@ -25,8 +27,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
     const [formData, setFormData] = useState<IQuote | any>(data);
     const [books, setBooks] = useState<IBook[]>();
     const [users, setUsers] = useState<IUser[] | undefined>();
-    const ownerRef = useRef(null);
-    const bookRef = useRef(null);
+    const [errors, setErrors] = useState<ValidationError[]>([{label: 'Text citátu musí obsahovať aspoň jeden znak!', target: 'text'}]);
 
     useEffect(() => {
         onChange(formData)
@@ -82,44 +83,69 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
     useEffect(() => {
         const data = (formData as unknown as IQuote);
         if (!data || !Object.keys(data).length) return;
-        console.log("data?",data);
+
+        let localErrors: ValidationError[] = [];
 
         if (!("text" in data && data?.text?.trim().length > 0)) {
-            return error('Text citátu musí obsahovať aspoň jeden znak!')
+            localErrors.push({label: 'Text citátu musí obsahovať aspoň jeden znak!', target: "title"});
+        } else {
+            localErrors = localErrors?.filter((err: ValidationError) => err.target !== "title") ?? localErrors;
         }
 
         if (!data?.fromBook) {
-            return error('Musí byť vybraná kniha!');
+            localErrors.push({label: 'Musí byť vybraná kniha!', target: "fromBook"});
+        } else {
+            localErrors = localErrors?.filter((err: ValidationError) => err.target !== "fromBook") ?? localErrors;
         }
-        return error('');
+
+        setErrors(localErrors);
+        error(localErrors)
     }, [formData])
 
-    const handleForm = (e: any): void => {
-        console.log(e)
-        try {
-            setFormData({
-                ...formData,
-                [e?.currentTarget.id]: e?.currentTarget.value
-            })
-        } catch (err) {
-            toast.error('Chyba pri zadávaní do formuláru!')
-            console.error('AddQuote(handleForm)', err)
-        }
-    }
+    const handleInputChange = useCallback((input) => {
+        let name: string, value: string;
 
-    const onChangeBookUser = (selected: any, type: "user" | "book") => {
-        //todo: merge with "handleForm"
-        type === "user" ?
-            setFormData({...formData, owner: selected}) :
-            setFormData({...formData, fromBook: selected.length ? selected[0]._id : null});
+        if ("target" in input) { // if it is a regular event
+            const {name: targetName, value: targetValue} = input.target;
+            name = targetName;
+            value = targetValue;
+        } else { // if it is MultiSelect custom answer
+            name = input.name;
+            value = input.value;
+        }
+
+        setFormData((prevData: any) => {
+            // Helper function to create a nested object structure
+            const setNestedValue = (obj: any, keys: string[], value: any) => {
+                const key = keys.shift(); // Get the first key
+                if (!key) return value; // If no more keys, return the value
+                obj[key] = setNestedValue(obj[key] || {}, keys, value); // Recursively set the nested value
+                return obj;
+            };
+
+            const keys = name.split('.'); // Split name into keys
+            const updatedData = {...prevData}; // Clone previous data
+            setNestedValue(updatedData, keys, value); // Set nested value
+
+            return updatedData;
+        });
+    }, []);
+
+    const getErrorMsg = (name: string): string => {
+        return errors.find(err => err.target === name)?.label || "";
     }
 
     return (<form>
         <div className="row">
             <div className="col-12">
-                {isText ? <textarea onChange={handleForm} id='text' placeholder='*Text'
-                                    className="form-control" autoComplete="off"
-                                    value={formData && "text" in formData ? formData?.text : ''}/> :
+                {isText ? <textarea id='note' placeholder='*Text'
+                                    className="form-control"
+                                    name="text"
+                                    autoComplete="off"
+                                    value={formData?.text || ""}
+                                    onChange={handleInputChange}
+                                    aria-errormessage={getErrorMsg('text')}
+                    /> :
                     <label className="btn btn-dark">
                         <i className="fa fa-image"/> Nahraj obrázky
                         <input type="file" style={{display: "none"}} name="image" accept="image/*"/>
@@ -134,68 +160,49 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                               state={() => setIsText(!isText)}/>
             </div>
             <div className="col-5">
-                <Multiselect
-                    selectionLimit={1} /* searching doesnt work on single select */
+                <MultiselectField
+                    selectionLimit={1}
                     options={books}
-                    isObject={true}
                     displayValue="title"
-                    closeOnSelect={true}
-                    placeholder="*Z knihy"
-                    closeIcon="cancel"
-                    emptyRecordMsg="Žiadne knihy nenájdené"
-                    onSelect={(book: IBook) => onChangeBookUser(book, "book")}
-                    onRemove={(book: IBook) => onChangeBookUser(book, "book")}
-                    style={{
-                        inputField: {marginLeft: "0.5rem"},
-                        optionContainer: {backgroundColor: "transparent"},
-                        option: {color: 'black'},
-                        multiselectContainer: {maxWidth: '100%'},
-                        chips: {backgroundColor: getCssPropertyValue("--anchor")}
-                    }}
-                    ref={bookRef}
-                    selectedValues={books?.filter((book: IBook) => formData?.fromBook?._id === book?._id)}
+                    label="*Z knihy"
+                    value={formData?.fromBook}
+                    name="fromBook"
+                    onChange={handleInputChange}
                 />
             </div>
             <div className="col-3">
-                <input type="number" id="pageNo" onChange={handleForm} placeholder="Strana"
-                       className="form-control" autoComplete="off"
-                       value={formData && "pageNo" in formData ? formData.pageNo : ''}/>
-            </div>
-        </div>
-        <div style={{height: '5px', width: '100%'}}/>
-        <div className="row">
-            <div className="col">
-                <Multiselect
-                    options={users}
-                    placeholder="Vlastník"
-                    displayValue="firstName"
-                    emptyRecordMsg="Žiadni užívatelia nenájdení"
-                    closeIcon="cancel"
-                    onSelect={(user: IUser) => onChangeBookUser(user, "user")}
-                    onRemove={(user: IUser) => onChangeBookUser(user, "user")}
-                    style={{
-                        inputField: {marginLeft: "0.5rem"},
-                        searchBox: {
-                            width: "100%",
-                            paddingRight: '5px',
-                            marginRight: '-5px',
-                            borderRadius: '3px'
-                        },
-                        option: {color: "black"},
-                        chips: {backgroundColor: getCssPropertyValue("--anchor")}
-                    }}
-                    ref={ownerRef}
-                    selectedValues={formData?.owner}
+                <InputField
+                    value={formData?.pageNo || ""}
+                    placeholder='Strana'
+                    name="pageNo"
+                    onChange={handleInputChange}
                 />
             </div>
         </div>
         <div style={{height: '5px', width: '100%'}}/>
         <div className="row">
             <div className="col">
-                <textarea onChange={handleForm} id="note" placeholder="Poznámka"
-                          className="form-control" autoComplete="off"
-                          value={formData && "note" in formData ? formData.note : ''}/>
-
+                <MultiselectField
+                    options={users}
+                    displayValue="fullName"
+                    label="Vlastník"
+                    value={formData?.owner}
+                    name="owner"
+                    onChange={handleInputChange}
+                />
+            </div>
+        </div>
+        <div style={{height: '5px', width: '100%'}}/>
+        <div className="row">
+            <div className="col">
+                <textarea id='note' placeholder='Poznámka'
+                          className="form-control"
+                          name="note"
+                          autoComplete="off"
+                          rows={1}
+                          value={formData?.note || ""}
+                          onChange={handleInputChange}
+                />
             </div>
         </div>
     </form>)
@@ -210,7 +217,7 @@ export const QuotesModalButtons = ({saveQuote, cleanFields, error}: ButtonsProps
                     onClick={cleanFields}>Vymazať polia
             </button>
             <button type="submit"
-                    disabled={Boolean(error)}
+                    disabled={Boolean(error?.length)}
                     onClick={saveQuote}
                     className="btn btn-success">Uložiť citát
             </button>

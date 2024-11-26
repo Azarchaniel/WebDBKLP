@@ -56,7 +56,6 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         setFormData(toBeModified);
     }, []);
 
-    //TODO: doesn use correct way of error handling; check BookModal
     // error handling
     useEffect(() => {
         //shortcut

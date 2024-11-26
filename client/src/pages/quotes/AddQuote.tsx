@@ -1,4 +1,4 @@
-import {IQuote} from "../../type";
+import {IQuote, ValidationError} from "../../type";
 import React, {useState} from "react";
 import ReactTooltip from "react-tooltip";
 import {Modal} from "../../components/Modal";
@@ -12,7 +12,7 @@ type Props = {
 const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any, id?: string | undefined }) => {
     const [showModal, setShowModal] = useState<boolean>(false);
     const [quoteData, setQuoteData] = useState<IQuote | Object>();
-    const [error, setError] = useState<string | undefined>('Text citátu musí obsahovať aspoň jeden znak!');
+    const [error, setError] = useState<ValidationError[] | undefined>([{label: 'Text citátu musí obsahovať aspoň jeden znak!', target: 'text'}]);
 
     return (
         <>

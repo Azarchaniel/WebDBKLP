@@ -9,7 +9,7 @@ import {IAutor, ILangCode, ILP, ValidationError} from "../../type";
 import {getAutors} from "../../API";
 import {showError} from "../Modal";
 import {formPersonsFullName} from "../../utils/utils";
-import {InputField} from "../InputFields";
+import {InputField, MultiselectField} from "../InputFields";
 
 //for datepicker
 registerLocale('cs', cs)
@@ -28,7 +28,7 @@ interface ButtonsProps {
 }
 
 export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
-    const [formData, setFormData] = useState<ILP | Object>(data);
+    const [formData, setFormData] = useState(data as any);
     const [autors, setAutors] = useState<IAutor[] | []>([]);
     const [errors, setErrors] = useState<ValidationError[]>([{label: 'Názov LP musí obsahovať aspoň jeden znak!', target: 'title'}]);
 
@@ -136,84 +136,72 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                     />
                 </div>
                 <div className="col">
-                    <input onChange={handleInputChange} type='text' id='subtitle'
-                           placeholder='Podnázov'
-                           className="form-control"
-                           autoComplete="off"
-                           value={(formData as ILP)?.subtitle || ""}
+                    <InputField
+                        value={(formData as ILP)?.subtitle || ""}
+                        placeholder='Podnázov'
+                        name="subtitle"
+                        onChange={handleInputChange}
                     />
                 </div>
             </div>
             <div style={{height: '5px', width: '100%'}}/>
             <div className="row">
-                <Multiselect
+                <MultiselectField
                     options={autors}
-                    isObject={true}
                     displayValue="fullName"
-                    closeOnSelect={true}
-                    placeholder="Autor"
-                    closeIcon="cancel"
+                    label="Autor"
+                    value={formData?.autor}
+                    name="autor"
+                    onChange={handleInputChange}
                     emptyRecordMsg="Žiadny autori nenájdení"
-                    selectionLimit={1}
-                    onSelect={(pickedAut: IAutor[]) => {
-                        setFormData({
-                            ...formData, autor: pickedAut
-                                .map(v => v._id)
-                        })
-                    }}
-                    style={{
-                        inputField: {marginLeft: "0.5rem"},
-                        optionContainer: {
-                            backgroundColor: "transparent",
-                        },
-                        option: {},
-                        multiselectContainer: {maxWidth: '100%'},
-                    }}
-                    ref={autorRef}
                 />
             </div>
             <div style={{height: '5px', width: '100%'}}/>
             <div className="row">
                 <div className="col">
-                    <input onChange={handleInputChange} type='text' id='edition.title'
-                           placeholder='Názov edície'
-                           className="form-control" autoComplete="off"
-                           value={(formData as ILP)?.edition?.title || ""}
+                    <InputField
+                        value={(formData as ILP)?.edition?.title || ""}
+                        placeholder='Názov edície'
+                        name="edition.title"
+                        onChange={handleInputChange}
                     />
                 </div>
                 <div className="col">
-                    <input onChange={handleInputChange} type='number' id='edition.no'
-                           placeholder='Číslo edice'
-                           className="form-control"
-                           autoComplete="off"
-                           min="0"
-                           value={(formData as ILP)?.edition?.no || ""}
-                    />
-                </div>
-            </div>
-            <div style={{height: '5px', width: '100%'}}/>
-            <div className="row">
-                <div className="col">
-                    <input onChange={handleInputChange} type='number' id='speed' placeholder='Počet otáčok'
-                           className="form-control" autoComplete="off" min="0"
-                           value={(formData as ILP)?.speed || ""}
-                    />
-                </div>
-                <div className="col">
-                    <input onChange={handleInputChange} type='number' id='countLp' placeholder='Počet platní'
-                           className="form-control" autoComplete="off" min="0"
-                           value={(formData as ILP)?.countLp || ""}
+                    <InputField
+                        value={(formData as ILP)?.edition?.no || ""}
+                        placeholder='Číslo edice'
+                        name="edition.no"
+                        onChange={handleInputChange}
                     />
                 </div>
             </div>
             <div style={{height: '5px', width: '100%'}}/>
             <div className="row">
                 <div className="col">
-                    <input onChange={handleInputChange} type='number' id='published.year'
-                           placeholder='Rok vydania'
-                           className="form-control"
-                           autoComplete="off"
-                           value={(formData as ILP)?.published?.year || ""}
+                    <InputField
+                        value={(formData as ILP)?.speed || ""}
+                        placeholder='Počet otáčok'
+                        name="speed"
+                        onChange={handleInputChange}
+                    />
+                </div>
+                <div className="col">
+                    <InputField
+                        value={(formData as ILP)?.countLp || ""}
+                        placeholder='Počet platní'
+                        name="subtitle"
+                        onChange={handleInputChange}
+                    />
+                </div>
+            </div>
+            <div style={{height: '5px', width: '100%'}}/>
+            <div className="row">
+                <div className="col">
+                    <InputField
+                        value={(formData as ILP)?.published?.year || ""}
+                        placeholder='Rok vydania'
+                        name='published.year'
+                        onChange={handleInputChange}
                     />
                 </div>
                 <div className="col">
@@ -244,11 +232,11 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
             <div style={{height: '5px', width: '100%'}}/>
             <div className="row">
                 <div className="col">
-                    <input onChange={handleInputChange} type='text' id='published.publisher'
-                           placeholder='Vydavateľ'
-                           className="form-control"
-                           autoComplete="off"
-                           value={(formData as ILP)?.published?.publisher || ""}
+                    <InputField
+                        value={(formData as ILP)?.published?.publisher || ""}
+                        placeholder='Vydavateľ'
+                        name='published.publisher'
+                        onChange={handleInputChange}
                     />
                 </div>
                 <div className="col">
