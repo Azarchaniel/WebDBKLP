@@ -1,4 +1,4 @@
-import {IAutor, IBook, ILP, IUser} from "../type";
+import {IAutor, IUser} from "../type";
 
 export const shortenStringKeepWord = (text: string, maxLength: number): string => {
     if (!text) return "";
@@ -37,7 +37,6 @@ export const stringifyAutors = (
         stringifyField(entity, 'translator', 'translatorsFull');
     });
 
-    console.log(dataM)
     return dataM;
 };
 

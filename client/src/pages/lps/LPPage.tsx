@@ -5,12 +5,12 @@ import Toast from "../../components/Toast";
 import React, {useEffect, useRef, useState} from "react";
 import {addLP, deleteLP, getLPs} from "../../API";
 import {toast} from "react-toastify";
-import {confirmAlert} from "react-confirm-alert";
 import {stringifyAutors} from "../../utils/utils";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
 import Header from "../../components/AppHeader";
 import {tableHeaderColor} from "../../utils/constants";
 import {ShowHideRow} from "../../components/books/ShowHideRow";
+import {openConfirmDialog} from "../../components/ConfirmDialog";
 
 export default function LPPage() {
     const [updateLP, setUpdateLP] = useState<ILP>();
@@ -75,32 +75,24 @@ export default function LPPage() {
     }
 
     const handleDeleteLP = (_id: string): void => {
-        confirmAlert({
-            title: 'Vymazat LP?',
-            message: `Naozaj chceš vymazať LP?`,
-            buttons: [
-                {
-                    label: 'Ano',
-                    onClick: () => {
-                        deleteLP(_id)
-                            .then(({ status}) => {
-                                if (status !== 200) {
-                                    throw new Error('Error! LP not deleted')
-                                }
-                                toast.success(`LP bolo úspešne vymazaný.`);
-                                fetchLPs();
-                            })
-                            .catch((err) => {
-                                toast.error('Došlo k chybe!');
-                                console.trace(err);
-                            })
-                    }
-                },
-                {
-                    label: 'Ne',
-                    onClick: () => {}
-                }
-            ],
+        openConfirmDialog({
+            title: "Vymazať LP?",
+            text: `Naozaj chceš vymazať LP?`,
+            onOk: () => {
+                deleteLP(_id)
+                    .then(({ status}) => {
+                        if (status !== 200) {
+                            throw new Error('Error! LP not deleted')
+                        }
+                        toast.success(`LP bolo úspešne vymazané.`);
+                        fetchLPs();
+                    })
+                    .catch((err) => {
+                        toast.error('Došlo k chybe!');
+                        console.trace(err);
+                    })
+            },
+            onCancel: () => {}
         });
     }
 

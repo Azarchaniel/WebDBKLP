@@ -2,7 +2,6 @@ import {IBook, IBookHidden, IUser} from "../../type";
 import React, {useEffect, useRef, useState} from "react";
 import {addBook, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
-import {confirmAlert} from "react-confirm-alert";
 import AddBook from "./AddBook";
 import Sidebar from "../../components/Sidebar";
 import Toast from "../../components/Toast";
@@ -13,6 +12,7 @@ import {useReadLocalStorage} from "usehooks-ts";
 import BookDetail from "./BookDetail";
 import {ShowHideRow} from "../../components/books/ShowHideRow";
 import {bookTableColumns} from "../../utils/constants";
+import {openConfirmDialog} from "../../components/ConfirmDialog";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
@@ -110,36 +110,27 @@ export default function BookPage() {
         getBook(_id)
             .then(({status, data}) => {
                 if (status !== 200) {
-                    throw new Error('Error! Book not deleted')
+                    throw new Error('Error! Book not found')
                 }
 
-                confirmAlert({
-                    title: 'Vymazat knihu?',
-                    message: `Naozaj chces vymazat knihu ${data.book?.title}?`,
-                    buttons: [
-                        {
-                            label: 'Ano',
-                            onClick: () => {
-                                deleteBook(_id)
-                                    .then(({status, data}) => {
-                                        if (status !== 200) {
-                                            throw new Error('Error! Book not deleted')
-                                        }
-                                        toast.success(`Kniha ${data.book?.title} bola uspesne vymazana.`);
-                                        fetchBooks();
-                                    })
-                                    .catch((err) => {
-                                        toast.error('Chyba! Knihu nemožno vymazať!');
-                                        console.trace(err);
-                                    })
-                            }
-                        },
-                        {
-                            label: 'Ne',
-                            onClick: () => {
-                            }
-                        }
-                    ]
+                openConfirmDialog({
+                    text: `Naozaj chceš vymazať knihu ${data.book?.title}?`,
+                    title: "Vymazať knihu?",
+                    onOk: () => {
+                        deleteBook(_id)
+                            .then(({status, data}) => {
+                                if (status !== 200) {
+                                    throw new Error('Error! Book not deleted')
+                                }
+                                toast.success(`Kniha ${data.book?.title} bola úspešne vymazaná.`);
+                                fetchBooks();
+                            })
+                            .catch((err) => {
+                                toast.error('Chyba! Knihu nemožno vymazať!');
+                                console.trace(err);
+                            })
+                    },
+                    onCancel: () => {}
                 });
             })
             .catch((err) => console.trace(err))

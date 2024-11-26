@@ -8,16 +8,17 @@ interface ModalProps {
     body: ReactElement;
     footer?: ReactElement;
     onClose?: () => void;
+    overrideStyle?: React.CSSProperties;
 }
 
-export const Modal: React.FC<ModalProps> = ({title, body, footer, onClose}: ModalProps) => {
+export const Modal: React.FC<ModalProps> = ({title, body, footer, onClose, overrideStyle}: ModalProps) => {
     return createPortal(
         <div className="customModalWrapper">
             <div className="customModalBackdrop"
                  onClick={onClose}
             />
 
-            <div className="customModal">
+            <div className="customModal" style={overrideStyle}>
                 <div className="customModalHeader">
                     <span>{title}</span>
                     <button
@@ -27,7 +28,9 @@ export const Modal: React.FC<ModalProps> = ({title, body, footer, onClose}: Moda
                         title="Zavrieť okno"
                     ><span>&times;</span></button>
                 </div>
-                <div className="customModalBody">{body}</div>
+                <div className="customModalBody">
+                    {body}
+                </div>
                 {footer && <div className="customModalFooter">
                     {footer}
                 </div>}

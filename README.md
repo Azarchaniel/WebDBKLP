@@ -24,7 +24,7 @@ cd ./client; npx run start
 - [X] clean form after saving item
 - [X] create all models and interfaces
 - [X] there is problem with fetchAll in Quotes when deleting
-- [ ] ConfirmAlert -> Modal
+- [X] ConfirmAlert -> Modal
 - [ ] add ESLint
 - [ ] add Role to Autor and filter by it (autor, musician, editor, translator) (multirole - Translator and Autor)
 - [ ] divide CSS into chunks based on page

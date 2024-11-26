@@ -3,7 +3,6 @@ import React, {useEffect, useState} from "react";
 import {IAutor} from "../../type";
 import {addAutor, deleteAutor, getAutor, getAutors} from "../../API";
 import {toast} from "react-toastify";
-import {confirmAlert} from "react-confirm-alert";
 import Sidebar from "../../components/Sidebar";
 import Toast from "../../components/Toast";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
@@ -11,6 +10,7 @@ import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import Header from "../../components/AppHeader";
 import {tableHeaderColor} from "../../utils/constants";
 import {TooltipedText} from "../../utils/elements";
+import {openConfirmDialog} from "../../components/ConfirmDialog";
 
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
@@ -59,37 +59,28 @@ export default function AutorPage() {
             .then(({status, data}) => {
                 if (status !== 200) {
                     toast.error('Došlo k chybe!');
-                    throw new Error('Chyba! Autor nebol vymazaný.')
+                    throw new Error('Chyba! Autor nebol najdeny.')
                 }
                 const autorNames = `${data.autor?.lastName}${data.autor?.firstName ? ', ' + data.autor?.firstName : ''}`;
 
-                confirmAlert({
-                    title: 'Vymazat autora?',
-                    message: `Naozaj chceš vymazať autora ${autorNames}?`,
-                    buttons: [
-                        {
-                            label: 'Ano',
-                            onClick: () => {
-                                deleteAutor(_id)
-                                    .then(({status, data}) => {
-                                        if (status !== 200) {
-                                            throw new Error('Error! Autor not deleted')
-                                        }
-                                        toast.success(`Autor ${autorNames} bol úspešne vymazaný.`);
-                                        setAutors(data.autors)
-                                    })
-                                    .catch((err) => {
-                                        toast.error('Došlo k chybe!');
-                                        console.trace(err);
-                                    })
-                            }
-                        },
-                        {
-                            label: 'Ne',
-                            onClick: () => {
-                            }
-                        }
-                    ],
+                openConfirmDialog({
+                    title: "Vymazať autora?",
+                    text: `Naozaj chceš vymazať autora ${autorNames}?`,
+                    onOk: () => {
+                        deleteAutor(_id)
+                            .then(({status, data}) => {
+                                if (status !== 200) {
+                                    throw new Error('Error! Autor not deleted')
+                                }
+                                toast.success(`Autor ${autorNames} bol úspešne vymazaný.`);
+                                setAutors(data.autors)
+                            })
+                            .catch((err) => {
+                                toast.error('Chyba! Autora nemožno vymazať!');
+                                console.trace(err);
+                            })
+                    },
+                    onCancel: () => {}
                 });
             })
             .catch((err) => console.trace(err))

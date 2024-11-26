@@ -6,13 +6,13 @@ import Toast from "../../components/Toast";
 import React, {useEffect, useState} from "react";
 import {addQuote, deleteQuote, getBooks, getQuotes} from "../../API";
 import {toast} from "react-toastify";
-import {confirmAlert} from "react-confirm-alert";
 import {darkenLightenColor} from "../../utils/utils";
 import Header from "../../components/AppHeader";
 import LoadingBooks from "../../components/LoadingBooks";
 import Multiselect from "multiselect-react-dropdown";
 import { useReadLocalStorage } from "usehooks-ts";
 import { ScrollToTopBtn } from "../../utils/elements";
+import {openConfirmDialog} from "../../components/ConfirmDialog";
 
 export default function QuotePage() {
     const [books, setBooks] = useState<IBook[]>([]);
@@ -94,32 +94,24 @@ export default function QuotePage() {
     }
 
     const handleDeleteQuote = (_id: string): void => {
-        confirmAlert({
-            title: 'Vymazať citát?',
-            message: `Naozaj chceš vymazať citát?`,
-            buttons: [
-                {
-                    label: 'Ano',
-                    onClick: () => {
-                        deleteQuote(_id)
-                            .then(res => {
-                                if (res.status !== 200) {
-                                    throw new Error('Error! Quote not deleted')
-                                }
-                                toast.success(`Citát bol úspešne vymazaný.`);
-                                refresh();
-                            })
-                            .catch((err) => {
-                                toast.error('Došlo k chybe pri mazaní citátu!');
-                                console.trace(err);
-                            })
-                    }
-                },
-                {
-                    label: 'Ne',
-                    onClick: () => {}
-                }
-            ],
+        openConfirmDialog({
+            text: "Naozaj chceš vymazať citát?",
+            title: "Vymazať citát?",
+            onOk: () => {
+                deleteQuote(_id)
+                    .then(res => {
+                        if (res.status !== 200) {
+                            throw new Error('Error! Quote not deleted')
+                        }
+                        toast.success(`Citát bol úspešne vymazaný.`);
+                        refresh();
+                    })
+                    .catch((err) => {
+                        toast.error('Chyba! Citát nemožno vymazať!');
+                        console.trace(err);
+                    })
+            },
+            onCancel: () => {}
         });
     }
 
