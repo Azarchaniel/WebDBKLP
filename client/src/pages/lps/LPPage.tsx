@@ -13,7 +13,7 @@ import {tableHeaderColor} from "../../utils/constants";
 import {ShowHideRow} from "../../components/books/ShowHideRow";
 
 export default function LPPage() {
-
+    const [updateLP, setUpdateLP] = useState<ILP>();
     const [LPs, setLPs] = useState<ILP[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [hidden, setHidden] = useState({
@@ -58,9 +58,10 @@ export default function LPPage() {
         addLP(formData)
             .then(({status, data}) => {
                 if (status !== 201) {
+                    toast.error(`Chyba! LP ${data.lp?.title} nebolo ${formData._id ? "uložené" : "pridané"}.`)
                     throw new Error('LP sa nepodarilo pridať!')
                 }
-                toast.success(`LP bolo úspešne pridaný.`);
+                toast.success(`LP ${data.lp?.title} bolo úspešne ${formData._id ? "uložené" : "pridané"}.`);
                 setLPs(stringifyAutors(data.lps));
             })
             .catch((err) => {
@@ -70,7 +71,7 @@ export default function LPPage() {
     }
 
     const handleUpdateLP = (lp: ILP): any => {
-        console.log(lp)
+        setUpdateLP(lp)
     }
 
     const handleDeleteLP = (_id: string): void => {
@@ -201,6 +202,7 @@ export default function LPPage() {
                             handleDeleteLP((rowData as ILP)._id)}
                 ]}
             />
+            {Boolean(updateLP) && <AddLP saveLp={handleSaveLP} lp={updateLP} />}
             <Toast />
         </main>
     )

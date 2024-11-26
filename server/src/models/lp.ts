@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import {editionSerieSchema} from "./editionSerie";
 import {ILp} from "../types";
 
+//TODO: add owner
 const lpSchema: Schema = new Schema({
     autor: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
     title: {type: String, required: true},

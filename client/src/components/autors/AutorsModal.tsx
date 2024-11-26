@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {toast} from "react-toastify";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
@@ -7,7 +7,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import cs from 'date-fns/locale/cs';
 import {countryCode} from "../../utils/locale";
 import {Multiselect} from 'multiselect-react-dropdown';
-import {IAutor, ILangCode} from "../../type";
+import {IAutor, ILangCode, ValidationError} from "../../type";
+import {InputField, MultiselectField} from "../InputFields";
+import {showError} from "../Modal";
 
 //for datepicker
 registerLocale('cs', cs)
@@ -15,19 +17,19 @@ registerLocale('cs', cs)
 interface BodyProps {
     data: IAutor | Object;
     onChange: (data: IAutor | Object) => void;
-    error: (err: string | undefined) => void;
+    error: (err: ValidationError[] | undefined) => void;
     editedAutor?: IAutor;
 }
 
 interface ButtonsProps {
     saveAutor: () => void;
     cleanFields: () => void;
-    error?: string | undefined;
+    error?: ValidationError[] | undefined;
 }
 
 export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
-    const [formData, setFormData] = useState<IAutor | Object>(data);
-    const countryRef = useRef(null);
+    const [formData, setFormData] = useState(data as any);
+    const [errors, setErrors] = useState<ValidationError[]>([{label: 'Priezvisko autora musí obsahovať aspoň jeden znak!', target: 'lastName'}]);
 
     useEffect(() => {
         onChange(formData)
@@ -54,6 +56,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         setFormData(toBeModified);
     }, []);
 
+    //TODO: doesn use correct way of error handling; check BookModal
     // error handling
     useEffect(() => {
         //shortcut
@@ -62,37 +65,62 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         //if there is no filled field, its disabled
         if (!data) return;
 
+        let localErrors: ValidationError[] = [];
+
         //if length is over 0, its OK
         const autorLength = data.lastName?.trim().length > 0;
         if (!autorLength) {
-            error('Priezvisko autora musí obsahovať aspoň jeden znak!');
-            return;
+            localErrors.push({label: 'Priezvisko autora musí obsahovať aspoň jeden znak!', target: "firstName"});
         } else {
-            error(undefined);
+            localErrors = localErrors?.filter((err: ValidationError) => err.target !== "firstName") ?? localErrors;
         }
 
-        //if there is no dates, return oposite of autorLength
-        if (!(data.dateOfBirth && data.dateOfDeath)) {
-            error(undefined);
-            return;
-        }
-        //if dateOfBirth is sooner, its OK
-        const dates = data.dateOfBirth! < data.dateOfDeath!;
+        if (data.dateOfBirth && data.dateOfDeath) {
+            //if dateOfBirth is sooner, its OK
+            const dates = data.dateOfBirth! < data.dateOfDeath!;
 
-        //name is ok, dates nok
-        if (autorLength && !dates) error('Dátum smrti nemôže byť skôr, než dátum narodenia!');
+            if (!dates) {
+                localErrors.push({label: 'Dátum smrti nemôže byť skôr, než dátum narodenia!', target: "dateOfDeath"});
+            } else {
+                localErrors = localErrors?.filter((err: ValidationError) => err.target !== "dateOfDeath") ?? localErrors;
+            }
+        }
+
+        setErrors(localErrors);
+        error(localErrors);
     }, [formData]);
 
-    const handleForm = (e: any): void => {
-        try {
-            setFormData({
-                ...formData,
-                [e?.currentTarget.id]: e?.currentTarget.value
-            })
-        } catch (err) {
-            toast.error('Chyba pri zadávaní do formuláru!')
-            console.error('AddAutor(handleForm)', err)
+    const handleInputChange = useCallback((input) => {
+        let name: string, value: string;
+
+        if ("target" in input) { // if it is a regular event
+            const {name: targetName, value: targetValue} = input.target;
+            name = targetName;
+            value = targetValue;
+        } else { // if it is MultiSelect custom answer
+            name = input.name;
+            value = input.value;
         }
+
+        setFormData((prevData: any) => {
+            // Helper function to create a nested object structure
+            const setNestedValue = (obj: any, keys: string[], value: any) => {
+                const key = keys.shift(); // Get the first key
+                if (!key) return value; // If no more keys, return the value
+                obj[key] = setNestedValue(obj[key] || {}, keys, value); // Recursively set the nested value
+                return obj;
+            };
+
+            const keys = name.split('.'); // Split name into keys
+            const updatedData = {...prevData}; // Clone previous data
+            setNestedValue(updatedData, keys, value); // Set nested value
+
+            return updatedData;
+        });
+    }, []);
+
+    const getErrorMsg = (name: string): string => {
+        return errors.find(err => err.target === name)?.label || "";
     }
 
     const isValidDate = (varToCheck: unknown) => {
@@ -103,16 +131,21 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         <form>
             <div className="row">
                 <div className="col">
-                    <input type="text" onChange={handleForm} className="form-control"
-                           id='firstName'
-                           value={(formData as IAutor)?.firstName || ''}
-                           placeholder="Krstné meno"/>
+                    <InputField
+                        value={formData?.firstName || ""}
+                        placeholder='Krstné meno'
+                        name="firstName"
+                        onChange={handleInputChange}
+                    />
                 </div>
                 <div className="col">
-                    <input type="text" onChange={handleForm} className="form-control"
-                           id='lastName'
-                           value={(formData as IAutor)?.lastName || ''}
-                           placeholder="*Priezvisko"/>
+                    <InputField
+                        value={formData?.lastName || ""}
+                        placeholder='*Priezvisko'
+                        name="lastName"
+                        onChange={handleInputChange}
+                        customerror={getErrorMsg("lastName")}
+                    />
                 </div>
             </div>
 
@@ -173,31 +206,25 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 
             <div className="row">
                 <div className="col">
-                    <Multiselect
+                    <MultiselectField
                         selectionLimit={1}
-                        closeOnSelect={true}
                         options={countryCode}
                         displayValue="value"
-                        placeholder="Národnosť"
-                        closeIcon="cancel"
-                        onSelect={(picked: ILangCode[]) => {
-                            setFormData({...formData, nationality: picked[0].key})
-                        }}
-                        style={{
-                            inputField: {marginLeft: "0.5rem"},
-                            searchBox: {
-                                width: "100%",
-                                paddingRight: '5px',
-                                marginRight: '-5px',
-                                borderRadius: '3px'
-                            }
-                        }}
-                        ref={countryRef}
+                        label="Národnosť"
+                        value={formData?.nationality}
+                        name="nationality"
+                        onChange={handleInputChange}
                     />
                 </div>
                 <div className="col">
-                    <textarea onChange={handleForm} className="form-control" id='note'
-                              value={(formData as IAutor)?.note || ''} placeholder="Poznámka"/>
+                    <textarea id='note' placeholder='Poznámka'
+                              className="form-control"
+                              name="note"
+                              autoComplete="off"
+                              rows={1}
+                              value={formData?.note || ""}
+                              onChange={handleInputChange}
+                    />
                 </div>
             </div>
         </form>
@@ -205,28 +232,20 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 }
 
 export const AutorsModalButtons = ({saveAutor, cleanFields, error}: ButtonsProps) => {
-    const showError = () => {
-        if (!error) return <></>;
-        return (
-            <div className="alert alert-danger"><FontAwesomeIcon icon={faExclamationTriangle}/> {error}</div>
-        );
-    }
-
     return (
         <div className="column">
-            <div>{showError()}</div>
+            <div>{showError(error)}</div>
 
             <div className="buttons">
                 <button type="button" className="btn btn-secondary"
                         onClick={cleanFields}>Vymazať polia
                 </button>
-                <button type="button"
-                        disabled={Boolean(error)}
+                <button type="submit"
+                        disabled={Boolean(error?.length)}
                         onClick={saveAutor}
                         className="btn btn-success">Uložiť autora
                 </button>
             </div>
-
         </div>
     )
 }

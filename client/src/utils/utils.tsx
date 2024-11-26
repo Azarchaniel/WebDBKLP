@@ -152,6 +152,7 @@ export const isNumberOrEmpty = (num: any) => {
     return (!isNaN(num) || num === "" || num === undefined);
 }
 
+//TODO: isn't this the same as stringifyAutors?
 export const formPersonsFullName = <T extends { firstName?: string; lastName?: string }>(
     person: T | T[] | undefined
 ): string | T[] | undefined => {

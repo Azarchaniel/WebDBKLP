@@ -1,13 +1,15 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import {toast} from "react-toastify";
 import {registerLocale} from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import cs from 'date-fns/locale/cs';
 import {countryCode, langCode} from "../../utils/locale";
 import {Multiselect} from 'multiselect-react-dropdown';
-import {IAutor, ILangCode, ILP} from "../../type";
+import {IAutor, ILangCode, ILP, ValidationError} from "../../type";
 import {getAutors} from "../../API";
 import {showError} from "../Modal";
+import {formPersonsFullName} from "../../utils/utils";
+import {InputField} from "../InputFields";
 
 //for datepicker
 registerLocale('cs', cs)
@@ -28,6 +30,7 @@ interface ButtonsProps {
 export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
     const [formData, setFormData] = useState<ILP | Object>(data);
     const [autors, setAutors] = useState<IAutor[] | []>([]);
+    const [errors, setErrors] = useState<ValidationError[]>([{label: 'Názov LP musí obsahovať aspoň jeden znak!', target: 'title'}]);
 
     const autorRef = useRef(null);
     const langRef = useRef(null);
@@ -38,8 +41,23 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
     }, [formData]);
 
     useEffect(() => {
-        setFormData(data);
+        if (!data) return;
+        if (Object.keys(data).length === 0 && data.constructor === Object) setFormData(data);
     }, [data]);
+
+    //edit LP
+    useEffect(() => {
+        if (!data) return;
+
+        const toBeModified: ILP = {
+            ...data,
+            autor: formPersonsFullName((data as ILP)?.autor),
+            published: {country: countryCode.find((country: ILangCode) => ((data as ILP)?.published?.country as unknown as string[])?.includes(country.key))},
+            language: langCode.filter((lang: ILangCode) => ((data as ILP)?.language as unknown as string[])?.includes(lang.key))
+        } as ILP;
+
+        setFormData(toBeModified);
+    }, []);
 
     useEffect(() => {
         getAutors()
@@ -56,7 +74,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
             });
     }, [formData])
 
-
+    //error handling
     useEffect(() => {
         //shortcut
         const data = (formData as unknown as ILP);
@@ -71,32 +89,58 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
         }
     }, [formData])
 
-    const handleForm = (e: any): void => {
-        try {
-            setFormData({
-                ...formData,
-                [e?.currentTarget.id]: e?.currentTarget.value
-            })
-        } catch (err) {
-            toast.error('Chyba pri zadávaní do formuláru!')
-            console.error('AddLP(handleForm)', err)
+    const handleInputChange = useCallback((input) => {
+        console.log(input);
+        let name: string, value: string;
+
+        if ("target" in input) { // if it is a regular event
+            const {name: targetName, value: targetValue} = input.target;
+            name = targetName;
+            value = targetValue;
+        } else { // if it is MultiSelect custom answer
+            name = input.name;
+            value = input.value;
         }
+
+        setFormData((prevData: any) => {
+            // Helper function to create a nested object structure
+            const setNestedValue = (obj: any, keys: string[], value: any) => {
+                const key = keys.shift(); // Get the first key
+                if (!key) return value; // If no more keys, return the value
+                obj[key] = setNestedValue(obj[key] || {}, keys, value); // Recursively set the nested value
+                return obj;
+            };
+
+            const keys = name.split('.'); // Split name into keys
+            const updatedData = {...prevData}; // Clone previous data
+            setNestedValue(updatedData, keys, value); // Set nested value
+
+            return updatedData;
+        });
+    }, []);
+
+    const getErrorMsg = (name: string): string => {
+        return errors.find(err => err.target === name)?.label || "";
     }
 
     return (
         <form>
             <div className="row">
                 <div className="col">
-                    <input onChange={handleForm} type='text' id='title' placeholder='*Názov'
-                           className="form-control" autoComplete="off"
-                           value={formData && "title" in formData ? formData.title : ''}/>
+                    <InputField
+                        value={(formData as ILP)?.title || ""}
+                        placeholder='*Názov'
+                        name="title"
+                        onChange={handleInputChange}
+                        customerror={getErrorMsg("title")}
+                    />
                 </div>
                 <div className="col">
-                    <input onChange={handleForm} type='text' id='subtitle'
+                    <input onChange={handleInputChange} type='text' id='subtitle'
                            placeholder='Podnázov'
                            className="form-control"
                            autoComplete="off"
-                           value={formData && "subtitle" in formData ? formData.subtitle : ''}
+                           value={(formData as ILP)?.subtitle || ""}
                     />
                 </div>
             </div>
@@ -131,45 +175,45 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
             <div style={{height: '5px', width: '100%'}}/>
             <div className="row">
                 <div className="col">
-                    <input onChange={handleForm} type='text' id='edition.title'
+                    <input onChange={handleInputChange} type='text' id='edition.title'
                            placeholder='Názov edície'
                            className="form-control" autoComplete="off"
-                           value={formData && "edition.title" in formData ? formData["edition.title"] as string : ''}
+                           value={(formData as ILP)?.edition?.title || ""}
                     />
                 </div>
                 <div className="col">
-                    <input onChange={handleForm} type='number' id='edition.no'
+                    <input onChange={handleInputChange} type='number' id='edition.no'
                            placeholder='Číslo edice'
                            className="form-control"
                            autoComplete="off"
                            min="0"
-                           value={formData && "edition.no" in formData ? formData["edition.no"] as number : ''}
+                           value={(formData as ILP)?.edition?.no || ""}
                     />
                 </div>
             </div>
             <div style={{height: '5px', width: '100%'}}/>
             <div className="row">
                 <div className="col">
-                    <input onChange={handleForm} type='number' id='speed' placeholder='Počet otáčok'
+                    <input onChange={handleInputChange} type='number' id='speed' placeholder='Počet otáčok'
                            className="form-control" autoComplete="off" min="0"
-                           value={formData && "speed" in formData ? formData.speed as number: ''}
+                           value={(formData as ILP)?.speed || ""}
                     />
                 </div>
                 <div className="col">
-                    <input onChange={handleForm} type='number' id='countLp' placeholder='Počet platní'
+                    <input onChange={handleInputChange} type='number' id='countLp' placeholder='Počet platní'
                            className="form-control" autoComplete="off" min="0"
-                           value={formData && "countLp" in formData ? formData.countLp as number : ''}
+                           value={(formData as ILP)?.countLp || ""}
                     />
                 </div>
             </div>
             <div style={{height: '5px', width: '100%'}}/>
             <div className="row">
                 <div className="col">
-                    <input onChange={handleForm} type='number' id='published.year'
+                    <input onChange={handleInputChange} type='number' id='published.year'
                            placeholder='Rok vydania'
                            className="form-control"
                            autoComplete="off"
-                           value={formData && "published.year" in formData ? formData["published.year"] as number : ''}
+                           value={(formData as ILP)?.published?.year || ""}
                     />
                 </div>
                 <div className="col">
@@ -200,11 +244,11 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
             <div style={{height: '5px', width: '100%'}}/>
             <div className="row">
                 <div className="col">
-                    <input onChange={handleForm} type='text' id='published.publisher'
+                    <input onChange={handleInputChange} type='text' id='published.publisher'
                            placeholder='Vydavateľ'
                            className="form-control"
                            autoComplete="off"
-                           value={formData && "published.publisher" in formData ? formData["published.publisher"] as string : ''}
+                           value={(formData as ILP)?.published?.publisher || ""}
                     />
                 </div>
                 <div className="col">

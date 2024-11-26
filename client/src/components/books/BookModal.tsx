@@ -1,4 +1,4 @@
-import {IAutor, IBook, ILangCode, IUser} from "../../type";
+import {IAutor, IBook, ILangCode, IUser, ValidationError} from "../../type";
 import React, {useCallback, useEffect, useState} from "react";
 import {getAutors, getUsers} from "../../API";
 import {toast} from "react-toastify";
@@ -9,24 +9,17 @@ import {showError} from "../Modal";
 import {InputField, MultiselectField} from "../InputFields";
 import {cities} from "../../utils/constants";
 
-//TODO: generalize with generics <T>
 interface BodyProps {
     data: IBook | Object;
     onChange: (data: IBook | Object) => void;
-    error: (err: any[] | undefined) => void;
+    error: (err: ValidationError[] | undefined) => void;
     editedLP?: IBook;
 }
 
 interface ButtonsProps {
     saveBook: () => void;
     cleanFields: () => void;
-    error?: any[] | undefined;
-}
-
-interface ValidationError {
-    label: string;
-    valid?: boolean;
-    target?: string;
+    error?: ValidationError[] | undefined;
 }
 
 export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
@@ -149,7 +142,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         }
 
         setErrors(localErrors);
-        error(localErrors)
+        error(localErrors);
     }, [formData])
 
     const handleInputChange = useCallback((input) => {

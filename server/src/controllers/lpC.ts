@@ -42,6 +42,8 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
             title, subtitle, edition, countLp, speed, published, language, note, autor
         } = req.body;
 
+        console.log(req.body);
+
         const lp: ILp = new Lp({
             autor: autor,
             title: title,

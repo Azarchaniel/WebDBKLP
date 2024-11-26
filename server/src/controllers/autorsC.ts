@@ -33,7 +33,7 @@ const addAutor = async (req: Request, res: Response): Promise<void> => {
             dateOfBirth: dateOfBirth,
             dateOfDeath: dateOfDeath,
             note: note,
-            nationality: nationality ?? '',
+            nationality: nationality?.[0]?.key ?? '',
             deletedAt: null
         });
 

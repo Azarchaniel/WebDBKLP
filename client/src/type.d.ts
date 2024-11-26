@@ -39,8 +39,8 @@ export interface ILP extends IBaseType {
     edition?: IEditionSerie;
     countLp: number;
     speed: number;
-    published: TPublished;
-    language: string;
+    published: IPublished;
+    language: ILangCode[];
     note: string;
 }
 
@@ -156,4 +156,10 @@ export interface IBookHidden {
     createdAt: boolean,
     location: boolean,
     owner: boolean
+}
+
+export interface ValidationError {
+    label: string;
+    valid?: boolean;
+    target?: string;
 }
