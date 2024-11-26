@@ -1,6 +1,6 @@
 import {IQuote, ValidationError} from "../../type";
 import React, {useState} from "react";
-import ReactTooltip from "react-tooltip";
+import { Tooltip as ReactTooltip } from "react-tooltip";
 import {Modal} from "../../components/Modal";
 import {QuotesModalBody, QuotesModalButtons} from "../../components/quotes/QuotesModal";
 
@@ -34,7 +34,7 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any, id?: string | 
                     />}
                 />
             }
-            <ReactTooltip place="bottom" effect="solid"/>
+            <ReactTooltip place="bottom"/>
         </>
     )
         ;

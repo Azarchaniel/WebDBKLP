@@ -1,18 +1,10 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
-import {toast} from "react-toastify";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
-import DatePicker, {registerLocale} from "react-datepicker";
+import React, {useCallback, useEffect, useState} from "react";
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import cs from 'date-fns/locale/cs';
 import {countryCode} from "../../utils/locale";
-import {Multiselect} from 'multiselect-react-dropdown';
-import {IAutor, ILangCode, ValidationError} from "../../type";
+import {IAutor, ValidationError} from "../../type";
 import {InputField, MultiselectField} from "../InputFields";
 import {showError} from "../Modal";
-
-//for datepicker
-registerLocale('cs', cs)
 
 interface BodyProps {
     data: IAutor | Object;
@@ -89,7 +81,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         error(localErrors);
     }, [formData]);
 
-    const handleInputChange = useCallback((input) => {
+    const handleInputChange = useCallback((input: any) => {
         let name: string, value: string;
 
         if ("target" in input) { // if it is a regular event
@@ -156,11 +148,11 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                         className="form-control"
                         id='dateOfBirth'
                         selected={(formData as IAutor)?.dateOfBirth ? new Date((formData as IAutor)?.dateOfBirth!) : undefined}
-                        onChange={(dateOfBirth: Date) => setFormData({
+                        onChange={(dateOfBirth: any) => setFormData({
                             ...formData,
                             dateOfBirth
                         })}
-                        onSelect={(dateOfBirth: Date) => setFormData({
+                        onSelect={(dateOfBirth: any) => setFormData({
                             ...formData,
                             dateOfBirth
                         })}
@@ -180,11 +172,11 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                         className="form-control"
                         id='dateOfDeath'
                         selected={(formData as IAutor)?.dateOfDeath ? new Date((formData as IAutor)?.dateOfDeath!) : undefined}
-                        onChange={(dateOfDeath: Date) => setFormData({
+                        onChange={(dateOfDeath: any) => setFormData({
                             ...formData,
                             dateOfDeath
                         })}
-                        onSelect={(dateOfDeath: Date) => setFormData({
+                        onSelect={(dateOfDeath: any) => setFormData({
                             ...formData,
                             dateOfDeath
                         })}

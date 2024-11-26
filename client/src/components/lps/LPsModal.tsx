@@ -1,8 +1,6 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {toast} from "react-toastify";
-import {registerLocale} from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import cs from 'date-fns/locale/cs';
 import {countryCode, langCode} from "../../utils/locale";
 import {Multiselect} from 'multiselect-react-dropdown';
 import {IAutor, ILangCode, ILP, ValidationError} from "../../type";
@@ -10,9 +8,6 @@ import {getAutors} from "../../API";
 import {showError} from "../Modal";
 import {formPersonsFullName} from "../../utils/utils";
 import {InputField, MultiselectField} from "../InputFields";
-
-//for datepicker
-registerLocale('cs', cs)
 
 interface BodyProps {
     data: ILP | Object;
@@ -89,7 +84,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
         }
     }, [formData])
 
-    const handleInputChange = useCallback((input) => {
+    const handleInputChange = useCallback((input: any) => {
         console.log(input);
         let name: string, value: string;
 

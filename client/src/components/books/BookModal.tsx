@@ -4,7 +4,7 @@ import {getAutors, getUsers} from "../../API";
 import {toast} from "react-toastify";
 import {checkIsbnValidity, formPersonsFullName, validateNumber} from "../../utils/utils";
 import {countryCode, langCode} from "../../utils/locale";
-import ChipInput from "material-ui-chip-input";
+//import ChipInput from "material-ui-chip-input";
 import {showError} from "../Modal";
 import {InputField, MultiselectField} from "../InputFields";
 import {cities} from "../../utils/constants";
@@ -145,7 +145,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         error(localErrors);
     }, [formData])
 
-    const handleInputChange = useCallback((input) => {
+    const handleInputChange = useCallback((input: any) => {
         let name: string, value: string;
 
         if ("target" in input) { // if it is a regular event
@@ -386,14 +386,14 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                 />
             </div>
             <div className="Obsah">
-                <ChipInput
+                {/*<ChipInput
                     className="form-control-important"
                     disableUnderline
                     placeholder="Obsah"
                     value={formData?.content}
                     defaultValue={formData?.content}
                     onChange={(values) => handleInputChange({name: "content", value: values})}
-                />
+                />*/}
             </div>
             <div className="Poznamka">
                                             <textarea id='note' placeholder='Poznámka'
