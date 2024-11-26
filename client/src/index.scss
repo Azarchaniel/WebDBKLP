@@ -1,5 +1,6 @@
 @import "./styles/mixin";
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+@import url('https://fonts.cdnfonts.com/css/lucida-handwriting-std');
 
 :root {
   --background: #EEEEEE;
@@ -353,6 +354,16 @@ body, html, main, #root {
   color: white !important;
 }
 
+.MuiTablePagination-toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.MuiTableHead-root {
+  height: 3rem !important;
+}
+
 .BookDetail {
   padding: 1rem;
 }
@@ -585,8 +596,7 @@ body, html, main, #root {
   }
 
   .customLink.appHeader {
-    font-family: "Lucida Handwriting", sans-serif;
-    font-weight: bold;
+    font-family: "Lucida Handwriting Std", sans-serif;
     text-decoration: none;
     color: var(--anchor);
     margin: 0 1rem;

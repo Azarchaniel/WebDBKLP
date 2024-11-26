@@ -10,8 +10,8 @@ import {darkenLightenColor} from "../../utils/utils";
 import Header from "../../components/AppHeader";
 import LoadingBooks from "../../components/LoadingBooks";
 import Multiselect from "multiselect-react-dropdown";
-import { useReadLocalStorage } from "usehooks-ts";
-import { ScrollToTopBtn } from "../../utils/elements";
+import {useReadLocalStorage} from "usehooks-ts";
+import {ScrollToTopBtn} from "../../utils/elements";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
 
 export default function QuotePage() {
@@ -30,7 +30,7 @@ export default function QuotePage() {
 
     useEffect(() => {
         getBooks()
-            .then(({ data: { books } }: IBook[] | any) => {
+            .then(({data: {books}}: IBook[] | any) => {
                 setBooks(books);
             })
             .catch((err: Error) => console.trace(err))
@@ -45,7 +45,7 @@ export default function QuotePage() {
     const fetchQuotes = (): void => {
         setLoading(true);
         getQuotes()
-            .then(({ data: { quotes, count } }: IQuote[] | any) => {
+            .then(({data: {quotes, count}}: IQuote[] | any) => {
                 if ((activeUser as string[])?.length) {
                     const quotesArr: IQuote[] = [];
                     quotes.forEach((qoute: IQuote) => {
@@ -66,14 +66,14 @@ export default function QuotePage() {
             .finally(() => setLoading(false))
     }
 
-    useEffect(() => {     
+    useEffect(() => {
         if (!booksToFilter.length) return setFilteredQuotes(initQuotes);
 
         let filteredQuotes = initQuotes.filter((quote: IQuote) => {
             if (!quote.fromBook) return false;
             return booksToFilter.includes(quote.fromBook._id);
         })
-        
+
         setFilteredQuotes(filteredQuotes);
 
     }, [booksToFilter]);
@@ -111,7 +111,8 @@ export default function QuotePage() {
                         console.trace(err);
                     })
             },
-            onCancel: () => {}
+            onCancel: () => {
+            }
         });
     }
 
@@ -129,7 +130,7 @@ export default function QuotePage() {
     }
 
     const scrollToTopOfPage = () => {
-        window.scroll(0,0)
+        window.scroll(0, 0)
     }
 
     const refresh = () => {
@@ -140,10 +141,10 @@ export default function QuotePage() {
     return (
         <main className='App'>
             <Header/>
-            <Sidebar />
+            <Sidebar/>
             <AddQuote saveQuote={handleSaveQuote}/>
             <div style={{position: "fixed", top: "20rem", zIndex: 1000}}>
-                {loading ? <LoadingBooks /> : <></>}
+                {loading ? <LoadingBooks/> : <></>}
             </div>
             <h6 className="h6MaterialClone">Citáty ({countAll})</h6>
             <Multiselect
@@ -187,12 +188,13 @@ export default function QuotePage() {
                                 saveQuote={handleSaveQuote}
                                 quote={quote}
                                 bcgrClr={getRndColor()}
-                            />}) :
-                            <span style={{color: 'black'}}>Žiadne citáty neboli nájdené!</span>
-            }
+                            />
+                        }) :
+                        <span style={{color: 'black'}}>Žiadne citáty neboli nájdené!</span>
+                }
             </div>
-            <ScrollToTopBtn scrollToTop={() => scrollToTopOfPage()} />
-            <Toast />
+            <ScrollToTopBtn scrollToTop={() => scrollToTopOfPage()}/>
+            <Toast/>
         </main>
     )
 }
