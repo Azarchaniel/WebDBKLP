@@ -57,10 +57,10 @@ const updateAutor = async (req: Request, res: Response): Promise<void> => {
             body
         )
         const allAutors: IAutor[] = await Autor.find()
-        res.status(200).json({
+        res.status(201).json({
             message: 'Autor updated',
-            Autor: updateAutor,
-            Autors: allAutors,
+            autor: updateAutor,
+            autors: allAutors,
         })
     } catch (error) {
         throw error

@@ -1,4 +1,4 @@
-import {IAutor, IUser} from "../type";
+import {IAutor, IBook, ILP, IUser} from "../type";
 
 export const shortenStringKeepWord = (text: string, maxLength: number): string => {
     if (!text) return "";
@@ -11,38 +11,34 @@ export const shortenStringKeepWord = (text: string, maxLength: number): string =
     }
 }
 
-export const stringifyAutors = (data: any) => {
-    let dataM = Array.isArray(data) ? data : [data];
-    //create string of autors; if one autor, just add him; if more, add '; ' at the beginning of every next
+export const stringifyAutors = (
+    data: any
+): any => {
+    const dataM = Array.isArray(data) ? data : [data];
+
+    // Helper function to process a specific field
+    const stringifyField = (entity: any, field: string, targetField: string) => {
+        let people = entity[field] as IAutor[] | undefined;
+
+        if (people) {
+            people = Array.isArray(people) ? people : [people];
+
+            entity[targetField] = people
+                .map((person: IAutor) => `${person.lastName}, ${person.firstName}`)
+                .join('; ');
+        }
+    };
+
+    // Iterate over the entities and process relevant fields
     dataM.forEach((entity: any) => {
-        if (entity.autor) {
-            entity['autorsFull'] = '';
-            entity.autor.forEach((autor: IAutor, index: number) =>
-                index > 0 ? entity['autorsFull'] += `; ${autor.lastName}, ${autor.firstName}`
-                    : entity['autorsFull'] = `${autor.lastName}, ${autor.firstName}`)
-        }
-        if (entity.editor) {
-            entity['editorsFull'] = '';
-            entity.editor.forEach((editor: IAutor, index: number) =>
-                index > 0 ? entity['editorsFull'] += `; ${editor.lastName}, ${editor.firstName}`
-                    : entity['editorsFull'] = `${editor.lastName}, ${editor.firstName}`)
-        }
-        if (entity.ilustrator) {
-            entity['illustratorsFull'] = '';
-            entity.ilustrator.forEach((ilustrator: IAutor, index: number) =>
-                index > 0 ? entity['ilustratorsFull'] += `; ${ilustrator.lastName}, ${ilustrator.firstName}`
-                    : entity['ilustratorsFull'] = `${ilustrator.lastName}, ${ilustrator.firstName}`)
-        }
-        if (entity.translator) {
-            entity['translatorsFull'] = '';
-            entity.translator.forEach((translator: IAutor, index: number) =>
-                index > 0 ? entity['translatorsFull'] += `; ${translator.lastName}, ${translator.firstName}`
-                    : entity['translatorsFull'] = `${translator.lastName}, ${translator.firstName}`)
-        }
+        stringifyField(entity, 'autor', 'autorsFull');
+        stringifyField(entity, 'editor', 'editorsFull');
+        stringifyField(entity, 'ilustrator', 'illustratorsFull');
+        stringifyField(entity, 'translator', 'translatorsFull');
     });
 
     return dataM;
-}
+};
 
 export const stringifyUsers = (data: IUser[], withSurname: boolean) => {
     let names = '';

@@ -33,10 +33,28 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         onChange(formData)
     }, [formData]);
 
+    // clear form btn
     useEffect(() => {
-        setFormData(data);
+        if (!data) return;
+        if (Object.keys(data).length === 0 && data.constructor === Object) setFormData(data);
     }, [data]);
 
+    //edit autor
+    useEffect(() => {
+        if (!data) return;
+
+        console.log(data);
+
+        const toBeModified: IAutor = {
+            ...data,
+            dateOfBirth: (data as IAutor).dateOfBirth ? new Date((data as IAutor)?.dateOfBirth!) : undefined,
+            dateOfDeath: (data as IAutor).dateOfDeath ? new Date((data as IAutor)?.dateOfDeath!) : undefined,
+        } as IAutor;
+
+        setFormData(toBeModified);
+    }, []);
+
+    // error handling
     useEffect(() => {
         //shortcut
         const data = (formData as unknown as IAutor);
@@ -105,7 +123,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     <DatePicker
                         className="form-control"
                         id='dateOfBirth'
-                        selected={(formData as IAutor)?.dateOfBirth}
+                        selected={(formData as IAutor)?.dateOfBirth ? new Date((formData as IAutor)?.dateOfBirth!) : undefined}
                         onChange={(dateOfBirth: Date) => setFormData({
                             ...formData,
                             dateOfBirth
@@ -129,7 +147,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     <DatePicker
                         className="form-control"
                         id='dateOfDeath'
-                        selected={(formData as IAutor)?.dateOfDeath}
+                        selected={(formData as IAutor)?.dateOfDeath ? new Date((formData as IAutor)?.dateOfDeath!) : undefined}
                         onChange={(dateOfDeath: Date) => setFormData({
                             ...formData,
                             dateOfDeath
@@ -179,7 +197,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                 </div>
                 <div className="col">
                     <textarea onChange={handleForm} className="form-control" id='note'
-                              placeholder="Poznámka"/>
+                              value={(formData as IAutor)?.note || ''} placeholder="Poznámka"/>
                 </div>
             </div>
         </form>

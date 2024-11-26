@@ -12,7 +12,7 @@ import Header from "../../components/AppHeader";
 import {useReadLocalStorage} from "usehooks-ts";
 import BookDetail from "./BookDetail";
 import {ShowHideRow} from "../../components/books/ShowHideRow";
-import {BookTableColumns} from "../../utils/constants";
+import {bookTableColumns} from "../../utils/constants";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
@@ -71,7 +71,7 @@ export default function BookPage() {
                     books.forEach((book: IBook) => {
                         //TODO: this filtering should be on BE
                         book.owner?.forEach((owner: IUser) => {
-                            if ((activeUser as string[]).includes(owner._id) || book.owner === undefined) {
+                            if ((activeUser as string[]).includes(owner._id) || !book.owner) {
                                 booksArr.push(book);
                             }
                         })
@@ -165,7 +165,7 @@ export default function BookPage() {
             <MaterialTableCustom
                 loading={loading}
                 title={`Knihy (${countAll})`}
-                columns={BookTableColumns(hidden)}
+                columns={bookTableColumns(hidden)}
                 data={clonedBooks}
                 actions={[
                     {

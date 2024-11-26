@@ -53,8 +53,8 @@ export interface IAutor extends IBaseType {
     firstName?: string;
     lastName: string;
     nationality?: string;
-    dateOfBirth?: Date;
-    dateOfDeath?: Date;
+    dateOfBirth?: Date | string;
+    dateOfDeath?: Date | string;
     note?: string;
     fullName?: string;
 }

@@ -7,15 +7,16 @@ import {confirmAlert} from "react-confirm-alert";
 import Sidebar from "../../components/Sidebar";
 import Toast from "../../components/Toast";
 import MaterialTableCustom from "../../components/MaterialTableCustom";
-import {shortenStringKeepWord} from "../../utils/utils";
+import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
 import Header from "../../components/AppHeader";
-import { tableHeaderColor } from "../../utils/constants";
-import { TooltipedText } from "../../utils/elements";
+import {tableHeaderColor} from "../../utils/constants";
+import {TooltipedText} from "../../utils/elements";
 
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
+    const [updateAutor, setUpdateAutor] = useState<IAutor>();
 
     useEffect(() => {
         fetchAutors();
@@ -36,24 +37,21 @@ export default function AutorPage() {
     }
 
     const handleSaveAutor = (formData: IAutor): void => {
-        console.log(formData)
         addAutor(formData)
             .then(({status, data}) => {
                 if (status !== 201) {
-                    throw new Error('Autora sa nepodarilo pridať!')
+                    toast.error(`Chyba! Autor ${data.autor?.lastName} nebol ${formData._id ? "uložený" : "pridaný"}.`)
+                    throw new Error('Chyba! Kniha nebola pridaná!');
                 }
-                const autorNames = `${data.autor?.lastName}${data.autor?.firstName ? ', ' + data.autor?.firstName : ''}`;
-                toast.success(`Autor ${autorNames} bol úspešne pridaný.`);
+                const autorNames = stringifyAutors({autor: data.autor})[0].autorsFull;
+
+                toast.success(`Autor ${autorNames} bol úspešne ${formData._id ? "uložený" : "pridaný"}.`);
                 setAutors(data.autors);
-            })
-            .catch((err) => {
-                toast.error(`Autora sa nepodarilo pridať!`);
-                console.trace(err);
             })
     }
 
     const handleUpdateAutor = (autor: IAutor): any => {
-        console.log('todo: update autor', autor);
+        setUpdateAutor(autor);
     }
 
     const handleDeleteAutor = (_id: string): void => {
@@ -179,14 +177,17 @@ export default function AutorPage() {
                     {
                         icon: "search",
                         tooltip: 'Detaily',
-                        render: (rowData: any) => {return (
-                            <>
-                                <pre>{JSON.stringify(rowData, undefined, 3)}</pre>
-                            </>
-                        )}
+                        render: (rowData: any) => {
+                            return (
+                                <>
+                                    <pre>{JSON.stringify(rowData, undefined, 3)}</pre>
+                                </>
+                            )
+                        }
                     },
                 ]}
-                />
+            />
+            {Boolean(updateAutor) && <AddAutor saveAutor={handleSaveAutor} autor={updateAutor} />}
             <Toast/>
         </main>
     )

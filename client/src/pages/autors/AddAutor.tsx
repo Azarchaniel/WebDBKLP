@@ -1,17 +1,25 @@
 import "react-datepicker/dist/react-datepicker.css";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {IAutor} from "../../type";
 import {Modal} from "../../components/Modal";
 import {AutorsModalBody, AutorsModalButtons} from "../../components/autors/AutorsModal";
 
 interface Props {
     saveAutor: (formData: IAutor) => void
+    autor?: IAutor;
 }
 
-const AddAutor: React.FC<Props> = ({saveAutor}: Props) => {
+const AddAutor: React.FC<Props> = ({saveAutor, autor}: Props) => {
     const [showModal, setShowModal] = useState(false);
     const [autorData, setAutorData] = useState<IAutor | Object>();
     const [error, setError] = useState<string | undefined>('Priezvisko autora musí obsahovať aspoň jeden znak!');
+
+    useEffect(() => {
+        if (autor) {
+            setShowModal(true);
+            setAutorData(autor);
+        }
+    }, []);
 
     return (
         <>

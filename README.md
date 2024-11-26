@@ -29,7 +29,7 @@ cd ./client; npx run start
 - [ ] add Role to Autor and filter by it (autor, musician, editor, translator) (multirole - Translator and Autor)
 - [ ] divide CSS into chunks based on page
 - [ ] better granulating - what is possible, move to components
-- [ ] updating book - fix modal AddBook (MVP)
+- [X] updating book - fix modal AddBook (MVP)
 - [ ] in BookDetail, when clicking on Edice/Serie, filter every book from Edice/Serie
 - -[ ] but this requires to have Edice/Serie as entry in DB with ID
 - -[ ] which require CRUD form Edice/Serie
@@ -38,7 +38,7 @@ cd ./client; npx run start
 - [X] a href to DatabazeKnih and GoodReads
 - [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend) (MVP)
 - [ ] fix router not fetching data when changing Owner - I need global store for ActiveUser (MVP)
-- [ ] rework Autocomplete - custom
+- [ ] rework Autocomplete - custom - if there is no item found, parse the string and create item
 - [X] custom modal - grid system
 - [ ] webscrapper and autofilling (MVP)
 - [ ] some reports, numbers, graph on Main page

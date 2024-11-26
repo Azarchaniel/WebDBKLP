@@ -15,7 +15,7 @@ export const multiselectStyle = {
 export const cities = [{value: 'spisska', showValue: "Spišská"},
     {value: 'bruchotin', showValue: "Břuchotín"}];
 
-export const BookTableColumns = (hidden: IBookHidden) => [
+export const bookTableColumns = (hidden: IBookHidden) => [
     {
         title: 'Autor',
         field: 'autorsFull',
