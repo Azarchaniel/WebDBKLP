@@ -1,4 +1,4 @@
-import {ILP} from "../../type";
+import {ILP, ValidationError} from "../../type";
 import React, {useEffect, useState} from "react";
 import {Modal} from "../../components/Modal";
 import {LPsModalBody, LPsModalButtons} from "../../components/lps/LPsModal";
@@ -11,7 +11,7 @@ type Props = {
 const AddLp: React.FC<Props> = ({saveLp, lp}: Props) => {
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [lpData, setLpData] = useState<ILP | object>();
-	const [error, setError] = useState<string | undefined>("Názov LP musí obsahovať aspoň jeden znak!");
+	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Názov LP musí obsahovať aspoň jeden znak!", target: "title"}]);
 
 	useEffect(() => {
 		if (lp) {
