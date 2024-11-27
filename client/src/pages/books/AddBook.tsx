@@ -1,4 +1,4 @@
-import React, {Fragment, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {IBook, ValidationError} from "../../type";
 import {Modal} from "../../components/Modal";
 import {BooksModalBody, BooksModalButtons} from "../../components/books/BookModal";
@@ -9,38 +9,38 @@ type Props = {
 }
 
 const AddBook: React.FC<Props> = ({saveBook, book}) => {
-    const [showModal, setShowModal] = useState<boolean>(false);
-    const [bookData, setBookData] = useState<IBook | Object>();
-    const [error, setError] = useState<ValidationError[] | undefined>([{label: 'Názov knihy musí obsahovať aspoň jeden znak!', target: 'title'}]);
+	const [showModal, setShowModal] = useState<boolean>(false);
+	const [bookData, setBookData] = useState<IBook | object>();
+	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title"}]);
 
-    useEffect(() => {
-        if (book) {
-            setBookData(book);
-            setShowModal(true);
-        }
-    }, []);
+	useEffect(() => {
+		if (book) {
+			setBookData(book);
+			setShowModal(true);
+		}
+	}, []);
 
-    return (
-        <>
-            {!book && <button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>}
-            {showModal &&
+	return (
+		<>
+			{!book && <button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>}
+			{showModal &&
                 <Modal
-                    title="Pridaj knihu"
-                    onClose={() => setShowModal(false)}
-                    body={<BooksModalBody
-                        data={bookData as IBook}
-                        onChange={setBookData}
-                        error={setError}
-                    />}
-                    footer={<BooksModalButtons
-                        saveBook={() => saveBook(bookData as IBook)}
-                        cleanFields={() => setBookData({})}
-                        error={error}
-                    />}
+                	title="Pridaj knihu"
+                	onClose={() => setShowModal(false)}
+                	body={<BooksModalBody
+                		data={bookData as IBook}
+                		onChange={setBookData}
+                		error={setError}
+                	/>}
+                	footer={<BooksModalButtons
+                		saveBook={() => saveBook(bookData as IBook)}
+                		cleanFields={() => setBookData({})}
+                		error={error}
+                	/>}
                 />
-            }
-        </>
-    );
+			}
+		</>
+	);
 }
 
 export default AddBook

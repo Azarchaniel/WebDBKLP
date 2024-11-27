@@ -10,11 +10,11 @@ type SAstyle = {
 
 interface SAprops {
     data: any;
-    multiple: Boolean;
+    multiple: boolean;
     placeholder: string;
     searchInAttr: string;
-    showTable: Boolean;
-    async?: Boolean;
+    showTable: boolean;
+    async?: boolean;
     showAttrInDropdown?: string;
     showAttrInTableOrResult?: string;
     style?: SAstyle;
@@ -29,21 +29,21 @@ const SearchAutocomplete: (props: SAprops) => JSX.Element = (props) => {
 
     useEffect(async () => {
         if (async) {
-            let neco = await data;
+            const neco = await data;
             setDataLocal(neco.data.books.filter((book: IBook) => !book.deletedAt));
         }
         //document.addEventListener('click', handleClickOutside);
     }, []);
 
     let selected: any[] = [];
-    let isLoading: boolean = false;
+    const isLoading: boolean = false;
 
     const filterResults = (input: string) => {
         const arrOfSearch = input?.split(/[\s,]+/);
         if (!dataLocal || !arrOfSearch) return;
-        let results: any[] = [];
+        const results: any[] = [];
 
-        for (let search of arrOfSearch) {
+        for (const search of arrOfSearch) {
             dataLocal?.forEach(item => {
 
                 //if in data, there are not {} but ""
@@ -55,7 +55,7 @@ const SearchAutocomplete: (props: SAprops) => JSX.Element = (props) => {
                     if (searchInAttr) {
                         //if there are specified attributes to search in, split to array and iterate over them
                         const arrayOfAtrs = searchInAttr.split(',');
-                        for (let attr of arrayOfAtrs) {
+                        for (const attr of arrayOfAtrs) {
                             if (!(attr in item)) throw Error("Unknown attribute, can't search by it!");
                             if (item[attr].toLowerCase().indexOf(search.toLowerCase()) > -1) {
                                 results.push(item);
@@ -149,11 +149,11 @@ const SearchAutocomplete: (props: SAprops) => JSX.Element = (props) => {
 
             //todo: here should be recursive function, if I put 'auutor.firstName'
 
-        let arrOfAttrs = criteria!.match(/\w+|\s+|[^\s\w]+/g);
+        const arrOfAttrs = criteria!.match(/\w+|\s+|[^\s\w]+/g);
         return array.map((res: any) => {
             let strOfKeys: string = '';
             if (!arrOfAttrs) return;
-            for (let element of arrOfAttrs) {
+            for (const element of arrOfAttrs) {
                 if (typeof res === 'string') return;
                 if (element in res) {
                     strOfKeys += res[element];
@@ -175,7 +175,7 @@ const SearchAutocomplete: (props: SAprops) => JSX.Element = (props) => {
         console.log(isOpen);
         let loadingElement: JSX.Element = <></>;
         let noDataElement: JSX.Element = <></>;
-        let results: any[] = [];
+        const results: any[] = [];
         if (!isOpen) return <></>;
         if (isLoading) loadingElement = <li className="loading">Načítam dáta</li>;
         if (!isLoading && !found?.length) noDataElement = <li className="loading">Žiadne výsledky</li>;

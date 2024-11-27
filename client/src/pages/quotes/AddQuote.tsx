@@ -10,34 +10,34 @@ type Props = {
 }
 
 const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any, id?: string | undefined }) => {
-    const [showModal, setShowModal] = useState<boolean>(false);
-    const [quoteData, setQuoteData] = useState<IQuote | Object>();
-    const [error, setError] = useState<ValidationError[] | undefined>([{label: 'Text citátu musí obsahovať aspoň jeden znak!', target: 'text'}]);
+	const [showModal, setShowModal] = useState<boolean>(false);
+	const [quoteData, setQuoteData] = useState<IQuote | object>();
+	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"}]);
 
-    return (
-        <>
-            <button type="button" className="addQuote" onClick={() => setShowModal(true)} data-tip="Pridaj citát"/>
+	return (
+		<>
+			<button type="button" className="addQuote" onClick={() => setShowModal(true)} data-tip="Pridaj citát"/>
 
-            {showModal &&
+			{showModal &&
                 <Modal
-                    title="Pridaj citát"
-                    onClose={() => setShowModal(false)}
-                    body={<QuotesModalBody
-                        data={quoteData as IQuote}
-                        onChange={setQuoteData}
-                        error={setError}
-                    />}
-                    footer={<QuotesModalButtons
-                        saveQuote={() => saveQuote(quoteData as IQuote)}
-                        cleanFields={() => setQuoteData({})}
-                        error={error}
-                    />}
+                	title="Pridaj citát"
+                	onClose={() => setShowModal(false)}
+                	body={<QuotesModalBody
+                		data={quoteData as IQuote}
+                		onChange={setQuoteData}
+                		error={setError}
+                	/>}
+                	footer={<QuotesModalButtons
+                		saveQuote={() => saveQuote(quoteData as IQuote)}
+                		cleanFields={() => setQuoteData({})}
+                		error={error}
+                	/>}
                 />
-            }
-            <ReactTooltip place="bottom"/>
-        </>
-    )
-        ;
+			}
+			<ReactTooltip place="bottom"/>
+		</>
+	)
+	;
 }
 
 export default AddQuote;
