@@ -1,6 +1,6 @@
 import {IAutor, IBook, ILangCode, IUser, ValidationError} from "../../type";
 import React, {useCallback, useEffect, useState} from "react";
-import {getAutors, getUsers} from "../../API";
+import {getAutors, getInfoAboutBook, getUsers} from "../../API";
 import {toast} from "react-toastify";
 import {checkIsbnValidity, formPersonsFullName, validateNumber} from "../../utils/utils";
 import {countryCode, langCode} from "../../utils/locale";
@@ -30,6 +30,12 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 
 	useEffect(() => {
 		onChange(formData);
+
+		//if (formData && ("ISBN" in formData && !("title" in formData)) && checkIsbnValidity(formData.ISBN)) {
+		getInfoAboutBook(formData?.ISBN)
+			.then((book) => console.log(book))
+			.catch(err => console.error(err));
+		//}
 	}, [formData]);
 
 	// clear form btn

@@ -25,7 +25,7 @@ cd ./client; npx run start
 - [X] create all models and interfaces
 - [X] there is problem with fetchAll in Quotes when deleting
 - [X] ConfirmAlert -> Modal
-- [ ] add ESLint
+- [X] add ESLint
 - [ ] add Role to Autor and filter by it (autor, musician, editor, translator) (multirole - Translator and Autor)
 - [ ] divide CSS into chunks based on page
 - [ ] better granulating - what is possible, move to components

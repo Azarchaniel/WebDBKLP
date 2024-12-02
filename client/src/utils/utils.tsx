@@ -72,52 +72,56 @@ export const getCssPropertyValue = (propertyName: string) => {
 	return getComputedStyle(document.body).getPropertyValue(propertyName);
 }
 
-export const checkIsbnValidity = (isbn: string | undefined)  => {
+
+export function checkIsbnValidity(isbn: string): boolean {
 	if (!isbn) return true;
-	if (/[^0-9X]/gi.test(isbn)) return false; //contains invalid chars
+	// Remove any hyphens or spaces
+	const cleanISBN = isbn.replace(/[\s-]/g, "");
 
-	let sum,
-		weight,
-		digit,
-		check,
-		i;
-
-	isbn = isbn.replace(/[^0-9X]/gi, "");
-
-	if (isbn.length < 10 && isbn.length > 1) {
-		return true; //can't validate older/shorter ISBN, so just assume they are correct
+	// Check if it's less than 10 characters
+	if (cleanISBN.length < 10) {
+		return true; // Consider valid for older Czech books
 	}
 
-	if (isbn.length === 13) {
-		sum = 0;
-		for (i = 0; i < 12; i++) {
-			digit = parseInt(isbn[i]);
-			if (i % 2 === 1) {
-				sum += 3*digit;
-			} else {
-				sum += digit;
-			}
-		}
-		check = (10 - (sum % 10)) % 10;
-		return (check === parseInt(isbn[isbn.length-1]));
+	if (cleanISBN.length === 10) {
+		return isValidISBN10(cleanISBN);
+	} else if (cleanISBN.length === 13) {
+		return isValidISBN13(cleanISBN);
 	}
 
-	if (isbn.length === 10) {
-		weight = 10;
-		sum = 0;
-		for (i = 0; i < 9; i++) {
-			digit = parseInt(isbn[i]);
-			sum += weight*digit;
-			weight--;
-		}
-		check = (11 - (sum % 11)) % 11
-		if (check === 10) {
-			check = "X";
-		}
-		return (check === isbn[isbn.length-1].toUpperCase());
+	return false; // Invalid if it's neither 10 nor 13 digits
+}
+
+function isValidISBN10(isbn10: string): boolean {
+	if (!/^\d{9}[\dX]$/.test(isbn10)) {
+		return false; // ISBN-10 should have 9 digits followed by a digit or 'X'
 	}
 
-	return false;
+	let sum = 0;
+
+	for (let i = 0; i < 9; i++) {
+		sum += parseInt(isbn10[i], 10) * (10 - i);
+	}
+
+	const lastChar = isbn10[9];
+	sum += lastChar === "X" ? 10 : parseInt(lastChar, 10);
+
+	return sum % 11 === 0;
+}
+
+function isValidISBN13(isbn13: string): boolean {
+	if (!/^\d{13}$/.test(isbn13)) {
+		return false; // ISBN-13 should be exactly 13 digits
+	}
+
+	let sum = 0;
+
+	for (let i = 0; i < 13; i++) {
+		const digit = parseInt(isbn13[i], 10);
+		sum += digit * (i % 2 === 0 ? 1 : 3);
+	}
+
+	return sum % 10 === 0;
 }
 
 type ValidationOptions = {

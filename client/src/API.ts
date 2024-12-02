@@ -67,7 +67,6 @@ export const deleteBook = async (
 //TODO: types
 export const getInfoAboutBook = async (isbn: string): Promise<any> => {
 	try {
-		console.log("API/getInfoAboutBook");
 		const bookInfo: AxiosResponse<any> = await axios.get(
 			`${baseUrl}/get-book-info/${isbn}`
 		)
