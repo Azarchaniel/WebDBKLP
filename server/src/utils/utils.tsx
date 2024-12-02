@@ -1,4 +1,13 @@
 import puppeteer, {Page} from 'puppeteer';
+import axios from "axios";
+import xml2js from "xml2js";
+
+enum GoodReadsRoles {
+    AUTHOR = "",
+    EDITOR = "Editor",
+    ILUSTRATOR = "Illustrator",
+    TRANSLATOR = "Translator",
+}
 
 export const getIdFromArray = (arrOfObj: Object[]) => {
     return arrOfObj?.map(obj => {
@@ -35,26 +44,48 @@ const mapDBKlanguageToLangCode = (languageFromDBK: string | undefined) => {
     }
 }
 
-const trimNestedStrings = (obj: any) => {
+const mapGRlanguageToCode = (languageFromDBK: string | undefined) => {
+    switch (languageFromDBK) {
+        case "slo":
+        case "SK":
+            return "sk";
+        case "cze":
+        case "CZ":
+            return "cz";
+        case "eng":
+            return "en";
+        default:
+            return languageFromDBK;
+    }
+}
+
+const trimNestedStrings = (obj: any): any => {
     if (typeof obj !== 'object' || obj === null) {
         return obj; // Return if it's not an object or is null
     }
 
     for (const key in obj) {
         if (typeof obj[key] === 'string') {
-            obj[key] = obj[key].trim(); // Trim the string
+            obj[key] = obj[key]
+                .trim()                // Trim leading/trailing spaces
+                .replace(/\n/g, '')    // Remove newlines
+                .replace(/\s+/g, ' '); // Replace multiple spaces with one
         } else if (typeof obj[key] === 'object') {
             trimNestedStrings(obj[key]); // Recursively handle nested objects
         }
     }
 
     return obj;
+};
+
+const filterAuthorsFromGR = (authors: any[], role: GoodReadsRoles) => {
+    return authors
+        .filter(author => author.role.includes(role))
+        .map(author => author.name[0]);
 }
 
 
 const databazeKnih = async (isbn: string): Promise<object | boolean> => {
-    console.log("databazeKnih");
-
     try {
         //TODO: giant security hole
         const browser = await puppeteer.launch({headless: true, args: ['--no-sandbox'], timeout: 0});
@@ -91,9 +122,9 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 
         await browser.close();
 
-        let book = {
-            title,
-            autor,
+        return {
+            title: title?.replace(" přehled", ""),
+            autor: [autor],
             translator,
             ilustrator,
             published: {
@@ -114,33 +145,60 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
             hrefDatabazeKnih: urlDB,
             picture: imgHref,
         }
-
-        book = trimNestedStrings(book);
-
-        return book;
     } catch (error) {
         console.error("Error in databazeKnih", error);
         return false;
     }
 }
 
-const goodreads = async (isbn: string): Promise<object> => {
-    return {};
+const goodreads = async (isbn: string): Promise<object | boolean> => {
+    try {
+        const url = `https://www.goodreads.com/book/isbn/${isbn}?key=${process.env.GOODREADS_API_KEY}`;
+        const response = await axios.get(url);
+        const parser = new xml2js.Parser();
+        const json = await parser.parseStringPromise(response.data);
+
+        const bookFetched = json.GoodreadsResponse.book[0];
+
+        const {author} = bookFetched.authors[0];
+
+        return {
+            title: bookFetched.title[0],
+            autor: filterAuthorsFromGR(author, GoodReadsRoles.AUTHOR),
+            translator: filterAuthorsFromGR(author, GoodReadsRoles.TRANSLATOR),
+            ilustrator: filterAuthorsFromGR(author, GoodReadsRoles.ILUSTRATOR),
+            editor: filterAuthorsFromGR(author, GoodReadsRoles.EDITOR),
+            published: {
+                publisher: bookFetched.publisher[0],
+                year: bookFetched.publication_year[0],
+                country: mapGRlanguageToCode(bookFetched.country_code[0]),
+            },
+            numberOfPages: bookFetched.num_pages[0],
+            language: mapGRlanguageToCode(bookFetched.language_code[0]),
+            hrefGoodReads: bookFetched.url[0],
+            picture: bookFetched.image_url,
+        };
+    } catch (error) {
+        console.error("Error in goodReads", error);
+        return false;
+    }
 }
 
 export const webScrapper = async (isbn: string): Promise<any> => {
-    console.log("web scrapper called", isbn);
     isbn = isbn.replace(/[^0-9X]/gi, '');
 
     let dkBook: any, grBook: any;
 
-    if (isbn.slice(3, 5) === "80") {
+    if (isbn.slice(3, 5) === "80" || isbn.length < 10) {
         //call Databaze knih, because non CZ SK books won't be there
         dkBook = await databazeKnih(isbn);
-        grBook = await goodreads(isbn);
+        if (isbn.length > 9) grBook = await goodreads(isbn);
     } else {
         grBook = await goodreads(isbn);
     }
 
-    return {...dkBook, ...grBook};
+    //TODO: if grBook is different than dkBook, send warning or do something
+    const finalBook = {...grBook, ...dkBook}; //prefer DBK, so it is overwriting
+
+    return trimNestedStrings(finalBook);
 }

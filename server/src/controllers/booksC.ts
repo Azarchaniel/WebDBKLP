@@ -172,7 +172,6 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
             params: {isbn}
         } = req;
 
-        console.log("controller/getInfoFromISBN");
         const bookInfo = await webScrapper(isbn);
 
         res.status(200).json(bookInfo);
