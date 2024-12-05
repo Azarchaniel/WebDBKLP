@@ -1,7 +1,6 @@
 import {Response, Request} from 'express';
 import {IBook, IPopulateOptions} from '../types';
 import Book from '../models/book';
-import {IUser} from '../types';
 import User from '../models/user';
 import { optionFetchAllExceptDeleted } from '../utils/constants';
 import {getIdFromArray, webScrapper} from "../utils/utils";
@@ -25,13 +24,13 @@ const normalizeBook = (data: any): IBook => {
         readBy: getIdFromArray(data.readBy),
         owner: getIdFromArray(data.owner),
         published: {
-            publisher: data["published.publisher"] ?? "",
-            year: data["published.year"] ?? undefined,
-            country: data["published.country"]?.[0]?.key ?? ''
+            publisher: data.published.publisher ?? "",
+            year: data.published.year ?? undefined,
+            country: data.published.country[0]?.key ?? ''
         },
         location: {
-            city: data["location.city"]?.[0]?.value ?? '',
-            shelf: data["location.shelf"],
+            city: data.location.city[0]?.value ?? '',
+            shelf: data.location.shelf,
         },
         language: data.language?.map((lang: {key: string; value: string}) => lang.key),
         numberOfPages: data.numberOfPages ? parseInt(data.numberOfPages) : undefined,
@@ -118,7 +117,9 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
             body,
         } = req;
 
+        console.log(body);
         const book = normalizeBook(body);
+        console.log(book);
         const updateBook = await Book.findByIdAndUpdate(
             {_id: id},
             book
@@ -193,7 +194,6 @@ const dashboard = {
 
            if (userId) {
                 const currUser = users.find(u => u._id === userId);
-                if (!currUser) throw Error("User not found");
 
                 response.push({
                     owner: {id: userId, firstName: currUser.firstName ?? "", lastName: currUser.lastName}, 

@@ -5,10 +5,11 @@ import {BooksModalBody, BooksModalButtons} from "../../components/books/BookModa
 
 type Props = {
     saveBook: (formData: IBook | any) => void;
+	onClose: () => void;
     book?: IBook;
 }
 
-const AddBook: React.FC<Props> = ({saveBook, book}) => {
+const AddBook: React.FC<Props> = ({saveBook, book, onClose}) => {
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [bookData, setBookData] = useState<IBook | object>();
 	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title"}]);
@@ -26,7 +27,10 @@ const AddBook: React.FC<Props> = ({saveBook, book}) => {
 			{showModal &&
                 <Modal
                 	title="Pridaj knihu"
-                	onClose={() => setShowModal(false)}
+                	onClose={() => {
+                		setShowModal(false);
+                		onClose();
+                	}}
                 	body={<BooksModalBody
                 		data={bookData as IBook}
                 		onChange={setBookData}

@@ -118,7 +118,7 @@ type AutorProps = {
 interface IPublished {
     publisher?: string;
     year?: number;
-    country?: string;
+    country?: ILangCode[];
 }
 
 export interface IDimension {

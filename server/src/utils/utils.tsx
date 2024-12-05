@@ -124,16 +124,16 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 
         return {
             title: title?.replace(" přehled", ""),
-            autor: [autor],
-            translator,
-            ilustrator,
+            autor: [autor].map(autor => autor?.replace(" (p)", "")),
+            translator: [translator],
+            ilustrator: [ilustrator],
             published: {
                 publisher,
                 year: yearOfPublish,
-                country: mapDBKlanguageToLangCode(language),
+                country: [mapDBKlanguageToLangCode(language)],
             },
             numberOfPages: noPages,
-            language: mapDBKlanguageToLangCode(language),
+            language: [mapDBKlanguageToLangCode(language)],
             serie: {
                 title: serieTitle,
                 no: serieNo,
@@ -152,6 +152,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 }
 
 const goodreads = async (isbn: string): Promise<object | boolean> => {
+    if (isbn.length < 10) return false;
     try {
         const url = `https://www.goodreads.com/book/isbn/${isbn}?key=${process.env.GOODREADS_API_KEY}`;
         const response = await axios.get(url);
@@ -171,10 +172,10 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
             published: {
                 publisher: bookFetched.publisher[0],
                 year: bookFetched.publication_year[0],
-                country: mapGRlanguageToCode(bookFetched.country_code[0]),
+                country: [mapGRlanguageToCode(bookFetched.country_code[0])],
             },
             numberOfPages: bookFetched.num_pages[0],
-            language: mapGRlanguageToCode(bookFetched.language_code[0]),
+            language: [mapGRlanguageToCode(bookFetched.language_code[0])],
             hrefGoodReads: bookFetched.url[0],
             picture: bookFetched.image_url,
         };
@@ -185,20 +186,20 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
 }
 
 export const webScrapper = async (isbn: string): Promise<any> => {
+    const originalIsbn = isbn;
     isbn = isbn.replace(/[^0-9X]/gi, '');
 
     let dkBook: any, grBook: any;
 
     if (isbn.slice(3, 5) === "80" || isbn.length < 10) {
-        //call Databaze knih, because non CZ SK books won't be there
-        dkBook = await databazeKnih(isbn);
-        if (isbn.length > 9) grBook = await goodreads(isbn);
+        [dkBook, grBook] = await Promise.all([databazeKnih(isbn), goodreads(isbn)]); //Promise.all, so it runs at the same time
     } else {
         grBook = await goodreads(isbn);
     }
 
     //TODO: if grBook is different than dkBook, send warning or do something
-    const finalBook = {...grBook, ...dkBook}; //prefer DBK, so it is overwriting
-
+    //TODO: add logic, if author is known, change the name to ID; if not known, create
+    const finalBook = {...grBook, ...dkBook, ISBN: originalIsbn}; //prefer DBK, so it is overwriting
+    console.log(finalBook)
     return trimNestedStrings(finalBook);
 }

@@ -1,6 +1,6 @@
 import React, {FC} from "react";
 import {Modal} from "./Modal";
-import ReactDOM from "react-dom";
+import {createRoot, Root} from "react-dom/client";
 
 interface ConfirmDialogProps {
     text: string;
@@ -42,13 +42,22 @@ interface ConfirmDialogOptions {
     onCancel?: () => void;
 }
 
-export const openConfirmDialog = ({text, title, onOk, onCancel}: ConfirmDialogOptions) => {
-	const container = document.createElement("div");
-	document.body.appendChild(container);
+let root: Root | null = null;
+let container: HTMLElement | null = null;
 
+export const openConfirmDialog = ({
+									  text,
+									  title,
+									  onOk,
+									  onCancel,
+								  }: ConfirmDialogOptions) => {
 	const handleClose = () => {
-		ReactDOM.unmountComponentAtNode(container);
-		document.body.removeChild(container);
+		if (root && container) {
+			root.unmount();
+			document.body.removeChild(container);
+			root = null;
+			container = null;
+		}
 	};
 
 	const handleOk = () => {
@@ -61,13 +70,18 @@ export const openConfirmDialog = ({text, title, onOk, onCancel}: ConfirmDialogOp
 		handleClose();
 	};
 
-	ReactDOM.render(
+	if (!container) {
+		container = document.createElement("div");
+		document.body.appendChild(container);
+		root = createRoot(container);
+	}
+
+	root?.render(
 		<ConfirmDialog
 			text={text}
 			title={title}
 			onOk={handleOk}
 			onCancel={handleCancel}
-		/>,
-		container
+		/>
 	);
 };

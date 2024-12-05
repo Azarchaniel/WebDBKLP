@@ -103,7 +103,7 @@ export default function BookPage() {
 	}
 
 	const handleUpdateBook = (book: IBook): void => {
-		setUpdateBook(book)
+		setUpdateBook(book);
 	}
 
 	const handleDeleteBook = (_id: string): void => {
@@ -141,7 +141,7 @@ export default function BookPage() {
 			{/* TODO: remove Header and Sidebar from here */}
 			<Header/>
 			<Sidebar/>
-			<AddBook saveBook={handleSaveBook}/>
+			<AddBook saveBook={handleSaveBook} onClose={() => setUpdateBook(undefined)}/>
 			<div ref={popRef} className={`showHideColumns ${hidden.control ? "hidden" : "shown"}`}>
 				<ShowHideRow label="Editor" init={hidden.editor} onChange={() => setHidden({...hidden, editor: !hidden.editor})} />
 				<ShowHideRow label="Ilustrátor" init={hidden.ilustrator} onChange={() => setHidden({...hidden, ilustrator: !hidden.ilustrator})} />
@@ -186,7 +186,13 @@ export default function BookPage() {
 					}
 				]}
 			/>
-			{Boolean(updateBook) && <AddBook saveBook={handleSaveBook} book={updateBook} />}
+			{Boolean(updateBook) &&
+				<AddBook
+					key={updateBook?._id || "new"}
+					saveBook={handleSaveBook}
+					book={updateBook}
+					onClose={() => setUpdateBook(undefined)}
+				/>}
 			<Toast/>
 		</main>
 	);

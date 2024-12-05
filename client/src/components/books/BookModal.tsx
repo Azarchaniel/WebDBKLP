@@ -8,6 +8,7 @@ import {countryCode, langCode} from "../../utils/locale";
 import {showError} from "../Modal";
 import {InputField, MultiselectField} from "../InputFields";
 import {cities} from "../../utils/constants";
+import {openLoadingBooks} from "../LoadingBooks";
 
 interface BodyProps {
     data: IBook | object;
@@ -30,12 +31,6 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 
 	useEffect(() => {
 		onChange(formData);
-
-		//if (formData && ("ISBN" in formData && !("title" in formData)) && checkIsbnValidity(formData.ISBN)) {
-		getInfoAboutBook(formData?.ISBN)
-			.then((book) => console.log(book))
-			.catch(err => console.error(err));
-		//}
 	}, [formData]);
 
 	// clear form btn
@@ -43,6 +38,26 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 		if (!data) return;
 		if (Object.keys(data).length === 0 && data.constructor === Object) setFormData(data);
 	}, [data]);
+
+	const getBookFromISBN = (isbn: string) => {
+		if (!("title" in (formData || {})) && checkIsbnValidity(isbn)) {
+			openLoadingBooks(true);
+			getInfoAboutBook(isbn)
+				.then((response) => {
+					setFormData({
+						...response.data,
+						published: {
+							...response.data.published,
+							country: countryCode.filter((country: ILangCode) =>
+								((response.data as IBook)?.published?.country as unknown as string[])?.includes(country.key))
+						},
+						language: langCode.filter((lang: ILangCode) => ((response.data as IBook)?.language as unknown as string[])?.includes(lang.key)),
+					} as IBook)
+				})
+				.catch(err => console.error(err))
+				.finally(() => openLoadingBooks(false))
+		}
+	}
 
 	//edit book
 	useEffect(() => {
@@ -55,7 +70,11 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 			editor: formPersonsFullName((data as IBook)?.editor),
 			ilustrator: formPersonsFullName((data as IBook)?.ilustrator),
 			location: {city: cities.find(c => c.value === (data as IBook)?.location?.city)?.showValue},
-			published: {country: countryCode.find((country: ILangCode) => ((data as IBook)?.published?.country as unknown as string[])?.includes(country.key))},
+			published: {
+				...(data as IBook).published,
+				country: countryCode.filter((country: ILangCode) =>
+					((data as IBook)?.published?.country as unknown as string[])?.includes(country.key))
+			},
 			language: langCode.filter((lang: ILangCode) => ((data as IBook)?.language as unknown as string[])?.includes(lang.key)),
 			readBy: formPersonsFullName((data as IBook)?.readBy),
 			owner: formPersonsFullName((data as IBook)?.owner),
@@ -219,7 +238,10 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					value={formData?.ISBN || ""}
 					placeholder='ISBN'
 					name="ISBN"
-					onChange={handleInputChange}
+					onChange={(input) => {
+						handleInputChange(input);
+						getBookFromISBN(input.target.value);
+					}}
 					customerror={getErrorMsg("ISBN")}
 				/>
 			</div>

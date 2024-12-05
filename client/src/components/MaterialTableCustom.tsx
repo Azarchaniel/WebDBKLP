@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import LoadingBooks from "./LoadingBooks";
+import { LoadingBooks } from "./LoadingBooks";
 import MaterialTable, {Column} from "@material-table/core";
 
 type PropsMT = {

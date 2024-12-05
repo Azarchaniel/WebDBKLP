@@ -17,6 +17,7 @@ body {
 }
 
 .bookshelf_wrapper {
+  z-index: 1003;
   position: absolute;
   top: 50vh;
 }
