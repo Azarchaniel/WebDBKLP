@@ -196,7 +196,7 @@ const dashboard = {
                 const currUser = users.find(u => u._id === userId);
 
                 response.push({
-                    owner: {id: userId, firstName: currUser.firstName ?? "", lastName: currUser.lastName}, 
+                    owner: {id: userId, firstName: currUser?.firstName ?? "", lastName: currUser?.lastName},
                     count: await Book.countDocuments({owner: userId})
                 });
             } else {
@@ -204,8 +204,8 @@ const dashboard = {
                 for (let user of users) {
                     tempRes.push(
                         {
-                            owner: {id: user._id, firstName: user.firstName ?? "", lastName: user.lastName},
-                            count: await Book.countDocuments({owner: user._id})
+                            owner: {id: user?._id, firstName: user?.firstName ?? "", lastName: user?.lastName},
+                            count: await Book.countDocuments({owner: user?._id})
                         }
                     )
                 }

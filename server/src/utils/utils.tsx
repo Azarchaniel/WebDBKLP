@@ -1,6 +1,7 @@
 import puppeteer, {Page} from 'puppeteer';
 import axios from "axios";
 import xml2js from "xml2js";
+import Autor from "../models/autor";
 
 enum GoodReadsRoles {
     AUTHOR = "",
@@ -84,9 +85,85 @@ const filterAuthorsFromGR = (authors: any[], role: GoodReadsRoles) => {
         .map(author => author.name[0]);
 }
 
+const getAuthorsIDandUnique = async (authors: string[]) => {
+    if (!authors) return;
+
+    const foundAuthors = [];
+
+    for (let author of authors) {
+        const splitted = author.split(" ");
+        let {firstName, lastName} = "";
+
+        // if name consist of only one word
+        if (splitted.length === 1) {
+            lastName = splitted[0];
+        } else {
+            firstName = splitted.slice(0, splitted.length - 1).join();
+            lastName = splitted[splitted.length - 1];
+        }
+
+        if (!lastName) return;
+
+        let queryOptions: any[] = [
+            {
+                lastName: {
+                    $regex: `^${lastName.replace(/ová$/i, '')}(ová)?$`,
+                    $options: 'i'
+                }
+            }
+        ];
+
+        if (firstName.length > 0) {
+            const firstNameConditions: any[] = [
+                { firstName: firstName }
+            ];
+
+            if (!firstName.includes(".")) {
+                firstNameConditions.push({
+                    firstName: firstName
+                        ?.split(" ")
+                        .map(word => word[0] + ". ")
+                        .join("")
+                        .trim()
+                });
+            }
+
+            queryOptions = [
+                {
+                    $and: [
+                        queryOptions[0], // Prioritize lastName condition
+                        { $or: firstNameConditions } // Include firstName conditions only when lastName matches
+                    ]
+                },
+                ...queryOptions // Fall back to matching lastName alone
+            ];
+        }
+
+        let foundAuthor = await Autor.findOne({ $or: queryOptions }).collation({ locale: "cs", strength: 1 });
+
+
+        if (!foundAuthor) {
+            foundAuthor = await Autor.create({firstName: firstName, lastName: lastName});
+        }
+
+        //cleaning obj, so there is no hidden params from Mongo
+        foundAuthors.push({
+            _id: foundAuthor._id,
+            lastName: foundAuthor.lastName,
+            firstName: foundAuthor.firstName,
+            fullName: `${foundAuthor.lastName ?? ""}${foundAuthor.firstName ? ", " + foundAuthor.firstName : ""}`,
+        });
+    }
+
+    // remove duplicates
+    return foundAuthors.filter((doc, index, self) =>
+        index === self.findIndex(d => d.firstName === doc.firstName && d.lastName === doc.lastName)
+    );
+}
 
 const databazeKnih = async (isbn: string): Promise<object | boolean> => {
     try {
+        console.log("DK called ", isbn);
         //TODO: giant security hole
         const browser = await puppeteer.launch({headless: true, args: ['--no-sandbox'], timeout: 0});
         //const browser = await puppeteer.launch();
@@ -106,7 +183,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         await page.waitForSelector("div[id='more_book_info']");
 
         const title = await getContentFromElement(page, "h1[itemprop='name']");
-        const autor = await getContentFromElement(page, "h2[class='jmenaautoru']");
+        const autor = await getContentFromElement(page, "span[itemprop='author']");
         const translator = await getContentFromElement(page, "span[itemprop='translator']");
         const ilustrator = await getContentFromElement(page, "span[itemprop='ilustrator']");
         const yearOfPublish = await getContentFromElement(page, "span[itemprop='datePublished']");
@@ -118,7 +195,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         const editionTitle = await getContentFromElement(page, "span[itemprop='bookEdition']");
         const editionNo = getNumberFromString(await getContentFromElement(page, "em[class='info st_normal']"));
         const urlDB = page.url();
-        const imgHref = await page.$eval("img[class='kniha_img']", el => el.src);
+        const imgHref = await page.$eval("img[class='kniha_img coverOnDetail']", el => el.src);
 
         await browser.close();
 
@@ -147,13 +224,15 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         }
     } catch (error) {
         console.error("Error in databazeKnih", error);
-        return false;
+        return {};
     }
 }
 
 const goodreads = async (isbn: string): Promise<object | boolean> => {
     if (isbn.length < 10) return false;
     try {
+        console.log("GR called ", isbn);
+
         const url = `https://www.goodreads.com/book/isbn/${isbn}?key=${process.env.GOODREADS_API_KEY}`;
         const response = await axios.get(url);
         const parser = new xml2js.Parser();
@@ -180,8 +259,8 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
             picture: bookFetched.image_url,
         };
     } catch (error) {
-        console.error("Error in goodReads", error);
-        return false;
+        console.error("Error in goodReads", error.status, error.code);
+        return {};
     }
 }
 
@@ -191,15 +270,36 @@ export const webScrapper = async (isbn: string): Promise<any> => {
 
     let dkBook: any, grBook: any;
 
-    if (isbn.slice(3, 5) === "80" || isbn.length < 10) {
-        [dkBook, grBook] = await Promise.all([databazeKnih(isbn), goodreads(isbn)]); //Promise.all, so it runs at the same time
+    if ((isbn.slice(3, 5) === "80" || isbn.slice(0,2) === "80") || isbn.length < 10) {
+        const results = await Promise.allSettled([databazeKnih(isbn), goodreads(isbn)]); //Promise.allSettled, so it runs at the same time but wont fail if one fail
+
+        dkBook = results[0].status === 'fulfilled' ? results[0].value : null;
+        grBook = results[1].status === 'fulfilled' ? results[1].value : null;
+
+        if (!dkBook) {
+            console.error('Failed to fetch data from databazeKnih');
+        }
+        if (!grBook) {
+            console.error('Failed to fetch data from goodreads');
+        }
     } else {
         grBook = await goodreads(isbn);
     }
 
+    if (!dkBook || !grBook) {
+        console.error("Book not found", isbn);
+    }
+
     //TODO: if grBook is different than dkBook, send warning or do something
-    //TODO: add logic, if author is known, change the name to ID; if not known, create
-    const finalBook = {...grBook, ...dkBook, ISBN: originalIsbn}; //prefer DBK, so it is overwriting
-    console.log(finalBook)
+    const mergedBook = {...grBook, ...dkBook, ISBN: originalIsbn}; //prefer DBK, so it is overwriting
+
+    const finalBook = {
+        ...mergedBook,
+        autor: await getAuthorsIDandUnique(mergedBook.autor),
+        translator: await getAuthorsIDandUnique(mergedBook.translator),
+        ilustrator: await getAuthorsIDandUnique(mergedBook.ilustrator),
+        editor: await getAuthorsIDandUnique(mergedBook.editor),
+    };
+
     return trimNestedStrings(finalBook);
 }
