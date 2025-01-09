@@ -1,7 +1,5 @@
 import App from "./App"
 import ReactDOM from "react-dom"
-import "bootstrap/dist/css/bootstrap.css";
-import "../node_modules/font-awesome/css/font-awesome.min.css";
 import {BrowserRouter, Routes, Route} from "react-router-dom";
 import BookPage from "./pages/books/BookPage";
 import AutorPage from "./pages/autors/AutorPage";

@@ -36,11 +36,6 @@ body, html, main, #root {
   flex-direction: column;
 }
 
-.tooltipA {
-  max-width: 30vw;
-  font-size: 1rem !important;
-}
-
 .Card {
   display: flex;
   justify-content: space-between;
@@ -137,15 +132,6 @@ body, html, main, #root {
   overflow-y: auto;
 }
 
-.modal-footer {
-  padding: 1rem 0.8rem 1rem 1rem !important;
-}
-
-.modal-content {
-  width: 170% !important;
-  margin: 0 auto;
-}
-
 .modal-title {
   color: var(--menu);
 }
@@ -156,11 +142,6 @@ body, html, main, #root {
   background: none;
   top: 19%;
   right: 10%;
-}
-
-.line-through {
-  text-decoration: line-through;
-  color: #777 !important;
 }
 
 .hide-button {
@@ -274,12 +255,12 @@ body, html, main, #root {
   user-select: none;
 
   &:hover {
-    color: var(--anchor) !important;
-    text-decoration: none !important;
+    color: var(--anchor);
+    text-decoration: none;
   }
 
   &.activeLink {
-    color: var(--anchor) !important;
+    color: var(--anchor);
   }
 }
 
@@ -318,7 +299,7 @@ body, html, main, #root {
 }
 
 .hidden {
-  visibility: hidden !important;
+  visibility: hidden;
 }
 
 .MuiPaper-root {
@@ -361,7 +342,7 @@ body, html, main, #root {
 }
 
 .MuiTableHead-root {
-  height: 3rem !important;
+  height: 3rem;
 }
 
 .BookDetail {
@@ -404,7 +385,7 @@ body, html, main, #root {
 }
 
 .hideShowCheckbox:hover {
-  color: darkslategray !important;
+  color: darkslategray;
 }
 
 .trueMark::after {
@@ -549,24 +530,6 @@ body, html, main, #root {
   grid-area: 10 / 8 / 10 / 13;
 }
 
-.form-control-important {
-  display: block !important;
-  width: 100% !important;
-  padding: 0 0.75rem !important;
-  font-size: 1rem !important;
-  font-weight: 400 !important;
-  line-height: 1rem !important;
-  color: #212529 !important;
-  background-color: #fff !important;
-  background-clip: padding-box !important;
-  border: 1px solid #ced4da !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  appearance: none !important;
-  border-radius: 0.25rem !important;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out !important;
-}
-
 .WAMuiChipInput-underline-14::before .WAMuiChipInput-underline-14::after {
   border-bottom: none;
 }
@@ -603,8 +566,8 @@ body, html, main, #root {
     font-size: 2rem;
 
     &:hover {
-      filter: brightness(1.2) !important;
-      text-decoration: none !important;
+      filter: brightness(1.2);
+      text-decoration: none;
     }
   }
 }
@@ -673,8 +636,8 @@ body, html, main, #root {
   position: fixed;
   right: 1rem;
   top: 8vh;
-  height: 3rem !important;
-  width: 3rem !important;
+  height: 3rem;
+  width: 3rem;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -709,7 +672,6 @@ body, html, main, #root {
 
 //for Multiselect
 .option {
-  //background-color: var(--anchor) !important;
   &:hover {
     background-color: var(--anchor) !important;
   }

@@ -37,10 +37,10 @@ cd ./client; npx run start
 - [ ] remove bootstrap (bootstrap is used in modals)
 - [X] a href to DatabazeKnih and GoodReads
 - [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend) (MVP)
-- [ ] fix router not fetching data when changing Owner - I need global store for ActiveUser (MVP)
+- [X] fix router not fetching data when changing Owner - I need global store for ActiveUser (MVP)
 - [ ] rework Autocomplete - custom - if there is no item found, parse the string and create item
 - [X] custom modal - grid system
-- [ ] webscrapper and autofilling (MVP)
+- [X] webscrapper and autofilling (MVP)
 - [ ] some reports, numbers, graph on Main page
 - [ ] import books from DBKLP (MVP)
 - -[ ] write script, that will get ID of every author
@@ -50,8 +50,7 @@ cd ./client; npx run start
 - - [ ] allow adding comments that is visible only for creator
 - [ ] WYSWIG editor for Quotes (with pictures)
 - [ ] generalize CRUD - first parameter is DB entity name, then ID, then requested params. In Error specify, what is missing in model. 
-- [ ] too many !importants in index.scss
-- [ ] translations
+- [X] too many !importants in index.scss
 - [ ] allow user to add tags - "fantasy", "read2012"
 
 (MVP) - Minimum Viable Product
