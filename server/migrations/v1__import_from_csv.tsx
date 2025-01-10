@@ -268,7 +268,7 @@ const app: Express = express()
 
 const PORT: string | number = 4001
 
-const uri: string = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
+const uri: string = `mongodb+srv://Azarchaniel:lubos26csonka@cluster0.og6qo.mongodb.net/WebDBKLP?retryWrites=true&w=majority`;
 
 mongoose.set("strictQuery", false);
 
