@@ -41,7 +41,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 
 		const toBeModified: IQuote = {
 			...data,
-			fromBook: [(data as IQuote)?.fromBook],
+			fromBook: (data as IQuote)?.fromBook ? [(data as IQuote)?.fromBook] : [],
 			owner: formPersonsFullName((data as IQuote)?.owner),
 		} as unknown as IQuote;
 

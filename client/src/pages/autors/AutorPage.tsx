@@ -107,7 +107,7 @@ export default function AutorPage() {
 						title: "Priezvisko",
 						field: "lastName",
 						defaultSort: "asc",
-						customSort: (a: IAutor, b: IAutor) => a.lastName.localeCompare(b.lastName),
+						customSort: (a: IAutor, b: IAutor) => a.lastName?.localeCompare(b.lastName),
 						headerStyle: {
 							backgroundColor: tableHeaderColor
 						},

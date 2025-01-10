@@ -48,30 +48,37 @@ export const stringifyUsers = (data: IUser[], withSurname: boolean) => {
 	return names;
 }
 
-export const darkenLightenColor = (color: string, percent: number) => {
-	let R = parseInt(color.substring(1,3),16);
-	let G = parseInt(color.substring(3,5),16);
-	let B = parseInt(color.substring(5,7),16);
+export const darkenLightenColor = (hex: string, percent: number): string => {
+	// Remove the hash (#) if present
+	hex = hex.replace(/^#/, "");
 
-	R = R * (100 + percent) / 100;
-	G = G * (100 + percent) / 100;
-	B = B * (100 + percent) / 100;
+	// Parse the color into RGB components
+	let r = parseInt(hex.substring(0, 2), 16);
+	let g = parseInt(hex.substring(2, 4), 16);
+	let b = parseInt(hex.substring(4, 6), 16);
 
-	R = (R<255)?R:255;
-	G = (G<255)?G:255;
-	B = (B<255)?B:255;
+	// Adjust each color channel
+	r = Math.min(255, Math.max(0, r + Math.round((percent / 100) * 255)));
+	g = Math.min(255, Math.max(0, g + Math.round((percent / 100) * 255)));
+	b = Math.min(255, Math.max(0, b + Math.round((percent / 100) * 255)));
 
-	const RR = ((R.toString(16).length===1)?"0"+R.toString(16):R.toString(16));
-	const GG = ((G.toString(16).length===1)?"0"+G.toString(16):G.toString(16));
-	const BB = ((B.toString(16).length===1)?"0"+B.toString(16):B.toString(16));
+	const calcChannel = (channel: number) =>
+		channel <= 0.03928 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
+	const luminance =
+		0.2126 * calcChannel(r) + 0.7152 * calcChannel(g) + 0.0722 * calcChannel(b);
 
-	return "#"+RR+GG+BB;
+	//color is too dark, dump it and create new
+	if (r < 15 || g < 15 || b < 15) return darkenLightenColor(hex, 35);
+	if (luminance < 3000) return darkenLightenColor(hex, -40);
+
+	// Convert back to hex and return
+	const toHex = (value: number) => value.toString(16).padStart(2, "0");
+	return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
 export const getCssPropertyValue = (propertyName: string) => {
 	return getComputedStyle(document.body).getPropertyValue(propertyName);
 }
-
 
 export function checkIsbnValidity(isbn: string): boolean {
 	if (!isbn) return true;
@@ -171,3 +178,12 @@ export const formPersonsFullName = <T extends { firstName?: string; lastName?: s
 		return `${person.lastName ?? ""}${person.firstName ? ", " + person.firstName : ""}`;
 	}
 };
+
+export const randomMinMax = (min: number, max: number, integer?: boolean): number => {
+	if (integer) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+	return Math.random() * (max - min) + min;
+}
