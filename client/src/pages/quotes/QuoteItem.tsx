@@ -11,18 +11,8 @@ type Props = { quote: IQuote, bcgrClr: string } & {
 const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {
 	const [update, setUpdate] = useState<IQuote>();
 
-	const cssGrid = () => {
-		if (quote.text.length < 300) {
-			return "Quote smallQ";
-		} else if (quote.text.length < 500) {
-			return "Quote mediumQ";
-		} else {
-			return "Quote largeQ";
-		}
-	}
-
 	return (
-		<div key={quote._id} className={cssGrid()} style={{backgroundColor: bcgrClr}}>
+		<div key={quote._id} className="Quote" style={{backgroundColor: bcgrClr}}>
 			<div className='text'>
 				{quote.fromBook && quote.fromBook?.title && <h4>{quote.fromBook?.title}{quote.pageNo ? ", s. " + quote.pageNo : ""}</h4>}
 				{quote.fromBook?.autor && <p><span className="quoteOwner">{formPersonsFullName(quote.fromBook?.autor[0])?.toString as any}</span></p>}

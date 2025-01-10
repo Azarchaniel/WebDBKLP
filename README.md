@@ -37,6 +37,7 @@ cd ./client; npx run start
 - [ ] remove bootstrap (bootstrap is used in modals)
 - [X] a href to DatabazeKnih and GoodReads
 - [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend) (MVP)
+- - [ ] lazy loading quotes
 - [X] fix router not fetching data when changing Owner - I need global store for ActiveUser (MVP)
 - [ ] rework Autocomplete - custom - if there is no item found, parse the string and create item
 - [X] custom modal - grid system

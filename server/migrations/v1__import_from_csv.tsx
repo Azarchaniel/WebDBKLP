@@ -4,6 +4,7 @@ import express, {Express} from "express";
 import Book from "../src/models/book";
 import LP from "../src/models/lp";
 import Quote from "../src/models/quote";
+import {IBook} from "../src/types";
 
 /**
  * HOW TO RUN:
@@ -28,7 +29,7 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
 
         if (splitted.length < 1) return;
 
-        // here it is reversed - last name is first, than first name
+        // here it is reversed - last name is first, then first name
         // if name consist of only one word
         if (splitted.length === 1) {
             lastName = splitted[0];
@@ -152,45 +153,64 @@ const createBook = async (row: string[], owner: string) => {
         console.log("creating book", );
         await Book.create(book);
     } catch (err) {
-        console.error("error while creating book", book.ISBN, error);
+        console.error("error while creating book", book.ISBN, err);
     }
 }
 
 const createLP = async (row: string[]) => {
-    const autors = row[0].split(";");
+    const splittedRow = row[0].split(";")
+    const autors = splittedRow[0].split(",");
+
+    //FIXME: most of the authors have reversed names
     const enrichedAutors = await getAuthorsIDandUnique(autors);
 
     const lp = {
         autor: enrichedAutors,
-        title: row[1],
-        subtitle: row[2],
+        title: splittedRow[1] || "",
+        subtitle: splittedRow[2],
         edition: {
-            title: row[4],
+            title: splittedRow[4],
         },
-        countLp: row[6],
-        speed: row[7],
+        countLp: splittedRow[5],
+        speed: splittedRow[6],
         publisher: {
-            publisher: row[9],
-            year: row[10],
-            country: row[8]
+            publisher: splittedRow[8],
+            year: splittedRow[9],
+            country: splittedRow[7]
         },
-        language: row[11],
-        note: row[12]
+        language: splittedRow[10],
+        note: splittedRow[11]
     }
+
+    console.log(lp)
 
     try {
         await LP.create(lp);
     } catch (err) {
         console.error("error while creating LP", lp.title, err);
     }
-
 }
 
 const createQuote = async (row: string[]) => {
+    const splittedRow = row[0].split(";")
+
+    let book: IBook | null = null;
+    if (splittedRow[0]) {
+        // 8071456071 becomes the regex 8-?0-?7-?1-?4-?5-?6-?0-?7-?1.
+        const normalizedIsbn = new RegExp(
+            splittedRow[0]
+                .replace(/-/g, "")
+                .split("")
+                .join('-?'),
+        "i");
+
+        book = await Book.findOne({ISBN: normalizedIsbn});
+    }
+
     const quote = {
-        text: row[3],
-        fromBook: row[0],
-        pageNo: row[2],
+        text: splittedRow[3],
+        fromBook: book ? book._id : undefined,
+        pageNo: splittedRow[2],
         owner: ["619800d46aba58b905cc2455"]
     }
 
@@ -202,7 +222,7 @@ const createQuote = async (row: string[]) => {
 
 }
 
-const importFromCss = () => {
+const importFromCsv = () => {
     const filePath = process.argv[2];
     console.log("------------------------------")
     console.log("readCSV file", filePath);
@@ -227,23 +247,26 @@ const importFromCss = () => {
                 case "DBKLP_Jakub.csv":
                     await createBook(row, "62bb590bf7da6b9aaa2a3669");
                     break;
-                case "LP":
+                case "LP.csv":
                     await createLP(row);
                     break;
-                case "Quotes":
+                case "Quotes.csv":
                     await createQuote(row);
                     break;
                 default:
                     throw Error("Unknown file " + filePath);
             }
         }
+
+        console.log("===== FINISHED =======")
+        process.exit();
     })
 
 }
 
 const app: Express = express()
 
-const PORT: string | number = 4000
+const PORT: string | number = 4001
 
 const uri: string = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`;
 
@@ -261,4 +284,4 @@ mongoose
     })
 
 
-importFromCss();
+importFromCsv();
