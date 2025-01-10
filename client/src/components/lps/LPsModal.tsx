@@ -145,15 +145,17 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 			</div>
 			<div style={{height: "5px", width: "100%"}}/>
 			<div className="row">
-				<MultiselectField
-					options={autors}
-					displayValue="fullName"
-					label="Autor"
-					value={formData?.autor}
-					name="autor"
-					onChange={handleInputChange}
-					emptyRecordMsg="Žiadny autori nenájdení"
-				/>
+				<div className="col">
+					<MultiselectField
+						options={autors}
+						displayValue="fullName"
+						label="Autor"
+						value={formData?.autor}
+						name="autor"
+						onChange={handleInputChange}
+						emptyRecordMsg="Žiadny autori nenájdení"
+					/>
+				</div>
 			</div>
 			<div style={{height: "5px", width: "100%"}}/>
 			<div className="row">

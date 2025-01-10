@@ -33,6 +33,7 @@ const MaterialTableCustom: React.FC<PropsMT> = ({title, data, columns, actions, 
 				numberOfPagesAround: 2
 			}}
 			actions={[
+				...columns,
 				...actions,
 				{
 					icon: "filter_list",

@@ -31,11 +31,13 @@ export default function QuotePage() {
 	useEffect(() => {
 		getBooks()
 			.then(({data: {books}}: IBook[] | any) => {
-				setBooks(books);
+				const quotedBookIds = new Set(initQuotes.map(quote => quote.fromBook._id));
+				//filter only books the quotes are from
+				//TODO: do on BE
+				setBooks(books.filter((book: IBook) => quotedBookIds.has(book._id)));
 			})
 			.catch((err: Error) => console.trace(err))
-		fetchQuotes();
-	}, []);
+	}, [initQuotes]);
 
 	useEffect(() => {
 		fetchQuotes();
@@ -65,18 +67,6 @@ export default function QuotePage() {
 			.catch((err: Error) => console.trace(err))
 			.finally(() => setLoading(false))
 	}
-
-	useEffect(() => {
-		if (!booksToFilter.length) return setFilteredQuotes(initQuotes);
-
-		const filteredQuotes = initQuotes.filter((quote: IQuote) => {
-			if (!quote.fromBook) return false;
-			return booksToFilter.includes(quote.fromBook._id);
-		})
-
-		setFilteredQuotes(filteredQuotes);
-
-	}, [booksToFilter]);
 
 	const handleSaveQuote = (formData: IQuote): void => {
 		addQuote(formData)
@@ -142,7 +132,7 @@ export default function QuotePage() {
 		<main className='App'>
 			<Header/>
 			<Sidebar/>
-			<AddQuote saveQuote={handleSaveQuote}/>
+			<AddQuote saveQuote={handleSaveQuote} onClose={() => {}}/>
 			<div style={{position: "fixed", top: "20rem", zIndex: 1000}}>
 				{loading ? <LoadingBooks/> : <></>}
 			</div>
@@ -153,6 +143,7 @@ export default function QuotePage() {
 				displayValue="title"
 				placeholder="Z knih"
 				closeIcon="cancel"
+				emptyRecordMsg="Žiadne knihy na výber"
 				onSelect={(_: any, added: IBook) => {
 					//first param is list already selected Objects
 					setBooksToFilter([...booksToFilter, added._id])
@@ -170,8 +161,10 @@ export default function QuotePage() {
 						borderRadius: "3px"
 					},
 					option: {
+						width: "20rem",
 						color: "black"
 					},
+					notFound: {color: "black"},
 					multiselectContainer: {
 						width: "20rem",
 						paddingRight: "5px",

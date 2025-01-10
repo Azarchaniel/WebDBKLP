@@ -3,8 +3,9 @@ import React, {useCallback, useEffect, useState} from "react";
 import {getBooks, getUsers} from "../../API";
 import {toast} from "react-toastify";
 import {showError} from "../Modal";
-import ToggleButton from "../ToggleButton";
 import {InputField, MultiselectField} from "../InputFields";
+import ToggleSwitch from "../ToggleSwitch";
+import {formPersonsFullName} from "../../utils/utils";
 
 interface BodyProps {
     data: IQuote | object;
@@ -31,8 +32,21 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	}, [formData]);
 
 	useEffect(() => {
+		if (!data) return;
 		setFormData(data);
 	}, [data]);
+
+	useEffect(() => {
+		if (!data) return;
+
+		const toBeModified: IQuote = {
+			...data,
+			fromBook: [(data as IQuote)?.fromBook],
+			owner: formPersonsFullName((data as IQuote)?.owner),
+		} as unknown as IQuote;
+
+		setFormData(toBeModified);
+	}, []);
 
 	useEffect(() => {
 		getBooks()
@@ -58,22 +72,6 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 				fullName: `${user.lastName}, ${user.firstName}`
 			})).sort((a: any, b: any) => a.fullName!.localeCompare(b.fullName!)));
 		}).catch(err => console.trace("Error while fetching Users", err));
-
-		// if (id) {
-		//     setShowModal(true);
-		//     getQuote(id).then(quote => {
-		//         const currentQuote = quote.data.quote;
-		//         setFormData({
-		//             _id: currentQuote?._id,
-		//             text: currentQuote?.text || undefined,
-		//             fromBook: currentQuote?.fromBook || undefined,
-		//             pageNo: currentQuote?.pageNo || undefined,
-		//             owner: currentQuote?.owner || undefined,
-		//             note: currentQuote?.note || undefined
-		//         });
-		//     })
-		//         .catch(err => console.trace("Error while fetching Quotes", err));
-		// }
 	}, [])
 
 	//ERROR HANDLING
@@ -153,8 +151,12 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 		<div style={{height: "5px", width: "100%"}}/>
 		<div className="row">
 			<div className="col-4">
-				<ToggleButton labelLeft="Text" labelRight="Obrázok"
-					state={() => setIsText(!isText)}/>
+				<ToggleSwitch
+					id="id"
+					checked={isText}
+					onChange={checked => setIsText(checked)}
+					optionLabels={["Text", "Obrázok"]}
+				/>
 			</div>
 			<div className="col-5">
 				<MultiselectField

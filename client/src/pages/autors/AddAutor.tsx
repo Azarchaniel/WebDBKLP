@@ -5,14 +5,18 @@ import {Modal} from "../../components/Modal";
 import {AutorsModalBody, AutorsModalButtons} from "../../components/autors/AutorsModal";
 
 interface Props {
-    saveAutor: (formData: IAutor) => void
+    saveAutor: (formData: IAutor) => void;
+    onClose: () => void;
     autor?: IAutor;
 }
 
-const AddAutor: React.FC<Props> = ({saveAutor, autor}: Props) => {
+const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose}: Props) => {
 	const [showModal, setShowModal] = useState(false);
 	const [autorData, setAutorData] = useState<IAutor | object>();
-	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName"}]);
+	const [error, setError] = useState<ValidationError[] | undefined>([{
+		label: "Priezvisko autora musí obsahovať aspoň jeden znak!",
+		target: "lastName"
+	}]);
 
 	useEffect(() => {
 		if (autor) {
@@ -27,7 +31,10 @@ const AddAutor: React.FC<Props> = ({saveAutor, autor}: Props) => {
 			{showModal &&
                 <Modal
                 	title="Pridaj autora"
-                	onClose={() => setShowModal(false)}
+                	onClose={() => {
+                		setShowModal(false);
+                		onClose();
+                	}}
                 	body={<AutorsModalBody
                 		data={autorData as IAutor}
                 		onChange={setAutorData}

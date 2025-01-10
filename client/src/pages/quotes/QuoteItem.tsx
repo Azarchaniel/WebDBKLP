@@ -9,7 +9,7 @@ type Props = { quote: IQuote, bcgrClr: string } & {
 }
 
 const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {
-	const [update, setUpdate] = useState(false);
+	const [update, setUpdate] = useState<IQuote>();
 
 	const cssGrid = () => {
 		if (quote.text.length < 300) {
@@ -31,11 +31,17 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {
 				{quote.note && <p><span className="quoteOwner">Poznámka: {quote.note}</span></p>}
 			</div>
 			<div className='Card--button'>
-				<i className="fas fa-pen" onClick={() => setUpdate(true)}/>
+				<i className="fas fa-pen" onClick={() => setUpdate(quote)}/>
                 &nbsp;&nbsp;&nbsp;
 				<i className="fas fa-trash" onClick={() => deleteQuote(quote._id)}/>
 			</div>
-			{update && <AddQuote saveQuote={saveQuote} id={quote._id}/>}
+			{Boolean(update) &&
+				<AddQuote
+					saveQuote={saveQuote}
+					quote={quote}
+					onClose={() => setUpdate(undefined)}
+				/>
+			}
 		</div>
 	)
 }

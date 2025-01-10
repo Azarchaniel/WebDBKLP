@@ -39,7 +39,7 @@ export interface ILP extends IBaseType {
     edition?: IEditionSerie;
     countLp: number;
     speed: number;
-    published: IPublished;
+    published?: IPublished;
     language: ILangCode[];
     note: string;
 }

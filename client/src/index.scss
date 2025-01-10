@@ -643,6 +643,7 @@ body, html, main, #root {
   justify-content: center;
   align-items: center;
   z-index: 2;
+  cursor: pointer;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.7);
@@ -767,6 +768,7 @@ body, html, main, #root {
       border: none;
       font-size: 2rem;
       color: var(--anchor);
+      cursor: pointer;
     }
   }
 

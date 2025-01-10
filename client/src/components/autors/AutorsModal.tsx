@@ -21,7 +21,8 @@ interface ButtonsProps {
 
 export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
 	const [formData, setFormData] = useState(data as any);
-	const [errors, setErrors] = useState<ValidationError[]>([{label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName"}]);
+	const [errors, setErrors] = useState<ValidationError[]>(
+		[{label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName"}]);
 
 	useEffect(() => {
 		onChange(formData)

@@ -60,7 +60,10 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
         } else {
             const updateQuote: IQuote | null = await Quote.findByIdAndUpdate(
                 { _id: id },
-                req.body
+                {
+                    ...req.body,
+                    fromBook: req.body.fromBook[0]
+                }
             )
 
             const allQuotes: IQuote[] = await Quote

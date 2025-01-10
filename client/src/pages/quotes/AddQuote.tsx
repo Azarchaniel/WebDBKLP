@@ -1,18 +1,26 @@
 import {IQuote, ValidationError} from "../../type";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import {Modal} from "../../components/Modal";
 import {QuotesModalBody, QuotesModalButtons} from "../../components/quotes/QuotesModal";
 
-type Props = {
+interface Props {
     saveQuote: (formData: IQuote | any) => void;
-    id?: string | undefined;
+	onClose: () => void;
+    quote?: IQuote | undefined;
 }
 
-const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any, id?: string | undefined }) => {
+const AddQuote: React.FC<Props> = ({saveQuote, quote, onClose}: Props) => {
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [quoteData, setQuoteData] = useState<IQuote | object>();
 	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"}]);
+
+	useEffect(() => {
+		if (quote) {
+			setShowModal(true);
+			setQuoteData(quote);
+		}
+	}, []);
 
 	return (
 		<>
@@ -21,7 +29,10 @@ const AddQuote: React.FC<Props> = ({saveQuote}: { saveQuote: any, id?: string | 
 			{showModal &&
                 <Modal
                 	title="Pridaj citát"
-                	onClose={() => setShowModal(false)}
+                	onClose={() => {
+                		setShowModal(false);
+                		onClose();
+                	}}
                 	body={<QuotesModalBody
                 		data={quoteData as IQuote}
                 		onChange={setQuoteData}
