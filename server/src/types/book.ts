@@ -21,7 +21,7 @@ export interface IBook extends Document {
     dimensions?: IDimension;
     numberOfPages?: number;
     exLibris: boolean;
-    location: ILocation;
+    location?: ILocation;
     owner: string;
     deletedAt: Date;
     readBy: string[];

@@ -36,4 +36,5 @@ router.put('/edit-lp/:id', controllers_5.updateLp);
 router.post('/delete-lp/:id', controllers_5.deleteLp);
 router.get('/webScrapper');
 router.get('/count-books/:id', controllers_1.dashboard.countBooks);
+router.get('/get-dimensions-statistics', controllers_1.dashboard.getDimensionsStatistics);
 exports.default = router;

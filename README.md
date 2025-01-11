@@ -36,7 +36,7 @@ cd ./client; npx run start
 - -[ ] I need it in DB for MultiSelect anyway
 - [ ] remove bootstrap (bootstrap is used in modals)
 - [X] a href to DatabazeKnih and GoodReads
-- [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend) (MVP)
+- [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend) (MVP) https://medium.com/@kannankannan18/client-side-pagination-vs-server-side-pagination-576a8f57257d
 - - [ ] lazy loading quotes
 - [X] fix router not fetching data when changing Owner - I need global store for ActiveUser (MVP)
 - [ ] rework Autocomplete - custom - if there is no item found, parse the string and create item
@@ -54,6 +54,7 @@ cd ./client; npx run start
 - [X] too many !importants in index.scss
 - [ ] allow user to add tags - "fantasy", "read2012"
 - [ ] connect to devices camera and read the bar code to get ISBN
+- [ ] check and fix requirments in models and types (MVP)
 
 (MVP) - Minimum Viable Product
 

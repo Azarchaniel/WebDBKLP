@@ -42,5 +42,6 @@ router.post('/delete-lp/:id', deleteLp)
 router.get('/webScrapper', )
 
 router.get('/count-books/:id', dashboard.countBooks)
+router.get('/get-dimensions-statistics', dashboard.getDimensionsStatistics)
 
 export default router;

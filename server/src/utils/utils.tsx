@@ -92,6 +92,7 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
 
     for (let author of authors) {
         const splitted = author.split(" ");
+        //@ts-ignore
         let {firstName, lastName} = "";
 
         // if name consist of only one word
@@ -258,7 +259,7 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
             hrefGoodReads: bookFetched.url[0],
             picture: bookFetched.image_url,
         };
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error in goodReads", error.status, error.code);
         return {};
     }

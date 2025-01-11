@@ -22,5 +22,5 @@
 /client/yarn-debug.log*
 /client/yarn-error.log*
 
-/server/dist
+/server/dist/
 /server/nodemon.json

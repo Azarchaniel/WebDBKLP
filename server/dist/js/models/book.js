@@ -38,6 +38,7 @@ const published_1 = require("./published");
 const editionSerie_1 = require("./editionSerie");
 const mongoose = __importStar(require("mongoose"));
 const location_1 = require("./location");
+const dimensions_1 = require("./dimensions");
 //FIXME: dimension
 const bookSchema = new mongoose_1.Schema({
     autor: { type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false },
@@ -53,6 +54,7 @@ const bookSchema = new mongoose_1.Schema({
     language: { type: [String], required: true },
     note: { type: String, required: false },
     numberOfPages: { type: Number, required: false },
+    dimensions: { type: dimensions_1.dimensionSchema, required: false },
     exLibris: { type: Boolean },
     published: { type: published_1.publishedSchema, required: false },
     location: { type: location_1.locationSchema, required: false },

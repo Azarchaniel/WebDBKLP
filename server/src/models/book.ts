@@ -4,6 +4,7 @@ import {publishedSchema} from "./published";
 import {editionSerieSchema} from "./editionSerie";
 import * as mongoose from "mongoose";
 import {locationSchema} from "./location";
+import {dimensionSchema} from "./dimensions";
 
 //FIXME: dimension
 const bookSchema: Schema = new Schema({
@@ -20,6 +21,7 @@ const bookSchema: Schema = new Schema({
     language: {type: [String], required: true},
     note: {type: String, required: false},
     numberOfPages: {type: Number, required: false},
+    dimensions: {type: dimensionSchema, required: false},
     exLibris: {type: Boolean},
     published: {type: publishedSchema, required: false},
     location: {type: locationSchema, required: false},

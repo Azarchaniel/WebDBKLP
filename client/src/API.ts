@@ -310,3 +310,14 @@ export const countBooks = async (userId?: string): Promise<AxiosResponse> => {
 		throw new Error(error);
 	}
 }
+
+export const getDimensionsStatistics = async (): Promise<AxiosResponse> => {
+	try {
+		const statistics: AxiosResponse = await axios.get(
+			`${baseUrl}/get-dimensions-statistics`,
+		)
+		return statistics;
+	} catch (error: any) {
+		throw new Error(error)
+	}
+}

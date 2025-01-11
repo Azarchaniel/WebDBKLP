@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { countBooks } from "../../API";
+import {countBooks, getDimensionsStatistics} from "../../API";
 import "chart.js/auto"; //for react-chart
 import { Pie } from "react-chartjs-2";
 
@@ -10,6 +10,10 @@ export default function DashboardPage() {
 		countBooks()
 			.then((result: any) => setCountAllBooks(result.data))
 			.catch((err: any) => console.error("error counting books FE", err));
+
+		getDimensionsStatistics()
+			.then((result: any) => console.log(result.data))
+			.catch((err: any) => console.error("error getDimensionsStatistics FE", err));
 	}, [])
 
 	const renderUserCount = () => {
