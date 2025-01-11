@@ -129,6 +129,34 @@ export default function QuotePage() {
 		fetchQuotes();
 	}
 
+	const onAddToFilteredBooks = (_: any, added: IBook) => {
+		//first param is list already selected Objects
+		const updatedBooksToFilter = [...booksToFilter, added._id];
+
+		// Update state with the new array
+		setBooksToFilter(updatedBooksToFilter);
+
+		// Use the updated array to filter quotes
+		const newFilteredQuotes = filteredQuotes.filter((quote: IQuote) =>
+			updatedBooksToFilter.includes(quote.fromBook?._id)
+		);
+
+		setFilteredQuotes(newFilteredQuotes);
+	}
+
+	const onRemoveFilteredBook = (remaining: IBook[]): void => {
+		const remainingIds = remaining.map((book: IBook) => book._id);
+		setBooksToFilter(remainingIds);
+		if (remainingIds.length === 0) {
+			setFilteredQuotes(initQuotes);
+		} else {
+			const newFilteredQuotes = filteredQuotes.filter((quote: IQuote) =>
+				remainingIds.includes(quote.fromBook?._id)
+			);
+			setFilteredQuotes(newFilteredQuotes);
+		}
+	}
+
 	return (
 		<main className='App'>
 			<Header/>
@@ -145,15 +173,8 @@ export default function QuotePage() {
 				placeholder="Z knih"
 				closeIcon="cancel"
 				emptyRecordMsg="Žiadne knihy na výber"
-				onSelect={(_: any, added: IBook) => {
-					//first param is list already selected Objects
-					setBooksToFilter([...booksToFilter, added._id])
-				}}
-				onRemove={
-					(remaining: IBook[]) => {
-						setBooksToFilter(remaining.map((book: IBook) => book._id))
-					}
-				}
+				onSelect={onAddToFilteredBooks}
+				onRemove={onRemoveFilteredBook}
 				style={{
 					inputField: {paddingLeft: "0.5rem"},
 					searchBox: {

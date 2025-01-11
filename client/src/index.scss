@@ -8,11 +8,6 @@
   --anchor: #00ADB5;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-}
-
 body, html, main, #root {
   font-family: 'Nunito', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -24,6 +19,16 @@ body, html, main, #root {
 .App {
   width: 97%;
   margin: 4rem 3rem;
+}
+
+::-moz-selection { /* Code for Firefox */
+  color: white;
+  background: var(--anchor);
+}
+
+::selection {
+  color: white;
+  background: var(--anchor);
 }
 
 .row {
@@ -804,4 +809,16 @@ input:invalid {
   position: fixed;
   z-index: 1002;
   background-color: white !important;
+}
+
+/* WYSWIG editor */
+.rsw-editor:has(.rsw-ce[contenteditable="false"]) {
+  border: none;
+  .rsw-ce {
+    padding: 0 !important;
+  }
+}
+
+.rsw-ce img {
+  width: 100%;
 }

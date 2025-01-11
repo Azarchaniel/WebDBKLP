@@ -122,7 +122,7 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
                 firstNameConditions.push({
                     firstName: firstName
                         ?.split(" ")
-                        .map(word => word[0] + ". ")
+                        .map((word: string[]) => word[0] + ". ")
                         .join("")
                         .trim()
                 });

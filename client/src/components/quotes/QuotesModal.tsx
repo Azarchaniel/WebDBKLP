@@ -4,8 +4,8 @@ import {getBooks, getUsers} from "../../API";
 import {toast} from "react-toastify";
 import {showError} from "../Modal";
 import {InputField, MultiselectField} from "../InputFields";
-import ToggleSwitch from "../ToggleSwitch";
 import {formPersonsFullName} from "../../utils/utils";
+import {Wysiwyg} from "../Wysiwyg";
 
 interface BodyProps {
     data: IQuote | object;
@@ -21,7 +21,6 @@ interface ButtonsProps {
 }
 
 export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
-	const [isText, setIsText] = useState<boolean>(true);
 	const [formData, setFormData] = useState<IQuote | any>(data);
 	const [books, setBooks] = useState<IBook[]>();
 	const [users, setUsers] = useState<IUser[] | undefined>();
@@ -126,38 +125,14 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 		});
 	}, []);
 
-	const getErrorMsg = (name: string): string => {
-		return errors.find(err => err.target === name)?.label || "";
-	}
-
 	return (<form>
 		<div className="row">
 			<div className="col-12">
-				{isText ? <textarea id='note' placeholder='*Text'
-					className="form-control"
-					name="text"
-					autoComplete="off"
-					value={formData?.text || ""}
-					onChange={handleInputChange}
-					aria-errormessage={getErrorMsg("text")}
-				/> :
-					<label className="btn btn-dark">
-						<i className="fa fa-image"/> Nahraj obrázky
-						<input type="file" style={{display: "none"}} name="image" accept="image/*"/>
-					</label>
-				}
+				<Wysiwyg value={formData?.text} onChange={handleInputChange} name="text" />
 			</div>
 		</div>
 		<div style={{height: "5px", width: "100%"}}/>
 		<div className="row">
-			<div className="col-4">
-				<ToggleSwitch
-					id="id"
-					checked={isText}
-					onChange={checked => setIsText(checked)}
-					optionLabels={["Text", "Obrázok"]}
-				/>
-			</div>
 			<div className="col-5">
 				<MultiselectField
 					selectionLimit={1}

@@ -43,16 +43,17 @@ cd ./client; npx run start
 - [X] custom modal - grid system
 - [X] webscrapper and autofilling (MVP)
 - [ ] some reports, numbers, graph on Main page
-- [ ] import books from DBKLP (MVP)
-- -[ ] write script, that will get ID of every author
+- [X] import books from DBKLP (MVP)
+- -[X] write script, that will get ID of every author
 - [ ] (in far future) localization
 - [ ] (in far future) authorization/authentication
 - - [ ] add comments
 - - [ ] allow adding comments that is visible only for creator
-- [ ] WYSWIG editor for Quotes (with pictures)
+- [X] WYSWIG editor for Quotes (with pictures)
 - [ ] generalize CRUD - first parameter is DB entity name, then ID, then requested params. In Error specify, what is missing in model. 
 - [X] too many !importants in index.scss
 - [ ] allow user to add tags - "fantasy", "read2012"
+- [ ] connect to devices camera and read the bar code to get ISBN
 
 (MVP) - Minimum Viable Product
 
