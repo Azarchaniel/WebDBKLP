@@ -24,15 +24,17 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	const [formData, setFormData] = useState<IQuote | any>(data);
 	const [books, setBooks] = useState<IBook[]>();
 	const [users, setUsers] = useState<IUser[] | undefined>();
-	const [errors, setErrors] = useState<ValidationError[]>([{label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"}]);
+	const [errors, setErrors] = useState<ValidationError[]>([
+		{label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"},
+		{label: "Musí byť vybraná kniha!", target: "fromBook"}
+	]);
 
 	useEffect(() => {
 		onChange(formData)
 	}, [formData]);
 
 	useEffect(() => {
-		if (!data) return;
-		setFormData(data);
+		if (data) setFormData(data);
 	}, [data]);
 
 	useEffect(() => {
@@ -76,14 +78,13 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	//ERROR HANDLING
 	useEffect(() => {
 		const data = (formData as unknown as IQuote);
-		if (!data || !Object.keys(data).length) return;
 
 		let localErrors: ValidationError[] = [];
 
-		if (!("text" in data && data?.text?.trim().length > 0)) {
-			localErrors.push({label: "Text citátu musí obsahovať aspoň jeden znak!", target: "title"});
+		if (!(data?.text?.trim().length > 0)) {
+			localErrors.push({label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"});
 		} else {
-			localErrors = localErrors?.filter((err: ValidationError) => err.target !== "title") ?? localErrors;
+			localErrors = localErrors?.filter((err: ValidationError) => err.target !== "text") ?? localErrors;
 		}
 
 		if (!data?.fromBook) {
@@ -125,16 +126,27 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 		});
 	}, []);
 
+	const getErrorMsg = (name: string): string => {
+		return errors.find(err => err.target === name)?.label || "";
+	}
+
 	return (<form>
 		<div className="row">
 			<div className="col-12">
-				<Wysiwyg value={formData?.text} onChange={handleInputChange} name="text" />
+				<Wysiwyg
+					id="modalWysiwygText"
+					value={formData?.text}
+					onChange={handleInputChange}
+					name="text"
+					customerror={getErrorMsg("text")}
+				/>
 			</div>
 		</div>
 		<div style={{height: "5px", width: "100%"}}/>
 		<div className="row">
 			<div className="col-5">
 				<MultiselectField
+					id="modalMultiselectFromBooks"
 					selectionLimit={1}
 					options={books}
 					displayValue="title"
@@ -142,6 +154,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 					value={formData?.fromBook}
 					name="fromBook"
 					onChange={handleInputChange}
+					customerror={getErrorMsg("fromBook")}
 				/>
 			</div>
 			<div className="col-3">

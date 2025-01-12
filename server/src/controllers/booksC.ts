@@ -474,12 +474,13 @@ const dashboard = {
                     return acc;
                 }, {});
 
+
             //result of this monstrosity looks like this:
             // {"height":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10},
             // "width":{"sum":10,"avg":10,"min":10,"max":10,"mode":1,"median":10},
             // "depth":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10},
             // "weight":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10}}
-            
+
             res.status(200).json(result);
         } catch (error: unknown) {
             console.log("Error while calculating statistics", error);
