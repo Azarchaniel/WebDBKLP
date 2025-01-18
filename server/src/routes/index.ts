@@ -43,5 +43,7 @@ router.get('/webScrapper', )
 
 router.get('/count-books/:id', dashboard.countBooks)
 router.get('/get-dimensions-statistics', dashboard.getDimensionsStatistics)
+router.get('/get-language-statistics', dashboard.getLanguageStatistics)
+router.get('/get-size-groups', dashboard.getSizesGroups)
 
 export default router;

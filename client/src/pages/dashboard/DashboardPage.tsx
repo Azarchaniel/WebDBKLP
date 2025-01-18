@@ -1,72 +1,57 @@
-import { useEffect, useState } from "react";
-import {countBooks, getDimensionsStatistics} from "../../API";
-import "chart.js/auto"; //for react-chart
-import { Pie } from "react-chartjs-2";
+import {useEffect, useState} from "react";
+import {countBooks, getDimensionsStatistics, getLanguageStatistics, getSizeGroups} from "../../API";
+import {DashboardPieChart} from "../../components/dashboard/DashboardPieChart";
+import {DashboardTableStats} from "../../components/dashboard/DashboardTableStats";
+import {IDimensionsStatistics, ILanguageStatistics} from "../../type";
+import {TableCountRatio} from "../../components/dashboard/TableCountRatio";
+import {TableLanguageStats} from "../../components/dashboard/TableLanguageStats";
 
 export default function DashboardPage() {
-	const [countAllBooks, setCountAllBooks] = useState<{owner: {id: string, firstName: string, lastName: string} | null, count: number}[]>([]);
-    
+	const [countAllBooks, setCountAllBooks] = useState<{
+        owner: { id: string, firstName: string, lastName: string } | null,
+        count: number
+    }[]>([]);
+	const [dimensionStats, setDimensionStats] = useState<IDimensionsStatistics>();
+	const [sizeGroups, setSizeGroups] = useState<any>();
+	const [langStats, setLangStats] = useState<ILanguageStatistics[]>();
+
 	useEffect(() => {
 		countBooks()
 			.then((result: any) => setCountAllBooks(result.data))
 			.catch((err: any) => console.error("error counting books FE", err));
 
 		getDimensionsStatistics()
-			.then((result: any) => console.log(result.data))
+			.then((result: any) => setDimensionStats(result.data))
+			.catch((err: any) => console.error("error getDimensionsStatistics FE", err));
+
+		getSizeGroups()
+			.then((result: any) => setSizeGroups(result.data))
+			.catch((err: any) => console.error("error getSizeGroups FE", err));
+
+		getLanguageStatistics()
+			.then((result: any) => setLangStats(result.data))
 			.catch((err: any) => console.error("error getDimensionsStatistics FE", err));
 	}, [])
 
-	const renderUserCount = () => {
-		if (!countAllBooks) return <p>Loading...</p>
-        
-		// Check if countAllBooks is an object
-		if (typeof countAllBooks === "object" && !Array.isArray(countAllBooks)) {
-			// If it's an object, convert it to an array of entries
-			return Object.entries(countAllBooks).map(([ownerId, bookCount]) => (
-				<p key={ownerId}>{`${ownerId}: ${bookCount}`}</p>
-			))
-		}
-        
-		// If it's already an array, use the previous logic
-		return countAllBooks.map(c => {
-			if (c.owner && !c.owner?.lastName) {
-				return <p key={Math.random()}>{`Bez majiteľa: ${c.count}`}</p>
-			} else if (c.owner) {
-				return <p key={c.owner?.id}>{`${c.owner?.firstName}: ${c.count}`}</p> 
-			} //if it doesnt have owner, it is catch by find in HTML below
-			return null;
-		})
-	}
-
-	const data = {
-		labels: countAllBooks.length ? countAllBooks.filter(c => c.owner).map(c => c.owner?.firstName || "Bez majiteľa") : [],
-		datasets: [{
-			label: "Počet kníh",
-			data: countAllBooks.filter(c => c.owner).map(c => c.count),
-			backgroundColor: [
-				"white", "lightpurple", "black", "gray", "red", "pink"
-			],
-			hoverOffset: 4
-		}]
-	};
-
-	const chartOptions = {
-		plugins: {
-			legend: {
-				position: "left" as const
-			}
-		}
-	}
-
 	return (
-		<div style={{ color: "black", marginLeft: "1rem", display: "flex", flexDirection: "row" }}>
-			<div style={{display: "flex", flexDirection: "column", width: "35%"}}>
-				<p>Počet kníh celkovo: {countAllBooks.find(bc => !bc.owner)?.count}</p>
-				{renderUserCount()}
+		<div className="dashboardContainer">
+			<div className="dashboardItem" style={{padding: 0}} >
+				<DashboardPieChart data={countAllBooks} />
 			</div>
-            
-			<div style={{width: "30rem", height: "30rem"}}>
-				<Pie data={data} options={chartOptions}/>
+			<div className="dashboardItem">
+				<DashboardTableStats dimensionStats={dimensionStats} />
+			</div>
+			<div className="dashboardItem">
+				<TableLanguageStats languageStats={langStats} />
+			</div>
+			<div className="dashboardItem">
+				<TableCountRatio data={sizeGroups?.height} title="Výška (cm)" />
+			</div>
+			<div className="dashboardItem">
+				<TableCountRatio data={sizeGroups?.width} title="Šírka (cm)" />
+			</div>
+			<div className="dashboardItem">
+                Every user - how many read
 			</div>
 		</div>
 	);

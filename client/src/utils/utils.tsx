@@ -163,6 +163,11 @@ export const isNumberOrEmpty = (num: any) => {
 	return (!isNaN(num) || num === "" || num === undefined);
 }
 
+export const toPercentage = (value: number) => {
+	if (!value) return;
+	return ((value * 100).toFixed(1)) + "%";
+}
+
 //TODO: isn't this the same as stringifyAutors?
 export const formPersonsFullName = <T extends { firstName?: string; lastName?: string }>(
 	person: T | T[] | undefined

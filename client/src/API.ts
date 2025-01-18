@@ -321,3 +321,25 @@ export const getDimensionsStatistics = async (): Promise<AxiosResponse> => {
 		throw new Error(error)
 	}
 }
+
+export const getLanguageStatistics = async (): Promise<AxiosResponse> => {
+	try {
+		const statistics: AxiosResponse = await axios.get(
+			`${baseUrl}/get-language-statistics`,
+		)
+		return statistics;
+	} catch (error: any) {
+		throw new Error(error)
+	}
+}
+
+export const getSizeGroups = async (): Promise<AxiosResponse> => {
+	try {
+		const sizeGroups: AxiosResponse = await axios.get(
+			`${baseUrl}/get-size-groups`,
+		)
+		return sizeGroups;
+	} catch (error: any) {
+		throw new Error(error)
+	}
+}

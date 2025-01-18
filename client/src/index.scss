@@ -161,6 +161,7 @@ body, html, main, #root {
   padding: 3rem 0 1rem 1rem;
   transition: 0.5s;
   z-index: 100;
+
   &Opened {
     position: fixed;
     width: 10vw;
@@ -178,6 +179,7 @@ body, html, main, #root {
       right: 1rem;
       top: 0;
       cursor: pointer;
+
       &:hover {
         color: white;
       }
@@ -219,7 +221,7 @@ body, html, main, #root {
     margin: -4rem 0 0 -3rem;
     padding-top: 3rem;
     z-index: 100;
-  
+
     .closeIcon {
       color: white;
       font-size: xx-large;
@@ -228,29 +230,30 @@ body, html, main, #root {
       top: 0;
       cursor: pointer;
       transition: 0.5s;
+
       &:hover {
         color: white;
       }
     }
-  
+
     .SB-Parent {
       margin-left: 1rem;
       font-size: 1.5rem;
       cursor: pointer;
-  
+
       i {
         visibility: visible;
         cursor: pointer;
       }
     }
-  
+
     .SB-Child {
       color: gray;
       visibility: visible;
       cursor: pointer;
     }
   }
-  
+
 
 }
 
@@ -314,7 +317,7 @@ body, html, main, #root {
   tr:hover {
     background-color: var(--anchor);
     box-shadow: inset 1000rem 1em rgba(255, 255, 255, 0.6);
-  }  
+  }
 }
 
 .MuiTableRow-footer:hover {
@@ -330,7 +333,7 @@ body, html, main, #root {
   width: 99.7% !important;
 }
 
-.MuiTableCell-head, .MuiTableSortLabel-active{
+.MuiTableCell-head, .MuiTableSortLabel-active {
   font-weight: bold !important;
   color: white !important;
   background-color: var(--anchor) !important;
@@ -592,6 +595,7 @@ body, html, main, #root {
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.7);
+
     &::after {
       color: var(--anchor);
     }
@@ -619,6 +623,7 @@ body, html, main, #root {
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.7);
+
     &::after {
       color: var(--anchor);
     }
@@ -653,6 +658,7 @@ body, html, main, #root {
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.7);
+
     &::after {
       color: var(--anchor);
     }
@@ -682,6 +688,7 @@ body, html, main, #root {
   &:hover {
     background-color: var(--anchor) !important;
   }
+
   &::selection {
     background-color: var(--anchor) !important;
   }
@@ -706,11 +713,11 @@ body, html, main, #root {
   flex-direction: row;
   justify-content: flex-end;
   width: 100%;
+
   .btn {
     margin-left: 1rem;
   }
 }
-
 
 
 .customModal {
@@ -755,7 +762,7 @@ body, html, main, #root {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);  /* Semi-transparent black */
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
     z-index: 1001;
   }
 
@@ -794,6 +801,7 @@ body, html, main, #root {
     .buttons {
       display: flex;
       justify-content: flex-end;
+
       button {
         margin-left: 0.5rem;
       }
@@ -814,6 +822,7 @@ input:invalid {
 /* WYSWIG editor */
 .rsw-editor:has(.rsw-ce[contenteditable="false"]) {
   border: none;
+
   .rsw-ce {
     padding: 0 !important;
   }
@@ -821,4 +830,35 @@ input:invalid {
 
 .rsw-ce img {
   width: 100%;
+}
+
+.dashboardContainer {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr); /* 2 rows of equal height */
+  grid-template-columns: repeat(3, 1fr); /* 3 columns of equal width */
+  gap: 10px;
+  width: 100%;
+  height: 42rem;
+  padding: 1rem;
+}
+
+.dashboardItem {
+  color: black;
+  background-image: radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px), radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px), radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px), radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px);
+  background-position: left top, right top, left bottom, left top;
+  background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
+  background-size: 17px 1px, 1px 17px, 17px 1px, 1px 17px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  font-size: 0.75rem;
+  line-height: 0.75rem;
+  max-height: 21rem;
+}
+
+.firstCell {
+  border-left: 1px solid transparent;
+  border-top: 1px solid transparent;
 }

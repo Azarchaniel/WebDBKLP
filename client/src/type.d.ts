@@ -163,3 +163,24 @@ export interface ValidationError {
     valid?: boolean;
     target?: string;
 }
+
+interface IDimensionStat {
+    sum: number;
+    avg: number;
+    min: number;
+    max: number;
+    median: number;
+    mode: number;
+}
+
+export interface IDimensionsStatistics {
+    height: IDimension;
+    width: IDimension;
+    depth: IDimension;
+    weight: IDimension;
+}
+
+export interface ILanguageStatistics {
+    language: string;
+    count: number;
+}

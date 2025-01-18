@@ -181,314 +181,353 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
+//FIXME: all of the methods are counting also deleted books
 const dashboard = {
     getDimensionsStatistics: async (_: Request, res: Response): Promise<void> => {
         try {
-            const result = [
-                //$group: {_id: null -> group everything
+            const result = await Book.aggregate([
                 {
-                    type: "sumHeight",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, sumHeight: {$sum: "$dimensions.height"}}},
-                    ])
-                },
-                {
-                    type: "avgHeight",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, avgHeight: {$avg: "$dimensions.height"}}},
-                    ])
-                },
-                {
-                    type: "minHeight",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, minHeight: {$min: "$dimensions.height"}}},
-                    ])
-                },
-                {
-                    type: "maxHeight",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, maxHeight: {$max: "$dimensions.height"}}},
-                    ])
-                },
-                {
-                    type: "modeHeight",
-                    value: await Book.aggregate([
-                        {$group: {_id: "$dimensions.height", modeHeight: {$sum: 1}}},
-                        {$sort: {count: -1}},
-                        {$limit: 1}
-                    ])
-                },
-                {
-                    type: "sumWidth",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, sumWidth: {$sum: "$dimensions.width"}}},
-                    ])
-                },
-                {
-                    type: "avgWidth",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, avgWidth: {$avg: "$dimensions.width"}}},
-                    ])
-                },
-                {
-                    type: "minWidth",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, minWidth: {$min: "$dimensions.width"}}},
-                    ])
-                },
-                {
-                    type: "maxWidth",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, maxWidth: {$max: "$dimensions.width"}}},
-                    ])
-                },
-                {
-                    type: "modeWidth",
-                    value: await Book.aggregate([
-                        {$group: {_id: "$dimensions.width", modeWidth: {$sum: 1}}},
-                        {$sort: {count: -1}},
-                        {$limit: 1}
-                    ])
-                },
-                {
-                    type: "sumDepth",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, sumDepth: {$sum: "$dimensions.depth"}}},
-                    ])
-                },
-                {
-                    type: "avgDepth",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, avgDepth: {$avg: "$dimensions.depth"}}},
-                    ])
-                },
-                {
-                    type: "minDepth",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, minDepth: {$min: "$dimensions.depth"}}},
-                    ])
-                },
-                {
-                    type: "maxDepth",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, maxDepth: {$max: "$dimensions.depth"}}},
-                    ])
-                },
-                {
-                    type: "modeDepth",
-                    value: await Book.aggregate([
-                        {$group: {_id: "$dimensions.depth", modeDepth: {$sum: 1}}},
-                        {$sort: {count: -1}},
-                        {$limit: 1}
-                    ])
-                },
-                {
-                    type: "sumWeight",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, sumWeight: {$sum: "$dimensions.weight"}}},
-                    ])
-                },
-                {
-                    type: "avgWeight",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, avgWeight: {$avg: "$dimensions.weight"}}},
-                    ])
-                },
-                {
-                    type: "minWeight",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, minWeight: {$min: "$dimensions.weight"}}},
-                    ])
-                },
-                {
-                    type: "maxWeight",
-                    value: await Book.aggregate([
-                        {$group: {_id: null, maxWeight: {$max: "$dimensions.weight"}}},
-                    ])
-                },
-                {
-                    type: "modeWeight",
-                    value: await Book.aggregate([
-                        {$group: {_id: "$dimensions.weight", modeWeight: {$sum: 1}}},
-                        {$sort: {count: -1}},
-                        {$limit: 1}
-                    ])
-                },
-                {
-                    type: "medianHeight",
-                    value: await Book.aggregate([
-                        {$sort: {"dimensions.height": 1}}, // Sort by height in ascending order
-                        {
-                            $group: {
-                                _id: null,
-                                heights: {$push: "$dimensions.height"} // Collect all heights in an array
-                            }
-                        },
-                        {
-                            $project: {
-                                medianHeight: {
-                                    $let: {
-                                        vars: {
-                                            sortedArray: "$heights",
-                                            len: {$size: "$heights"}
-                                        },
-                                        in: {
-                                            $cond: [
-                                                {$eq: [{$mod: ["$$len", 2]}, 0]}, // If even length
-                                                {
-                                                    $avg: [
-                                                        {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
-                                                        {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
-                                                    ]
-                                                },
-                                                {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]} // If odd length
-                                            ]
+                    $facet: {
+                        stats: [
+                            {
+                                $group: {
+                                    _id: null,
+                                    sumHeight: {$sum: "$dimensions.height"},
+                                    avgHeight: {$avg: "$dimensions.height"},
+                                    minHeight: {$min: "$dimensions.height"},
+                                    maxHeight: {$max: "$dimensions.height"},
+                                    heights: {$push: "$dimensions.height"},
+                                    sumWidth: {$sum: "$dimensions.width"},
+                                    avgWidth: {$avg: "$dimensions.width"},
+                                    minWidth: {$min: "$dimensions.width"},
+                                    maxWidth: {$max: "$dimensions.width"},
+                                    widths: {$push: "$dimensions.width"},
+                                    sumDepth: {$sum: "$dimensions.depth"},
+                                    avgDepth: {$avg: "$dimensions.depth"},
+                                    minDepth: {$min: "$dimensions.depth"},
+                                    maxDepth: {$max: "$dimensions.depth"},
+                                    depths: {$push: "$dimensions.depth"},
+                                    sumWeight: {$sum: "$dimensions.weight"},
+                                    avgWeight: {$avg: "$dimensions.weight"},
+                                    minWeight: {$min: "$dimensions.weight"},
+                                    maxWeight: {$max: "$dimensions.weight"},
+                                    weights: {$push: "$dimensions.weight"}
+                                }
+                            },
+                            {
+                                $project: {
+                                    sumHeight: 1,
+                                    avgHeight: 1,
+                                    minHeight: 1,
+                                    maxHeight: 1,
+                                    medianHeight: {
+                                        $let: {
+                                            vars: {
+                                                sortedArray: "$heights",
+                                                len: {$size: "$heights"}
+                                            },
+                                            in: {
+                                                $cond: [
+                                                    {$eq: [{$mod: ["$$len", 2]}, 0]},
+                                                    {
+                                                        $avg: [
+                                                            {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
+                                                            {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
+                                                        ]
+                                                    },
+                                                    {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]}
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    sumWidth: 1,
+                                    avgWidth: 1,
+                                    minWidth: 1,
+                                    maxWidth: 1,
+                                    medianWidth: {
+                                        $let: {
+                                            vars: {
+                                                sortedArray: "$widths",
+                                                len: {$size: "$widths"}
+                                            },
+                                            in: {
+                                                $cond: [
+                                                    {$eq: [{$mod: ["$$len", 2]}, 0]},
+                                                    {
+                                                        $avg: [
+                                                            {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
+                                                            {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
+                                                        ]
+                                                    },
+                                                    {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]}
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    sumDepth: 1,
+                                    avgDepth: 1,
+                                    minDepth: 1,
+                                    maxDepth: 1,
+                                    medianDepth: {
+                                        $let: {
+                                            vars: {
+                                                sortedArray: "$depths",
+                                                len: {$size: "$depths"}
+                                            },
+                                            in: {
+                                                $cond: [
+                                                    {$eq: [{$mod: ["$$len", 2]}, 0]},
+                                                    {
+                                                        $avg: [
+                                                            {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
+                                                            {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
+                                                        ]
+                                                    },
+                                                    {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]}
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    sumWeight: 1,
+                                    avgWeight: 1,
+                                    minWeight: 1,
+                                    maxWeight: 1,
+                                    medianWeight: {
+                                        $let: {
+                                            vars: {
+                                                sortedArray: "$weights",
+                                                len: {$size: "$weights"}
+                                            },
+                                            in: {
+                                                $cond: [
+                                                    {$eq: [{$mod: ["$$len", 2]}, 0]},
+                                                    {
+                                                        $avg: [
+                                                            {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
+                                                            {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
+                                                        ]
+                                                    },
+                                                    {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]}
+                                                ]
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                    ])
-                },
-                {
-                    type: "medianWidth",
-                    value: await Book.aggregate([
-                        {$sort: {"dimensions.width": 1}},
-                        {
-                            $group: {
-                                _id: null,
-                                widths: {$push: "$dimensions.width"} // Fixed spelling from 'widthts' to 'widths'
-                            }
-                        },
-                        {
-                            $project: {
-                                medianWidth: {
-                                    $let: {
-                                        vars: {
-                                            sortedArray: "$widths",
-                                            len: {$size: "$widths"}
-                                        },
-                                        in: {
-                                            $cond: [
-                                                {$eq: [{$mod: ["$$len", 2]}, 0]},
-                                                {
-                                                    $avg: [
-                                                        {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
-                                                        {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
-                                                    ]
-                                                },
-                                                {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]}
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ])
-                },
-                {
-                    type: "medianDepth",
-                    value: await Book.aggregate([
-                        {$sort: {"dimensions.depth": 1}}, // Sort by height in ascending order
-                        {
-                            $group: {
-                                _id: null,
-                                depths: {$push: "$dimensions.depth"} // Collect all heights in an array
-                            }
-                        },
-                        {
-                            $project: {
-                                medianDepth: {
-                                    $let: {
-                                        vars: {
-                                            sortedArray: "$depths",
-                                            len: {$size: "$depths"}
-                                        },
-                                        in: {
-                                            $cond: [
-                                                {$eq: [{$mod: ["$$len", 2]}, 0]}, // If even length
-                                                {
-                                                    $avg: [
-                                                        {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
-                                                        {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
-                                                    ]
-                                                },
-                                                {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]} // If odd length
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ])
-                },
-                {
-                    type: "medianWeight",
-                    value: await Book.aggregate([
-                        {$sort: {"dimensions.weight": 1}}, // Sort by height in ascending order
-                        {
-                            $group: {
-                                _id: null,
-                                weights: {$push: "$dimensions.weight"} // Collect all heights in an array
-                            }
-                        },
-                        {
-                            $project: {
-                                medianWeight: {
-                                    $let: {
-                                        vars: {
-                                            sortedArray: "$weights",
-                                            len: {$size: "$weights"}
-                                        },
-                                        in: {
-                                            $cond: [
-                                                {$eq: [{$mod: ["$$len", 2]}, 0]}, // If even length
-                                                {
-                                                    $avg: [
-                                                        {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
-                                                        {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
-                                                    ]
-                                                },
-                                                {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]} // If odd length
-                                            ]
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    ])
-                }
-            ]
-                .map(result => {
-                    return {type: result.type, value: result.value[0][result.type]}
-                })
-                .reduce((acc: any, {type, value}) => {
-                    const [metric, dimension] = type.match(/([a-zA-Z]+)([A-Z].+)/)!.slice(1);
-                    const dimensionLower: string = dimension.toLowerCase();
-
-                    if (!acc[dimensionLower]) {
-                        acc[dimensionLower] = {};
+                        ],
+                        modeHeight: [
+                            {$group: {_id: "$dimensions.height", modeHeight: {$sum: 1}}},
+                            {$sort: {count: -1}},
+                            {$limit: 1}
+                        ],
+                        modeWidth: [
+                            {$group: {_id: "$dimensions.width", modeWidth: {$sum: 1}}},
+                            {$sort: {count: -1}},
+                            {$limit: 1}
+                        ],
+                        modeDepth: [
+                            {$group: {_id: "$dimensions.depth", modeDepth: {$sum: 1}}},
+                            {$sort: {count: -1}},
+                            {$limit: 1}
+                        ],
+                        modeWeight: [
+                            {$group: {_id: "$dimensions.weight", modeWeight: {$sum: 1}}},
+                            {$sort: {count: -1}},
+                            {$limit: 1}
+                        ]
                     }
+                },
+                {
+                    $project: {
+                        sumHeight: "$stats.sumHeight",
+                        avgHeight: "$stats.avgHeight",
+                        minHeight: "$stats.minHeight",
+                        maxHeight: "$stats.maxHeight",
+                        medianHeight: "$stats.medianHeight",
+                        modeHeight: "$modeHeight.modeHeight",
+                        sumWidth: "$stats.sumWidth",
+                        avgWidth: "$stats.avgWidth",
+                        minWidth: "$stats.minWidth",
+                        maxWidth: "$stats.maxWidth",
+                        medianWidth: "$stats.medianWidth",
+                        modeWidth: "$modeWidth.modeWidth",
+                        sumDepth: "$stats.sumDepth",
+                        avgDepth: "$stats.avgDepth",
+                        minDepth: "$stats.minDepth",
+                        maxDepth: "$stats.maxDepth",
+                        medianDepth: "$stats.medianDepth",
+                        modeDepth: "$modeDepth.modeDepth",
+                        sumWeight: "$stats.sumWeight",
+                        avgWeight: "$stats.avgWeight",
+                        minWeight: "$stats.minWeight",
+                        maxWeight: "$stats.maxWeight",
+                        medianWeight: "$stats.medianWeight",
+                        modeWeight: "$modeWeight.modeWeight"
+                    }
+                }
+            ]);
 
-                    acc[dimensionLower][metric] = value;
-                    return acc;
-                }, {});
+            const formattedResult = {
+                height: {
+                    sum: result[0].sumHeight[0],
+                    avg: result[0].avgHeight[0],
+                    min: result[0].minHeight[0],
+                    max: result[0].maxHeight[0],
+                    mode: result[0].modeHeight[0],
+                    median: result[0].medianHeight[0]
+                },
+                width: {
+                    sum: result[0].sumWidth[0],
+                    avg: result[0].avgWidth[0],
+                    min: result[0].minWidth[0],
+                    max: result[0].maxWidth[0],
+                    mode: result[0].modeWidth[0],
+                    median: result[0].medianWidth[0]
+                },
+                depth: {
+                    sum: result[0].sumDepth[0],
+                    avg: result[0].avgDepth[0],
+                    min: result[0].minDepth[0],
+                    max: result[0].maxDepth[0],
+                    mode: result[0].modeDepth[0],
+                    median: result[0].medianDepth[0]
+                },
+                weight: {
+                    sum: result[0].sumWeight[0],
+                    avg: result[0].avgWeight[0],
+                    min: result[0].minWeight[0],
+                    max: result[0].maxWeight[0],
+                    mode: result[0].modeWeight[0],
+                    median: result[0].medianWeight[0]
+                }
+            };
 
+            /*result of this monstrosity looks like this:
+            {"height":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10},
+            "width":{"sum":10,"avg":10,"min":10,"max":10,"mode":1,"median":10},
+            "depth":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10},
+            "weight":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10}}*/
 
-            //result of this monstrosity looks like this:
-            // {"height":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10},
-            // "width":{"sum":10,"avg":10,"min":10,"max":10,"mode":1,"median":10},
-            // "depth":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10},
-            // "weight":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10}}
-
-            res.status(200).json(result);
+            res.status(200).json(formattedResult);
         } catch (error: unknown) {
             console.log("Error while calculating statistics", error);
         }
     },
+    getSizesGroups: async (_: Request, res: Response): Promise<void> => {
+        try {
+            const boundaries = [0, 5, 10, 15, 20, 25, 30, 35, 40, 100];
+
+            // Single aggregation pipeline with $facet
+            const aggregationPipeline = [
+                {
+                    $facet: {
+                        heightGroups: [
+                            {
+                                $bucket: {
+                                    groupBy: "$dimensions.height",
+                                    boundaries: boundaries,
+                                    default: null,
+                                    output: {
+                                        count: { $sum: 1 }
+                                    }
+                                }
+                            }
+                        ],
+                        widthGroups: [
+                            {
+                                $bucket: {
+                                    groupBy: "$dimensions.width",
+                                    boundaries: boundaries,
+                                    default: null,
+                                    output: {
+                                        count: { $sum: 1 }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ];
+
+            const results = await Book.aggregate(aggregationPipeline);
+
+            // Extract height and width results
+            const { heightGroups, widthGroups } = results[0];
+
+            // Total counts for normalization
+            const totalHeightBooks = heightGroups.reduce((acc, current) => acc + current.count, 0);
+            const totalWidthBooks = widthGroups.reduce((acc, current) => acc + current.count, 0);
+
+            // Helper function to format the results
+            const formatGroups = (groups: { _id: any; count: number }[], total: number) =>
+                groups.map((group) => {
+                    if (group._id) {
+                        const lowerIndex = boundaries.indexOf(group._id);
+                        const upperIndex = lowerIndex + 1;
+                        return {
+                            group: group._id >= 40 ? "40<" : `${boundaries[lowerIndex]}-${boundaries[upperIndex]}`,
+                            count: group.count,
+                            ratio: group.count / total,
+                        };
+                    } else {
+                        return {
+                            group: `Bez rozmerov`,
+                            count: group.count,
+                            ratio: group.count / total,
+                        };
+                    }
+                });
+
+            // Format both height and width groups
+            const formattedHeight = formatGroups(heightGroups, totalHeightBooks);
+            const formattedWidth = formatGroups(widthGroups, totalWidthBooks);
+
+            res.status(200).json({
+                height: formattedHeight,
+                width: formattedWidth,
+            });
+        } catch (err) {
+            console.error("Error while getSizesGroups", err);
+            res.status(500).json({ error: "Failed to get size groups." });
+        }
+    };
+
+    getLanguageStatistics: async (_: Request, res: Response): Promise<void> => {
+        const aggregationPipeline = [
+            {
+                $addFields: {
+                    firstLanguage: { $arrayElemAt: ["$language", 0] }
+                }
+            },
+            {
+                $group: {
+                    _id: "$firstLanguage",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    language: "$_id",
+                    count: 1
+                }
+            }
+        ];
+
+        let data = await Book.aggregate(aggregationPipeline);
+        // replace null in object with "-"
+        data.forEach(function(object){
+            for (let key in object) {
+                if(object[key] == null)
+                    object[key] = "Bez jazyka";
+            }
+        });
+
+        res.status(200).json(data);
+    },
     countBooks: async (req: Request, res: Response): Promise<void> => {
         try {
-            const {
+           const {
                 params: {userId}
             } = req
 
@@ -540,7 +579,7 @@ const dashboard = {
         } catch (error) {
             throw error;
         }
-    }
+    },
 }
 
 export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN}
