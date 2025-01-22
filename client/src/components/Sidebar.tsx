@@ -92,6 +92,11 @@ const Sidebar = () => {
 			title: "Úryvky",
 			icon: "fas fa-pen-nib",
 			route: "/quotes",
+		},
+		{
+			title: "Spoločenské hry",
+			icon: "fas fa-chess",
+			route: "/board-games",
 		}
 	];
 

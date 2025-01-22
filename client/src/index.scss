@@ -844,7 +844,11 @@ input:invalid {
 
 .dashboardItem {
   color: black;
-  background-image: radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px), radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px), radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px), radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px);
+  background-image:
+          radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
+          radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
+          radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
+          radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px); // dotted border
   background-position: left top, right top, left bottom, left top;
   background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
   background-size: 17px 1px, 1px 17px, 17px 1px, 1px 17px;
