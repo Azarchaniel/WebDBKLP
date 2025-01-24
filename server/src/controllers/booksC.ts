@@ -187,6 +187,11 @@ const dashboard = {
         try {
             const result = await Book.aggregate([
                 {
+                    $match: {
+                        deletedAt: undefined // Exclude documents that are deleted
+                    }
+                },
+                {
                     $facet: {
                         stats: [
                             {
@@ -420,6 +425,11 @@ const dashboard = {
             // Single aggregation pipeline with $facet
             const aggregationPipeline = [
                 {
+                    $match: {
+                        deletedAt: undefined // Exclude documents that are deleted
+                    }
+                },
+                {
                     $facet: {
                         heightGroups: [
                             {
@@ -494,6 +504,11 @@ const dashboard = {
     getLanguageStatistics: async (_: Request, res: Response): Promise<void> => {
         const aggregationPipeline = [
             {
+                $match: {
+                    deletedAt: undefined // Exclude documents that are deleted
+                }
+            },
+            {
                 $addFields: {
                     firstLanguage: { $arrayElemAt: ["$language", 0] }
                 }
@@ -538,7 +553,7 @@ const dashboard = {
 
                 response.push({
                     owner: {id: userId, firstName: currUser?.firstName ?? "", lastName: currUser?.lastName},
-                    count: await Book.countDocuments({owner: userId})
+                    count: await Book.countDocuments({owner: userId, deletedAt: { $ne: undefined }})
                 });
             } else {
                 let tempRes: any[] = [];
@@ -546,7 +561,7 @@ const dashboard = {
                     tempRes.push(
                         {
                             owner: {id: user?._id, firstName: user?.firstName ?? "", lastName: user?.lastName},
-                            count: await Book.countDocuments({owner: user?._id})
+                            count: await Book.countDocuments({owner: user?._id, deletedAt: { $ne: undefined }})
                         }
                     )
                 }
@@ -555,7 +570,8 @@ const dashboard = {
                     $or: [
                         {owner: {$exists: false}},
                         {owner: {$size: 0} as any}
-                    ]
+                    ],
+                    deletedAt: { $ne: undefined }
                 }
 
                 tempRes.push(
@@ -568,7 +584,7 @@ const dashboard = {
                 response = tempRes;
             }
 
-            response.push({owner: null, count: await Book.countDocuments()});
+            response.push({owner: null, count: await Book.countDocuments({deletedAt: { $ne: undefined }})});
             response.sort((a, b) => {
                 if (a.owner === null || b.owner === null) return 0
                 return a.owner?.lastName?.localeCompare(b.owner?.lastName)
@@ -583,7 +599,7 @@ const dashboard = {
         try {
             const users: IUser[] = await User.find().select('_id firstName lastName');
             // Count total books
-            const totalBooksRead = await Book.countDocuments();
+            const totalBooksRead = await Book.countDocuments({deletedAt: { $ne: undefined }});
 
             const result: any[] = [];
 
@@ -602,6 +618,7 @@ const dashboard = {
                     const count = await Book.countDocuments({
                         owner: otherUserId,
                         readBy: userId,
+                        deletedAt: { $ne: undefined }
                     });
 
                     const ratio = totalBooksRead > 0 ? count / totalBooksRead : 0;
@@ -614,8 +631,6 @@ const dashboard = {
                 }
                 result.push(userStats);
             }
-
-
 
             const customOrder = ['Ľuboš', 'Žaneta', 'Jakub', 'Jaroslav', 'Magdaléna'];
             const sortByParam = (data: any, param: string) => data.sort((a, b) => {

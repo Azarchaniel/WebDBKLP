@@ -37,7 +37,7 @@ cd ./client; npx run start
 - [ ] remove bootstrap (bootstrap is used in modals)
 - [X] a href to DatabazeKnih and GoodReads
 - [ ] get pagination, number of entities per page etc. from backend (faster than get all and then sort it on frontend) (MVP) https://medium.com/@kannankannan18/client-side-pagination-vs-server-side-pagination-576a8f57257d
-- - [ ] lazy loading quotes
+- - [ ] lazy loading quotes https://medium.com/@iamusamasattar/how-to-implement-scroll-pagination-in-mern-application-f253f170754f
 - [X] fix router not fetching data when changing Owner - I need global store for ActiveUser (MVP)
 - [ ] rework Autocomplete - custom - if there is no item found, parse the string and create item
 - [X] custom modal - grid system
