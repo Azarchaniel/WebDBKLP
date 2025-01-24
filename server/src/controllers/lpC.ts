@@ -39,62 +39,59 @@ const getLp = async (req: Request, res: Response): Promise<void> => {
 const addLp = async (req: Request, res: Response): Promise<void> => {
     try {
         const {
-            title, subtitle, edition, countLp, speed, published, language, note, autor
+            _id, title, subtitle, edition, countLp, speed, published, language, note, autor
         } = req.body;
 
-        console.log(req.body);
+        const languageNormalized = language?.map((lang: { key: string; value: string }) => lang.key);
 
-        const lp: ILp = new Lp({
-            autor: autor,
-            title: title,
-            subtitle: subtitle,
-            edition: edition,
-            language: language,
-            note: note,
-            countLp: countLp,
-            published: {
-                publisher: published?.publisher,
-                year: published?.year ?? undefined,
-                country: published?.country ?? ''
-            },
-            speed: speed,
-            deletedAt: null
-        })
+        if (!_id) {
+            const lp: ILp = new Lp({
+                autor: autor,
+                title: title,
+                subtitle: subtitle,
+                edition: edition,
+                language: languageNormalized,
+                note: note,
+                countLp: countLp,
+                published: {
+                    publisher: published?.publisher,
+                    year: published?.year ?? undefined,
+                    country: published?.country ?? ''
+                },
+                speed: speed,
+                deletedAt: null
+            })
 
-        const newLp: ILp = await lp.save()
-        const allLps: ILp[] = await Lp.find().populate([
-            {path: 'autor', model: 'Autor'},
-        ]).exec()
+            const newLp: ILp = await lp.save()
+            const allLps: ILp[] = await Lp.find().populate([
+                {path: 'autor', model: 'Autor'},
+            ]).exec()
 
-        res.status(201).json({message: 'Lp added', lp: newLp, lps: allLps})
+            res.status(201).json({message: 'Lp added', lp: newLp, lps: allLps})
+        } else {
+            const updateLp: ILp | null = await Lp.findByIdAndUpdate(
+                {_id: _id},
+                {
+                    ...req.body,
+                    language: languageNormalized
+                }
+            )
+            const allLps: ILp[] = await Lp.find().populate([
+                {path: 'autor', model: 'Autor'},
+            ]).exec()
+
+            res.status(201).json({
+                message: 'Lp updated',
+                lp: updateLp,
+                lps: allLps,
+            })
+        }
     } catch (error) {
-        throw error
+        throw Error("Error while creating/editing LP \n" + error)
     }
 }
 
-const updateLp = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const {
-            params: {id},
-            body,
-        } = req
-        const updateLp: ILp | null = await Lp.findByIdAndUpdate(
-            {_id: id},
-            body
-        )
-        const allLps: ILp[] = await Lp.find().populate([
-            {path: 'autor', model: 'Autor'},
-        ]).exec()
 
-        res.status(200).json({
-            message: 'Lp updated',
-            lp: updateLp,
-            lps: allLps,
-        })
-    } catch (error) {
-        throw error
-    }
-}
 
 const deleteLp = async (req: Request, res: Response): Promise<void> => {
     try {

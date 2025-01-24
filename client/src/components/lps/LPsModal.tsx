@@ -276,7 +276,7 @@ export const LPsModalButtons: React.FC<ButtonsProps> = ({saveLP, cleanFields, er
 					onClick={cleanFields}>Vymazať polia
 				</button>
 				<button type="submit"
-					disabled={Boolean(error)}
+					disabled={Boolean(error?.length)}
 					onClick={saveLP}
 					className="btn btn-success">Uložiť LP
 				</button>

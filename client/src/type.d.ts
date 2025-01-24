@@ -184,3 +184,14 @@ export interface ILanguageStatistics {
     language: string;
     count: number;
 }
+
+interface IUserStatistics {
+    user: string;
+    count: number;
+    ratio: number;
+}
+
+interface IUserReadingStats {
+    name: string;
+    stats: IUserStatistics;
+}

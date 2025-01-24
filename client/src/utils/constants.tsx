@@ -134,3 +134,26 @@ export const bookTableColumns = (hidden: IBookHidden) => [
 		hidden: hidden.owner
 	},
 ]
+
+export const chartLabels = {
+	generateLabels(chart: any) {
+		const data = chart.data;
+		return data.labels.map((label: any, i: number) => {
+			const meta = chart.getDatasetMeta(0);
+			const style = meta.controller.getStyle(i);
+
+			return {
+				text: `${label} (${chart.data.datasets[0].data[i]})`,
+				fillStyle: style.backgroundColor,
+				strokeStyle: style.borderColor,
+				lineWidth: style.borderWidth,
+				hidden: !chart.getDataVisibility(i),
+				index: i
+			};
+		});
+	}
+};
+
+export const chartColors = [
+	"#073b4c","#118ab2","#06d6a0","#ffd166","#f78c6b","#ef476f"
+]

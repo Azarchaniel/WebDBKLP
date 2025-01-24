@@ -343,3 +343,14 @@ export const getSizeGroups = async (): Promise<AxiosResponse> => {
 		throw new Error(error)
 	}
 }
+
+export const getReadBy = async (): Promise<AxiosResponse> => {
+	try {
+		const readBy: AxiosResponse = await axios.get(
+			`${baseUrl}/get-read-by`,
+		)
+		return readBy;
+	} catch (error: any) {
+		throw new Error(error)
+	}
+}

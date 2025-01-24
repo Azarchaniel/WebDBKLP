@@ -42,7 +42,7 @@ cd ./client; npx run start
 - [ ] rework Autocomplete - custom - if there is no item found, parse the string and create item
 - [X] custom modal - grid system
 - [X] webscrapper and autofilling (MVP)
-- [ ] some reports, numbers, graph on Main page
+- [X] some reports, numbers, graph on Main page
 - [X] import books from DBKLP (MVP)
 - -[X] write script, that will get ID of every author
 - [ ] (in far future) localization
