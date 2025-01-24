@@ -1,10 +1,12 @@
 import {useEffect, useState} from "react";
-import {countBooks, getDimensionsStatistics, getLanguageStatistics, getSizeGroups} from "../../API";
+import {countBooks, getDimensionsStatistics, getLanguageStatistics, getReadBy, getSizeGroups} from "../../API";
 import {DashboardPieChart} from "../../components/dashboard/DashboardPieChart";
 import {DashboardTableStats} from "../../components/dashboard/DashboardTableStats";
-import {IDimensionsStatistics, ILanguageStatistics} from "../../type";
+import {IDimensionsStatistics, ILanguageStatistics, IUserReadingStats} from "../../type";
 import {TableCountRatio} from "../../components/dashboard/TableCountRatio";
 import {TableLanguageStats} from "../../components/dashboard/TableLanguageStats";
+import {Tab, Tabs} from "../../components/Tabs";
+import {ReadByChart} from "../../components/dashboard/ReadByChart";
 
 export default function DashboardPage() {
 	const [countAllBooks, setCountAllBooks] = useState<{
@@ -14,6 +16,7 @@ export default function DashboardPage() {
 	const [dimensionStats, setDimensionStats] = useState<IDimensionsStatistics>();
 	const [sizeGroups, setSizeGroups] = useState<any>();
 	const [langStats, setLangStats] = useState<ILanguageStatistics[]>();
+	const [readBy, setReadBy] = useState<IUserReadingStats[]>();
 
 	useEffect(() => {
 		countBooks()
@@ -31,7 +34,26 @@ export default function DashboardPage() {
 		getLanguageStatistics()
 			.then((result: any) => setLangStats(result.data))
 			.catch((err: any) => console.error("error getDimensionsStatistics FE", err));
+
+		getReadBy()
+			.then((result: any) => setReadBy(result.data))
+			.catch((err: any) => console.error("error getReadBy FE", err));
 	}, [])
+
+	const getTabsForReadByStats = (): any => {
+		if (!readBy) return <span>No Data</span>;
+
+		return (
+			<Tabs>
+				{readBy.map((user: any) => {
+					return <Tab label={user.name}>
+						<ReadByChart data={user.stats} />
+					</Tab>
+				})}
+			</Tabs>
+		)
+
+	}
 
 	return (
 		<div className="dashboardContainer">
@@ -50,8 +72,8 @@ export default function DashboardPage() {
 			<div className="dashboardItem">
 				<TableCountRatio data={sizeGroups?.width} title="Šírka (cm)" />
 			</div>
-			<div className="dashboardItem">
-                Every user - how many read
+			<div className="dashboardItem" style={{padding:0, paddingRight: "1rem", maxWidth: "20rem"}} >
+				{getTabsForReadByStats()}
 			</div>
 		</div>
 	);

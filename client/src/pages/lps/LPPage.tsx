@@ -19,7 +19,9 @@ export default function LPPage() {
 	const [hidden, setHidden] = useState({
 		control: true,
 		subtitle: true,
-		createdAt: true
+		createdAt: true,
+		speed: true,
+		countLp: true
 	});
 	const popRef = useRef(null);
 
@@ -104,6 +106,8 @@ export default function LPPage() {
 			<div ref={popRef} className={`showHideColumns ${hidden.control ? "hidden" : "shown"}`}>
 				<ShowHideRow label="Podnázov" init={hidden.subtitle} onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})} />
 				<ShowHideRow label="Dátum pridania" init={hidden.createdAt} onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})} />
+				<ShowHideRow label="Rýchlosť" init={hidden.speed} onChange={() => setHidden({...hidden, speed: !hidden.speed})} />
+				<ShowHideRow label="Počet LP" init={hidden.countLp} onChange={() => setHidden({...hidden, countLp: !hidden.countLp})} />
 			</div>
 			<MaterialTableCustom
 				title={`LP (${countAll})`}
@@ -155,11 +159,20 @@ export default function LPPage() {
 						},
 					},
 					{
-						title: "Počet strán",
-						field: "numberOfPages",
+						title: "Počet LP",
+						field: "countLp",
 						headerStyle: {
 							backgroundColor: tableHeaderColor
-						}
+						},
+						hidden: hidden.countLp
+					},
+					{
+						title: "Rýchlosť",
+						field: "speed",
+						headerStyle: {
+							backgroundColor: tableHeaderColor
+						},
+						hidden: hidden.speed
 					},
 					{
 						title: "Pridané",

@@ -28,15 +28,15 @@ router.post('/delete-quote/:id', controllers_3.deleteQuote);
 // ### USERS ###
 router.get('/user/:id', controllers_4.getUser);
 router.get('/users', controllers_4.getAllUsers);
-// ### QUOTES ###
+// ### LP ###
 router.get('/lp/:id', controllers_5.getLp);
 router.get('/lps', controllers_5.getAllLps);
 router.post('/add-lp', controllers_5.addLp);
-router.put('/edit-lp/:id', controllers_5.updateLp);
 router.post('/delete-lp/:id', controllers_5.deleteLp);
 router.get('/webScrapper');
 router.get('/count-books/:id', controllers_1.dashboard.countBooks);
 router.get('/get-dimensions-statistics', controllers_1.dashboard.getDimensionsStatistics);
 router.get('/get-language-statistics', controllers_1.dashboard.getLanguageStatistics);
 router.get('/get-size-groups', controllers_1.dashboard.getSizesGroups);
+router.get('/get-read-by', controllers_1.dashboard.getReadBy);
 exports.default = router;

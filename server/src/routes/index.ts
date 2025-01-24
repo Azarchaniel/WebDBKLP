@@ -3,7 +3,7 @@ import {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInf
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
 import {getAllUsers, getUser} from "../controllers";
-import {addLp, deleteLp, getAllLps, getLp, updateLp} from "../controllers";
+import {addLp, deleteLp, getAllLps, getLp} from "../controllers";
 
 const router: Router = Router()
 
@@ -32,11 +32,10 @@ router.post('/delete-quote/:id', deleteQuote)
 router.get('/user/:id', getUser)
 router.get('/users', getAllUsers)
 
-// ### QUOTES ###
+// ### LP ###
 router.get('/lp/:id', getLp)
 router.get('/lps', getAllLps)
 router.post('/add-lp', addLp)
-router.put('/edit-lp/:id', updateLp)
 router.post('/delete-lp/:id', deleteLp)
 
 router.get('/webScrapper', )
@@ -45,5 +44,6 @@ router.get('/count-books/:id', dashboard.countBooks)
 router.get('/get-dimensions-statistics', dashboard.getDimensionsStatistics)
 router.get('/get-language-statistics', dashboard.getLanguageStatistics)
 router.get('/get-size-groups', dashboard.getSizesGroups)
+router.get('/get-read-by', dashboard.getReadBy)
 
 export default router;

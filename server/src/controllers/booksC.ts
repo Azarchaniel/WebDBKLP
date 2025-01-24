@@ -1,5 +1,5 @@
 import {Response, Request} from 'express';
-import {IBook, IPopulateOptions} from '../types';
+import {IBook, IPopulateOptions, IUser} from '../types';
 import Book from '../models/book';
 import User from '../models/user';
 import {optionFetchAllExceptDeleted} from '../utils/constants';
@@ -491,7 +491,6 @@ const dashboard = {
             res.status(500).json({ error: "Failed to get size groups." });
         }
     };
-
     getLanguageStatistics: async (_: Request, res: Response): Promise<void> => {
         const aggregationPipeline = [
             {
@@ -580,6 +579,59 @@ const dashboard = {
             throw error;
         }
     },
+    getReadBy: async (req: Request, res: Response): Promise<void> => {
+        try {
+            const users: IUser[] = await User.find().select('_id firstName lastName');
+            // Count total books
+            const totalBooksRead = await Book.countDocuments();
+
+            const result: any[] = [];
+
+            for (const user of users) {
+                const userId = user._id.toString();
+
+                const userStats: {name: string, stats: {user: string, count: number, ratio: number}[]} = {
+                    name: user.firstName!,
+                    stats: [],
+                };
+
+                for (const otherUser of users) {
+                    const otherUserId = otherUser._id.toString();
+
+                    // Count books read by `user` that are owned by `otherUser`
+                    const count = await Book.countDocuments({
+                        owner: otherUserId,
+                        readBy: userId,
+                    });
+
+                    const ratio = totalBooksRead > 0 ? count / totalBooksRead : 0;
+
+                    userStats.stats.push({
+                        user: otherUser.firstName!,
+                        count,
+                        ratio: parseFloat(ratio.toFixed(2)),
+                    });
+                }
+                result.push(userStats);
+            }
+
+
+
+            const customOrder = ['Ľuboš', 'Žaneta', 'Jakub', 'Jaroslav', 'Magdaléna'];
+            const sortByParam = (data: any, param: string) => data.sort((a, b) => {
+                return customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]);
+            });
+            // sort the result by array and then sort stats in every name
+            let sortedData =
+                sortByParam(result, "name")
+                    .map((item: any) =>{return {...item, stats: sortByParam(item.stats, "user")}});
+
+            res.status(200).json(sortedData);
+        } catch (error) {
+            console.error('Error calculating reading statistics:', error);
+            throw error;
+        }
+    }
 }
 
 export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN}
