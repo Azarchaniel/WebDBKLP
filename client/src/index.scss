@@ -857,7 +857,7 @@ input:invalid {
   padding: 1rem;
   font-size: 0.75rem;
   line-height: 0.75rem;
-  max-height: 21rem;
+  height: 40vh;
 }
 
 .firstCell {
@@ -920,7 +920,7 @@ input:invalid {
   background-color: var(--background);
 }
 
-.tab-pane {
+.tab-panel {
   animation: fadeIn 0.3s ease;
 }
 

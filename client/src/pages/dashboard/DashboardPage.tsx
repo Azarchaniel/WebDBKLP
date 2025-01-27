@@ -72,7 +72,7 @@ export default function DashboardPage() {
 			<div className="dashboardItem">
 				<TableCountRatio data={sizeGroups?.width} title="Šírka (cm)" />
 			</div>
-			<div className="dashboardItem" style={{padding:0, paddingRight: "1rem", maxWidth: "20rem"}} >
+			<div className="dashboardItem" style={{padding:0, paddingRight: "1rem"}} >
 				{getTabsForReadByStats()}
 			</div>
 		</div>

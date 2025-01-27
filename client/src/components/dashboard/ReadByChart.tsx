@@ -1,7 +1,12 @@
 import {Pie} from "react-chartjs-2";
 import {chartColors, chartLabels} from "../../utils/constants";
+import {IUserReadingStats} from "../../type";
 
-export const ReadByChart = (props: any) => {
+interface Props {
+	data: IUserReadingStats[];
+}
+
+export const ReadByChart = (props: Props) => {
 	const data = {
 		labels: props.data.length ? props.data.map((c: any) => c.user) : [],
 		datasets: [{
@@ -14,15 +19,16 @@ export const ReadByChart = (props: any) => {
 
 	const chartOptions = {
 		responsive: true,
+		maintainAspectRatio: false,
 		plugins: {
 			legend: {
-				position: "top" as const,
+				position: "chartArea" as const,
 				labels: chartLabels
 			}
 		}
 	}
 
 	return (
-		<Pie data={data} options={chartOptions}/>
+		<Pie data={data} options={chartOptions} height={"210px"} />
 	)
 }

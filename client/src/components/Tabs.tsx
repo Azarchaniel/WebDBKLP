@@ -44,7 +44,7 @@ const Tabs = ({ children }: TabsProps) => {
 			<div className="tabs-content">
 				{children.map((child: any) => (
 					activeTab === child.props.label ? (
-						<div key={child.props.label} className="tab-pane">
+						<div key={child.props.label} className="tab-panel">
 							{child.props.children}
 						</div>
 					) : null

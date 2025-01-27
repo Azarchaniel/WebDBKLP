@@ -500,7 +500,7 @@ const dashboard = {
             console.error("Error while getSizesGroups", err);
             res.status(500).json({ error: "Failed to get size groups." });
         }
-    };
+    },
     getLanguageStatistics: async (_: Request, res: Response): Promise<void> => {
         const aggregationPipeline = [
             {
@@ -598,55 +598,59 @@ const dashboard = {
     getReadBy: async (req: Request, res: Response): Promise<void> => {
         try {
             const users: IUser[] = await User.find().select('_id firstName lastName');
-            // Count total books
-            const totalBooksRead = await Book.countDocuments({deletedAt: { $ne: undefined }});
+            const totalBooksRead = await Book.countDocuments({ deletedAt: { $ne: undefined } });
 
-            const result: any[] = [];
+            const userIds = users.map(user => user._id.toString());
 
-            for (const user of users) {
-                const userId = user._id.toString();
+            const result: any[] = await Promise.all(
+                users.map(async user => {
+                    const userId = user._id.toString();
 
-                const userStats: {name: string, stats: {user: string, count: number, ratio: number}[]} = {
-                    name: user.firstName!,
-                    stats: [],
-                };
+                    const userStats: { name: string; stats: { user: string; count: number; ratio: number }[] } = {
+                        name: user.firstName!,
+                        stats: [],
+                    };
 
-                for (const otherUser of users) {
-                    const otherUserId = otherUser._id.toString();
+                    for (const otherUser of users) {
+                        const otherUserId = otherUser._id.toString();
 
-                    // Count books read by `user` that are owned by `otherUser`
-                    const count = await Book.countDocuments({
-                        owner: otherUserId,
-                        readBy: userId,
-                        deletedAt: { $ne: undefined }
-                    });
+                        // Count books read by `user` that are owned by `otherUser`
+                        const count = await Book.countDocuments({
+                            owner: otherUserId,
+                            readBy: { $in: [userId] },
+                            deletedAt: undefined,
+                        });
 
-                    const ratio = totalBooksRead > 0 ? count / totalBooksRead : 0;
+                        const ratio = totalBooksRead > 0 ? count / totalBooksRead : 0;
 
-                    userStats.stats.push({
-                        user: otherUser.firstName!,
-                        count,
-                        ratio: parseFloat(ratio.toFixed(2)),
-                    });
-                }
-                result.push(userStats);
-            }
+                        userStats.stats.push({
+                            user: otherUser.firstName!,
+                            count,
+                            ratio: parseFloat(ratio.toFixed(2)),
+                        });
+                    }
+
+                    return userStats;
+                })
+            );
 
             const customOrder = ['Ľuboš', 'Žaneta', 'Jakub', 'Jaroslav', 'Magdaléna'];
-            const sortByParam = (data: any, param: string) => data.sort((a, b) => {
-                return customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]);
-            });
-            // sort the result by array and then sort stats in every name
-            let sortedData =
-                sortByParam(result, "name")
-                    .map((item: any) =>{return {...item, stats: sortByParam(item.stats, "user")}});
+            const sortByParam = (data: any, param: string) =>
+                data.sort((a, b) => customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]));
+
+            // Sort the result by array and then sort stats in every name
+            const sortedData = sortByParam(result, 'name').map(item => ({
+                ...item,
+                stats: sortByParam(item.stats, 'user'),
+            }));
 
             res.status(200).json(sortedData);
         } catch (error) {
             console.error('Error calculating reading statistics:', error);
-            throw error;
+            res.status(500).json({ message: 'Internal server error', error });
         }
     }
+
 }
 
 export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN}
