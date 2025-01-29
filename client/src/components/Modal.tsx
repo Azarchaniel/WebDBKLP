@@ -4,6 +4,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 
 interface ModalProps {
+	key: string;
     title: string;
     body: ReactElement;
     footer?: ReactElement;
@@ -11,14 +12,14 @@ interface ModalProps {
     overrideStyle?: React.CSSProperties;
 }
 
-export const Modal: React.FC<ModalProps> = ({title, body, footer, onClose, overrideStyle}: ModalProps) => {
+export const Modal: React.FC<ModalProps> = ({key, title, body, footer, onClose, overrideStyle}: ModalProps) => {
 	return createPortal(
 		<div className="customModalWrapper">
 			<div className="customModalBackdrop"
 				onClick={onClose}
 			/>
 
-			<div className="customModal" style={overrideStyle}>
+			<div className="customModal" style={overrideStyle} key={key}>
 				<div className="customModalHeader">
 					<span>{title}</span>
 					<button

@@ -44,12 +44,12 @@ const BookDetail: React.FC<Props> = ({data}) => {
 				</p>
 				<p className="detailHrefs">
 					{data.rowData.hrefDatabazeKnih ?
-						<a href={data.rowData.hrefDatabazeKnih}>
+						<a href={data.rowData.hrefDatabazeKnih} target="_blank">
 							<img src="img/DBKicon.png" width="32" alt="DBK"
 								style={{marginLeft: "0.3rem"}}/>
 						</a> : null}
 					{data.rowData.hrefGoodReads ?
-						<a href={data.rowData.hrefGoodReads}>
+						<a href={data.rowData.hrefGoodReads} target="_blank">
 							<img src="https://www.goodreads.com/favicon.ico" width="32" alt="GR"
 								style={{marginLeft: "0.3rem"}}/>
 						</a> : null}

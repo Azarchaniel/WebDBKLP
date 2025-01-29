@@ -1,4 +1,5 @@
-import {IAutor, IUser} from "../type";
+import {IAutor, ILocation, IUser} from "../type";
+import {cities} from "./constants";
 
 export const shortenStringKeepWord = (text: string, maxLength: number): string => {
 	if (!text) return "";
@@ -191,4 +192,9 @@ export const randomMinMax = (min: number, max: number, integer?: boolean): numbe
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 	return Math.random() * (max - min) + min;
+}
+
+export const getBookLocation = (location: ILocation): string => {
+	if (!location || !location.city) return "";
+	return `${cities.find(city => city.value === location.city)?.showValue}${location.shelf ? ', ' + location.shelf : ""}`
 }

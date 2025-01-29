@@ -91,10 +91,13 @@ export default function AutorPage() {
 			{/* TODO: remove Header and Sidebar from here */}
 			<Header/>
 			<Sidebar/>
-			<AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>
+			<AddAutor key={updateAutor?._id || "new"} saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>
 			<MaterialTableCustom
 				title={`Autori (${countAll})`}
 				loading={loading}
+				pageSizeChange={() => {}}
+				pageChange={() => {}}
+				totalCount={countAll}
 				columns={[
 					{
 						title: "Meno",
@@ -180,6 +183,7 @@ export default function AutorPage() {
 			/>
 			{Boolean(updateAutor) &&
 				<AddAutor
+					key={updateAutor?._id || "new"}
 					saveAutor={handleSaveAutor}
 					autor={updateAutor}
 					onClose={() => setUpdateAutor(undefined)}

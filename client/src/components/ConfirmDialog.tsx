@@ -12,6 +12,7 @@ interface ConfirmDialogProps {
 const ConfirmDialog: FC<ConfirmDialogProps> = ({text, title, onOk, onCancel}: ConfirmDialogProps) => {
 	return (
 		<Modal
+			key="confirmDialog"
 			title={title}
 			body={<span>{text}</span>}
 			footer={

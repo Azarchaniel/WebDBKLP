@@ -43,7 +43,7 @@ export default function QuotePage() {
 
 
 	useEffect(() => {
-		getBooks()
+		getBooks({ page: 0, pageSize: 10000 })
 			.then(({data: {books}}: IBook[] | any) => {
 				const quotedBookIds = new Set(initQuotes.map(quote => quote.fromBook?._id));
 				//filter only books the quotes are from
@@ -161,7 +161,7 @@ export default function QuotePage() {
 		<main className='App'>
 			<Header/>
 			<Sidebar/>
-			<AddQuote saveQuote={handleSaveQuote} onClose={() => {}}/>
+			<AddQuote key={"new"} saveQuote={handleSaveQuote} onClose={() => {}}/>
 			<div style={{position: "fixed", top: "20rem", zIndex: 1000}}>
 				{loading ? <LoadingBooks/> : <></>}
 			</div>

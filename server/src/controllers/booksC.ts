@@ -60,14 +60,26 @@ const normalizeBook = (data: any): IBook => {
     } as unknown as IBook
 }
 
-const getAllBooks = async (_: Request, res: Response): Promise<void> => {
+const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        //remember: when populating, and NameOfField != Model, define it with {}
-        const books = await Book
-            .find(optionFetchAllExceptDeleted)
+        const {page, pageSize, search} = req.query;
+
+        const query = {
+            $or: [
+                { title: { $regex: search, $options: 'i' } }, // Example search by title
+                { author: { $regex: search, $options: 'i' } } // Example search by author
+            ],
+            deletedAt: { $eq: null } // Exclude deleted documents if necessary
+        };
+
+        const books = await Book.find(query)
+            .skip((page-1) * pageSize)
+            .limit(parseInt(<string>pageSize))
             .populate(populateOptions)
             .exec();
-        const count = await Book.countDocuments(optionFetchAllExceptDeleted)
+
+        const count = await Book.countDocuments(query)
+
         res.status(200).json({books, count})
     } catch (error) {
         throw error
@@ -181,7 +193,6 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
-//FIXME: all of the methods are counting also deleted books
 const dashboard = {
     getDimensionsStatistics: async (_: Request, res: Response): Promise<void> => {
         try {

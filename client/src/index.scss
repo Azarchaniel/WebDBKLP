@@ -287,8 +287,8 @@ body, html, main, #root {
   z-index: 100;
   background: white;
   color: black;
-  right: 8.7rem;
-  top: 6.4rem;
+  right: 6.5rem;
+  top: 7rem;
   padding: 1rem 1rem 0;
 
   input {
@@ -842,11 +842,10 @@ input:invalid {
 
 .dashboardItem {
   color: black;
-  background-image:
-          radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
-          radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
-          radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
-          radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px); // dotted border
+  background-image: radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
+  radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
+  radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
+  radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px); // dotted border
   background-position: left top, right top, left bottom, left top;
   background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
   background-size: 17px 1px, 1px 17px, 17px 1px, 1px 17px;
@@ -934,4 +933,97 @@ input:invalid {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* TAN STACK TABLE */
+.tableHeader {
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+
+  th {
+    border: 1px solid var(--anchor);
+    background-color: var(--anchor);
+    color: white;
+  }
+
+  th[colspan]:not([colspan="1"]) { // select element that has colspan and it is not 1
+    vertical-align: middle;
+    text-align: center;
+  }
+}
+
+tbody {
+  tr {
+    height: 4rem;
+  }
+   td {
+     border-bottom: 2px solid lightgray;
+   }
+}
+
+.headerTitleAction {
+  display: flex;
+  justify-content: space-between;
+  padding-right: 4rem;
+  color: black;
+}
+
+.pageSelector {
+  color: black;
+  font-size: 1.25rem;
+  padding: 0 1rem;
+  cursor: pointer;
+
+  &.current {
+    font-weight: bold;
+    color: var(--anchor);
+    cursor: default;
+  }
+}
+
+
+.tableNavigationRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 2rem;
+  flex-direction: row;
+  margin-top: 0.5rem;
+  color: black;
+}
+
+button:focus {
+  outline: none !important;
+}
+
+.tabNav {
+  color: var(--anchor);
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  -webkit-transition: background 0.2s, color 0.2s;
+  -moz-transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    background: rgba(255, 255, 255, 1);
+    color: #64bb5d;
+  }
+
+  &:disabled {
+    color: lightgray;
+    cursor: not-allowed;
+  }
+}
+
+.bookTableAction {
+  transform: rotate(90deg);
+  font-size: 1.5rem;
+  cursor: pointer;
 }

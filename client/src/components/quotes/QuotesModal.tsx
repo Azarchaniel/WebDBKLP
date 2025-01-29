@@ -50,7 +50,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	}, []);
 
 	useEffect(() => {
-		getBooks()
+		getBooks({ page: 0, pageSize: 10000 })
 			.then(books => {
 				setBooks(books.data.books.map((book: IBook) => ({
 					...book,
