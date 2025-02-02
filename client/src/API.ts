@@ -11,7 +11,8 @@ export const getBooks = async (pagination: any): Promise<AxiosResponse<ApiBookDa
 				params: {
 					page: pagination.page, // API expects 1-based index
 					pageSize: pagination.pageSize,
-					search: '' // Add a search query if needed
+					search: pagination.search,
+					sorting: pagination.sorting
 				}
 			});
 		return books

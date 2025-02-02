@@ -4,9 +4,10 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     ColumnDef,
-    flexRender,
+    flexRender, SortingState, getExpandedRowModel, ExpandedState,
 } from '@tanstack/react-table';
 import {LoadingBooks} from "./LoadingBooks";
+import BookDetail from "../pages/books/BookDetail";
 
 type PropsMT = {
     title: string;
@@ -14,13 +15,17 @@ type PropsMT = {
     columns: ColumnDef<any>[];
     pageChange: (page: number) => void;
     pageSizeChange: (pageSize: number) => void;
+    sortingChange: (sorting: SortingState) => void;
     totalCount: number;
     actions?: ReactElement;
+    rowActions?: (_id: string, expandRow: () => void) => ReactElement;
     detailPanel?: any;
     loading?: boolean;
     pagination?: {
         page: number;
         pageSize: number;
+        sorting: SortingState;
+        search?: string;
     };
     hiddenCols?: { [columnId: string]: boolean };
 };
@@ -31,21 +36,25 @@ const ServerPaginationTable: React.FC<PropsMT> =
          data,
          columns,
          actions,
+         rowActions,
          pageChange,
          pageSizeChange,
+         sortingChange,
          totalCount,
          loading = false,
-         pagination = {page: 1, pageSize: 50},
-         hiddenCols,
+         pagination = {page: 1, pageSize: 50, sorting: {id: "", desc: true}},
+         hiddenCols
      }) => {
         const [currentPage, setCurrentPage] = useState(pagination.page);
         const [currentPageSize, setCurrentPageSize] = useState(pagination.pageSize);
+        const [sorting, setSorting] = React.useState<SortingState>([])
+        const [expanded, setExpanded] = useState<ExpandedState>({});
 
         const maxPage = Math.ceil(totalCount / currentPageSize);
 
         useEffect(() => {
-            console.log(hiddenCols)
-        }, [hiddenCols]);
+            sortingChange(sorting);
+        }, [sorting]);
 
         useEffect(() => {
             pageChange(currentPage);
@@ -65,10 +74,16 @@ const ServerPaginationTable: React.FC<PropsMT> =
                     pageIndex: currentPage - 1,
                     pageSize: currentPageSize,
                 },
+                sorting,
+                expanded: expanded
             },
             getCoreRowModel: getCoreRowModel(),
             getPaginationRowModel: getPaginationRowModel(),
-            manualPagination: true
+            manualPagination: true,
+            onSortingChange: setSorting,
+            onExpandedChange: setExpanded,
+            getRowCanExpand: () => true, //all rows can expand
+            getExpandedRowModel: getExpandedRowModel(),
         });
 
         return (
@@ -88,27 +103,67 @@ const ServerPaginationTable: React.FC<PropsMT> =
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (
-                                        <th key={header.id} colSpan={header.colSpan} className="p-2">
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
+                                        <th key={header.id} colSpan={header.colSpan}>
+                                            {header.isPlaceholder ? null : (
+                                                <div
+                                                    className={
+                                                        header.column.getCanSort()
+                                                            ? 'cursor-pointer select-none'
+                                                            : ''
+                                                    }
+                                                    onClick={header.column.getToggleSortingHandler()}
+                                                    title={
+                                                        header.column.getCanSort()
+                                                            ? header.column.getNextSortingOrder() === 'asc'
+                                                                ? 'Radiť vzostupne'
+                                                                : header.column.getNextSortingOrder() === 'desc'
+                                                                    ? 'Radiť zostupne'
+                                                                    : "Reset"
+                                                            : undefined
+                                                    }
+                                                >
+                                                    {flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                                    {{
+                                                        asc: <i className="fa fa-angle-up ml-2"
+                                                                style={{fontSize: "24px"}}></i>,
+                                                        desc: <i className="fa fa-angle-down ml-2"
+                                                                 style={{fontSize: "24px"}}></i>,
+                                                    }[header.column.getIsSorted() as string] ?? null}
+                                                </div>
+                                            )}
                                         </th>
                                     ))}
+                                    <th></th>
                                 </tr>
                             ))}
                             </thead>
-                            <tbody>
+
+                            <tbody style={{pointerEvents: "none"}}>
                             {table.getRowModel().rows.map((row) => (
-                                <tr key={row.id}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td key={cell.id} className="p-2">
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </td>
-                                    ))}
-                                </tr>
+                                <>
+                                    <tr key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <td key={cell.id}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </td>
+                                        ))}
+                                        {rowActions &&
+                                            <td>
+                                                {rowActions(row.original._id, () => row.toggleExpanded())}
+                                            </td>
+                                        }
+                                    </tr>
+                                    {row.getIsExpanded() && (
+                                        <tr style={{pointerEvents: "none"}}>
+                                            <td colSpan={row.getAllCells().length} style={{pointerEvents: "none"}}>
+                                                <BookDetail data={row.original} />
+                                            </td>
+                                        </tr>
+                                    )}
+                                </>
                             ))}
                             </tbody>
                         </table>
@@ -138,7 +193,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                         disabled={currentPage <= 1}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                              className="lucide lucide-chevron-first">
                             <path d="m17 18-6-6 6-6"/>
                             <path d="M7 6v12"/>
@@ -150,7 +205,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                         disabled={currentPage <= 1}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                              className="lucide lucide-chevron-left">
                             <path d="m15 18-6-6 6-6"/>
                         </svg>
@@ -170,7 +225,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                         disabled={currentPage >= maxPage}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                              className="lucide lucide-chevron-right">
                             <path d="m9 18 6-6-6-6"/>
                         </svg>
@@ -181,7 +236,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                         disabled={currentPage >= maxPage}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="m7 18 6-6-6-6"/>
                             <path d="M17 6v12"/>
                         </svg>

@@ -5,6 +5,7 @@ import User from '../models/user';
 import {optionFetchAllExceptDeleted} from '../utils/constants';
 import {getIdFromArray, webScrapper} from "../utils/utils";
 import mongoose from 'mongoose';
+import Autor from "../models/autor";
 
 const populateOptions: IPopulateOptions[] = [
     {path: 'autor', model: 'Autor'},
@@ -62,19 +63,42 @@ const normalizeBook = (data: any): IBook => {
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {page, pageSize, search} = req.query;
+        const {page, pageSize, search = "", sorting} = req.query;
+
+        let sortParams: Array<{ id: string; desc: string }> = [];
+        if (typeof sorting === "string") {
+            sortParams = JSON.parse(sorting);
+        } else if (Array.isArray(sorting)) {
+            sortParams = sorting;
+        }
+
+        // Build the sort object for MongoDB
+        const sortOptions: { [key: string]: 1 | -1 } = {};
+        sortParams.forEach((param) => {
+            sortOptions[param.id] = param.desc === "true" ? -1 : 1;
+        });
+
+        const matchingAuthors = await Autor.find({
+            $or: [
+                {firstName: {$regex: search, $options: "i"}},
+                {lastName: {$regex: search, $options: "i"}}
+            ],
+        }).select("_id");
+
+        const authorIds = matchingAuthors.map((author) => author._id);
 
         const query = {
             $or: [
-                { title: { $regex: search, $options: 'i' } }, // Example search by title
-                { author: { $regex: search, $options: 'i' } } // Example search by author
+                {title: {$regex: search, $options: 'i'}}, // Example search by title
+                {autor: {$in: authorIds}} // Example search by author
             ],
-            deletedAt: { $eq: null } // Exclude deleted documents if necessary
+            deletedAt: {$eq: null} // Exclude deleted documents if necessary
         };
 
         const books = await Book.find(query)
-            .skip((page-1) * pageSize)
-            .limit(parseInt(<string>pageSize))
+            .sort(sortOptions)
+            .skip((+page - 1) * +pageSize) //plus is converting to int
+            .limit(+pageSize)
             .populate(populateOptions)
             .exec();
 
@@ -449,7 +473,7 @@ const dashboard = {
                                     boundaries: boundaries,
                                     default: null,
                                     output: {
-                                        count: { $sum: 1 }
+                                        count: {$sum: 1}
                                     }
                                 }
                             }
@@ -461,7 +485,7 @@ const dashboard = {
                                     boundaries: boundaries,
                                     default: null,
                                     output: {
-                                        count: { $sum: 1 }
+                                        count: {$sum: 1}
                                     }
                                 }
                             }
@@ -473,7 +497,7 @@ const dashboard = {
             const results = await Book.aggregate(aggregationPipeline);
 
             // Extract height and width results
-            const { heightGroups, widthGroups } = results[0];
+            const {heightGroups, widthGroups} = results[0];
 
             // Total counts for normalization
             const totalHeightBooks = heightGroups.reduce((acc, current) => acc + current.count, 0);
@@ -509,7 +533,7 @@ const dashboard = {
             });
         } catch (err) {
             console.error("Error while getSizesGroups", err);
-            res.status(500).json({ error: "Failed to get size groups." });
+            res.status(500).json({error: "Failed to get size groups."});
         }
     },
     getLanguageStatistics: async (_: Request, res: Response): Promise<void> => {
@@ -521,13 +545,13 @@ const dashboard = {
             },
             {
                 $addFields: {
-                    firstLanguage: { $arrayElemAt: ["$language", 0] }
+                    firstLanguage: {$arrayElemAt: ["$language", 0]}
                 }
             },
             {
                 $group: {
                     _id: "$firstLanguage",
-                    count: { $sum: 1 }
+                    count: {$sum: 1}
                 }
             },
             {
@@ -541,9 +565,9 @@ const dashboard = {
 
         let data = await Book.aggregate(aggregationPipeline);
         // replace null in object with "-"
-        data.forEach(function(object){
+        data.forEach(function (object) {
             for (let key in object) {
-                if(object[key] == null)
+                if (object[key] == null)
                     object[key] = "Bez jazyka";
             }
         });
@@ -552,7 +576,7 @@ const dashboard = {
     },
     countBooks: async (req: Request, res: Response): Promise<void> => {
         try {
-           const {
+            const {
                 params: {userId}
             } = req
 
@@ -564,7 +588,7 @@ const dashboard = {
 
                 response.push({
                     owner: {id: userId, firstName: currUser?.firstName ?? "", lastName: currUser?.lastName},
-                    count: await Book.countDocuments({owner: userId, deletedAt: { $ne: undefined }})
+                    count: await Book.countDocuments({owner: userId, deletedAt: {$ne: undefined}})
                 });
             } else {
                 let tempRes: any[] = [];
@@ -572,7 +596,7 @@ const dashboard = {
                     tempRes.push(
                         {
                             owner: {id: user?._id, firstName: user?.firstName ?? "", lastName: user?.lastName},
-                            count: await Book.countDocuments({owner: user?._id, deletedAt: { $ne: undefined }})
+                            count: await Book.countDocuments({owner: user?._id, deletedAt: {$ne: undefined}})
                         }
                     )
                 }
@@ -582,7 +606,7 @@ const dashboard = {
                         {owner: {$exists: false}},
                         {owner: {$size: 0} as any}
                     ],
-                    deletedAt: { $ne: undefined }
+                    deletedAt: {$ne: undefined}
                 }
 
                 tempRes.push(
@@ -595,7 +619,7 @@ const dashboard = {
                 response = tempRes;
             }
 
-            response.push({owner: null, count: await Book.countDocuments({deletedAt: { $ne: undefined }})});
+            response.push({owner: null, count: await Book.countDocuments({deletedAt: {$ne: undefined}})});
             response.sort((a, b) => {
                 if (a.owner === null || b.owner === null) return 0
                 return a.owner?.lastName?.localeCompare(b.owner?.lastName)
@@ -609,7 +633,7 @@ const dashboard = {
     getReadBy: async (req: Request, res: Response): Promise<void> => {
         try {
             const users: IUser[] = await User.find().select('_id firstName lastName');
-            const totalBooksRead = await Book.countDocuments({ deletedAt: { $ne: undefined } });
+            const totalBooksRead = await Book.countDocuments({deletedAt: {$ne: undefined}});
 
             const userIds = users.map(user => user._id.toString());
 
@@ -628,7 +652,7 @@ const dashboard = {
                         // Count books read by `user` that are owned by `otherUser`
                         const count = await Book.countDocuments({
                             owner: otherUserId,
-                            readBy: { $in: [userId] },
+                            readBy: {$in: [userId]},
                             deletedAt: undefined,
                         });
 
@@ -658,7 +682,7 @@ const dashboard = {
             res.status(200).json(sortedData);
         } catch (error) {
             console.error('Error calculating reading statistics:', error);
-            res.status(500).json({ message: 'Internal server error', error });
+            res.status(500).json({message: 'Internal server error', error});
         }
     }
 

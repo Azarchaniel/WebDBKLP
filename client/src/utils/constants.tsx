@@ -1,5 +1,5 @@
-import {IBook, ILocation} from "../type";
-import {ColumnDef, createColumnHelper} from "@tanstack/react-table";
+import {ILocation} from "../type";
+import {createColumnHelper} from "@tanstack/react-table";
 import {getBookLocation} from "./utils";
 
 export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
@@ -17,12 +17,13 @@ export const multiselectStyle = {
 export const cities = [{value: "spisska", showValue: "Spišská"},
     {value: "bruchotin", showValue: "Břuchotín"}];
 
-const columnHelper = createColumnHelper<IBook>();
+const columnHelper = createColumnHelper<any>();
 
-export const bookTableColumns: ColumnDef<IBook>[] = [
+export const getBookTableColumns = (): any => [
     {
         accessorKey: 'autorsFull',
-        header: 'Autor'
+        header: 'Autor',
+        sortUndefined: "last"
     },
     {
         accessorKey: 'editorsFull',
@@ -39,11 +40,12 @@ export const bookTableColumns: ColumnDef<IBook>[] = [
     {
         accessorKey: 'title',
         header: 'Názov',
-        cell: info => (
+        cell: (info: any) => (
             <b>
                 {info.getValue() as unknown as string}
             </b>
         ),
+        sortUndefined: "last"
     },
     {
         accessorKey: 'subtitle',
@@ -75,20 +77,28 @@ export const bookTableColumns: ColumnDef<IBook>[] = [
         },
         columns: [
             columnHelper.accessor(row => row.dimensions?.height, {
+                id: "height",
                 cell: info => info.getValue(),
-                header: "Výška"
+                header: "Výška",
+                sortingFn: "alphanumeric"
             }),
             columnHelper.accessor(row => row.dimensions?.width, {
+                id: "width",
                 cell: info => info.getValue(),
-                header: "Šírka"
+                header: "Šírka",
+                sortingFn: "alphanumeric"
             }),
             columnHelper.accessor(row => row.dimensions?.depth, {
+                id: "depth",
                 cell: info => info.getValue(),
-                header: "Hrúbka"
+                header: "Hrúbka",
+                sortingFn: "alphanumeric"
             }),
             columnHelper.accessor(row => row.dimensions?.weight, {
+                id: "weight",
                 cell: info => info.getValue(),
-                header: "Hmotnosť"
+                header: "Hmotnosť",
+                sortingFn: "alphanumeric"
             }),
         ]
     }),
@@ -99,12 +109,13 @@ export const bookTableColumns: ColumnDef<IBook>[] = [
     {
         accessorKey: 'createdAt',
         header: 'Dátum pridania',
-        cell: ({cell}) => new Date(cell.getValue() as unknown as string).toLocaleDateString("cs-CZ"), //TODO: show time on hover
+        cell: ({cell}: { cell: any }) => new Date(cell.getValue() as unknown as string).toLocaleDateString("cs-CZ"), //TODO: show time on hover
+        sortingFn: "datetime"
     },
     {
         accessorKey: 'location',
         header: 'Umiestnenie',
-        cell: ({cell}) => getBookLocation(cell.getValue() as unknown as ILocation),
+        cell: ({cell}: { cell: any }) => getBookLocation(cell.getValue() as unknown as ILocation),
     },
     {
         accessorKey: 'ownersFull',

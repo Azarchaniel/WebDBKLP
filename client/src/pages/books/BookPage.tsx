@@ -9,13 +9,22 @@ import {stringifyAutors, stringifyUsers} from "../../utils/utils";
 import Header from "../../components/AppHeader";
 import {useReadLocalStorage} from "usehooks-ts";
 import {ShowHideRow} from "../../components/books/ShowHideRow";
-import {bookTableColumns} from "../../utils/constants";
+import {getBookTableColumns} from "../../utils/constants";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
 import ServerPaginationTable from "../../components/TableSP";
+import {SortingState} from "@tanstack/react-table";
 
 export default function BookPage() {
 	const [clonedBooks, setClonedBooks] = useState<any[]>([]);
-	const [pagination, setPagination] = useState({ page: 1, pageSize: 50 });
+	const [pagination, setPagination] = useState({
+		page: 1,
+		pageSize: 50,
+		search: "",
+		sorting: [{
+			id: "title",
+			desc: false
+		}] as SortingState
+	});
 	const [countAll, setCountAll] = useState<number>(0);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [updateBook, setUpdateBook] = useState<IBook>();
@@ -27,6 +36,10 @@ export default function BookPage() {
 		subtitle: true,
 		content: true,
 		dimensions: true,
+		height: true,
+		width: true,
+		depth: true,
+		weight: true,
 		createdAt: true,
 		location: true,
 		ownersFull: true
@@ -110,8 +123,12 @@ export default function BookPage() {
 			.catch((err) => console.trace(err))
 	}
 
-	const handleUpdateBook = (book: IBook): void => {
-		setUpdateBook(book);
+	const handleUpdateBook = (_id: string): void => {
+		getBook(_id)
+			.then(({data}) => {
+				setUpdateBook(data.book);
+			})
+			.catch((err) => console.trace(err))
 	}
 
 	const handleDeleteBook = (_id: string): void => {
@@ -156,40 +173,50 @@ export default function BookPage() {
 				<ShowHideRow label="Prekladateľ" init={hidden.translatorsFull} onChange={() => setHidden({...hidden, translatorsFull: !hidden.translatorsFull})} />
 				<ShowHideRow label="Podtitul" init={hidden.subtitle} onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})} />
 				<ShowHideRow label="Obsah" init={hidden.content} onChange={() => setHidden({...hidden, content: !hidden.content})} />
-				{/* TODO dimensions hiding*/}
 				<ShowHideRow
 					label="Rozmery"
 					init={hidden.dimensions}
-					onChange={() => setHidden({...hidden, dimensions: !hidden.dimensions})} />
+					onChange={() => setHidden({
+						...hidden,
+						dimensions: !hidden.dimensions,
+						height: !hidden.dimensions,
+						width: !hidden.dimensions,
+						depth: !hidden.dimensions,
+						weight: !hidden.dimensions
+					})} />
 				<ShowHideRow label="Dátum pridania" init={hidden.createdAt} onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})} />
 				<ShowHideRow label="Umiestnenie" init={hidden.location} onChange={() => setHidden({...hidden, location: !hidden.location})} />
 				<ShowHideRow label="Majiteľ" init={hidden.ownersFull} onChange={() => setHidden({...hidden, ownersFull: !hidden.ownersFull})} />
 			</div>
-			{/*
-
-			  TODO: single book actions (edit, delete, expand)
-			  		expand row
-			  		sorting
-			  		search
-
-			  */}
 			<ServerPaginationTable
 				title={`Knihy (${countAll})`}
 				data={clonedBooks}
-				columns={bookTableColumns}
+				columns={getBookTableColumns()}
 				pageChange={(page) => setPagination(prevState => ({...prevState, page: page}))}
 				pageSizeChange={(pageSize) => setPagination(prevState => ({...prevState, pageSize: pageSize}))}
+				sortingChange={(sorting) => setPagination(prevState => ({...prevState, sorting: sorting}))}
 				totalCount={countAll}
 				loading={loading}
 				pagination={pagination}
 				hiddenCols={hidden}
 				actions={
-					<div>
-						<input/>
+					<div className="row justify-center mb-4 mr-2">
+						<input
+							placeholder="Vyhľadaj názov/autora"
+							onChange={(e) => setPagination(prevState => ({...prevState, search: e.target.value}))}
+						/>
 						<i
 							className="fas fa-bars bookTableAction ml-4"
 							onClick={() => setHidden({...hidden, control: !hidden.control})}
 						/>
+					</div>
+				}
+				rowActions={(_id, expandRow) =>
+					<div className="actionsRow" style={{pointerEvents: "auto"}}>
+						<i onClick={() => handleDeleteBook(_id)} className="fa fa-trash"/>
+						<i className="fa fa-pencil-alt"
+						   onClick={() => handleUpdateBook(_id)}/>
+						<i className="fa fa-chevron-down" onClick={() => expandRow()}/>
 					</div>
 				}
 			/>

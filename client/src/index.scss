@@ -353,6 +353,7 @@ body, html, main, #root {
 
 .BookDetail {
   padding: 1rem;
+  pointer-events: none;
 }
 
 .bookDimensions {
@@ -404,6 +405,7 @@ body, html, main, #root {
 
 .detailHrefs {
   text-align: left;
+  pointer-events: auto;
 }
 
 .container {
@@ -958,6 +960,11 @@ tbody {
   }
    td {
      border-bottom: 2px solid lightgray;
+     pointer-events: none;
+
+     div {
+       pointer-events: none;
+     }
    }
 }
 
@@ -980,7 +987,6 @@ tbody {
     cursor: default;
   }
 }
-
 
 .tableNavigationRow {
   display: flex;
@@ -1026,4 +1032,24 @@ button:focus {
   transform: rotate(90deg);
   font-size: 1.5rem;
   cursor: pointer;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.select-none {
+  user-select: none;
+}
+
+.actionsRow {
+  width: 5rem;
+  margin-left: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  i {
+    cursor: pointer;
+  }
 }
