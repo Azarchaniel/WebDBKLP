@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "main": "app.js",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc",
     "start": "concurrently \"tsc -w\" \"nodemon dist/js/app.js\"",
