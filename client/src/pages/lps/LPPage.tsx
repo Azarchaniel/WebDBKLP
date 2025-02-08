@@ -102,7 +102,7 @@ export default function LPPage() {
 		<main className='App'>
 			<Header/>
 			<Sidebar />
-			<AddLP saveLp={handleSaveLP} />
+			<AddLP key={updateLP?._id || "new"} saveLp={handleSaveLP} />
 			<div ref={popRef} className={`showHideColumns ${hidden.control ? "hidden" : "shown"}`}>
 				<ShowHideRow label="Podnázov" init={hidden.subtitle} onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})} />
 				<ShowHideRow label="Dátum pridania" init={hidden.createdAt} onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})} />
@@ -111,6 +111,9 @@ export default function LPPage() {
 			</div>
 			<MaterialTableCustom
 				title={`LP (${countAll})`}
+				pageSizeChange={() => {}}
+				pageChange={() => {}}
+				totalCount={countAll}
 				columns={[
 					{
 						title: "Autor",
@@ -207,7 +210,7 @@ export default function LPPage() {
 							handleDeleteLP((rowData as ILP)._id)}
 				]}
 			/>
-			{Boolean(updateLP) && <AddLP saveLp={handleSaveLP} lp={updateLP} />}
+			{Boolean(updateLP) && <AddLP key={updateLP?._id || "new"} saveLp={handleSaveLP} lp={updateLP} />}
 			<Toast />
 		</main>
 	)

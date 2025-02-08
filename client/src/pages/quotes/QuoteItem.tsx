@@ -48,6 +48,7 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {
 			</div>
 			{Boolean(update) &&
 				<AddQuote
+					key={quote._id}
 					saveQuote={saveQuote}
 					quote={quote}
 					onClose={() => setUpdate(undefined)}

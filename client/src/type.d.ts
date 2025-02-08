@@ -73,10 +73,6 @@ export interface IQuote extends IBaseType {
     owner: IUser[];
 }
 
-type BookProps = {
-    book: IBook
-}
-
 type ApiBookDataType = {
     message: string
     books: IBook[]
@@ -146,16 +142,7 @@ interface IEditionSerie {
 }
 
 export interface IBookHidden {
-    control: boolean,
-    editor: boolean,
-    ilustrator: boolean,
-    translator: boolean,
-    subtitle: boolean,
-    content: boolean,
-    dimensions: boolean,
-    createdAt: boolean,
-    location: boolean,
-    owner: boolean
+    [columnId: string]: boolean
 }
 
 export interface ValidationError {
@@ -173,6 +160,7 @@ interface IDimensionStat {
     mode: number;
 }
 
+//fixme: this is wrong type
 export interface IDimensionsStatistics {
     height: IDimension;
     width: IDimension;

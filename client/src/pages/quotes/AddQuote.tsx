@@ -5,12 +5,13 @@ import {Modal} from "../../components/Modal";
 import {QuotesModalBody, QuotesModalButtons} from "../../components/quotes/QuotesModal";
 
 interface Props {
+	key: string;
     saveQuote: (formData: IQuote | any) => void;
 	onClose: () => void;
     quote?: IQuote | undefined;
 }
 
-const AddQuote: React.FC<Props> = ({saveQuote, quote, onClose}: Props) => {
+const AddQuote: React.FC<Props> = ({key, saveQuote, quote, onClose}: Props) => {
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [quoteData, setQuoteData] = useState<IQuote | object>();
 	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"}]);
@@ -28,6 +29,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, quote, onClose}: Props) => {
 
 			{showModal &&
                 <Modal
+					key={key}
                 	title="Pridaj citát"
                 	onClose={() => {
                 		setShowModal(false);

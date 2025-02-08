@@ -4,11 +4,12 @@ import {Modal} from "../../components/Modal";
 import {LPsModalBody, LPsModalButtons} from "../../components/lps/LPsModal";
 
 type Props = {
+	key: string;
     saveLp: (formData: ILP | any) => void;
     lp?: ILP;
 }
 
-const AddLp: React.FC<Props> = ({saveLp, lp}: Props) => {
+const AddLp: React.FC<Props> = ({key, saveLp, lp}: Props) => {
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [lpData, setLpData] = useState<ILP | object>();
 	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Názov LP musí obsahovať aspoň jeden znak!", target: "title"}]);
@@ -21,7 +22,6 @@ const AddLp: React.FC<Props> = ({saveLp, lp}: Props) => {
 	}, []);
 
 	const onChange = (data: any) => {
-		console.log(data);
 		setLpData(data);
 	}
 
@@ -30,6 +30,7 @@ const AddLp: React.FC<Props> = ({saveLp, lp}: Props) => {
 			<button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>
 			{showModal &&
                 <Modal
+					key={key}
                 	title="Pridaj LP"
                 	onClose={() => setShowModal(false)}
                 	body={<LPsModalBody

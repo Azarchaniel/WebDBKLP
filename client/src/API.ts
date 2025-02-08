@@ -4,11 +4,17 @@ import {ApiAutorDataType, ApiBookDataType, ApiLPDataType, ApiQuoteDataType, ApiU
 const baseUrl: string = "http://localhost:4000"
 
 //### BOOK ###
-export const getBooks = async (): Promise<AxiosResponse<ApiBookDataType>> => {
+export const getBooks = async (pagination?: any): Promise<AxiosResponse<ApiBookDataType>> => {
 	try {
 		const books: AxiosResponse<ApiBookDataType> = await axios.get(
-			baseUrl + "/books"
-		)
+			baseUrl + "/books", {
+				params: {
+					page: pagination.page ?? 1, // API expects 1-based index
+					pageSize: pagination.pageSize ?? 10_000,
+					search: pagination.search ?? "",
+					sorting: pagination.sorting ?? {id: "title", desc: false}
+				}
+			});
 		return books
 	} catch (error: any) {
 		throw new Error(error)
