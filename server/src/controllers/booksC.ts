@@ -25,13 +25,13 @@ const normalizeBook = (data: any): IBook => {
         readBy: getIdFromArray(data.readBy),
         owner: getIdFromArray(data.owner),
         published: {
-            publisher: data.published.publisher ?? "",
-            year: data.published.year ?? undefined,
-            country: data.published.country[0]?.key ?? ''
+            publisher: data.published?.publisher ?? "",
+            year: data.published?.year ?? undefined,
+            country: data.published?.country[0]?.key ?? ''
         },
         location: {
-            city: data.location.city[0]?.value ?? '',
-            shelf: data.location.shelf,
+            city: data.location?.city?.shift()?.value ?? '',
+            shelf: data.location?.shelf ?? "",
         },
         language: data.language?.map((lang: { key: string; value: string }) => lang.key),
         numberOfPages: data.numberOfPages ? parseInt(data.numberOfPages) : undefined,
@@ -63,7 +63,12 @@ const normalizeBook = (data: any): IBook => {
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {page, pageSize, search = "", sorting} = req.query;
+        let {page, pageSize, search = "", sorting} = req.query;
+
+        if (!page && !pageSize) {
+            page = "1";
+            pageSize = "10_000"
+        }
 
         let sortParams: Array<{ id: string; desc: string }> = [];
         if (typeof sorting === "string") {
@@ -95,9 +100,12 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             deletedAt: {$eq: null} // Exclude deleted documents if necessary
         };
 
+        const skipCalc = (+page - 1) * +pageSize; //plus is converting to int
+        const skip = skipCalc < 0 ? 0 : skipCalc;
+
         const books = await Book.find(query)
             .sort(sortOptions)
-            .skip((+page - 1) * +pageSize) //plus is converting to int
+            .skip(skip)
             .limit(+pageSize)
             .populate(populateOptions)
             .exec();
@@ -153,9 +161,7 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
             body,
         } = req;
 
-        console.log(body);
         const book = normalizeBook(body);
-        console.log(book);
         const updateBook = await Book.findByIdAndUpdate(
             {_id: id},
             book
@@ -588,25 +594,27 @@ const dashboard = {
 
                 response.push({
                     owner: {id: userId, firstName: currUser?.firstName ?? "", lastName: currUser?.lastName},
-                    count: await Book.countDocuments({owner: userId, deletedAt: {$ne: undefined}})
+                    count: await Book.countDocuments({owner: userId, deletedAt: undefined})
                 });
             } else {
                 let tempRes: any[] = [];
                 for (let user of users) {
+                    //get stats for every of users
                     tempRes.push(
                         {
-                            owner: {id: user?._id, firstName: user?.firstName ?? "", lastName: user?.lastName},
-                            count: await Book.countDocuments({owner: user?._id, deletedAt: {$ne: undefined}})
+                            owner: {id: user._id, firstName: user?.firstName ?? "", lastName: user?.lastName},
+                            count: await Book.countDocuments({owner: user._id, deletedAt: undefined})
                         }
                     )
                 }
 
+                // get stats for books without owner
                 const query: mongoose.FilterQuery<IBook> = {
                     $or: [
                         {owner: {$exists: false}},
                         {owner: {$size: 0} as any}
                     ],
-                    deletedAt: {$ne: undefined}
+                    deletedAt: undefined
                 }
 
                 tempRes.push(
@@ -619,7 +627,7 @@ const dashboard = {
                 response = tempRes;
             }
 
-            response.push({owner: null, count: await Book.countDocuments({deletedAt: {$ne: undefined}})});
+            response.push({owner: null, count: await Book.countDocuments({deletedAt: undefined})});
             response.sort((a, b) => {
                 if (a.owner === null || b.owner === null) return 0
                 return a.owner?.lastName?.localeCompare(b.owner?.lastName)
