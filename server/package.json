@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "start": "concurrently \"tsc -w\" \"nodemon dist/js/app.js\"",
-    "startProduction": "concurrently \"tsc\" \"nodemon dist/js/app.js\"",
+    "startProduction": "node dist/js/app.js",
     "runImport": "node migrations/v1__import_from_csv.tsx"
   },
   "keywords": [],
