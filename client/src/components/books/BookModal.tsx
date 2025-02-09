@@ -84,7 +84,6 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 	}, []);
 
 	useEffect(() => {
-		//TODO: move filtering to backend; start fetching at third char
 		getAutors()
 			.then(aut => {
 				//constructing fullName for autocomplete

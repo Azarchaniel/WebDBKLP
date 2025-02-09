@@ -42,7 +42,8 @@ export default [
 		rules: {
 			camelcase: ["error", {ignoreDestructuring: true}],
 			quotes: ["error", "double"],
-			indent: ["error", "tab", { "SwitchCase": 1 }]
+			indent: ["error", "tab", { "SwitchCase": 1 }],
+			'@typescript-eslint/no-unused-vars': 'off',
 		},
 	},
 	{

@@ -6,7 +6,6 @@ import * as mongoose from "mongoose";
 import {locationSchema} from "./location";
 import {dimensionSchema} from "./dimensions";
 
-//FIXME: dimension
 const bookSchema: Schema = new Schema({
     autor: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
     editor: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
@@ -18,19 +17,20 @@ const bookSchema: Schema = new Schema({
     edition: {type: editionSerieSchema, required: false},
     serie: {type: editionSerieSchema, required: false},
     ISBN: {type: String, required: false},
-    language: {type: [String], required: true},
+    language: {type: [String], required: false},
     note: {type: String, required: false},
     numberOfPages: {type: Number, required: false},
     dimensions: {type: dimensionSchema, required: false},
-    exLibris: {type: Boolean},
+    exLibris: {type: Boolean, required: false},
     published: {type: publishedSchema, required: false},
     location: {type: locationSchema, required: false},
-    deletedAt: {type: Date},
-    owner: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: true},
+    deletedAt: {type: Date, required: false},
+    owner: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false},
     readBy: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false},
     picture: {type: String, required: false},
     hrefGoodReads: {type: String, required: false},
     hrefDatabazeKnih: {type: String, required: false},
+    wasChecked: {type: Boolean, required: false, default: false}, //TEMPORARY
 }, {timestamps: true})
 
 export default model<IBook>('Book', bookSchema);

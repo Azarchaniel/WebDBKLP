@@ -109,7 +109,12 @@ export const getBookTableColumns = (): any => [
     {
         accessorKey: 'createdAt',
         header: 'Dátum pridania',
-        cell: ({cell}: { cell: any }) => new Date(cell.getValue() as unknown as string).toLocaleDateString("cs-CZ"), //TODO: show time on hover
+        cell: ({cell}: { cell: any }) => {
+            const value = cell.getValue() as unknown as string;
+            const date = new Date(value).toLocaleDateString("cs-CZ");
+            const time = new Date(value).toLocaleTimeString("cs-CZ");
+            return <span title={time} style={{pointerEvents: "auto"}}>{date}</span>
+        },
         sortingFn: "datetime"
     },
     {
@@ -120,6 +125,12 @@ export const getBookTableColumns = (): any => [
     {
         accessorKey: 'ownersFull',
         header: 'Majiteľ',
+    },
+    {
+        //TEMP
+        accessorKey: "wasChecked",
+        header: "skontrolovane",
+        cell: ({cell}: { cell: any }) => cell.getValue() ? "ANO" : "ne",
     }
 ];
 

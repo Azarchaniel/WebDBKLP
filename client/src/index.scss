@@ -946,6 +946,7 @@ input:invalid {
     border: 1px solid var(--anchor);
     background-color: var(--anchor);
     color: white;
+    height: 2rem;
   }
 
   th[colspan]:not([colspan="1"]) { // select element that has colspan and it is not 1
@@ -954,18 +955,19 @@ input:invalid {
   }
 }
 
-tbody {
+.serverPaginationTable {
   tr {
     height: 4rem;
   }
-   td {
-     border-bottom: 2px solid lightgray;
-     pointer-events: none;
 
-     div {
-       pointer-events: none;
-     }
-   }
+  td {
+    border-bottom: 2px solid lightgray;
+    pointer-events: none;
+
+    div {
+      pointer-events: none;
+    }
+  }
 }
 
 .headerTitleAction {

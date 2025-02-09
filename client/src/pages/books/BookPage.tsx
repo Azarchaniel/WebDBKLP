@@ -212,16 +212,38 @@ export default function BookPage() {
 						/>
 						<i
 							className="fas fa-bars bookTableAction ml-4"
+							title="Zobraz/skry stĺpce"
 							onClick={() => setHidden({...hidden, control: !hidden.control})}
 						/>
 					</div>
 				}
 				rowActions={(_id, expandRow) =>
 					<div className="actionsRow" style={{pointerEvents: "auto"}}>
-						<i onClick={() => handleDeleteBook(_id)} className="fa fa-trash"/>
-						<i className="fa fa-pencil-alt"
-						   onClick={() => handleUpdateBook(_id)}/>
-						<i className="fa fa-chevron-down" onClick={() => expandRow()}/>
+						{/* TEMPORARY input*/}
+						<input
+							type="checkbox"
+							title="Zaškrtni, ak sme túto knihu skontrolovali"
+							checked={clonedBooks.find((book: IBook) => book._id === _id)?.wasChecked}
+							onChange={() => handleSaveBook({
+								...clonedBooks.find((book: IBook) => book._id === _id),
+								wasChecked: !(clonedBooks.find((book: IBook) => book._id === _id).wasChecked)
+							})}
+						/>
+						<i
+							title="¨Vymazať"
+							onClick={() => handleDeleteBook(_id)}
+							className="fa fa-trash"
+						/>
+						<i
+							title="Upraviť"
+							className="fa fa-pencil-alt"
+						   	onClick={() => handleUpdateBook(_id)}
+						/>
+						<i
+							title="Detaily"
+							className="fa fa-chevron-down"
+							onClick={() => expandRow()}
+						/>
 					</div>
 				}
 			/>

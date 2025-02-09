@@ -20,14 +20,15 @@ export interface IBook extends Document {
     note?: string;
     dimensions?: IDimension;
     numberOfPages?: number;
-    exLibris: boolean;
+    exLibris?: boolean;
     location?: ILocation;
-    owner: string;
-    deletedAt: Date;
+    owner?: string;
+    deletedAt?: Date;
     readBy: string[];
     picture?: string;
     hrefGoodReads?: string;
     hrefDatabazeKnih?: string;
-    binding?: string;
+    //binding?: string;
+    wasChecked?: boolean; //TEMPORARY
 }
 //vazba: vazana, brozovana, sesit, kruzkovana, leporelo

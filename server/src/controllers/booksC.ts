@@ -16,6 +16,8 @@ const populateOptions: IPopulateOptions[] = [
 ];
 
 const normalizeBook = (data: any): IBook => {
+    const city = Array.isArray(data.city) ? data.location?.city?.shift()?.value : data.city;
+
     return {
         autor: getIdFromArray(data.autor),
         editor: getIdFromArray(data.editor),
@@ -29,7 +31,7 @@ const normalizeBook = (data: any): IBook => {
             country: data.published?.country[0]?.key ?? ''
         },
         location: {
-            city: data.location?.city?.shift()?.value ?? '',
+            city: city ?? '',
             shelf: data.location?.shelf ?? "",
         },
         language: data.language?.map((lang: { key: string; value: string }) => lang.key),
@@ -57,6 +59,7 @@ const normalizeBook = (data: any): IBook => {
         picture: data.picture,
         hrefGoodReads: data.hrefGoodReads,
         hrefDatabazeKnih: data.hrefDatabazeKnih,
+        wasChecked: data.wasChecked //TEMPORARY
     } as unknown as IBook
 }
 
