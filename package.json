@@ -6,8 +6,7 @@
   "scripts": {
     "install-server": "cd server && npm run build",
     "start-server": "cd server && npm run startProduction",
-    "install-client": "cd client && npm install --legacy-peer-deps",
-    "build-client": "cd client && npm run build",
+    "build-client": "cd client && npm install --legacy-peer-deps && npm run build",
     "start-client": "cd client && npm run start"
   },
   "keywords": [],
