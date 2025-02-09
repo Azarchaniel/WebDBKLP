@@ -24,7 +24,9 @@
     "experimentalDecorators": true,
     "incremental": true,
     "noFallthroughCasesInSwitch": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "outDir": "dist",
+    "rootDir": "./"
   },
   "include": [
     "src/**/*",

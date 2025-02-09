@@ -5,9 +5,9 @@
   "main": "app.js",
   "type": "commonjs",
   "scripts": {
-    "build": "tsc",
+    "build": "npm install --legacy-peer-deps && tsc",
     "start": "concurrently \"tsc -w\" \"nodemon dist/js/app.js\"",
-    "startProduction": "node dist/js/app.js",
+    "startProduction": "nodemon dist/js/app.js",
     "runImport": "node migrations/v1__import_from_csv.tsx"
   },
   "keywords": [],
