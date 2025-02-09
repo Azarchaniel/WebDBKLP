@@ -1,7 +1,7 @@
 import axios, {AxiosResponse} from "axios"
 import {ApiAutorDataType, ApiBookDataType, ApiLPDataType, ApiQuoteDataType, ApiUserDataType, IBook} from "./type";
 
-const baseUrl: string = "http://localhost:4000"
+const baseUrl: string = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
 
 //### BOOK ###
 export const getBooks = async (pagination?: any): Promise<AxiosResponse<ApiBookDataType>> => {

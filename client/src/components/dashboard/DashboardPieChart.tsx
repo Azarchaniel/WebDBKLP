@@ -1,7 +1,6 @@
 import "chart.js/auto"; //for react-chart
 import {Pie} from "react-chartjs-2";
 import {chartColors, chartLabels} from "../../utils/constants";
-import {useEffect} from "react";
 
 export const DashboardPieChart = (props: {data: any[]}) => {
 	const data = {
@@ -13,10 +12,6 @@ export const DashboardPieChart = (props: {data: any[]}) => {
 			hoverOffset: 4
 		}]
 	};
-
-	useEffect(() => {
-		console.log(data);
-	}, [data]);
 
 	const chartOptions = {
 		plugins: {
