@@ -53,6 +53,11 @@ const ServerPaginationTable: React.FC<PropsMT> =
         const maxPage = Math.ceil(totalCount / currentPageSize);
 
         useEffect(() => {
+            setCurrentPage(pagination.page);
+            setCurrentPageSize(pagination.pageSize);
+        }, [pagination]);
+
+        useEffect(() => {
             sortingChange(sorting);
         }, [sorting]);
 

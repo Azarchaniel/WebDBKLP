@@ -1,5 +1,3 @@
-import {IEditionSerie} from "../../server/src/types";
-
 interface IBaseType {
     _id: string;
     deletedAt?: string;

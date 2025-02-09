@@ -161,6 +161,11 @@ export default function BookPage() {
 			.catch((err) => console.trace(err))
 	}
 
+	const handlePageSizeChange = (newPageSize: number) => {
+		const newPage = Math.floor(((pagination.page - 1) * pagination.pageSize) / newPageSize) + 1;
+		setPagination(prevState => ({...prevState, page: newPage, pageSize: newPageSize}));
+	};
+
 	return (
 		<main className='App'>
 			{/* TODO: remove Header and Sidebar from here */}
@@ -193,7 +198,7 @@ export default function BookPage() {
 				data={clonedBooks}
 				columns={getBookTableColumns()}
 				pageChange={(page) => setPagination(prevState => ({...prevState, page: page}))}
-				pageSizeChange={(pageSize) => setPagination(prevState => ({...prevState, pageSize: pageSize}))}
+				pageSizeChange={handlePageSizeChange}
 				sortingChange={(sorting) => setPagination(prevState => ({...prevState, sorting: sorting}))}
 				totalCount={countAll}
 				loading={loading}

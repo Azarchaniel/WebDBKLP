@@ -2,7 +2,6 @@ import {Response, Request} from 'express';
 import {IBook, IPopulateOptions, IUser} from '../types';
 import Book from '../models/book';
 import User from '../models/user';
-import {optionFetchAllExceptDeleted} from '../utils/constants';
 import {getIdFromArray, webScrapper} from "../utils/utils";
 import mongoose from 'mongoose';
 import Autor from "../models/autor";
@@ -74,7 +73,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         if (typeof sorting === "string") {
             sortParams = JSON.parse(sorting);
         } else if (Array.isArray(sorting)) {
-            sortParams = sorting;
+            sortParams = sorting as Array<{ id: string; desc: string }>;
         }
 
         // Build the sort object for MongoDB
@@ -88,25 +87,26 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
                 {firstName: {$regex: search, $options: "i"}},
                 {lastName: {$regex: search, $options: "i"}}
             ],
-        }).select("_id");
+        }).select("_id") as {_id: string}[];
 
+        // result is [ {_id: "..."} ] so here is mapping
         const authorIds = matchingAuthors.map((author) => author._id);
 
         const query = {
             $or: [
-                {title: {$regex: search, $options: 'i'}}, // Example search by title
-                {autor: {$in: authorIds}} // Example search by author
+                {title: {$regex: search, $options: 'i'}},
+                {autor: {$in: authorIds}}
             ],
             deletedAt: {$eq: null} // Exclude deleted documents if necessary
         };
 
-        const skipCalc = (+page - 1) * +pageSize; //plus is converting to int
+        const skipCalc = (+page! - 1) * +pageSize!; //plus is converting to int
         const skip = skipCalc < 0 ? 0 : skipCalc;
 
         const books = await Book.find(query)
             .sort(sortOptions)
             .skip(skip)
-            .limit(+pageSize)
+            .limit(+pageSize!)
             .populate(populateOptions)
             .exec();
 
@@ -142,7 +142,8 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
 
         const bookToSave = new Book(book);
 
-        const newBook: IBook = await bookToSave.save()
+        const newBook: IBook = (await bookToSave.save()).toObject();
+
         const allBooks = await Book
             .find()
             .populate(populateOptions)
@@ -505,9 +506,14 @@ const dashboard = {
             // Extract height and width results
             const {heightGroups, widthGroups} = results[0];
 
+            interface IDimensionGroup {
+                _id: string | number; //10, 20 ... 40+
+                count: number
+            }
+
             // Total counts for normalization
-            const totalHeightBooks = heightGroups.reduce((acc, current) => acc + current.count, 0);
-            const totalWidthBooks = widthGroups.reduce((acc, current) => acc + current.count, 0);
+            const totalHeightBooks = heightGroups.reduce((acc: number, current: IDimensionGroup) => acc + current.count, 0);
+            const totalWidthBooks = widthGroups.reduce((acc: number, current: IDimensionGroup) => acc + current.count, 0);
 
             // Helper function to format the results
             const formatGroups = (groups: { _id: any; count: number }[], total: number) =>
@@ -640,14 +646,12 @@ const dashboard = {
     },
     getReadBy: async (req: Request, res: Response): Promise<void> => {
         try {
-            const users: IUser[] = await User.find().select('_id firstName lastName');
+            const users = (await User.find().select('_id firstName lastName')) as Partial<IUser>[];
             const totalBooksRead = await Book.countDocuments({deletedAt: {$ne: undefined}});
-
-            const userIds = users.map(user => user._id.toString());
 
             const result: any[] = await Promise.all(
                 users.map(async user => {
-                    const userId = user._id.toString();
+                    const userId = (user._id as string).toString();
 
                     const userStats: { name: string; stats: { user: string; count: number; ratio: number }[] } = {
                         name: user.firstName!,
@@ -655,14 +659,14 @@ const dashboard = {
                     };
 
                     for (const otherUser of users) {
-                        const otherUserId = otherUser._id.toString();
+                        const otherUserId = (otherUser._id as string).toString();
 
                         // Count books read by `user` that are owned by `otherUser`
                         const count = await Book.countDocuments({
                             owner: otherUserId,
                             readBy: {$in: [userId]},
                             deletedAt: undefined,
-                        });
+                        }) as number;
 
                         const ratio = totalBooksRead > 0 ? count / totalBooksRead : 0;
 
@@ -679,10 +683,10 @@ const dashboard = {
 
             const customOrder = ['Ľuboš', 'Žaneta', 'Jakub', 'Jaroslav', 'Magdaléna'];
             const sortByParam = (data: any, param: string) =>
-                data.sort((a, b) => customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]));
+                data.sort((a: any, b: any) => customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]));
 
             // Sort the result by array and then sort stats in every name
-            const sortedData = sortByParam(result, 'name').map(item => ({
+            const sortedData = sortByParam(result, 'name').map((item: any) => ({
                 ...item,
                 stats: sortByParam(item.stats, 'user'),
             }));
