@@ -8,6 +8,7 @@ const autorSchema: Schema = new Schema({
     dateOfBirth: { type: Date, required: false },
     dateOfDeath: { type: Date, required: false },
     note: { type: String, required: false },
+    role: {type: [String], required: false },
     deletedAt: { type: Date}
 }, {timestamps: true})
 

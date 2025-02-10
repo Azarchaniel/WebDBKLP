@@ -257,7 +257,7 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
             numberOfPages: bookFetched.num_pages[0],
             language: [mapGRlanguageToCode(bookFetched.language_code[0])],
             hrefGoodReads: bookFetched.url[0],
-            picture: bookFetched.image_url,
+            picture: bookFetched.image_url[0],
         };
     } catch (error: any) {
         console.error("Error in goodReads", error.status, error.code);

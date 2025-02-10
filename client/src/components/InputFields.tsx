@@ -94,6 +94,7 @@ export const MultiselectField = React.memo(({
 			avoidHighlightFirstOption={true}
 			selectedValues={value}
 			onSelect={(value) => onChange({name: name, value: value})}
+			onRemove={(removedList, _) => onChange({name: name, value: removedList})}
 		/>
 	)
 })

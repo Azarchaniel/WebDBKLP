@@ -25,7 +25,8 @@ const getAutor = async (req: Request, res: Response): Promise<void> => {
 }
 
 const addAutor = async (req: Request, res: Response): Promise<void> => {
-    const {firstName, lastName, dateOfBirth, dateOfDeath, note, nationality} = req.body;
+    const {firstName, lastName, dateOfBirth, dateOfDeath, note, nationality, role} = req.body;
+
     try {
         const autor: IAutor = new Autor({
             firstName: firstName,
@@ -34,6 +35,7 @@ const addAutor = async (req: Request, res: Response): Promise<void> => {
             dateOfDeath: dateOfDeath,
             note: note,
             nationality: nationality?.[0]?.key ?? '',
+            role: role?.map((val: {value: string, showValue: string}) => val.value),
             deletedAt: null
         });
 
@@ -52,9 +54,13 @@ const updateAutor = async (req: Request, res: Response): Promise<void> => {
             params: {id},
             body,
         } = req
+
         const updateAutor: IAutor | null = await Autor.findByIdAndUpdate(
             {_id: id},
-            body
+            {
+                ...body,
+                role: body.role?.map((val: {value: string, showValue: string}) => val.value),
+            }
         )
         const allAutors: IAutor[] = await Autor.find()
         res.status(201).json({

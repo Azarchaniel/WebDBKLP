@@ -41,7 +41,8 @@ export default function DashboardPage() {
 	}, [])
 
 	const getTabsForReadByStats = (): any => {
-		if (!readBy) return <span>No Data</span>;
+		const isDataEmpty = readBy?.every(userStat => userStat.stats.every(stat => stat.count === 0));
+		if (!readBy || isDataEmpty) return <span>Žiadne dáta</span>;
 
 		return (
 			<Tabs>

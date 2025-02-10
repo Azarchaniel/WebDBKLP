@@ -5,6 +5,7 @@ import {countryCode} from "../../utils/locale";
 import {IAutor, ValidationError} from "../../type";
 import {InputField, MultiselectField} from "../InputFields";
 import {showError} from "../Modal";
+import {autorRoles} from "../../utils/constants";
 
 interface BodyProps {
     data: IAutor | object;
@@ -38,10 +39,9 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	useEffect(() => {
 		if (!data) return;
 
-		console.log(data);
-
 		const toBeModified: IAutor = {
 			...data,
+			role: autorRoles.filter(obj => ((formData as IAutor).role as string[]).includes(obj.value)),
 			dateOfBirth: (formData as IAutor)?.dateOfBirth ?
 				new Date((formData as IAutor)?.dateOfBirth as string | number | Date) :
 				undefined,
@@ -221,11 +221,26 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 				</div>
 				<div className="col">
 					<textarea id='note' placeholder='Poznámka'
-						className="form-control"
-						name="note"
-						autoComplete="off"
-						rows={1}
-						value={formData?.note || ""}
+							  className="form-control"
+							  name="note"
+							  autoComplete="off"
+							  rows={1}
+							  value={formData?.note || ""}
+							  onChange={handleInputChange}
+					/>
+				</div>
+			</div>
+
+			<div style={{height: "5px", width: "100%"}}/>
+
+			<div className="row">
+				<div className="col">
+					<MultiselectField
+						options={autorRoles}
+						displayValue="showValue"
+						label="Role"
+						value={formData?.role}
+						name="role"
 						onChange={handleInputChange}
 					/>
 				</div>
@@ -241,12 +256,12 @@ export const AutorsModalButtons = ({saveAutor, cleanFields, error}: ButtonsProps
 
 			<div className="buttons">
 				<button type="button" className="btn btn-secondary"
-					onClick={cleanFields}>Vymazať polia
+						onClick={cleanFields}>Vymazať polia
 				</button>
 				<button type="submit"
-					disabled={Boolean(error?.length)}
-					onClick={saveAutor}
-					className="btn btn-success">Uložiť autora
+						disabled={Boolean(error?.length)}
+						onClick={saveAutor}
+						className="btn btn-success">Uložiť autora
 				</button>
 			</div>
 		</div>

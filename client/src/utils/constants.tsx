@@ -15,7 +15,8 @@ export const multiselectStyle = {
 };
 
 export const cities = [{value: "spisska", showValue: "Spišská"},
-    {value: "bruchotin", showValue: "Břuchotín"}];
+    {value: "bruchotin", showValue: "Břuchotín"}
+];
 
 const columnHelper = createColumnHelper<any>();
 
@@ -142,7 +143,7 @@ export const chartLabels = {
             const style = meta.controller.getStyle(i);
 
             return {
-                text: `${label} (${chart.data.datasets[0].data[i]})`,
+                text: `${label} (${chart.data.datasets[0].data[i] ?? 0})`,
                 fillStyle: style.backgroundColor,
                 strokeStyle: style.borderColor,
                 lineWidth: style.borderWidth,
@@ -155,4 +156,12 @@ export const chartLabels = {
 
 export const chartColors = [
     "#073b4c", "#118ab2", "#06d6a0", "#ffd166", "#f78c6b", "#ef476f"
+]
+
+export const autorRoles = [
+    {value: "autor", showValue: "Autor"},
+    {value: "editor", showValue: "Editor"},
+    {value: "ilustrator", showValue: "Ilustrátor"},
+    {value: "musician", showValue: "Hudobník"},
+    {value: "boardGameAutor", showValue: "Autor spol. hier"}
 ]

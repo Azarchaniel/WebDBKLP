@@ -3,7 +3,8 @@ interface Props {
 }
 
 export const DashboardTableStats = ({dimensionStats}: Props) => {
-	if (!dimensionStats) return null;
+	// if no data, then it is: { height: {}, width: {}, depth: {}, weight: {} }
+	if (!dimensionStats || Object.values(dimensionStats).every((v: any) => Object.keys(v).length === 0)) return <>Žiadne dáta</>;
 
 	//TEMPORARY: until translation
 	const translationMap: Record<string, string> = {
@@ -38,8 +39,8 @@ export const DashboardTableStats = ({dimensionStats}: Props) => {
 						<tr key={row}>
 							<td><b>{translationMap[row]}</b></td>
 							{columns.map((column) => (
-								<td key={column}>{dimensionStats[row][column]}</td>
-							))}
+								<td key={column}>{Math.round(dimensionStats[row][column] * 10) / 10}</td>
+								))}
 						</tr>
 					))}
 				</tbody>

@@ -7,6 +7,8 @@ interface Props {
 }
 
 export const ReadByChart = (props: Props) => {
+	if (!props.data || Object.values(props.data).every((v: any) => v.count === 0)) return <>Žiadne dáta</>;
+
 	const data = {
 		labels: props.data.length ? props.data.map((c: any) => c.user) : [],
 		datasets: [{

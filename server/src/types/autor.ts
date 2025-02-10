@@ -10,4 +10,5 @@ export interface IAutor extends Document {
     note?: string;
     fullName?: string;
     deletedAt?: Date;
+    role?: string[];
 }

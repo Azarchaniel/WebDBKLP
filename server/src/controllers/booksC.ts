@@ -16,7 +16,7 @@ const populateOptions: IPopulateOptions[] = [
 ];
 
 const normalizeBook = (data: any): IBook => {
-    const city = Array.isArray(data.city) ? data.location?.city?.shift()?.value : data.city;
+    const city = Array.isArray(data.city) ? JSON.parse(data.location?.city)?.shift()?.value : data.location.city;
 
     return {
         autor: getIdFromArray(data.autor),
@@ -34,7 +34,7 @@ const normalizeBook = (data: any): IBook => {
             city: city ?? '',
             shelf: data.location?.shelf ?? "",
         },
-        language: data.language?.map((lang: { key: string; value: string }) => lang.key),
+        language: data.language?.map((lang: { key: string; value: string }) => (lang?.key ?? lang)),
         numberOfPages: data.numberOfPages ? parseInt(data.numberOfPages) : undefined,
         title: data.title,
         subtitle: data.subtitle,
@@ -226,6 +226,10 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
         throw "Problem at web scrapping: " + err;
     }
 }
+
+const customOrder = ['Ľuboš', 'Žaneta', 'Jakub', 'Jaroslav', 'Magdaléna', ''];
+const sortByParam = (data: any, param: string) =>
+    data.sort((a: any, b: any) => customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]));
 
 const dashboard = {
     getDimensionsStatistics: async (_: Request, res: Response): Promise<void> => {
@@ -582,10 +586,22 @@ const dashboard = {
         // replace null in object with "-"
         data.forEach(function (object) {
             for (let key in object) {
-                if (object[key] == null)
+                if (object[key] == null || object[key] === "")
                     object[key] = "Bez jazyka";
             }
         });
+
+        // merge count if key is same
+        data = Object.values(
+            data.reduce((acc: any, obj) => {
+                if (!acc[obj.language]) {
+                    acc[obj.language] = { ...obj }; // Initialize with the first object
+                } else {
+                    acc[obj.language].count += obj.count; // Merge count values
+                }
+                return acc;
+            }, {})
+        );
 
         res.status(200).json(data);
     },
@@ -636,11 +652,9 @@ const dashboard = {
                 response = tempRes;
             }
 
+            response = response.map(dt => ({owner: dt.owner.firstName, count: dt.count}));
+            const sortedData = sortByParam(response, "owner")
             response.push({owner: null, count: await Book.countDocuments({deletedAt: undefined})});
-            response.sort((a, b) => {
-                if (a.owner === null || b.owner === null) return 0
-                return a.owner?.lastName?.localeCompare(b.owner?.lastName)
-            });
 
             res.status(200).json(response);
         } catch (error) {
@@ -683,10 +697,6 @@ const dashboard = {
                     return userStats;
                 })
             );
-
-            const customOrder = ['Ľuboš', 'Žaneta', 'Jakub', 'Jaroslav', 'Magdaléna'];
-            const sortByParam = (data: any, param: string) =>
-                data.sort((a: any, b: any) => customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]));
 
             // Sort the result by array and then sort stats in every name
             const sortedData = sortByParam(result, 'name').map((item: any) => ({

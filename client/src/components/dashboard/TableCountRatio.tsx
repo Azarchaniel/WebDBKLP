@@ -2,7 +2,7 @@ import {toPercentage} from "../../utils/utils";
 import {Bar} from "react-chartjs-2";
 
 export const TableCountRatio = ({data, title}: { data: any[], title: string }) => {
-	if (!data) return <></>;
+	if (!data || data?.length === 0) return <>Žiadne dáta</>;
 
 	const dimensionGroups = [
 		"0-5",

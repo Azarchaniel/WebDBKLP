@@ -87,7 +87,7 @@
     "@smithy/util-utf8" "^3.0.0"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sso-oidc@3.682.0":
+"@aws-sdk/client-sso-oidc@^3.679.0", "@aws-sdk/client-sso-oidc@3.682.0":
   version "3.682.0"
   resolved "https://registry.npmjs.org/@aws-sdk/client-sso-oidc/-/client-sso-oidc-3.682.0.tgz"
   integrity sha512-ZPZ7Y/r/w3nx/xpPzGSqSQsB090Xk5aZZOH+WBhTDn/pBEuim09BYXCLzvvxb7R7NnuoQdrTJiwimdJAhHl7ZQ==
@@ -176,7 +176,7 @@
     "@smithy/util-utf8" "^3.0.0"
     tslib "^2.6.2"
 
-"@aws-sdk/client-sts@3.682.0":
+"@aws-sdk/client-sts@^3.679.0", "@aws-sdk/client-sts@^3.682.0", "@aws-sdk/client-sts@3.682.0":
   version "3.682.0"
   resolved "https://registry.npmjs.org/@aws-sdk/client-sts/-/client-sts-3.682.0.tgz"
   integrity sha512-xKuo4HksZ+F8m9DOfx/ZuWNhaPuqZFPwwy0xqcBT6sWH7OAuBjv/fnpOTzyQhpVTWddlf+ECtMAMrxjxuOExGQ==
@@ -350,7 +350,7 @@
     "@smithy/types" "^3.5.0"
     tslib "^2.6.2"
 
-"@aws-sdk/credential-providers@^3.186.0":
+"@aws-sdk/credential-providers@^3.186.0", "@aws-sdk/credential-providers@^3.188.0":
   version "3.682.0"
   resolved "https://registry.npmjs.org/@aws-sdk/credential-providers/-/credential-providers-3.682.0.tgz"
   integrity sha512-vLBdUlTISEXVKYFFO665ajC0U0RdXFx21fwTHiN2g4edFH++di2XCJ8/Y34bu09z9bV/rwFT2jn41iAVWasNKg==
@@ -1567,7 +1567,7 @@ destroy@1.2.0:
   resolved "https://registry.npmjs.org/destroy/-/destroy-1.2.0.tgz"
   integrity sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg==
 
-devtools-protocol@0.0.1354347:
+devtools-protocol@*, devtools-protocol@0.0.1354347:
   version "0.0.1354347"
   resolved "https://registry.npmjs.org/devtools-protocol/-/devtools-protocol-0.0.1354347.tgz"
   integrity sha512-BlmkSqV0V84E2WnEnoPnwyix57rQxAM5SKJjf4TbYOCGLAWtz8CDH8RIaGOjPgPCXo2Mce3kxSY497OySidY3Q==
@@ -1907,6 +1907,13 @@ https-proxy-agent@^7.0.3, https-proxy-agent@^7.0.5:
     agent-base "^7.0.2"
     debug "4"
 
+iconv-lite@^0.6.3:
+  version "0.6.3"
+  resolved "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz"
+  integrity sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==
+  dependencies:
+    safer-buffer ">= 2.1.2 < 3.0.0"
+
 iconv-lite@0.4.24:
   version "0.4.24"
   resolved "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.24.tgz"
@@ -2215,7 +2222,7 @@ multer-gridfs-storage@^5.0.2:
     mongodb-uri "^0.9.7"
     pump "^3.0.0"
 
-multer@^1.4.5-lts.1:
+multer@^1.4.2, multer@^1.4.5-lts.1:
   version "1.4.5-lts.1"
   resolved "https://registry.npmjs.org/multer/-/multer-1.4.5-lts.1.tgz"
   integrity sha512-ywPWvcDMeH+z9gQq5qYHCCy+ethsk4goepZ45GLD63fOu0YcNecQxi64nDs3qluZB+murG3/D4dJ7+dGctcCQQ==
@@ -2510,7 +2517,7 @@ safe-buffer@5.2.1:
   resolved "https://registry.npmjs.org/safe-buffer/-/safe-buffer-5.2.1.tgz"
   integrity sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==
 
-"safer-buffer@>= 2.1.2 < 3":
+"safer-buffer@>= 2.1.2 < 3", "safer-buffer@>= 2.1.2 < 3.0.0":
   version "2.1.2"
   resolved "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
@@ -2801,7 +2808,7 @@ typedarray@^0.0.6:
   resolved "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz"
   integrity sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==
 
-typescript@^5.7.2:
+typescript@^5.7.2, typescript@>=4.9.5:
   version "5.7.2"
   resolved "https://registry.npmjs.org/typescript/-/typescript-5.7.2.tgz"
   integrity sha512-i5t66RHxDvVN40HfDd1PsEThGNnlMCMT3jMUuoh9/0TaqWevNontacunWyN02LA9/fIbEWlcHZcgTKb9QoaLfg==

@@ -56,6 +56,7 @@ export interface IAutor extends IBaseType {
     dateOfDeath?: Date | string;
     note?: string;
     fullName?: string;
+    role?: {value: string, showValue: string}[] | string[];
 }
 
 export interface IUser extends IBaseType {
@@ -180,5 +181,5 @@ interface IUserStatistics {
 
 interface IUserReadingStats {
     name: string;
-    stats: IUserStatistics;
+    stats: IUserStatistics[];
 }

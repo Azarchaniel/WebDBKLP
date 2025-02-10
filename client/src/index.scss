@@ -859,6 +859,30 @@ input:invalid {
   font-size: 0.75rem;
   line-height: 0.75rem;
   height: 40vh;
+  overflow: hidden;
+}
+
+.tableLangStats {
+  .tableSection {
+    height: 45%;
+    max-height: 20vh;
+    margin-bottom: 1rem;
+    overflow-y: scroll;
+  }
+
+  .chartSection {
+    height: 45%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .dashboardContainer {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .dashboardItem {
+    height: 20rem;
+  }
 }
 
 .firstCell {

@@ -125,7 +125,8 @@ export const addAutor = async (
 				},
 				note: formData.note ?? "",
 				dateOfBirth: formData.dateOfBirth ?? undefined,
-				dateOfDeath: formData.dateOfDeath ?? undefined
+				dateOfDeath: formData.dateOfDeath ?? undefined,
+				role: formData.role ?? undefined
 			}
 			return await axios.post(
 				baseUrl + "/add-autor",

@@ -8,6 +8,7 @@ const autorSchema = new mongoose_1.Schema({
     dateOfBirth: { type: Date, required: false },
     dateOfDeath: { type: Date, required: false },
     note: { type: String, required: false },
+    role: { type: [String], required: false },
     deletedAt: { type: Date }
 }, { timestamps: true });
 exports.default = (0, mongoose_1.model)('Autor', autorSchema);
