@@ -428,6 +428,16 @@ body, html, main, #root {
 
 .ISBN {
   grid-area: 2 / 10 / 2 / 13;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.isbnLookup {
+  position: absolute;
+  right: 1rem;
+  cursor: pointer;
 }
 
 .Translator {
@@ -475,11 +485,11 @@ body, html, main, #root {
 }
 
 .language {
-  grid-area: 6 / 5 / 6 / 9;
+  grid-area: 6 / 9 / 6 / 13;
 }
 
 .Police {
-  grid-area: 6 / 9 / 6 / 13;
+  grid-area: 6 / 5 / 6 / 9;
 }
 
 .Vyska {
@@ -962,24 +972,26 @@ input:invalid {
 }
 
 /* TAN STACK TABLE */
-.tableHeader {
-  border-top-left-radius: 1rem;
-  border-top-right-radius: 1rem;
 
-  th {
-    border: 1px solid var(--anchor);
-    background-color: var(--anchor);
-    color: white;
-    height: 2rem;
-  }
-
-  th[colspan]:not([colspan="1"]) { // select element that has colspan and it is not 1
-    vertical-align: middle;
-    text-align: center;
-  }
-}
 
 .serverPaginationTable {
+  .tableHeader {
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+
+    th {
+      border: 1px solid var(--anchor);
+      background-color: var(--anchor);
+      color: white;
+      max-height: 2rem !important;
+    }
+
+    th[colspan]:not([colspan="1"]) { // select element that has colspan and it is not 1
+      vertical-align: middle;
+      text-align: center;
+    }
+  }
+
   tr {
     height: 4rem;
   }

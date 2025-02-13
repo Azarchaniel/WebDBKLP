@@ -76,7 +76,6 @@ export const getInfoAboutBook = async (isbn: string): Promise<any> => {
 		const bookInfo: AxiosResponse<any> = await axios.get(
 			`${baseUrl}/get-book-info/${isbn}`
 		)
-		console.log(bookInfo)
 		return bookInfo
 	} catch (error: any) {
 		throw new Error(error)

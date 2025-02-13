@@ -289,6 +289,7 @@ export const webScrapper = async (isbn: string): Promise<any> => {
 
     if (!dkBook || !grBook) {
         console.error("Book not found", isbn);
+        return false;
     }
 
     //TODO: if grBook is different than dkBook, send warning or do something

@@ -9,6 +9,8 @@ import {showError} from "../Modal";
 import {InputField, MultiselectField} from "../InputFields";
 import {cities} from "../../utils/constants";
 import {openLoadingBooks} from "../LoadingBooks";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
 
 interface BodyProps {
     data: IBook | object;
@@ -39,22 +41,25 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 		if (Object.keys(data).length === 0 && data.constructor === Object) setFormData(data);
 	}, [data]);
 
-	const getBookFromISBN = (isbn: string) => {
-		if (!("title" in (formData || {})) && checkIsbnValidity(isbn)) {
+	const getBookFromISBN = () => {
+		if (!("title" in (formData || {})) && checkIsbnValidity(formData.ISBN)) {
 			openLoadingBooks(true);
-			getInfoAboutBook(isbn)
-				.then((response) => {
+			getInfoAboutBook(formData.ISBN)
+				.then(({data}) => {
 					setFormData({
-						...response.data,
+						...data,
 						published: {
-							...response.data.published,
+							...data.published,
 							country: countryCode.filter((country: ILangCode) =>
-								((response.data as IBook)?.published?.country as unknown as string[])?.includes(country.key))
+								((data as IBook)?.published?.country as unknown as string[])?.includes(country.key))
 						},
-						language: langCode.filter((lang: ILangCode) => ((response.data as IBook)?.language as unknown as string[])?.includes(lang.key)),
+						language: langCode.filter((lang: ILangCode) => ((data as IBook)?.language as unknown as string[])?.includes(lang.key)),
 					} as IBook)
 				})
-				.catch(err => console.error(err))
+				.catch(err => {
+					toast.error(`Chyba! Kniha nebola nájdená.`)
+					console.error(`Chyba! Kniha ${formData.ISBN} nebola nájdená!`, err);
+				})
 				.finally(() => openLoadingBooks(false))
 		}
 	}
@@ -63,17 +68,24 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 	useEffect(() => {
 		if (!data) return;
 
+		// TODO: refactor
 		const toBeModified: IBook = {
 			...data,
 			autor: formPersonsFullName((data as IBook)?.autor),
 			translator: formPersonsFullName((data as IBook)?.translator),
 			editor: formPersonsFullName((data as IBook)?.editor),
 			ilustrator: formPersonsFullName((data as IBook)?.ilustrator),
-			location: {city: cities.find(c => c.value === (data as IBook)?.location?.city)?.showValue},
+			location: {city: cities.filter(c => c.value === (data as IBook)?.location?.city)},
 			published: {
 				...(data as IBook).published,
 				country: countryCode.filter((country: ILangCode) =>
 					((data as IBook)?.published?.country as unknown as string[])?.includes(country.key))
+			},
+			dimensions: {
+				height: (data as IBook).dimensions?.height?.toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number,
+				width: (data as IBook).dimensions?.width?.toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number,
+				depth: (data as IBook).dimensions?.depth?.toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number,
+				weight: (data as IBook).dimensions?.weight?.toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number,
 			},
 			language: langCode.filter((lang: ILangCode) => ((data as IBook)?.language as unknown as string[])?.includes(lang.key)),
 			readBy: formPersonsFullName((data as IBook)?.readBy),
@@ -239,9 +251,14 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					name="ISBN"
 					onChange={(input) => {
 						handleInputChange(input);
-						getBookFromISBN(input.target.value);
 					}}
 					customerror={getErrorMsg("ISBN")}
+				/>
+				<FontAwesomeIcon
+					icon={faMagnifyingGlass}
+					className="isbnLookup"
+					title="Vyhľadať podľa ISBN"
+					onClick={getBookFromISBN}
 				/>
 			</div>
 			<div className="Translator">

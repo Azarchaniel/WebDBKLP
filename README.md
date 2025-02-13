@@ -55,6 +55,7 @@ cd ./client; npx run start
 - [ ] allow user to add tags - "fantasy", "read2012"
 - [ ] connect to devices camera and read the bar code to get ISBN
 - [ ] check and fix requirments in models and types (MVP)
+- [ ] allow to pick search column - send as a JSON to BE
 
 (MVP) - Minimum Viable Product
 

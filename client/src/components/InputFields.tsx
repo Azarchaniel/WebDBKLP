@@ -51,6 +51,7 @@ export const InputField = React.memo((props: InputProps) => {
 			{...props}
 			ref={inputRef}
 			className="form-control" autoComplete="off"
+			lang="cs-CZ"
 		/>
 	);
 });

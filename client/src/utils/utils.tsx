@@ -140,6 +140,7 @@ type ValidationOptions = {
 export const validateNumber = (value: any, options?: ValidationOptions): boolean => {
 	if (!value) return true;
 	const { mustBePositive = false, mustBeInteger = false } = options || {};
+	value = value.toString().replace(",",".");
 
 	// Check if the value is a number
 	const numberValue = Number(value);

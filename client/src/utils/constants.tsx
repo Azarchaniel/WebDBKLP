@@ -58,7 +58,8 @@ export const getBookTableColumns = (): any => [
     },
     {
         accessorKey: 'ISBN',
-        header: 'ISBN'
+        header: 'ISBN',
+        cell: (info: any) => info?.getValue()?.toString()
     },
     {
         accessorKey: 'language',
@@ -68,7 +69,7 @@ export const getBookTableColumns = (): any => [
         accessorKey: 'numberOfPages',
         header: 'Počet strán'
     },
-    columnHelper.group({
+    /*columnHelper.group({
         id: "dimensions",
         header: () => "Rozmery",
         meta: {
@@ -102,7 +103,7 @@ export const getBookTableColumns = (): any => [
                 sortingFn: "alphanumeric"
             }),
         ]
-    }),
+    }),*/
     {
         accessorKey: 'note',
         header: 'Poznámka'

@@ -110,7 +110,10 @@ export default function BookPage() {
 		fetchBooks();
 	}, [pagination]);
 
-	const handleSaveBook = (formData: IBook): void => {
+	const [wasCheckedLoading, setWasCheckedLoading] = useState<boolean>(false);
+	const handleSaveBook = (formData: IBook, wasCheckedBox?: boolean): void => {
+		if (wasCheckedBox) setWasCheckedLoading(true); //TEMP
+
 		addBook(formData)
 			.then(({status, data}) => {
 				if (status !== 200) {
@@ -121,6 +124,7 @@ export default function BookPage() {
 				fetchBooks()
 			})
 			.catch((err) => console.trace(err))
+			.finally(() => setWasCheckedLoading(false)) //TEMP
 	}
 
 	const handleUpdateBook = (_id: string): void => {
@@ -171,7 +175,7 @@ export default function BookPage() {
 			{/* TODO: remove Header and Sidebar from here */}
 			<Header/>
 			<Sidebar/>
-			<AddBook key={updateBook?._id || "new"} saveBook={handleSaveBook} onClose={() => setUpdateBook(undefined)}/>
+			<AddBook key="new" saveBook={handleSaveBook} onClose={() => setUpdateBook(undefined)}/>
 			<div ref={popRef} className={`showHideColumns ${hidden.control ? "hidden" : "shown"}`}>
 				<ShowHideRow label="Editor" init={hidden.editorsFull} onChange={() => setHidden({...hidden, editorsFull: !hidden.editorsFull})} />
 				<ShowHideRow label="Ilustrátor" init={hidden.ilustratorsFull} onChange={() => setHidden({...hidden, ilustratorsFull: !hidden.ilustratorsFull})} />
@@ -227,7 +231,8 @@ export default function BookPage() {
 							onChange={() => handleSaveBook({
 								...clonedBooks.find((book: IBook) => book._id === _id),
 								wasChecked: !(clonedBooks.find((book: IBook) => book._id === _id).wasChecked)
-							})}
+							}, true)}
+							disabled={wasCheckedLoading}
 						/>
 						<i
 							title="¨Vymazať"
@@ -249,7 +254,7 @@ export default function BookPage() {
 			/>
 			{Boolean(updateBook) &&
 				<AddBook
-					key={updateBook?._id || "new"}
+					key={updateBook?._id!}
 					saveBook={handleSaveBook}
 					book={updateBook}
 					onClose={() => setUpdateBook(undefined)}

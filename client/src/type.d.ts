@@ -44,7 +44,7 @@ export interface ILP extends IBaseType {
 }
 
 interface ILocation {
-    city: string;
+    city: any;
     shelf?: string;
 }
 

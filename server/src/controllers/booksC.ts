@@ -15,8 +15,11 @@ const populateOptions: IPopulateOptions[] = [
     {path: 'readBy', model: 'User'}
 ];
 
+//TODO: refactor!!!
 const normalizeBook = (data: any): IBook => {
-    const city = Array.isArray(data.city) ? JSON.parse(data.location?.city)?.shift()?.value : data.location.city;
+    const city = data.location ?
+                        Array.isArray(data.location?.city) ? data?.location?.city?.[0]?.value : data?.location?.city
+                        : null;
 
     return {
         autor: getIdFromArray(data.autor),
@@ -50,10 +53,10 @@ const normalizeBook = (data: any): IBook => {
         ISBN: data.ISBN,
         note: data.note,
         dimensions: {
-            height: data.dimensions?.height,
-            width: data.dimensions?.width,
-            depth: data.dimensions?.depth,
-            weight: data.dimensions?.weight
+            height: data.dimensions?.height ? parseFloat(data.dimensions?.height.toString().replace(",",".")) : undefined,
+            width: data.dimensions?.width ? parseFloat(data.dimensions?.width.toString().replace(",",".")) : undefined,
+            depth: data.dimensions?.depth ? parseFloat(data.dimensions?.depth.toString().replace(",",".")) : undefined,
+            weight: data.dimensions?.weight ? parseFloat(data.dimensions?.weight.toString().replace(",",".")) : undefined
         },
         exLibris: data.exLibris,
         picture: data.picture,
@@ -90,7 +93,9 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
                 {firstName: {$regex: search, $options: "i"}},
                 {lastName: {$regex: search, $options: "i"}}
             ],
-        }).select("_id") as {_id: string}[];
+        })
+            .collation({locale: "sk", strength: 1})
+            .select("_id") as {_id: string}[];
 
         // result is [ {_id: "..."} ] so here is mapping
         const authorIds = matchingAuthors.map((author) => author._id);
@@ -166,10 +171,12 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
         } = req;
 
         const book = normalizeBook(body);
+
         const updateBook = await Book.findByIdAndUpdate(
             {_id: id},
             book
         )
+
         const allBooks = await Book
             .find()
             .populate(populateOptions)
@@ -221,7 +228,11 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
 
         const bookInfo = await webScrapper(isbn);
 
-        res.status(200).json(bookInfo);
+        if (bookInfo) {
+            res.status(200).json(bookInfo);
+        } else {
+            res.status(401).json({message: "Book not found"});
+        }
     } catch (err) {
         throw "Problem at web scrapping: " + err;
     }
