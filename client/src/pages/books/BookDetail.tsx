@@ -32,12 +32,12 @@ const BookDetail: React.FC<Props> = ({data}) => {
 				<table className="bookDimensions">
 					<tbody>
 					<tr>
-						<td>Výška: {dimensions.height ?? "-"} cm</td>
-						<td>Šírka: {dimensions.width ?? "-"} cm</td>
+						<td>Výška: {(dimensions.height / 10).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) ?? "-"} cm</td>
+						<td>Šírka: {(dimensions.width / 10).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) ?? "-"} cm</td>
 					</tr>
 					<tr>
-						<td>Hrúbka: {dimensions.depth ?? "-"} cm</td>
-						<td>{dimensions.weight ? `Hmotnosť: ${dimensions.weight ?? "-"} g` : null}</td>
+						<td>Hrúbka: {(dimensions.depth / 10).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) ?? "-"} cm</td>
+						<td>{dimensions.weight ? `Hmotnosť: ${(dimensions.weight / 10).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) ?? "-"} g` : null}</td>
 					</tr>
 					</tbody>
 				</table>

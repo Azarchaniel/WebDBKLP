@@ -20,6 +20,9 @@ const normalizeBook = (data: any): IBook => {
     const city = data.location ?
                         Array.isArray(data.location?.city) ? data?.location?.city?.[0]?.value : data?.location?.city
                         : null;
+    const countryPublished = data.published ?
+        Array.isArray(data.published?.country) ? data?.published?.country?.[0]?.value : data?.published?.country
+        : null;
 
     return {
         autor: getIdFromArray(data.autor),
@@ -31,10 +34,10 @@ const normalizeBook = (data: any): IBook => {
         published: {
             publisher: data.published?.publisher ?? "",
             year: data.published?.year ?? undefined,
-            country: data.published?.country[0]?.key ?? ''
+            country: countryPublished
         },
         location: {
-            city: city ?? '',
+            city: city,
             shelf: data.location?.shelf ?? "",
         },
         language: data.language?.map((lang: { key: string; value: string }) => (lang?.key ?? lang)),
@@ -53,10 +56,10 @@ const normalizeBook = (data: any): IBook => {
         ISBN: data.ISBN,
         note: data.note,
         dimensions: {
-            height: data.dimensions?.height ? parseFloat(data.dimensions?.height.toString().replace(",",".")) : undefined,
-            width: data.dimensions?.width ? parseFloat(data.dimensions?.width.toString().replace(",",".")) : undefined,
-            depth: data.dimensions?.depth ? parseFloat(data.dimensions?.depth.toString().replace(",",".")) : undefined,
-            weight: data.dimensions?.weight ? parseFloat(data.dimensions?.weight.toString().replace(",",".")) : undefined
+            height: data.dimensions?.height ? parseFloat((data.dimensions?.height).toString().replace(",",".")) * 10 : undefined,
+            width: data.dimensions?.width ? parseFloat((data.dimensions?.width).toString().replace(",",".")) * 10 : undefined,
+            depth: data.dimensions?.depth ? parseFloat((data.dimensions?.depth).toString().replace(",",".")) * 10 : undefined,
+            weight: data.dimensions?.weight ? parseFloat((data.dimensions?.weight).toString().replace(",",".")) * 10 : undefined
         },
         exLibris: data.exLibris,
         picture: data.picture,
@@ -665,9 +668,9 @@ const dashboard = {
 
             response = response.map(dt => ({owner: dt.owner.firstName, count: dt.count}));
             const sortedData = sortByParam(response, "owner")
-            response.push({owner: null, count: await Book.countDocuments({deletedAt: undefined})});
+            sortedData.push({owner: null, count: await Book.countDocuments({deletedAt: undefined})});
 
-            res.status(200).json(response);
+            res.status(200).json(sortedData);
         } catch (error) {
             throw error;
         }

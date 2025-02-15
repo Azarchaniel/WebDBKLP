@@ -82,10 +82,10 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					((data as IBook)?.published?.country as unknown as string[])?.includes(country.key))
 			},
 			dimensions: {
-				height: (data as IBook).dimensions?.height?.toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number,
-				width: (data as IBook).dimensions?.width?.toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number,
-				depth: (data as IBook).dimensions?.depth?.toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number,
-				weight: (data as IBook).dimensions?.weight?.toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number,
+				height: ((data as IBook).dimensions?.height! / 10).toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number ?? null, // *10, because Mongo is not saving decimal, so here it's shown as decimal
+				width: ((data as IBook).dimensions?.width! / 10).toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number ?? null,
+				depth: ((data as IBook).dimensions?.depth! / 10).toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number ?? null,
+				weight: ((data as IBook).dimensions?.weight! / 10).toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number ?? null,
 			},
 			language: langCode.filter((lang: ILangCode) => ((data as IBook)?.language as unknown as string[])?.includes(lang.key)),
 			readBy: formPersonsFullName((data as IBook)?.readBy),

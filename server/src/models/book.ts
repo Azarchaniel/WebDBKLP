@@ -24,13 +24,31 @@ const bookSchema: Schema = new Schema({
     exLibris: {type: Boolean, required: false},
     published: {type: publishedSchema, required: false},
     location: {type: locationSchema, required: false},
-    deletedAt: {type: Date, required: false},
     owner: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false},
     readBy: {type: [mongoose.Schema.Types.ObjectId], ref: 'User', required: false},
     picture: {type: String, required: false},
     hrefGoodReads: {type: String, required: false},
     hrefDatabazeKnih: {type: String, required: false},
+    createdAt: {type: Date, required: false}, //because I had to edit createdAt at first import, I had to change it to be set manually
+    updatedAt: {type: Date, required: false},
+    deletedAt: {type: Date, required: false},
     wasChecked: {type: Boolean, required: false, default: false}, //TEMPORARY
-}, {timestamps: true})
+})
+
+bookSchema.pre('save', function (next) {
+    if (!this.createdAt) {
+        this.createdAt = new Date();
+    }
+    this.updatedAt = new Date();
+    //console.log("middleware for create", this.createdAt, this.updatedAt, this._id);
+    next();
+});
+
+bookSchema.pre(['findOneAndUpdate', 'updateOne', 'updateMany'], function (next) {
+    this.set({ updatedAt: new Date() });
+    //console.log("middleware for update");
+    next();
+});
+
 
 export default model<IBook>('Book', bookSchema);

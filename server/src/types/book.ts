@@ -23,6 +23,8 @@ export interface IBook extends Document {
     exLibris?: boolean;
     location?: ILocation;
     owner?: string;
+    createdAt?: Date;
+    updateAt?: Date;
     deletedAt?: Date;
     readBy: string[];
     picture?: string;

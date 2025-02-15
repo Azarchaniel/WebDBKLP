@@ -8,10 +8,12 @@ import {IBook} from "../src/types";
 import {AutorRole} from "../src/utils/constants";
 
 /**
- * Save as: Text oddeleny tabulatormi; change postfix to csv
+ * Save as: Text oddeleny tabulatormi; change format to csv; UTF-8
  * HOW TO RUN:
  * npx ts-node migrations/v1__import_from_csv.tsx DBKLP_Lubos.csv
  */
+
+const alreadyCheckedBooks = ["Zombies, Run!","Bojové techniky starověkého světa","Zlatý osel","Tažení Alexandra Velikého","Hovory k sobě","Atlas římské říše: Budování říše a období rozmachu: 300 př. n. l. – 200 n. l.","Ideologie a virtuální město","Absint","A People's History of Scotland","Báseň o hašiši","Čas je hráč","Důvěrné deníky","Důvěrný deník","Fanfarlo","Hořké propasti","Chuť smútku","Květy zla","Květy zla","Květy zla a jiné básně","Kytica z Kvetov zla","La Fanfarlo","Les Fleurs du mal","Malé básně v próze","Malé básně v próze","Malé básně v próze","Mé srdce, tak jak je","Parížsky spleen - Malé básne v próze","Petits po?mes en prose / Malé básně v próze","Rakety / Mé srdce obnažené","Selected Poems","Tej, čo prešla popri mne","The Flowers of Evil","The Flowers of Evil","The Flowers of Evil / Les Fleurs du Mal","Umělé ráje","Úvahy o některých současnících","Víno samotářovo","Z Kvetov zla","Žena","Školní mluvnice ruského jazyka","Co je nového v počítačových hrách","Charles Baudelaire","Bojové techniky středověkého světa","Nové pohledy: mapy světa, jak ho neznáme","Láska a válka","Superinteligence","Od kompasu k GPS","Geostorky","Hannibal","Podivuhodný příběh - Esej o jednom Baudelairově snu","Válečné paměti","Mýtus o Sisyfovi","J. R. R. Tolkien: Životopis","Tolkien: Zákulisí Pána prstenů","O povinnostech","Únos Proserpiny","O válce","Migrace: Stěhování lidstva od pravěku po současnost","Izrael a Palestina","Půlkacíř","Dějiny zemí Koruny české II.","Husitská revoluce: Stručná historie","Evropa - Dějiny jednoho kontinentu","Charles Baudelaire","Fenomén Karel Kryl","Když hvězdy byly ještě bohy","Jak vidím svět","Z mých pozdějších let","Řecké mýty: Mytologie a filosofie","The Atlas of Tolkien's Middle-Earth","Roboti nastupují: Automatizace, umělá inteligence a hrozba budoucnosti bez práce","Hrdinové","Mýty","Prométheus: Bitva s Titány","Norse Mythology","Světy J. R. R. Tolkiena","Charles Baudelaire","Charles Baudelaire","Úpadok a zánik Rímskej ríše","Mytologie Slovanů","Brána bohov: Vzostup a pád Babylonu","Římští císařové","Příručka pro partyzány","Řecké mýty I","Řecké mýty II","Zlaté rouno","Bojové techniky orientálního světa","Vesmír v kostce","Řím po Marku Aureliovi / Kniha o císařích","Odysseia","Slovník antické kultury","Báje a mýty starých Slovanů","Velká nástěnná mapa světových dějin","Einstein: Jeho život a vesmír","Atentát na Reinharda Heydricha","Běhání pre (ne)chápavé","Soumrak bohů: Severské mýty a báje","Supervelmoci umělé inteligence - Čína, Silicon Valley a svět v éře AI","Fyzika budoucnosti","Fyzika nemožného","Hyperprostor","Vidím širou a krásnou zemi","Čarovné hrady a zámky Slovenska","Portréty světovládců I","Gramatika současné švédštiny","Homérští hrdinové ve vzpomínkách věků","Na veselé struně","Písně pastvin a lesů","Svět ezopských bajek","Synové slávy – oběti iluzí","Verše o víně","Óda na Ódina","Sága o Hervaře","Monomýtus: Syntetické pojednání o teorii mýtu","Sága o Lundirovi","Nero","Kníška Karla Kryla","Komplet - Vyměň kordy za akordy","Krylogie","Krylogie","Ostrov pokladů","Prózy","Rozhovory","Rýmované komentáře","Země Lhostejnost","Panorama mytologie","Zpěvy Maldororovy - Poesie - Dopisy","Trpaslíci a elfové ve středověku","Poslední dny Charlese Baudelaira","Bröderna Lejonhjärta","Dějiny I","Dějiny II-III","Dějiny IV","Dějiny V","Dějiny VI","Dějiny VII","Doma lidé umírají","Pod maskou smích","Pro koho krev","Spartakus - Před námi boj","Spartakus - Smrtí boj nekončí","Farsalské pole","Listy hetér","Pravdivé výmysly","Šlehy a úsměvy","Severský bestiář","Alexander Veľký - Dedič ríše","Alexander Veľký - Dobyvateľ","Alexander Veľký - Veštba Amonova","Sila geografie v 21. storočí: Desať máp budúcnosti nášho sveta","V zajatí geografie","Umělá inteligence","Umělá inteligence","Umělá inteligence","Umělá inteligence","Umělá inteligence","Umělá inteligence","The Enemies of Rome","Starověké báje a pověsti","CSS: Moderní layout","Co kdyby?","Héró a Leandros","O lásce a milování","Ruština nejen pro samouky","Švédština nejen pro samouky","Kleopatra – Ve znamení hada","Být tak strojem","Proměny","Polidštěná galaxie: Kosmická budoucnost lidstva 2","SU-152 a příbuzná vozidla","Tolkien: Man and Myth","Satirikon","Bolestný život Baudelairův","Děti Jasanu a Jívy: Dějiny Vikingů","Kmotr - příběhy rodiny dona Coleona","Atlas klasického Řecka: 5. a 4. stol. př. n. l.: zlatý věk první evropské civilizace","The Book of Beasties: A Scottish Bestiary of Old 1710","Mýty starého světa","Seven Brief Lessons on Physics","Héraklés a jiné tragédie","Bouřková sezóna","Čas opovržení","Krev elfů","Křest ohněm","Meč osudu","Paní jezera","Poslední přání","Věž vlaštovky","Zaklínač (poviedka 1)","O duševním klidu","Tragédie I.","Tragédie II.","Výbor z listů Luciliovi","Armáda strojů: Autonomní zbraně a budoucnost války","Recommendation Engines","Krev, pot a pixely","Press Reset","Signál a šum","The Wolf Age: The Vikings, the Anglo-Saxons and the Battle for the North Sea Empire","Melancholie v zrcadle","Moudrost starých Římanů","Everybody Lies: What the Internet Can Tell Us About Who We Really Are","Sen o Tróji","Sága o svatém Óláfovi","Když papyry promluvily","Nová velká kniha etikety","Agricola, Anály, Germánia, Histórie","Velký průvodce JavaScriptem","Dopisy Otce Vánoc","Pád Númenoru","Pan Blahoš  / Mr. Bliss","A Secret Vice: Tolkien on Invented Languages","The Hobbit","The Lay of Aotrou & Itroun","Artušův pád / The Fall of Arthur","Beowulf","Beren and Lúthien","Dve veže","Hobit","Hobit aneb Cesta tam a zase zpátky","Húrinove deti","Letters from Father Christmas","List od Nimrala a jiné příběhy","Návrat kráľa","Nedokončené príbehy","Netvoři a kritikové a jiné eseje","Pád Gondolinu","Roverandom","Silmarillion","Silmarillion","Smith of Wootton Major","Spoločenstvo prsteňa","The Adventures of Tom Bombadil and Other Verses from the Red Book","The Battle of Maldon: together with The Homecoming of Beorhtnoth","The Fall of Númenor: and Other Tales from the Second Age of Middle-earth","The Fellowship of the Ring","The Hobbit: Or There and Back Again","The Return of the King","The Two Towers","Po nás potopa","Baudelaire","The Complete Tolkien Companion","Život v starom Ríme","Svět dávných Slovanů","Velká Morava: Tisíciletá tradice státu a kultury","Dějiny zemí Koruny české I.","Zpěvy rolnické a pastýřské","Nápady","Ben Hur","Spravedlivé a nespravedlivé války","SAS - Příručka jak přežít","SAS Survival Guide: How to Survive in the Wild, on Land or Sea","Řecké dějiny - Lakedaimovské zřízení o státních příjmech","Slečna Baudelairová","Bohové a hrdinové antických bájí","Dejiny písané Rímom","Jejich veličenstva pyramidy","Na počátku byl Sumer","Objevení Tróje","Řecký zázrak","Sinuhet","Za sedmi divy světa","1968 - Revoluční rok ve fotografiích","Béowulf","Edda","Epos o Gilgamešovi","Hráme na gitare","Kalevala","Lživé ságy starého Severu","Sága o Grettim","Staroislandské ságy","Školní atlas československých dějin","A dívky mlčely","Květy zla","Srdce temnoty","Rusky za 4 týdny","Naše planeta","Syntaktické struktury","Staré pověsti české","El retorno del rey","Hobit","Hobit aneb cesta tam a zase zpátky","Pán prstenů – souborné vydání","Exodus","Školní atlas světa","Kvety zla","Křížové výpravy"]
 
 const getAuthorsIDandUnique = async (authors: string[], isbn: string, role: string) => {
     try {
@@ -24,24 +26,25 @@ const getAuthorsIDandUnique = async (authors: string[], isbn: string, role: stri
                 .replace(/\\/g, "")
                 .replace(/'/g, "")
                 .replace(/"/g, "")
-                .replace(/,/g, "")
                 .trim();
-            const splitted = author.split(" ");
+            const splitted = author.split(",").map(word => word.trim());
             let firstName = "";
             let lastName = "";
 
             if (splitted.length < 1) return;
 
-            // here it is reversed - last name is first, then first name
             // if name consist of only one word
             if (splitted.length === 1) {
                 lastName = splitted[0];
+            } else if (splitted.length === 2) {
+                firstName = splitted[1];
+                lastName = splitted[0];
             } else {
-                firstName = splitted[splitted.length - 1];
-                lastName = splitted.slice(0, splitted.length - 1).join();
+                lastName = splitted[0];
+                firstName = splitted.slice(1).join(', ');
             }
 
-            if (!lastName) return;
+            if (!lastName || lastName === "kolektív") return;
 
             let queryOptions: any = [
                 {
@@ -114,6 +117,12 @@ const getAuthorsIDandUnique = async (authors: string[], isbn: string, role: stri
         console.error("Error while finding autors for ", isbn);
     }
 };
+
+const parseDate = (date: string): Date => {
+    const [day, month, year] = date.split('.').map(Number);
+    const parsedDate = new Date(year, month - 1, day);
+    return parsedDate;
+}
 
 const createBook = async (row: string[], owner: string) => {
     try {
@@ -194,9 +203,9 @@ const createBook = async (row: string[], owner: string) => {
                 no: row[18],
             },
             dimensions: {
-                height: row[26] ? parseFloat(row[26]) : undefined,
-                width: row[27] ? parseFloat(row[27]) : undefined,
-                depth: row[28] ? parseFloat(row[28]) : undefined,
+                height: row[26] ? parseFloat(row[26])*10 : undefined, // *10, because Mongo is not saving decimal
+                width: row[27] ? parseFloat(row[27])*10 : undefined,
+                depth: row[28] ? parseFloat(row[28])*10 : undefined,
             },
             edition: {
                 title: row[15],
@@ -212,12 +221,13 @@ const createBook = async (row: string[], owner: string) => {
             picture: "",
             readBy: readBy,
             owner: owner,
-            wasChecked: false
+            wasChecked: alreadyCheckedBooks.includes(row[13]),
+            createdAt: row[32] ? parseDate(row[32]) : new Date(),
         }
         //console.log(book);
         await Book.create(book);
     } catch (err) {
-        console.error("error while creating book", row[19]);
+        console.error("error while creating book", row[19], err);
     }
 }
 
