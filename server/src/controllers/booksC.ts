@@ -103,7 +103,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         // result is [ {_id: "..."} ] so here is mapping
         const authorIds = matchingAuthors.map((author) => author._id);
 
-        let query = {
+        let query: Record<string, any> = {
             $or: [
                 {title: {$regex: search, $options: 'i'}},
                 {autor: {$in: authorIds}}
