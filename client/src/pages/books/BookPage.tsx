@@ -45,7 +45,7 @@ export default function BookPage() {
 		ownersFull: true
 	});
 	const popRef = useRef(null);
-	const activeUser = useReadLocalStorage("activeUsers");
+	const activeUsers = useReadLocalStorage("activeUsers");
 
 	//fetch books on page init
 	useEffect(() => {
@@ -55,7 +55,7 @@ export default function BookPage() {
 	//fetch books when changed user
 	useEffect(() => {
 		fetchBooks();
-	}, [activeUser]);
+	}, [activeUsers]);
 
 	useEffect(() => {
 		function handleClickOutside(event: Event) {
@@ -77,26 +77,10 @@ export default function BookPage() {
 	// ### BOOKS ###
 	const fetchBooks = (): void => {
 		try {
-			getBooks(pagination)
+			getBooks({...pagination, activeUsers})
 				.then(({data: {books, count}}: IBook[] | any) => {
-					//TODO: CLEAN
-					if ((activeUser as string[])?.length) {
-						const booksArr: IBook[] = [];
-						books.forEach((book: IBook) => {
-							//TODO: this filtering should be on BE
-							book.owner?.forEach((owner: IUser) => {
-								if ((activeUser as string[]).includes(owner._id) || !book.owner) {
-									booksArr.push(book);
-								}
-							})
-						})
-						books = booksArr;
-					}
-
 					setCountAll(count);
-
 					books.map((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false))
-
 					setClonedBooks(stringifyAutors(books));
 				})
 				.catch((err: Error) => console.trace(err))

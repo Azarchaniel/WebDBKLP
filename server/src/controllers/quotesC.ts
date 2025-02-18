@@ -1,21 +1,30 @@
 import { Request, Response } from "express";
-import { IPopulateOptions, IQuote } from "../types";
+import {IPopulateOptions, IQuote, IUser} from "../types";
 import Quote from "../models/quote"
 import { optionFetchAllExceptDeleted } from "../utils/constants";
+import User from "../models/user";
 
 const populateOptions: IPopulateOptions[] = [
     { path: 'fromBook', model: 'Book', populate: {path: 'autor', model: 'Autor'} },
     { path: 'owner', model: 'User' }
 ];
 
-const getAllQuotes = async (_: Request, res: Response): Promise<void> => {
+const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
     try {
-        const quotes: IQuote[] =
-            await Quote.find(optionFetchAllExceptDeleted)
-                .populate(populateOptions)
-                .exec();
-        quotes.sort((a: IQuote, b: IQuote) => a.createdAt < b.createdAt ? 1 : -1);
-        const count = await Quote.countDocuments(optionFetchAllExceptDeleted);
+        let { activeUsers } = req.query;
+
+        const query: any = { ...optionFetchAllExceptDeleted };
+
+        if (activeUsers) {
+            query.owner = { $in: activeUsers };
+        }
+
+        const quotes: IQuote[] = await Quote.find(query)
+            .populate(populateOptions)
+            .exec();
+
+        const count = await Quote.countDocuments(query);
+
         res.status(200).json({ quotes, count })
     } catch (error) {
         res.status(500);

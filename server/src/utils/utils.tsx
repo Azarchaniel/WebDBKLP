@@ -305,3 +305,7 @@ export const webScrapper = async (isbn: string): Promise<any> => {
 
     return trimNestedStrings(finalBook);
 }
+
+const customOrder = ['Ľuboš', 'Žaneta', 'Jakub', 'Jaroslav', 'Magdaléna', 'Csonka rodičia', 'Víša rodičia', ''];
+export const sortByParam = (data: any, param: string) =>
+    data.sort((a: any, b: any) => customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]));

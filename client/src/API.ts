@@ -4,15 +4,16 @@ import {ApiAutorDataType, ApiBookDataType, ApiLPDataType, ApiQuoteDataType, ApiU
 const baseUrl: string = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
 
 //### BOOK ###
-export const getBooks = async (pagination?: any): Promise<AxiosResponse<ApiBookDataType>> => {
+export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataType>> => {
 	try {
 		const books: AxiosResponse<ApiBookDataType> = await axios.get(
 			baseUrl + "/books", {
 				params: {
-					page: pagination.page ?? 1, // API expects 1-based index
-					pageSize: pagination.pageSize ?? 10_000,
-					search: pagination.search ?? "",
-					sorting: pagination.sorting ?? {id: "title", desc: false}
+					page: params.page ?? 1, // API expects 1-based index
+					pageSize: params.pageSize ?? 10_000,
+					search: params.search ?? "",
+					sorting: params.sorting ?? {id: "title", desc: false},
+					filterUsers: params.activeUsers,
 				}
 			});
 		return books
@@ -156,10 +157,13 @@ export const deleteAutor = async (
 }
 
 // ### QUOTES ###
-export const getQuotes = async (): Promise<AxiosResponse<ApiQuoteDataType>> => {
+export const getQuotes = async (activeUsers: string[]): Promise<AxiosResponse<ApiQuoteDataType>> => {
 	try {
 		const quotes: AxiosResponse<ApiQuoteDataType> = await axios.get(
-			baseUrl + "/quotes"
+			baseUrl + "/quotes", {
+			params: {
+				activeUsers: activeUsers
+		}}
 		)
 		return quotes
 	} catch (error: any) {

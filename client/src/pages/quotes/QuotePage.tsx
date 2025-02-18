@@ -20,7 +20,7 @@ export default function QuotePage() {
 	const [initQuotes, setInitQuotes] = useState<IQuote[]>([]);
 	const [filteredQuotes, setFilteredQuotes] = useState<IQuote[]>([]);
 	const [countAll, setCountAll] = useState<number>(0);
-	const activeUser = useReadLocalStorage("activeUsers");
+	const activeUser = useReadLocalStorage("activeUsers") as string[];
 	const [loading, setLoading] = useState(true);
 
 	const generateColors = (length: number) => {
@@ -60,20 +60,8 @@ export default function QuotePage() {
 	// ### QUOTES ###
 	const fetchQuotes = (): void => {
 		setLoading(true);
-		getQuotes()
+		getQuotes(activeUser)
 			.then(({data: {quotes, count}}: IQuote[] | any) => {
-				if ((activeUser as string[])?.length) {
-					const quotesArr: IQuote[] = [];
-					quotes.forEach((qoute: IQuote) => {
-						//TODO: this filtering should be on BE
-						qoute.owner?.forEach((owner: IUser) => {
-							if ((activeUser as string[]).includes(owner._id) || qoute.owner === undefined) {
-								quotesArr.push(qoute);
-							}
-						})
-					})
-					quotes = quotesArr;
-				}
 				setInitQuotes(quotes);
 				setFilteredQuotes(quotes);
 				setCountAll(count);

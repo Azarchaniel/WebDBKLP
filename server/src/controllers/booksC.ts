@@ -2,7 +2,7 @@ import {Response, Request} from 'express';
 import {IBook, IPopulateOptions, IUser} from '../types';
 import Book from '../models/book';
 import User from '../models/user';
-import {getIdFromArray, webScrapper} from "../utils/utils";
+import {getIdFromArray, sortByParam, webScrapper} from "../utils/utils";
 import mongoose from 'mongoose';
 import Autor from "../models/autor";
 
@@ -71,7 +71,7 @@ const normalizeBook = (data: any): IBook => {
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        let {page, pageSize, search = "", sorting} = req.query;
+        let {page, pageSize, search = "", sorting, filterUsers} = req.query;
 
         if (!page && !pageSize) {
             page = "1";
@@ -103,13 +103,17 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         // result is [ {_id: "..."} ] so here is mapping
         const authorIds = matchingAuthors.map((author) => author._id);
 
-        const query = {
+        let query = {
             $or: [
                 {title: {$regex: search, $options: 'i'}},
                 {autor: {$in: authorIds}}
             ],
             deletedAt: {$eq: null} // Exclude deleted documents if necessary
         };
+
+        if (filterUsers) {
+            query = {...query, owner: {$in: filterUsers}};
+        }
 
         const skipCalc = (+page! - 1) * +pageSize!; //plus is converting to int
         const skip = skipCalc < 0 ? 0 : skipCalc;
@@ -240,10 +244,6 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
         throw "Problem at web scrapping: " + err;
     }
 }
-
-const customOrder = ['Ľuboš', 'Žaneta', 'Jakub', 'Jaroslav', 'Magdaléna', ''];
-const sortByParam = (data: any, param: string) =>
-    data.sort((a: any, b: any) => customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]));
 
 const dashboard = {
     getDimensionsStatistics: async (_: Request, res: Response): Promise<void> => {
