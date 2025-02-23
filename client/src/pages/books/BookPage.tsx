@@ -44,6 +44,7 @@ export default function BookPage() {
 		location: true,
 		ownersFull: true
 	});
+	const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
 	const popRef = useRef(null);
 	const activeUsers = useReadLocalStorage("activeUsers");
 
@@ -105,9 +106,13 @@ export default function BookPage() {
 					throw new Error("Chyba! Kniha nebola pridaná!");
 				}
 				toast.success(`Kniha ${data.book?.title} bola úspešne ${formData._id ? "uložená" : "pridaná"}.`);
+				setSaveBookSuccess(true);
 				fetchBooks()
 			})
-			.catch((err) => console.trace(err))
+			.catch((err) => {
+				console.trace(err)
+				setSaveBookSuccess(false);
+			})
 			.finally(() => setWasCheckedLoading(false)) //TEMP
 	}
 
@@ -159,7 +164,11 @@ export default function BookPage() {
 			{/* TODO: remove Header and Sidebar from here */}
 			<Header/>
 			<Sidebar/>
-			<AddBook key="new" saveBook={handleSaveBook} onClose={() => setUpdateBook(undefined)}/>
+			<AddBook
+				saveBook={handleSaveBook}
+				onClose={() => setUpdateBook(undefined)}
+				saveResultSuccess={saveBookSuccess}
+			/>
 			<div ref={popRef} className={`showHideColumns ${hidden.control ? "hidden" : "shown"}`}>
 				<ShowHideRow label="Editor" init={hidden.editorsFull} onChange={() => setHidden({...hidden, editorsFull: !hidden.editorsFull})} />
 				<ShowHideRow label="Ilustrátor" init={hidden.ilustratorsFull} onChange={() => setHidden({...hidden, ilustratorsFull: !hidden.ilustratorsFull})} />
@@ -218,17 +227,17 @@ export default function BookPage() {
 							}, true)}
 							disabled={wasCheckedLoading}
 						/>
-						<i
+						<button
 							title="¨Vymazať"
 							onClick={() => handleDeleteBook(_id)}
 							className="fa fa-trash"
 						/>
-						<i
+						<button
 							title="Upraviť"
 							className="fa fa-pencil-alt"
 						   	onClick={() => handleUpdateBook(_id)}
 						/>
-						<i
+						<button
 							title="Detaily"
 							className="fa fa-chevron-down"
 							onClick={() => expandRow()}
@@ -238,10 +247,10 @@ export default function BookPage() {
 			/>
 			{Boolean(updateBook) &&
 				<AddBook
-					key={updateBook?._id!}
 					saveBook={handleSaveBook}
 					book={updateBook}
 					onClose={() => setUpdateBook(undefined)}
+					saveResultSuccess={saveBookSuccess}
 				/>}
 			<Toast/>
 		</main>

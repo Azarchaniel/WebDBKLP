@@ -4,16 +4,17 @@ import {Modal} from "../../components/Modal";
 import {BooksModalBody, BooksModalButtons} from "../../components/books/BookModal";
 
 type Props = {
-	key: string;
     saveBook: (formData: IBook | any) => void;
 	onClose: () => void;
     book?: IBook;
+	saveResultSuccess?: boolean;
 }
 
-const AddBook: React.FC<Props> = ({key, saveBook, book, onClose}) => {
+const AddBook: React.FC<Props> = ({saveBook, book, onClose, saveResultSuccess}: Props) => {
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [bookData, setBookData] = useState<IBook | object>();
 	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title"}]);
+	const [outline, setOutline] = useState<React.CSSProperties>();
 
 	useEffect(() => {
 		if (book) {
@@ -22,13 +23,27 @@ const AddBook: React.FC<Props> = ({key, saveBook, book, onClose}) => {
 		}
 	}, []);
 
+	useEffect(() => {
+		switch (saveResultSuccess) {
+			case true:
+				setOutline({outline: "10px solid green"});
+				break;
+			case false:
+				setOutline({outline: "10px solid red"});
+				break;
+			default:
+				setOutline({outline: "none"});
+				break;
+		}
+	}, [saveResultSuccess]);
+
 	return (
 		<>
 			{!book && <button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>}
 			{showModal &&
                 <Modal
-					key={key}
-                	title="Pridaj knihu"
+					customKey={book?._id || "new"}
+                	title={(book ? "Uprav" : "Pridaj") + " knihu"}
                 	onClose={() => {
                 		setShowModal(false);
                 		onClose();
@@ -43,6 +58,7 @@ const AddBook: React.FC<Props> = ({key, saveBook, book, onClose}) => {
                 		cleanFields={() => setBookData({})}
                 		error={error}
                 	/>}
+					overrideStyle={outline}
                 />
 			}
 		</>

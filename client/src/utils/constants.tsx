@@ -1,17 +1,13 @@
 import {ILocation} from "../type";
 import {createColumnHelper} from "@tanstack/react-table";
-import {getBookLocation} from "./utils";
+import {formatDimension, getBookLocation} from "./utils";
 
 export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
 export const multiselectStyle = {
     inputField: {marginLeft: "0.5rem"},
-    optionContainer: {
-        backgroundColor: "transparent",
-    },
     chips: {background: "#00ADB5"},
     option: {color: "black"},
-    multiselectContainer: {maxWidth: "100%"},
 };
 
 export const cities = [{value: "spisska", showValue: "Spišská"},
@@ -69,7 +65,7 @@ export const getBookTableColumns = (): any => [
         accessorKey: 'numberOfPages',
         header: 'Počet strán'
     },
-    /*columnHelper.group({
+    columnHelper.group({
         id: "dimensions",
         header: () => "Rozmery",
         meta: {
@@ -80,30 +76,30 @@ export const getBookTableColumns = (): any => [
         columns: [
             columnHelper.accessor(row => row.dimensions?.height, {
                 id: "height",
-                cell: info => info.getValue(),
+                cell: info => formatDimension(info.getValue()),
                 header: "Výška",
                 sortingFn: "alphanumeric"
             }),
             columnHelper.accessor(row => row.dimensions?.width, {
                 id: "width",
-                cell: info => info.getValue(),
+                cell: info => formatDimension(info.getValue()),
                 header: "Šírka",
                 sortingFn: "alphanumeric"
             }),
             columnHelper.accessor(row => row.dimensions?.depth, {
                 id: "depth",
-                cell: info => info.getValue(),
+                cell: info => formatDimension(info.getValue()),
                 header: "Hrúbka",
                 sortingFn: "alphanumeric"
             }),
             columnHelper.accessor(row => row.dimensions?.weight, {
                 id: "weight",
-                cell: info => info.getValue(),
+                cell: info => formatDimension(info.getValue()),
                 header: "Hmotnosť",
                 sortingFn: "alphanumeric"
             }),
         ]
-    }),*/
+    }),
     {
         accessorKey: 'note',
         header: 'Poznámka'

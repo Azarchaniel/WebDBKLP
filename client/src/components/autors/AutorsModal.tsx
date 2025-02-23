@@ -24,6 +24,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	const [formData, setFormData] = useState(data as any);
 	const [errors, setErrors] = useState<ValidationError[]>(
 		[{label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName"}]);
+	const [roleOptions, setRoleOptions] = useState(autorRoles);
 
 	useEffect(() => {
 		onChange(formData)
@@ -33,6 +34,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	useEffect(() => {
 		if (!data) return;
 		if (Object.keys(data).length === 0 && data.constructor === Object) setFormData(data);
+		setRoleOptions(roleOptions);
 	}, [data]);
 
 	//edit autor
@@ -236,7 +238,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 			<div className="row">
 				<div className="col">
 					<MultiselectField
-						options={autorRoles}
+						options={roleOptions}
 						displayValue="showValue"
 						label="Role"
 						value={formData?.role}

@@ -91,7 +91,7 @@ export default function AutorPage() {
 			{/* TODO: remove Header and Sidebar from here */}
 			<Header/>
 			<Sidebar/>
-			<AddAutor key={updateAutor?._id || "new"} saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>
+			<AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>
 			<MaterialTableCustom
 				title={`Autori (${countAll})`}
 				loading={loading}
@@ -183,7 +183,6 @@ export default function AutorPage() {
 			/>
 			{Boolean(updateAutor) &&
 				<AddAutor
-					key={updateAutor?._id || "new"}
 					saveAutor={handleSaveAutor}
 					autor={updateAutor}
 					onClose={() => setUpdateAutor(undefined)}

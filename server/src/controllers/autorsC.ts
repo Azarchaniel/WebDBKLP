@@ -20,7 +20,7 @@ const getAutor = async (req: Request, res: Response): Promise<void> => {
         const allAutors: IAutor[] = await Autor.find()
         res.status(200).json({autor: autor, autors: allAutors})
     } catch (err) {
-        throw err;
+        console.error("Can't find autor", err);
     }
 }
 

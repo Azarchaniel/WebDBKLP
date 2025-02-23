@@ -4,7 +4,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
 
 interface ModalProps {
-	key: string;
+	customKey: string;
     title: string;
     body: ReactElement;
     footer?: ReactElement;
@@ -12,22 +12,23 @@ interface ModalProps {
     overrideStyle?: React.CSSProperties;
 }
 
-export const Modal: React.FC<ModalProps> = ({key, title, body, footer, onClose, overrideStyle}: ModalProps) => {
+export const Modal: React.FC<ModalProps> = ({customKey, title, body, footer, onClose, overrideStyle}: ModalProps) => {
 	return createPortal(
-		<div className="customModalWrapper">
+		<div className="customModalWrapper" key={customKey}>
 			<div className="customModalBackdrop"
 				onClick={onClose}
 			/>
 
-			<div className="customModal" style={overrideStyle} key={key}>
+			<div className="customModal" style={overrideStyle}>
 				<div className="customModalHeader">
 					<span>{title}</span>
+					<span className="hiddenId">{customKey}</span>
 					<button
 						type="button"
 						className="closeModal"
 						onClick={onClose}
 						title="Zavrieť okno"
-					><span>&times;</span></button>
+					>&times;</button>
 				</div>
 				<div className="customModalBody">
 					{body}

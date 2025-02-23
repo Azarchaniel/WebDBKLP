@@ -2,9 +2,8 @@ import {IAutor, IBook, ILangCode, IUser, ValidationError} from "../../type";
 import React, {useCallback, useEffect, useState} from "react";
 import {getAutors, getInfoAboutBook, getUsers} from "../../API";
 import {toast} from "react-toastify";
-import {checkIsbnValidity, formPersonsFullName, validateNumber} from "../../utils/utils";
+import {checkIsbnValidity, formatDimension, formPersonsFullName, validateNumber} from "../../utils/utils";
 import {countryCode, langCode} from "../../utils/locale";
-//import ChipInput from "material-ui-chip-input";
 import {showError} from "../Modal";
 import {InputField, MultiselectField} from "../InputFields";
 import {cities} from "../../utils/constants";
@@ -42,7 +41,8 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 	}, [data]);
 
 	const getBookFromISBN = () => {
-		if (!("title" in (formData || {})) && checkIsbnValidity(formData.ISBN)) {
+		if (!formData?.ISBN) return;
+		if (!("title" in (formData || {})) && checkIsbnValidity(formData?.ISBN)) {
 			openLoadingBooks(true);
 			getInfoAboutBook(formData.ISBN)
 				.then(({data}) => {
@@ -67,29 +67,29 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 	//edit book
 	useEffect(() => {
 		if (!data) return;
+		const typedData: IBook = data as IBook;
 
-		// TODO: refactor
 		const toBeModified: IBook = {
 			...data,
-			autor: formPersonsFullName((data as IBook)?.autor),
-			translator: formPersonsFullName((data as IBook)?.translator),
-			editor: formPersonsFullName((data as IBook)?.editor),
-			ilustrator: formPersonsFullName((data as IBook)?.ilustrator),
+			autor: formPersonsFullName(typedData.autor),
+			translator: formPersonsFullName(typedData.translator),
+			editor: formPersonsFullName(typedData.editor),
+			ilustrator: formPersonsFullName(typedData.ilustrator),
 			location: {city: cities.filter(c => c.value === (data as IBook)?.location?.city)},
 			published: {
 				...(data as IBook).published,
 				country: countryCode.filter((country: ILangCode) =>
-					((data as IBook)?.published?.country as unknown as string[])?.includes(country.key))
+					(typedData.published?.country as unknown as string[])?.includes(country.key))
 			},
 			dimensions: {
-				height: ((data as IBook).dimensions?.height! / 10).toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number ?? null, // *10, because Mongo is not saving decimal, so here it's shown as decimal
-				width: ((data as IBook).dimensions?.width! / 10).toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number ?? null,
-				depth: ((data as IBook).dimensions?.depth! / 10).toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number ?? null,
-				weight: ((data as IBook).dimensions?.weight! / 10).toLocaleString('cs-CZ', {minimumFractionDigits: 1}) as unknown as number ?? null,
+				height: formatDimension(typedData.dimensions?.height),
+				width: formatDimension(typedData.dimensions?.width),
+				depth: formatDimension(typedData.dimensions?.depth),
+				weight: formatDimension(typedData.dimensions?.weight),
 			},
 			language: langCode.filter((lang: ILangCode) => ((data as IBook)?.language as unknown as string[])?.includes(lang.key)),
-			readBy: formPersonsFullName((data as IBook)?.readBy),
-			owner: formPersonsFullName((data as IBook)?.owner),
+			readBy: formPersonsFullName(typedData.readBy),
+			owner: formPersonsFullName(typedData.owner),
 		} as IBook;
 
 		setFormData(toBeModified);
@@ -254,12 +254,15 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					}}
 					customerror={getErrorMsg("ISBN")}
 				/>
-				<FontAwesomeIcon
-					icon={faMagnifyingGlass}
+				<button
 					className="isbnLookup"
 					title="Vyhľadať podľa ISBN"
 					onClick={getBookFromISBN}
-				/>
+				>
+					<FontAwesomeIcon
+						icon={faMagnifyingGlass}
+					/>
+				</button>
 			</div>
 			<div className="Translator">
 				<MultiselectField

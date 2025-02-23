@@ -12,6 +12,7 @@ export const shortenStringKeepWord = (text: string, maxLength: number): string =
 	}
 }
 
+//TODO: refactor these 3
 export const stringifyAutors = (
 	data: any
 ): any => {
@@ -49,6 +50,21 @@ export const stringifyUsers = (data: IUser[], withSurname: boolean) => {
 	return names;
 }
 
+export const formPersonsFullName = <T extends { firstName?: string; lastName?: string }>(
+	person: T | T[] | undefined
+): string | T[] | undefined => {
+	if (!person) return;
+
+	if (Array.isArray(person)) {
+		return person.map(p => ({
+			...p,
+			fullName: `${p.lastName ?? ""}${p.firstName ? ", " + p.firstName : ""}`,
+		}));
+	} else {
+		return `${person.lastName ?? ""}${person.firstName ? ", " + person.firstName : ""}`;
+	}
+};
+
 export const darkenLightenColor = (hex: string, percent: number): string => {
 	// Remove the hash (#) if present
 	hex = hex.replace(/^#/, "");
@@ -70,7 +86,7 @@ export const darkenLightenColor = (hex: string, percent: number): string => {
 
 	//color is too dark, dump it and create new
 	if (r < 15 || g < 15 || b < 15) return darkenLightenColor(hex, 35);
-	if (luminance < 3000) return darkenLightenColor(hex, -40);
+	if (luminance < 2500) return darkenLightenColor(hex, -40);
 
 	// Convert back to hex and return
 	const toHex = (value: number) => value.toString(16).padStart(2, "0");
@@ -170,22 +186,6 @@ export const toPercentage = (value: number) => {
 	return ((value * 100).toFixed(1)) + "%";
 }
 
-//TODO: isn't this the same as stringifyAutors?
-export const formPersonsFullName = <T extends { firstName?: string; lastName?: string }>(
-	person: T | T[] | undefined
-): string | T[] | undefined => {
-	if (!person) return;
-
-	if (Array.isArray(person)) {
-		return person.map(p => ({
-			...p,
-			fullName: `${p.lastName ?? ""}${p.firstName ? ", " + p.firstName : ""}`,
-		}));
-	} else {
-		return `${person.lastName ?? ""}${person.firstName ? ", " + person.firstName : ""}`;
-	}
-};
-
 export const randomMinMax = (min: number, max: number, integer?: boolean): number => {
 	if (integer) {
 		min = Math.ceil(min);
@@ -198,4 +198,13 @@ export const randomMinMax = (min: number, max: number, integer?: boolean): numbe
 export const getBookLocation = (location: ILocation): string => {
 	if (!location || !location.city) return "";
 	return `${cities.find(city => city.value === location.city)?.showValue}${location.shelf ? ', ' + location.shelf : ""}`
+}
+
+export const formatDimension = (dimension: any) => {
+	if (!dimension) return undefined;
+
+	if (typeof dimension === 'object' && "$numberDecimal" in dimension)
+		return parseFloat(dimension.$numberDecimal).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) as unknown as number;
+
+	return parseFloat(dimension).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) as unknown as number;
 }

@@ -1,15 +1,6 @@
 import React, {useEffect, useRef} from "react";
 import {Multiselect} from "multiselect-react-dropdown";
-
-const multiselectStyle = {
-	inputField: {marginLeft: "0.5rem"},
-	optionContainer: {
-		backgroundColor: "transparent",
-	},
-	chips: {background: "#00ADB5"},
-	option: {color: "black"},
-	multiselectContainer: {maxWidth: "100%"},
-};
+import {multiselectStyle} from "../utils/constants";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     customerror?: string;

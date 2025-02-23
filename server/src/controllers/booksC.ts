@@ -2,7 +2,7 @@ import {Response, Request} from 'express';
 import {IBook, IPopulateOptions, IUser} from '../types';
 import Book from '../models/book';
 import User from '../models/user';
-import {getIdFromArray, sortByParam, webScrapper} from "../utils/utils";
+import {formatMongoDbDecimal, getIdFromArray, sortByParam, webScrapper} from "../utils/utils";
 import mongoose from 'mongoose';
 import Autor from "../models/autor";
 
@@ -56,10 +56,10 @@ const normalizeBook = (data: any): IBook => {
         ISBN: data.ISBN,
         note: data.note,
         dimensions: {
-            height: data.dimensions?.height ? parseFloat((data.dimensions?.height).toString().replace(",",".")) * 10 : undefined,
-            width: data.dimensions?.width ? parseFloat((data.dimensions?.width).toString().replace(",",".")) * 10 : undefined,
-            depth: data.dimensions?.depth ? parseFloat((data.dimensions?.depth).toString().replace(",",".")) * 10 : undefined,
-            weight: data.dimensions?.weight ? parseFloat((data.dimensions?.weight).toString().replace(",",".")) * 10 : undefined
+            height: data.dimensions?.height ? formatMongoDbDecimal(data.dimensions?.height) : undefined,
+            width: data.dimensions?.width ? formatMongoDbDecimal(data.dimensions?.width) : undefined,
+            depth: data.dimensions?.depth ? formatMongoDbDecimal(data.dimensions?.depth) : undefined,
+            weight: data.dimensions?.weight ? formatMongoDbDecimal(data.dimensions?.weight) : undefined
         },
         exLibris: data.exLibris,
         picture: data.picture,

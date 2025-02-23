@@ -2,6 +2,7 @@ import puppeteer, {Page} from 'puppeteer';
 import axios from "axios";
 import xml2js from "xml2js";
 import Autor from "../models/autor";
+import mongoose from "mongoose";
 
 enum GoodReadsRoles {
     AUTHOR = "",
@@ -86,80 +87,84 @@ const filterAuthorsFromGR = (authors: any[], role: GoodReadsRoles) => {
 }
 
 const getAuthorsIDandUnique = async (authors: string[]) => {
-    if (!authors) return;
+    try {
+        if (!authors) return;
 
-    const foundAuthors = [];
+        const foundAuthors = [];
 
-    for (let author of authors) {
-        const splitted = author.split(" ");
-        //@ts-ignore
-        let {firstName, lastName} = "";
+        for (let author of authors) {
+            const splitted = author.split(" ");
+            //@ts-ignore
+            let {firstName, lastName} = "";
 
-        // if name consist of only one word
-        if (splitted.length === 1) {
-            lastName = splitted[0];
-        } else {
-            firstName = splitted.slice(0, splitted.length - 1).join();
-            lastName = splitted[splitted.length - 1];
-        }
-
-        if (!lastName) return;
-
-        let queryOptions: any[] = [
-            {
-                lastName: {
-                    $regex: `^${lastName.replace(/ová$/i, '')}(ová)?$`,
-                    $options: 'i'
-                }
-            }
-        ];
-
-        if (firstName.length > 0) {
-            const firstNameConditions: any[] = [
-                { firstName: firstName }
-            ];
-
-            if (!firstName.includes(".")) {
-                firstNameConditions.push({
-                    firstName: firstName
-                        ?.split(" ")
-                        .map((word: string[]) => word[0] + ". ")
-                        .join("")
-                        .trim()
-                });
+            // if name consist of only one word
+            if (splitted?.length === 1) {
+                lastName = splitted[0];
+            } else {
+                firstName = splitted.slice(0, splitted?.length - 1).join();
+                lastName = splitted[splitted?.length - 1];
             }
 
-            queryOptions = [
+            if (!lastName) return;
+
+            let queryOptions: any[] = [
                 {
-                    $and: [
-                        queryOptions[0], // Prioritize lastName condition
-                        { $or: firstNameConditions } // Include firstName conditions only when lastName matches
-                    ]
-                },
-                ...queryOptions // Fall back to matching lastName alone
+                    lastName: {
+                        $regex: `^${lastName.replace(/ová$/i, '')}(ová)?$`,
+                        $options: 'i'
+                    }
+                }
             ];
+
+            if (firstName) {
+                const firstNameConditions: any[] = [
+                    {firstName: firstName}
+                ];
+
+                if (!firstName.includes(".")) {
+                    firstNameConditions.push({
+                        firstName: firstName
+                            ?.split(" ")
+                            .map((word: string[]) => word[0] + ". ")
+                            .join("")
+                            .trim()
+                    });
+                }
+
+                queryOptions = [
+                    {
+                        $and: [
+                            queryOptions[0], // Prioritize lastName condition
+                            {$or: firstNameConditions} // Include firstName conditions only when lastName matches
+                        ]
+                    },
+                    ...queryOptions // Fall back to matching lastName alone
+                ];
+            }
+
+            let foundAuthor = await Autor.findOne({$or: queryOptions}).collation({locale: "cs", strength: 1});
+
+
+            if (!foundAuthor) {
+                foundAuthor = await Autor.create({firstName: firstName, lastName: lastName});
+            }
+
+            //cleaning obj, so there is no hidden params from Mongo
+            foundAuthors.push({
+                _id: foundAuthor._id,
+                lastName: foundAuthor.lastName,
+                firstName: foundAuthor.firstName,
+                fullName: `${foundAuthor.lastName ?? ""}${foundAuthor.firstName ? ", " + foundAuthor.firstName : ""}`,
+            });
         }
 
-        let foundAuthor = await Autor.findOne({ $or: queryOptions }).collation({ locale: "cs", strength: 1 });
-
-
-        if (!foundAuthor) {
-            foundAuthor = await Autor.create({firstName: firstName, lastName: lastName});
-        }
-
-        //cleaning obj, so there is no hidden params from Mongo
-        foundAuthors.push({
-            _id: foundAuthor._id,
-            lastName: foundAuthor.lastName,
-            firstName: foundAuthor.firstName,
-            fullName: `${foundAuthor.lastName ?? ""}${foundAuthor.firstName ? ", " + foundAuthor.firstName : ""}`,
-        });
+        // remove duplicates
+        return foundAuthors.filter((doc, index, self) =>
+            index === self.findIndex(d => d.firstName === doc.firstName && d.lastName === doc.lastName)
+        );
+    } catch (err) {
+        console.error("Cannot get author from webScrapping", err);
     }
-
-    // remove duplicates
-    return foundAuthors.filter((doc, index, self) =>
-        index === self.findIndex(d => d.firstName === doc.firstName && d.lastName === doc.lastName)
-    );
 }
 
 const databazeKnih = async (isbn: string): Promise<object | boolean> => {
@@ -271,7 +276,7 @@ export const webScrapper = async (isbn: string): Promise<any> => {
 
     let dkBook: any, grBook: any;
 
-    if ((isbn.slice(3, 5) === "80" || isbn.slice(0,2) === "80") || isbn.length < 10) {
+    if ((isbn.slice(3, 5) === "80" || isbn.slice(0, 2) === "80") || isbn.length < 10) {
         const results = await Promise.allSettled([databazeKnih(isbn), goodreads(isbn)]); //Promise.allSettled, so it runs at the same time but wont fail if one fail
 
         dkBook = results[0].status === 'fulfilled' ? results[0].value : null;
@@ -309,3 +314,7 @@ export const webScrapper = async (isbn: string): Promise<any> => {
 const customOrder = ['Ľuboš', 'Žaneta', 'Jakub', 'Jaroslav', 'Magdaléna', 'Csonka rodičia', 'Víša rodičia', ''];
 export const sortByParam = (data: any, param: string) =>
     data.sort((a: any, b: any) => customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]));
+
+export const formatMongoDbDecimal = (num: string) => {
+    return mongoose.Types.Decimal128.fromString((num).replace(",","."));
+}

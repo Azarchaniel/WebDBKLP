@@ -1,5 +1,6 @@
 import {IAutor, IBook, IUser} from "../../type";
 import React, {ReactElement} from "react";
+import {formatDimension} from "../../utils/utils";
 
 type Props = {
     data: IExtendedBook
@@ -32,12 +33,12 @@ const BookDetail: React.FC<Props> = ({data}) => {
 				<table className="bookDimensions">
 					<tbody>
 					<tr>
-						<td>Výška: {(dimensions.height / 10).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) ?? "-"} cm</td>
-						<td>Šírka: {(dimensions.width / 10).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) ?? "-"} cm</td>
+						<td>Výška: {formatDimension(dimensions?.height) ?? "-"} cm</td>
+						<td>Šírka: {formatDimension(dimensions?.width) ?? "-"} cm</td>
 					</tr>
 					<tr>
-						<td>Hrúbka: {(dimensions.depth / 10).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) ?? "-"} cm</td>
-						<td>{dimensions.weight ? `Hmotnosť: ${(dimensions.weight / 10).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) ?? "-"} g` : null}</td>
+						<td>Hrúbka: {formatDimension(dimensions?.depth) ?? "-"} cm</td>
+						<td>{dimensions.weight ? `Hmotnosť: ${formatDimension(dimensions?.weight) ?? "-"} g` : null}</td>
 					</tr>
 					</tbody>
 				</table>

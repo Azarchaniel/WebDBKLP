@@ -149,7 +149,7 @@ export default function QuotePage() {
 		<main className='App'>
 			<Header/>
 			<Sidebar/>
-			<AddQuote key={"new"} saveQuote={handleSaveQuote} onClose={() => {}}/>
+			<AddQuote saveQuote={handleSaveQuote} onClose={() => {}}/>
 			<div style={{position: "fixed", top: "20rem", zIndex: 1000}}>
 				{loading ? <LoadingBooks/> : <></>}
 			</div>
