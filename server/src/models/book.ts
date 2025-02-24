@@ -5,6 +5,8 @@ import {editionSerieSchema} from "./editionSerie";
 import * as mongoose from "mongoose";
 import {locationSchema} from "./location";
 import {dimensionSchema} from "./dimensions";
+import {normalizeSearchFields} from '../utils/utils'; // Adjust the import path as needed
+
 
 const bookSchema: Schema = new Schema({
     autor: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
@@ -32,23 +34,68 @@ const bookSchema: Schema = new Schema({
     createdAt: {type: Date, required: false}, //because I had to edit createdAt at first import, I had to change it to be set manually
     updatedAt: {type: Date, required: false},
     deletedAt: {type: Date, required: false},
+    normalizedSearchField: {type: JSON, required: false},
     wasChecked: {type: Boolean, required: false, default: false}, //TEMPORARY
 })
+
+bookSchema.index({
+        "normalizedSearchField.autor": "text",
+        "normalizedSearchField.editor": "text",
+        "normalizedSearchField.ilustrator": "text",
+        "normalizedSearchField.translator": "text",
+        "normalizedSearchField.title": "text",
+        "normalizedSearchField.subtitle": "text",
+        "normalizedSearchField.content": "text",
+        "normalizedSearchField.edition": "text",
+        "normalizedSearchField.serie": "text",
+        "normalizedSearchField.note": "text",
+        "normalizedSearchField.published": "text"
+});
 
 bookSchema.pre('save', function (next) {
     if (!this.createdAt) {
         this.createdAt = new Date();
     }
     this.updatedAt = new Date();
-    //console.log("middleware for create", this.createdAt, this.updatedAt, this._id);
     next();
 });
 
 bookSchema.pre(['findOneAndUpdate', 'updateOne', 'updateMany'], function (next) {
-    this.set({ updatedAt: new Date() });
-    //console.log("middleware for update");
+    this.set({updatedAt: new Date()});
     next();
 });
 
+bookSchema.pre(['save', 'updateOne', 'findOneAndUpdate', 'deleteOne', 'findOneAndDelete'], async function (next) {
+    // normalization for search
+    try {
+        const docInstance = this;
 
+        if (docInstance instanceof mongoose.Document) {
+            // For `save` middleware
+            const normalizedFields = await normalizeSearchFields(docInstance);
+            docInstance.normalizedSearchField = normalizedFields;
+        } else {
+            // @ts-ignore
+            const updateQuery = this.getUpdate();
+
+            // Fetch the current document (if needed) to normalize fields
+            // @ts-ignore
+            const doc = await this.model.findOne(this.getQuery());
+
+            if (doc) {
+                const normalizedFields = await normalizeSearchFields(doc);
+                // @ts-ignore
+                this.setUpdate({
+                    ...updateQuery,
+                    normalizedSearchField: normalizedFields
+                });
+            }
+        }
+    } catch (error) {
+        console.error("Error in middleware when normalizing book", error);
+        next();
+    }
+
+    next();
+});
 export default model<IBook>('Book', bookSchema);
