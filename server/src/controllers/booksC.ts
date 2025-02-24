@@ -3,8 +3,7 @@ import {IBook, IPopulateOptions, IUser} from '../types';
 import Book from '../models/book';
 import User from '../models/user';
 import {formatMongoDbDecimal, getIdFromArray, sortByParam, webScrapper} from "../utils/utils";
-import mongoose from 'mongoose';
-import Autor from "../models/autor";
+import mongoose, {PipelineStage} from 'mongoose';
 
 const populateOptions: IPopulateOptions[] = [
     {path: 'autor', model: 'Autor'},
@@ -15,11 +14,10 @@ const populateOptions: IPopulateOptions[] = [
     {path: 'readBy', model: 'User'}
 ];
 
-//TODO: refactor!!!
 const normalizeBook = (data: any): IBook => {
     const city = data.location ?
-                        Array.isArray(data.location?.city) ? data?.location?.city?.[0]?.value : data?.location?.city
-                        : null;
+        Array.isArray(data.location?.city) ? data?.location?.city?.[0]?.value : data?.location?.city
+        : null;
     const countryPublished = data.published ?
         Array.isArray(data.published?.country) ? data?.published?.country?.[0]?.value : data?.published?.country
         : null;
@@ -73,11 +71,11 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
         let {page, pageSize, search = "", sorting, filterUsers} = req.query;
 
-        if (!page && !pageSize) {
-            page = "1";
-            pageSize = "10_000"
-        }
+        // Set default pagination values if not provided
+        if (!page) page = "1";
+        if (!pageSize) pageSize = "10_000";
 
+        // Parse sorting parameters
         let sortParams: Array<{ id: string; desc: string }> = [];
         if (typeof sorting === "string") {
             sortParams = JSON.parse(sorting);
@@ -87,51 +85,66 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
 
         // Build the sort object for MongoDB
         const sortOptions: { [key: string]: 1 | -1 } = {};
-        sortParams.forEach((param) => {
-            sortOptions[param.id] = param.desc === "true" ? -1 : 1;
-        });
+        if (sortParams.length > 0) {
+            sortParams.forEach((param) => {
+                sortOptions[param.id] = param.desc === "true" ? -1 : 1;
+            });
+        } else {
+            // Default sorting if no sorting parameters are provided
+            sortOptions["title"] = 1;
+        }
 
-        const matchingAuthors = await Autor.find({
-            $or: [
-                {firstName: {$regex: search, $options: "i"}},
-                {lastName: {$regex: search, $options: "i"}}
-            ],
-        })
-            .collation({locale: "sk", strength: 1})
-            .select("_id") as {_id: string}[];
-
-        // result is [ {_id: "..."} ] so here is mapping
-        const authorIds = matchingAuthors.map((author) => author._id);
-
-        let query: Record<string, any> = {
-            $or: [
-                {title: {$regex: search, $options: 'i'}},
-                {autor: {$in: authorIds}}
-            ],
-            deletedAt: {$eq: null} // Exclude deleted documents if necessary
-        };
-
+        // Handle filterUsers
+        let query: Record<string, any> = {deletedAt: {$eq: null}};
         if (filterUsers) {
             query = {...query, owner: {$in: filterUsers}};
         }
 
-        const skipCalc = (+page! - 1) * +pageSize!; //plus is converting to int
-        const skip = skipCalc < 0 ? 0 : skipCalc;
+        // Refactored: Helper function for $lookup
+        const createLookupStage = (from: string, localField: string, as: string) => ({
+            $lookup: {from, localField, foreignField: "_id", as}
+        });
 
-        const books = await Book.find(query)
-            .sort(sortOptions)
-            .skip(skip)
-            .limit(+pageSize!)
-            .populate(populateOptions)
-            .exec();
+        const normalizedSearchFields = [
+            "autor", "editor", "ilustrator", "translator", "title", "subtitle", "content", "edition", "serie", "note", "published"
+        ];
 
-        const count = await Book.countDocuments(query)
+        // Add search conditions to the query if a search term is provided
+        if (search) {
+            query = {
+                ...query,
+                $or: normalizedSearchFields.map(field => ({
+                    [`normalizedSearchField.${field}`]: {$regex: search, $options: "i"}
+                }))
+            };
+        }
 
-        res.status(200).json({books, count})
+        // Aggregation pipeline
+        const pipeline: PipelineStage[] = [
+            {$match: query}, // Match by default query (e.g., deletedAt)
+            // Lookups to populate related fields
+            createLookupStage("autors", "autor", "autor"),
+            createLookupStage("autors", "editor", "editor"),
+            createLookupStage("autors", "ilustrator", "ilustrator"),
+            createLookupStage("autors", "translator", "translator"),
+            createLookupStage("users", "owner", "owner"),
+            {$skip: (parseInt(page as string) - 1) * parseInt(pageSize as string)},
+            {$limit: parseInt(pageSize as string)},
+            {$sort: sortOptions}
+        ];
+
+        const books = await Book.aggregate(pipeline);
+
+        // Count total documents (for pagination)
+        const count = await Book.countDocuments(query);
+
+        // Send response
+        res.status(200).json({books, count});
     } catch (error) {
-        throw error
+        console.error("Error fetching books:", error);
+        res.status(500).json({message: "Internal server error"});
     }
-}
+};
 
 const getBook = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -609,7 +622,7 @@ const dashboard = {
         data = Object.values(
             data.reduce((acc: any, obj) => {
                 if (!acc[obj.language]) {
-                    acc[obj.language] = { ...obj }; // Initialize with the first object
+                    acc[obj.language] = {...obj}; // Initialize with the first object
                 } else {
                     acc[obj.language].count += obj.count; // Merge count values
                 }

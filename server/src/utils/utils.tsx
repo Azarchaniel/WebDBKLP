@@ -3,6 +3,7 @@ import axios from "axios";
 import xml2js from "xml2js";
 import Autor from "../models/autor";
 import mongoose from "mongoose";
+import diacritics from 'diacritics';
 
 enum GoodReadsRoles {
     AUTHOR = "",
@@ -318,3 +319,95 @@ export const sortByParam = (data: any, param: string) =>
 export const formatMongoDbDecimal = (num: string) => {
     return mongoose.Types.Decimal128.fromString((num).replace(",","."));
 }
+
+
+/**
+ * Helper to normalize a given field value into a string.
+ * @param value - The value to normalize. Can be string, array, or object.
+ * @returns A promise that resolves to a normalized string.
+ */
+async function normalizeFieldValue(value: any): Promise<string> {
+    if (!value) return '';
+
+    if (Array.isArray(value)) {
+        const normalizedValues = await Promise.all(
+            value.map(async (item) => {
+                const autor = await Autor.findById(item);
+                if (autor) {
+                    return diacritics.remove(`${autor.firstName ?? ''} ${autor.lastName ?? ''}`);
+                }
+                return typeof item === 'string' ? diacritics.remove(item) : '';
+            })
+        );
+        return diacritics.remove(normalizedValues.filter(Boolean).join(', ') ?? '');
+    }
+
+    if (typeof value === 'object') {
+        const { title, publisher }: any = value;
+        return diacritics.remove(title ?? publisher ?? '');
+    }
+
+    // For single string values
+    return diacritics.remove(value ?? '');
+}
+
+/**
+ * Safely sets a value into a nested object based on a nested path.
+ * @param obj - The object to modify.
+ * @param path - An array of keys representing the path, e.g., ["serie", "title"].
+ * @param value - The value to set.
+ */
+function setNestedValue(obj: Record<string, any>, path: string[], value: any): void {
+    let current = obj;
+    for (let i = 0; i < path.length - 1; i++) {
+        const key = path[i];
+        if (!current[key]) {
+            current[key] = {}; // Create the object if it doesn't exist
+        }
+        current = current[key];
+    }
+    current[path[path.length - 1]] = value;
+}
+
+/**
+ * Normalizes specified fields into a nested JSON object where keys are field names, and values are normalized strings.
+ * Only fields with non-empty normalized values are included.
+ * @param doc - Document containing the fields to normalize.
+ * @returns A promise that resolves to a nested object with normalized search fields.
+ */
+export async function normalizeSearchFields(doc: any): Promise<Record<string, any>> {
+    const normalizedFields: Record<string, any> = {};
+
+    // Fields to normalize
+    const fieldsToNormalize: Record<string, any> = {
+        autor: doc.autor,
+        editor: doc.editor,
+        ilustrator: doc.ilustrator,
+        title: doc.title,
+        subtitle: doc.subtitle,
+        edition: doc.edition,
+        serie: doc.serie,
+        note: doc.note,
+        published: doc.published,
+    };
+
+    // Normalize fields and add them as nested properties
+    for (const [key, value] of Object.entries(fieldsToNormalize)) {
+        const normalizedValue = await normalizeFieldValue(value);
+        if (normalizedValue) {
+            // Handle nested paths (e.g., "edition.title") by splitting by "."
+            const path = key.split('.');
+            setNestedValue(normalizedFields, path, normalizedValue);
+        }
+    }
+
+    // Handle `content` field separately
+    const content = doc.content?.length > 0 ? diacritics.remove(doc.content.join(', ')) : '';
+    if (content) {
+        normalizedFields['content'] = content;
+    }
+
+    return normalizedFields;
+}
+
+
