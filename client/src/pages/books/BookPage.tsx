@@ -122,6 +122,7 @@ export default function BookPage() {
 	}
 
 	const handleUpdateBook = (_id: string): void => {
+		setSaveBookSuccess(undefined);
 		getBook(_id)
 			.then(({data}) => {
 				setUpdateBook(data.book);
@@ -192,7 +193,7 @@ export default function BookPage() {
 						weight: !hidden.dimensions
 					})} />
 				<ShowHideRow label="Vydané" init={hidden.published} onChange={() => setHidden({...hidden, published: !hidden.published})} />
-				<ShowHideRow label="Edícia" init={hidden.edition} onChange={() => setHidden({...hidden, serie: !hidden.edition})} />
+				<ShowHideRow label="Edícia" init={hidden.edition} onChange={() => setHidden({...hidden, edition: !hidden.edition})} />
 				<ShowHideRow label="Séria" init={hidden.serie} onChange={() => setHidden({...hidden, serie: !hidden.serie})} />
 				<ShowHideRow label="Ex Libris" init={hidden.exLibris} onChange={() => setHidden({...hidden, exLibris: !hidden.exLibris})} />
 				<ShowHideRow label="Dátum pridania" init={hidden.createdAt} onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})} />

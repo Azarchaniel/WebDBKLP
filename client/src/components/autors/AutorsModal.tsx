@@ -2,7 +2,7 @@ import React, {useCallback, useEffect, useState} from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {countryCode} from "../../utils/locale";
-import {IAutor, ValidationError} from "../../type";
+import {IAutor, ILangCode, ValidationError} from "../../type";
 import {InputField, MultiselectField} from "../InputFields";
 import {showError} from "../Modal";
 import {autorRoles} from "../../utils/constants";
@@ -40,15 +40,17 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	//edit autor
 	useEffect(() => {
 		if (!data) return;
+		const typedData = data as IAutor;
 
 		const toBeModified: IAutor = {
 			...data,
-			role: autorRoles.filter(obj => ((formData as IAutor).role as string[]).includes(obj.value)),
-			dateOfBirth: (formData as IAutor)?.dateOfBirth ?
-				new Date((formData as IAutor)?.dateOfBirth as string | number | Date) :
+			nationality: countryCode.filter((country: ILangCode) => typedData?.nationality?.includes(country.key)),
+			role: autorRoles.filter(obj => (typedData.role as string[]).includes(obj.value)),
+			dateOfBirth: typedData?.dateOfBirth ?
+				new Date(typedData?.dateOfBirth as string | number | Date) :
 				undefined,
-			dateOfDeath: (formData as IAutor)?.dateOfDeath ?
-				new Date((formData as IAutor)?.dateOfDeath as string | number | Date) :
+			dateOfDeath: typedData?.dateOfDeath ?
+				new Date(typedData?.dateOfDeath as string | number | Date) :
 				undefined
 		} as IAutor;
 
@@ -167,7 +169,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 							...formData,
 							dateOfBirth
 						})}
-						locale="cs"
+						locale="sk"
 						dateFormat='dd.MM.yyyy'
 						placeholderText={"Dátum narodenia"}
 						maxDate={new Date()}
@@ -194,7 +196,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 							...formData,
 							dateOfDeath
 						})}
-						locale="cs"
+						locale="sk"
 						dateFormat='dd.MM.yyyy'
 						placeholderText={"Dátum smrti"}
 						maxDate={new Date()}

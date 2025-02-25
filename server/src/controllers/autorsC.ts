@@ -1,12 +1,14 @@
 import {Response, Request} from 'express';
 import {IAutor} from '../types';
 import Autor from "../models/autor";
-import { optionFetchAllExceptDeleted } from '../utils/constants';
+import {optionFetchAllExceptDeleted} from '../utils/constants';
+import Book from "../models/book";
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
         const autors: IAutor[] = await Autor.find(optionFetchAllExceptDeleted)
         const count: number = await Autor.countDocuments(optionFetchAllExceptDeleted)
+
         res.status(200).json({autors: autors, count: count})
     } catch (error) {
         res.status(500);
@@ -21,6 +23,25 @@ const getAutor = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({autor: autor, autors: allAutors})
     } catch (err) {
         console.error("Can't find autor", err);
+    }
+}
+
+const getAllAutorsBooks = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const {id} = req.params; //autor ID
+
+        const books = await Book.find({
+            $or: [
+                { autor: id },
+                { translator: id },
+                { editor: id },
+                { ilustrator: id }
+            ]
+        });
+
+        res.status(200).json({books});
+    } catch (error) {
+        console.error("Error fetching books:", error);
     }
 }
 
@@ -55,10 +76,15 @@ const updateAutor = async (req: Request, res: Response): Promise<void> => {
             body,
         } = req
 
+        const nationalityValue = body.nationality ?
+            Array.isArray(body.nationality) ? body.nationality[0]?.key : body.nationality
+            : null;
+
         const updateAutor: IAutor | null = await Autor.findByIdAndUpdate(
             {_id: id},
             {
                 ...body,
+                nationality: nationalityValue,
                 role: body.role?.map((val: {value: string, showValue: string}) => val.value),
             }
         )
@@ -97,4 +123,4 @@ const deleteAutor = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
-export {getAllAutors, addAutor, updateAutor, deleteAutor, getAutor};
+export {getAllAutors, addAutor, updateAutor, deleteAutor, getAutor, getAllAutorsBooks};

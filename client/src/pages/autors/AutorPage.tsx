@@ -11,6 +11,8 @@ import Header from "../../components/AppHeader";
 import {tableHeaderColor} from "../../utils/constants";
 import {TooltipedText} from "../../utils/elements";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
+import AutorDetail from "./AutorDetail";
+import {countryCode} from "../../utils/locale";
 
 export default function AutorPage() {
 	const [autors, setAutors] = useState<IAutor[]>([]);
@@ -123,7 +125,8 @@ export default function AutorPage() {
 						field: "nationality",
 						headerStyle: {
 							backgroundColor: tableHeaderColor
-						}
+						},
+						render: (rowData: IAutor) => countryCode.filter(cc => cc.key === rowData?.nationality).map(cc => cc.value) ?? "-"
 					},
 					{
 						title: "Narodenie",
@@ -171,13 +174,7 @@ export default function AutorPage() {
 					{
 						icon: "search",
 						tooltip: "Detaily",
-						render: (rowData: any) => {
-							return (
-								<>
-									<pre>{JSON.stringify(rowData, undefined, 3)}</pre>
-								</>
-							)
-						}
+						render: (rowData: any) => <AutorDetail data={rowData} />
 					},
 				]}
 			/>

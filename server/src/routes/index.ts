@@ -7,7 +7,7 @@ import {
     getBook,
     dashboard,
     getInfoFromISBN,
-    getBooksByIds
+    getBooksByIds, getAllAutorsBooks
 } from '../controllers'
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
@@ -31,6 +31,7 @@ router.get('/autors', getAllAutors)
 router.post('/add-autor', addAutor)
 router.put('/edit-autor/:id', updateAutor)
 router.post('/delete-autor/:id', deleteAutor)
+router.get('/get-autor-info/:id', getAllAutorsBooks)
 
 // ### QUOTES ###
 router.get('/quote/:id', getQuote)
@@ -48,7 +49,7 @@ router.get('/lps', getAllLps)
 router.post('/add-lp', addLp)
 router.post('/delete-lp/:id', deleteLp)
 
-router.get('/webScrapper', )
+router.get('/webScrapper',)
 
 router.get('/count-books/:id', dashboard.countBooks)
 router.get('/get-dimensions-statistics', dashboard.getDimensionsStatistics)

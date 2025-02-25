@@ -171,6 +171,19 @@ export const deleteAutor = async (
 	}
 }
 
+export const getAutorInfo = async (
+	_id: string
+): Promise<AxiosResponse<ApiAutorDataType>> => {
+	try {
+		const enrichedAutor: AxiosResponse<ApiAutorDataType> = await axios.get(
+			`${baseUrl}/get-autor-info/${_id}`
+		)
+		return enrichedAutor
+	} catch (error: any) {
+		throw new Error(error)
+	}
+}
+
 // ### QUOTES ###
 export const getQuotes = async (activeUsers: string[]): Promise<AxiosResponse<ApiQuoteDataType>> => {
 	try {

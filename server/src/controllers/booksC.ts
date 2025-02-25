@@ -1,18 +1,12 @@
 import {Response, Request} from 'express';
-import {IBook, IPopulateOptions, IUser} from '../types';
+import {IBook, IUser} from '../types';
 import Book from '../models/book';
 import User from '../models/user';
 import {formatMongoDbDecimal, getIdFromArray, sortByParam, webScrapper} from "../utils/utils";
 import mongoose, {PipelineStage} from 'mongoose';
+import {populateOptionsBook} from "../utils/constants";
+import diacritics from "diacritics";
 
-const populateOptions: IPopulateOptions[] = [
-    {path: 'autor', model: 'Autor'},
-    {path: 'editor', model: 'Autor'},
-    {path: 'ilustrator', model: 'Autor'},
-    {path: 'translator', model: 'Autor'},
-    {path: 'owner', model: 'User'},
-    {path: 'readBy', model: 'User'}
-];
 
 const normalizeBook = (data: any): IBook => {
     const city = data.location ?
@@ -97,6 +91,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         // Handle filterUsers
         let query: Record<string, any> = {deletedAt: {$eq: null}};
         if (filterUsers) {
+            console.log(filterUsers);
             query = {...query, owner: {$in: filterUsers}};
         }
 
@@ -114,11 +109,12 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             query = {
                 ...query,
                 $or: normalizedSearchFields.map(field => ({
-                    [`normalizedSearchField.${field}`]: {$regex: search, $options: "i"}
+                    [`normalizedSearchField.${field}`]: {$regex: diacritics.remove(search as string), $options: "i"}
                 }))
             };
         }
 
+        console.log(query);
         // Aggregation pipeline
         const pipeline: PipelineStage[] = [
             {$match: query}, // Match by default query (e.g., deletedAt)
@@ -128,16 +124,20 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             createLookupStage("autors", "ilustrator", "ilustrator"),
             createLookupStage("autors", "translator", "translator"),
             createLookupStage("users", "owner", "owner"),
-            createLookupStage("users", "readBy", "readBy"),
-            {$skip: (parseInt(page as string) - 1) * parseInt(pageSize as string)},
-            {$limit: parseInt(pageSize as string)},
-            {$sort: sortOptions}
+            createLookupStage("users", "readBy", "readBy")
         ];
 
-        const books = await Book.aggregate(pipeline);
+        const paginationPipeline = [
+            ...pipeline,
+            {$sort: sortOptions},
+            {$skip: (parseInt(page as string) - 1) * parseInt(pageSize as string)},
+            {$limit: parseInt(pageSize as string)},
+        ]
+
+        const books = await Book.aggregate(paginationPipeline);
 
         // Count total documents (for pagination)
-        const count = await Book.countDocuments(query);
+        const count = (await Book.aggregate(pipeline)).length;
 
         // Send response
         res.status(200).json({books, count});
@@ -150,7 +150,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
 const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
     try {
         const {ids} = req.query;
-        const books = await Book.find({_id: {$in: ids}}).populate(populateOptions);
+        const books = await Book.find({_id: {$in: ids}}).populate(populateOptionsBook);
         res.status(200).json({books});
     } catch (error) {
         console.error("Error fetching books:", error);
@@ -161,11 +161,11 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
     try {
         const book = await Book
             .findById(req.params.id)
-            .populate(populateOptions)
+            .populate(populateOptionsBook)
             .exec();
         const allBooks = await Book
             .find()
-            .populate(populateOptions)
+            .populate(populateOptionsBook)
             .exec()
         res.status(200).json({book: book, books: allBooks})
     } catch (err) {
@@ -185,7 +185,7 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
 
         const allBooks = await Book
             .find()
-            .populate(populateOptions)
+            .populate(populateOptionsBook)
             .exec();
 
         res.status(200).json({message: 'Book added', book: newBook, books: allBooks})
@@ -210,7 +210,7 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
 
         const allBooks = await Book
             .find()
-            .populate(populateOptions)
+            .populate(populateOptionsBook)
             .exec();
 
         res.status(200).json({
@@ -238,7 +238,7 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
         )
         const allBooks = await Book
             .find()
-            .populate(populateOptions)
+            .populate(populateOptionsBook)
             .exec();
 
         res.status(200).json({

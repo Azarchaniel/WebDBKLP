@@ -51,7 +51,7 @@ interface ILocation {
 export interface IAutor extends IBaseType {
     firstName?: string;
     lastName: string;
-    nationality?: string;
+    nationality?: any;
     dateOfBirth?: Date | string;
     dateOfDeath?: Date | string;
     note?: string;

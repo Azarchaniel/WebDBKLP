@@ -48,7 +48,7 @@ const BookDetail: React.FC<Props> = ({data}) => {
 	}
 
 	return (<>
-		<div className="row BookDetail">
+		<div className="row tableDetailRow">
 			<div className="w-25">
 				<p>{data.picture ? <img src={data.picture} alt='titulka'/> :
 					<img src="img/no_thumbnail.svg" alt="no_thumbnail" style={{maxWidth: "20rem"}}/>}

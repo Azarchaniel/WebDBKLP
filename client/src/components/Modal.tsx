@@ -16,7 +16,7 @@ export const Modal: React.FC<ModalProps> = ({customKey, title, body, footer, onC
 	return createPortal(
 		<div className="customModalWrapper" key={customKey}>
 			<div className="customModalBackdrop"
-				onClick={onClose}
+				/*onClick={onClose}*/
 			/>
 
 			<div className="customModal" style={overrideStyle}>

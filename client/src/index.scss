@@ -351,9 +351,41 @@ body, html, main, #root {
   margin: 0; //fixing not centered pagination in Table
 }
 
-.BookDetail {
+.tableDetailRow {
   padding: 1rem;
   pointer-events: none;
+
+  &:hover {
+    background-color: blue !important;
+  }
+}
+
+.autorDetailTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 14px;
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+
+  tr {
+    &:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    &:hover {
+      background-color: #f1f1f1;
+    }
+  }
 }
 
 .bookDimensions {
@@ -756,6 +788,10 @@ body, html, main, #root {
   }
 }
 
+.hiddenId {
+  font-size: 0.3rem;
+  color: transparent;
+}
 
 .customModal {
   @include box-shadow;
@@ -818,11 +854,6 @@ body, html, main, #root {
       font-size: 2rem;
       color: var(--anchor);
       cursor: pointer;
-    }
-
-    .hiddenId {
-      font-size: 0.3rem;
-      color: transparent;
     }
   }
 
@@ -1017,7 +1048,7 @@ input:invalid {
       background-color: var(--anchor);
       color: white;
       max-height: 2rem !important;
-      padding: 0 1rem;
+      padding: 0 0.5rem;
     }
 
     // it's here becuase of Dimensions
@@ -1039,19 +1070,22 @@ input:invalid {
 
   tr {
     height: 4rem;
+    pointer-events: auto;
+
+    &:hover {
+      background-color: var(--anchor);
+      box-shadow: inset 1000rem 1em rgba(255, 255, 255, 0.6);
+    }
   }
 
   td {
     border-bottom: 2px solid lightgray;
-    pointer-events: none;
+
     padding: 0 0.5rem;
     position: relative;
+    pointer-events: auto;
 
-    div {
-      pointer-events: none;
-    }
-
-    &::after {
+    &:not(:first-child)::after {
       //line in the middle of the cell
       content: '';
       position: absolute;
