@@ -1,5 +1,14 @@
 import {Router} from 'express'
-import {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN} from '../controllers'
+import {
+    getAllBooks,
+    addBook,
+    updateBook,
+    deleteBook,
+    getBook,
+    dashboard,
+    getInfoFromISBN,
+    getBooksByIds
+} from '../controllers'
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
 import {getAllUsers, getUser} from "../controllers";
@@ -14,6 +23,7 @@ router.post('/add-book', addBook)
 router.put('/edit-book/:id', updateBook)
 router.post('/delete-book/:id', deleteBook)
 router.get('/get-book-info/:isbn', getInfoFromISBN)
+router.get('/books-by-ids', getBooksByIds)
 
 // ### AUTORS ###
 router.get('/autor/:id', getAutor)

@@ -90,6 +90,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 			language: langCode.filter((lang: ILangCode) => ((data as IBook)?.language as unknown as string[])?.includes(lang.key)),
 			readBy: formPersonsFullName(typedData.readBy),
 			owner: formPersonsFullName(typedData.owner),
+			exLibris: typedData.exLibris,
 		} as IBook;
 
 		setFormData(toBeModified);
@@ -478,6 +479,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					id="exLibris"
 					className="checkBox"
 					value={formData?.exLibris}
+				    checked={formData?.exLibris}
 					onChange={(e) => handleInputChange({name: "exLibris", value: e.target.checked})}
 				/>Ex Libris</label>
 			</div>

@@ -1007,8 +1007,6 @@ input:invalid {
 }
 
 /* TAN STACK TABLE */
-
-
 .serverPaginationTable {
   .tableHeader {
     border-top-left-radius: 1rem;
@@ -1019,11 +1017,23 @@ input:invalid {
       background-color: var(--anchor);
       color: white;
       max-height: 2rem !important;
+      padding: 0 1rem;
     }
 
+    // it's here becuase of Dimensions
     th[colspan]:not([colspan="1"]) { // select element that has colspan and it is not 1
       vertical-align: middle;
       text-align: center;
+    }
+
+    .TSP {
+      &autorsFull {
+        min-width: 12rem;
+      }
+
+      &title {
+        min-width: 15rem;
+      }
     }
   }
 
@@ -1034,9 +1044,30 @@ input:invalid {
   td {
     border-bottom: 2px solid lightgray;
     pointer-events: none;
+    padding: 0 0.5rem;
+    position: relative;
 
     div {
       pointer-events: none;
+    }
+
+    &::after {
+      //line in the middle of the cell
+      content: '';
+      position: absolute;
+      height: 1.8rem;
+      width: 1px;
+      background-color: lightgray;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+  }
+
+  .TSP {
+    &exLibris, &height, &width, &depth, &numberOfPages, &createdAt {
+      display: table-cell;
+      text-align: center;
     }
   }
 }

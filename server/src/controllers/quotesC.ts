@@ -9,6 +9,13 @@ const populateOptions: IPopulateOptions[] = [
     { path: 'owner', model: 'User' }
 ];
 
+const getBooksFromQuotes = (quotes: IQuote[]): (string | undefined)[] => {
+    const bookIdsSet = new Set(
+        quotes.map(quote => quote.fromBook?._id?.toString()).filter(Boolean)
+    );
+    return Array.from(bookIdsSet);
+}
+
 const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
     try {
         let { activeUsers } = req.query;
@@ -25,7 +32,9 @@ const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
 
         const count = await Quote.countDocuments(query);
 
-        res.status(200).json({ quotes, count })
+        const bookIds = getBooksFromQuotes(quotes);
+
+        res.status(200).json({ quotes, count, bookIds })
     } catch (error) {
         res.status(500);
         console.error(error);

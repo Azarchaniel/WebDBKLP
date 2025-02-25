@@ -128,6 +128,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             createLookupStage("autors", "ilustrator", "ilustrator"),
             createLookupStage("autors", "translator", "translator"),
             createLookupStage("users", "owner", "owner"),
+            createLookupStage("users", "readBy", "readBy"),
             {$skip: (parseInt(page as string) - 1) * parseInt(pageSize as string)},
             {$limit: parseInt(pageSize as string)},
             {$sort: sortOptions}
@@ -145,6 +146,16 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({message: "Internal server error"});
     }
 };
+
+const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const {ids} = req.query;
+        const books = await Book.find({_id: {$in: ids}}).populate(populateOptions);
+        res.status(200).json({books});
+    } catch (error) {
+        console.error("Error fetching books:", error);
+    }
+}
 
 const getBook = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -740,4 +751,4 @@ const dashboard = {
 
 }
 
-export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN}
+export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN, getBooksByIds}

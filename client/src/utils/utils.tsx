@@ -154,8 +154,10 @@ type ValidationOptions = {
 };
 
 export const validateNumber = (value: any, options?: ValidationOptions): boolean => {
-	if (!value) return true;
+	if (value === undefined || value === null) return true;
+
 	const { mustBePositive = false, mustBeInteger = false } = options || {};
+
 	value = value.toString().replace(",",".");
 
 	// Check if the value is a number
@@ -201,7 +203,7 @@ export const getBookLocation = (location: ILocation): string => {
 }
 
 export const formatDimension = (dimension: any) => {
-	if (!dimension) return undefined;
+	if (dimension === undefined || dimension === null) return undefined;
 
 	if (typeof dimension === 'object' && "$numberDecimal" in dimension)
 		return parseFloat(dimension.$numberDecimal).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) as unknown as number;

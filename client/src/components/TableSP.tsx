@@ -108,7 +108,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (
-                                        <th key={header.id} colSpan={header.colSpan}>
+                                        <th key={header.id} colSpan={header.colSpan} className={"TSP" + header.column.id}>
                                             {header.isPlaceholder ? null : (
                                                 <div
                                                     className={
@@ -151,7 +151,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                 <>
                                     <tr key={row.id}>
                                         {row.getVisibleCells().map((cell) => (
-                                            <td key={cell.id}>
+                                            <td key={cell.id} className={"TSP" + cell.column.id}>
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </td>
                                         ))}

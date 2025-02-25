@@ -1,6 +1,7 @@
-import {ILocation} from "../type";
+import {ILocation, IPublished, IUser} from "../type";
 import {createColumnHelper} from "@tanstack/react-table";
 import {formatDimension, getBookLocation} from "./utils";
+import React from "react";
 
 export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
@@ -100,6 +101,41 @@ export const getBookTableColumns = (): any => [
             }),
         ]
     }),
+    {
+        accessorKey: 'edition',
+        header: 'Edícia',
+        cell: ({ cell }: { cell: any }) => cell.getValue()?.title ?? "" + ` ${cell.getValue()?.no ?? ""}`,
+        sortingFn: "alphanumeric",
+    },
+    {
+        accessorKey: 'serie',
+        header: 'Séria',
+        cell: ({ cell }: { cell: any }) => cell.getValue()?.title ?? "" + ` ${cell.getValue()?.no ?? ""}`,
+        sortingFn: "alphanumeric",
+    },
+    {
+        accessorKey: 'published',
+        header: 'Vydané',
+        cell: ({ cell }: { cell: any }) => {
+            const published = cell.getValue() as IPublished;
+            return `${published?.publisher} (${published?.year ?? "?"})`;
+        },
+        sortingFn: "datetime",
+    },
+    {
+        accessorKey: 'exLibris',
+        header: 'Ex Libris',
+        cell: ({ cell }: { cell: any }) => (cell.getValue() ? <span className="trueMark"/> : <span className="falseMark"/>),
+    },
+    {
+        accessorKey: 'readBy',
+        header: 'Prečítané',
+        cell: ({ cell }: { cell: any }) => {
+            const readBy = cell.getValue() as IUser[];
+            return readBy?.map(user => user.firstName).join(', ') || '';
+        },
+    },
+
     {
         accessorKey: 'note',
         header: 'Poznámka'

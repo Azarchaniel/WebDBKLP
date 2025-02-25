@@ -4,7 +4,7 @@ import {IBook, IQuote, IUser} from "../../type";
 import QuoteItem from "./QuoteItem";
 import Toast from "../../components/Toast";
 import React, {useEffect, useState} from "react";
-import {addQuote, deleteQuote, getBooks, getQuotes} from "../../API";
+import {addQuote, deleteQuote, getBooks, getBooksByIds, getQuotes} from "../../API";
 import {toast} from "react-toastify";
 import {darkenLightenColor, randomMinMax} from "../../utils/utils";
 import Header from "../../components/AppHeader";
@@ -41,18 +41,6 @@ export default function QuotePage() {
 		[initQuotes.length]
 	);
 
-
-	useEffect(() => {
-		getBooks({ page: 0, pageSize: 10000 })
-			.then(({data: {books}}: IBook[] | any) => {
-				const quotedBookIds = new Set(initQuotes.map(quote => quote.fromBook?._id));
-				//filter only books the quotes are from
-				//TODO: do on BE
-				setBooks(books.filter((book: IBook) => quotedBookIds.has(book._id)));
-			})
-			.catch((err: Error) => console.trace(err))
-	}, [initQuotes]);
-
 	useEffect(() => {
 		fetchQuotes();
 	}, [activeUser]);
@@ -61,10 +49,11 @@ export default function QuotePage() {
 	const fetchQuotes = (): void => {
 		setLoading(true);
 		getQuotes(activeUser)
-			.then(({data: {quotes, count}}: IQuote[] | any) => {
+			.then(({data: {quotes, count, bookIds}}: IQuote[] | any) => {
 				setInitQuotes(quotes);
 				setFilteredQuotes(quotes);
 				setCountAll(count);
+				getBooksByIds(bookIds).then(({data: {books}}) => setBooks(books))
 			})
 			.catch((err: Error) => console.trace(err))
 			.finally(() => setLoading(false))

@@ -33,13 +33,18 @@ export default function BookPage() {
 		editorsFull: false,
 		ilustratorsFull: false,
 		translatorsFull: true,
-		subtitle: true,
+		subtitle: false,
 		content: true,
-		dimensions: true,
-		height: true,
-		width: true,
-		depth: true,
-		weight: true,
+		dimensions: false,
+		height: false,
+		width: false,
+		depth: false,
+		weight: false,
+		edition: false,
+		serie: false,
+		published: true,
+		exLibris: true,
+		readBy: true,
 		createdAt: true,
 		location: true,
 		ownersFull: true
@@ -171,9 +176,9 @@ export default function BookPage() {
 			/>
 			<div ref={popRef} className={`showHideColumns ${hidden.control ? "hidden" : "shown"}`}>
 				<ShowHideRow label="Editor" init={hidden.editorsFull} onChange={() => setHidden({...hidden, editorsFull: !hidden.editorsFull})} />
-				<ShowHideRow label="Ilustrátor" init={hidden.ilustratorsFull} onChange={() => setHidden({...hidden, ilustratorsFull: !hidden.ilustratorsFull})} />
 				<ShowHideRow label="Prekladateľ" init={hidden.translatorsFull} onChange={() => setHidden({...hidden, translatorsFull: !hidden.translatorsFull})} />
-				<ShowHideRow label="Podtitul" init={hidden.subtitle} onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})} />
+				<ShowHideRow label="Ilustrátor" init={hidden.ilustratorsFull} onChange={() => setHidden({...hidden, ilustratorsFull: !hidden.ilustratorsFull})} />
+				<ShowHideRow label="Podnázov" init={hidden.subtitle} onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})} />
 				<ShowHideRow label="Obsah" init={hidden.content} onChange={() => setHidden({...hidden, content: !hidden.content})} />
 				<ShowHideRow
 					label="Rozmery"
@@ -186,6 +191,10 @@ export default function BookPage() {
 						depth: !hidden.dimensions,
 						weight: !hidden.dimensions
 					})} />
+				<ShowHideRow label="Vydané" init={hidden.published} onChange={() => setHidden({...hidden, published: !hidden.published})} />
+				<ShowHideRow label="Edícia" init={hidden.edition} onChange={() => setHidden({...hidden, serie: !hidden.edition})} />
+				<ShowHideRow label="Séria" init={hidden.serie} onChange={() => setHidden({...hidden, serie: !hidden.serie})} />
+				<ShowHideRow label="Ex Libris" init={hidden.exLibris} onChange={() => setHidden({...hidden, exLibris: !hidden.exLibris})} />
 				<ShowHideRow label="Dátum pridania" init={hidden.createdAt} onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})} />
 				<ShowHideRow label="Umiestnenie" init={hidden.location} onChange={() => setHidden({...hidden, location: !hidden.location})} />
 				<ShowHideRow label="Majiteľ" init={hidden.ownersFull} onChange={() => setHidden({...hidden, ownersFull: !hidden.ownersFull})} />

@@ -22,6 +22,21 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
 	}
 }
 
+export const getBooksByIds = async (ids: string[]): Promise<AxiosResponse<ApiBookDataType>> => {
+	try {
+		const books: AxiosResponse<ApiBookDataType> = await axios.get(
+			baseUrl + "/books-by-ids", {
+				params: {
+					ids
+				}
+			});
+		return books
+	} catch (error: any) {
+		console.error("Cannot get books by ids: ", error);
+		throw new Error(error);
+	}
+}
+
 export const getBook = async (
 	_id: string
 ): Promise<AxiosResponse<ApiBookDataType>> => {
