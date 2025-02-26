@@ -206,7 +206,9 @@ export const formatDimension = (dimension: any) => {
 	if (dimension === undefined || dimension === null) return undefined;
 
 	if (typeof dimension === 'object' && "$numberDecimal" in dimension)
-		return parseFloat(dimension.$numberDecimal).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) as unknown as number;
+		return parseFloat(dimension.$numberDecimal)
+			.toLocaleString("cs-CZ",
+				{minimumFractionDigits: 1, maximumFractionDigits: 1}) as unknown as number;
 
 	return parseFloat(dimension).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) as unknown as number;
 }

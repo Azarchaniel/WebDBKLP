@@ -1,11 +1,10 @@
 import Autor from "../src/models/autor";
-import mongoose from "mongoose";
-import express, {Express} from "express";
 import Book from "../src/models/book";
 import LP from "../src/models/lp";
 import Quote from "../src/models/quote";
 import {IBook} from "../src/types";
 import {AutorRole} from "../src/utils/constants";
+import {connectDBforMigration} from "./premigration";
 
 /**
  * Save as: Text oddeleny tabulatormi; change format to csv; UTF-8
@@ -372,24 +371,5 @@ const importFromCsv = () => {
     });
 };
 
-const app: Express = express()
-
-const PORT: string | number = 4001
-
-const uri: string = `mongodb+srv://Azarchaniel:lubos26csonka@cluster0.og6qo.mongodb.net/WebDBKLP?retryWrites=true&w=majority`;
-
-mongoose.set("strictQuery", false);
-
-mongoose
-    .connect(uri)
-    .then(() =>
-        app.listen(PORT, () =>
-            console.log(`Server running on http://localhost:${PORT}`)
-        )
-    )
-    .catch((error) => {
-        throw error
-    })
-
-
+connectDBforMigration();
 importFromCsv();

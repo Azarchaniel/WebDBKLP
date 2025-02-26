@@ -3,10 +3,9 @@ import {IBook, IUser} from '../types';
 import Book from '../models/book';
 import User from '../models/user';
 import {formatMongoDbDecimal, getIdFromArray, sortByParam, webScrapper} from "../utils/utils";
-import mongoose, {PipelineStage} from 'mongoose';
+import mongoose, {PipelineStage, Types} from 'mongoose';
 import {populateOptionsBook} from "../utils/constants";
 import diacritics from "diacritics";
-
 
 const normalizeBook = (data: any): IBook => {
     const city = data.location ?
@@ -91,8 +90,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         // Handle filterUsers
         let query: Record<string, any> = {deletedAt: {$eq: null}};
         if (filterUsers) {
-            console.log(filterUsers);
-            query = {...query, owner: {$in: filterUsers}};
+            query = {...query, owner: {$in: (filterUsers as string[]).map(userId => new Types.ObjectId(userId))}};
         }
 
         // Refactored: Helper function for $lookup
@@ -114,7 +112,6 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             };
         }
 
-        console.log(query);
         // Aggregation pipeline
         const pipeline: PipelineStage[] = [
             {$match: query}, // Match by default query (e.g., deletedAt)
@@ -134,7 +131,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             {$limit: parseInt(pageSize as string)},
         ]
 
-        const books = await Book.aggregate(paginationPipeline);
+        const books = await Book.aggregate(paginationPipeline).collation({ locale: "sk", numericOrdering: true });
 
         // Count total documents (for pagination)
         const count = (await Book.aggregate(pipeline)).length;

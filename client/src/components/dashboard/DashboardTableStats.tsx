@@ -1,3 +1,5 @@
+import {formatDimension} from "../../utils/utils";
+
 interface Props {
 	dimensionStats: any;
 }
@@ -39,7 +41,7 @@ export const DashboardTableStats = ({dimensionStats}: Props) => {
 						<tr key={row}>
 							<td><b>{translationMap[row]}</b></td>
 							{columns.map((column) => (
-								<td key={column}>{Math.round(dimensionStats[row][column] * 10) / 10}</td>
+								<td key={column}>{formatDimension(dimensionStats[row][column])}</td>
 								))}
 						</tr>
 					))}
