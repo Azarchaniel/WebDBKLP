@@ -61,8 +61,8 @@ export default function DashboardPage() {
 			<div className="dashboardItem" style={{padding: 0}} >
 				<DashboardPieChart data={countAllBooks} />
 			</div>
-			<div className="dashboardItem">
-				<DashboardTableStats dimensionStats={dimensionStats} />
+			<div className="dashboardItem" style={{padding:0, paddingRight: "1rem"}} >
+				{getTabsForReadByStats()}
 			</div>
 			<div className="dashboardItem">
 				<TableLanguageStats languageStats={langStats} />
@@ -73,8 +73,8 @@ export default function DashboardPage() {
 			<div className="dashboardItem">
 				<TableCountRatio data={sizeGroups?.width} title="Šírka (cm)" />
 			</div>
-			<div className="dashboardItem" style={{padding:0, paddingRight: "1rem"}} >
-				{getTabsForReadByStats()}
+			<div className="dashboardItem">
+				<DashboardTableStats dimensionStats={dimensionStats} />
 			</div>
 		</div>
 	);
