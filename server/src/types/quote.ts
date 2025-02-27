@@ -1,9 +1,10 @@
 import { Document } from 'mongoose'
 import { IUser } from './user';
+import {IBook} from "./book";
 
 export interface IQuote extends Document {
     text: string; //text or URL to pic
-    fromBook: string;
+    fromBook: IBook;
     pageNo?: number;
     note?: string;
     deletedAt: Date;
