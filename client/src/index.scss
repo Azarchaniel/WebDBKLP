@@ -614,12 +614,33 @@ body, html, main, #root {
 .header {
   position: fixed;
   top: 0;
-  width: 100%;
+  width: calc(100% - 3rem);
   height: 45px;
   background-color: var(--menu);
   display: flex;
   align-items: center;
   z-index: 99;
+
+  &Users {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+  }
+
+  &Login {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-right: 1rem;
+
+    button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 1.5rem;
+    }
+  }
 
   span {
     display: flex;
@@ -806,7 +827,7 @@ body, html, main, #root {
   color: black;
   min-width: 250px;
   max-width: 80vw;
-  min-height: 300px;
+  //min-height: 300px;
   max-height: 80vh;
 
   &Body {

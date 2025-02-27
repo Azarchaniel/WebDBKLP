@@ -3,6 +3,7 @@ import {getUsers} from "../API";
 import {IUser} from "../type";
 import {Link} from "react-router-dom";
 import { useLocalStorage } from "usehooks-ts";
+import LoginModal from "./LoginModal";
 
 const Header: React.FC = () => {
 	const [owners, setOwners] = useState<IUser[]>();
@@ -27,15 +28,20 @@ const Header: React.FC = () => {
 	return (
 		<div className="header" style={{userSelect: "none", msUserSelect: "none"}}>
 			<h1><Link className='customLink appHeader' to='/'>WebDBKLP</Link></h1>
-			{owners?.map((owner: IUser) => 
-				<span
-					className={activeOwners.includes(owner._id) ? "activeUser customLink" : "customLink"}
-					onClick={() => activateUsers(owner._id)}
-					key={owner._id}
-				>
-					{owner.firstName}
-				</span>
-			)}
+			<div className="headerUsers">
+				{owners?.map((owner: IUser) =>
+					<span
+						className={activeOwners.includes(owner._id) ? "activeUser customLink" : "customLink"}
+						onClick={() => activateUsers(owner._id)}
+						key={owner._id}
+					>
+						{owner.firstName}
+					</span>
+				)}
+			</div>
+			<div className="headerLogin">
+				<LoginModal />
+			</div>
 		</div>
 	);
 }
