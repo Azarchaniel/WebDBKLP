@@ -16,7 +16,7 @@ import {openConfirmDialog} from "../../components/ConfirmDialog";
 
 export default function QuotePage() {
 	const [books, setBooks] = useState<IBook[]>([]);
-	const [booksToFilter, setBooksToFilter] = useState<string[]>([]);
+	const [booksToFilter, setBooksToFilter] = useState<IBook[]>([]);
 	const [initQuotes, setInitQuotes] = useState<IQuote[]>([]);
 	const [filteredQuotes, setFilteredQuotes] = useState<IQuote[]>([]);
 	const [countAll, setCountAll] = useState<number>(0);
@@ -36,24 +36,29 @@ export default function QuotePage() {
 		return Array.from(new Set(colors));
 	}
 
+	useEffect(() => {
+		fetchQuotes();
+	}, [activeUser]);
+
 	const colors = React.useMemo(
 		() => generateColors(initQuotes.length),
 		[initQuotes.length]
 	);
 
-	useEffect(() => {
+	const updateFilteredBooks = (books: IBook[]): void => {
+		setBooksToFilter(books);
 		fetchQuotes();
-	}, [activeUser]);
+	}
 
 	// ### QUOTES ###
 	const fetchQuotes = (): void => {
 		setLoading(true);
-		getQuotes(activeUser)
-			.then(({data: {quotes, count, bookIds}}: IQuote[] | any) => {
+		getQuotes(booksToFilter.map(book => book._id), activeUser)
+			.then(({data: {quotes, count, onlyQuotedBooks}}: IQuote[] | any) => {
 				setInitQuotes(quotes);
 				setFilteredQuotes(quotes);
 				setCountAll(count);
-				getBooksByIds(bookIds).then(({data: {books}}) => setBooks(books))
+				setBooks(onlyQuotedBooks);
 			})
 			.catch((err: Error) => console.trace(err))
 			.finally(() => setLoading(false))
@@ -66,7 +71,6 @@ export default function QuotePage() {
 					throw new Error("Citát sa nepodarilo pridať!")
 				}
 				toast.success("Citát bol úspešne pridaný.");
-				refresh();
 			})
 			.catch((err) => {
 				toast.error("Citát sa nepodarilo pridať!");
@@ -85,7 +89,6 @@ export default function QuotePage() {
 							throw new Error("Error! Quote not deleted")
 						}
 						toast.success("Citát bol úspešne vymazaný.");
-						refresh();
 					})
 					.catch((err) => {
 						toast.error("Chyba! Citát nemožno vymazať!");
@@ -99,40 +102,6 @@ export default function QuotePage() {
 
 	const scrollToTopOfPage = () => {
 		window.scroll(0, 0)
-	}
-
-	const refresh = () => {
-		setInitQuotes([]);
-		fetchQuotes();
-	}
-
-	const onAddToFilteredBooks = (_: any, added: IBook) => {
-		//TODO: move to BE
-		//first param is list already selected Objects
-		const updatedBooksToFilter = [...booksToFilter, added._id];
-
-		// Update state with the new array
-		setBooksToFilter(updatedBooksToFilter);
-
-		// Use the updated array to filter quotes
-		const newFilteredQuotes = filteredQuotes.filter((quote: IQuote) =>
-			updatedBooksToFilter.includes(quote.fromBook?._id)
-		);
-
-		setFilteredQuotes(newFilteredQuotes);
-	}
-
-	const onRemoveFilteredBook = (remaining: IBook[]): void => {
-		const remainingIds = remaining.map((book: IBook) => book._id);
-		setBooksToFilter(remainingIds);
-		if (remainingIds.length === 0) {
-			setFilteredQuotes(initQuotes);
-		} else {
-			const newFilteredQuotes = filteredQuotes.filter((quote: IQuote) =>
-				remainingIds.includes(quote.fromBook?._id)
-			);
-			setFilteredQuotes(newFilteredQuotes);
-		}
 	}
 
 	return (
@@ -151,8 +120,8 @@ export default function QuotePage() {
 				placeholder="Z knih"
 				closeIcon="cancel"
 				emptyRecordMsg="Žiadne knihy na výber"
-				onSelect={onAddToFilteredBooks}
-				onRemove={onRemoveFilteredBook}
+				onSelect={updateFilteredBooks}
+				onRemove={(remaining) => updateFilteredBooks(remaining)}
 				style={{
 					inputField: {paddingLeft: "0.5rem"},
 					searchBox: {

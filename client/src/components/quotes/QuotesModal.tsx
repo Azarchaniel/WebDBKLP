@@ -24,10 +24,40 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	const [formData, setFormData] = useState<IQuote | any>(data);
 	const [books, setBooks] = useState<IBook[]>();
 	const [users, setUsers] = useState<IUser[] | undefined>();
+	const [searchTerm, setSearchTerm] = useState<string>("");
+	const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
 	const [errors, setErrors] = useState<ValidationError[]>([
 		{label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"},
 		{label: "Musí byť vybraná kniha!", target: "fromBook"}
 	]);
+
+	const fetchBooks = () => {
+		getBooks({ page: 1, pageSize: 25, search: debouncedSearchTerm })
+			.then(books => {
+				setBooks(books.data.books.map((book: IBook) => ({
+					...book,
+					showName: `${book.title} 
+                        ${book.autor && book.autor[0] && book.autor[0].firstName ? "/ " + book.autor[0].firstName : ""} 
+                        ${book.autor && book.autor[0] && book.autor[0].lastName ? book.autor[0].lastName : ""} 
+                        ${book.published && book.published?.year ? "/ " + book.published?.year : ""}`
+				})));
+			})
+			.catch(err => {
+				toast.error("Nepodarilo sa načítať knihy!");
+				console.error("Couldn't fetch books", err)
+			});
+
+		getUsers().then(user => {
+			setUsers(user.data.users.map((user: IUser) => ({
+				...user,
+				fullName: `${user.lastName}, ${user.firstName}`
+			})).sort((a: any, b: any) => a.fullName!.localeCompare(b.fullName!)));
+		}).catch(err => console.trace("Error while fetching Users", err));
+	};
+
+	useEffect(() => {
+		fetchBooks();
+	}, [debouncedSearchTerm]);
 
 	useEffect(() => {
 		onChange(formData)
@@ -36,6 +66,13 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	useEffect(() => {
 		if (data) setFormData(data);
 	}, [data]);
+
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			setDebouncedSearchTerm(searchTerm);
+		}, 500);
+		return () => clearTimeout(timeoutId);
+	}, [searchTerm]);
 
 	useEffect(() => {
 		if (!data) return;
@@ -48,32 +85,6 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 
 		setFormData(toBeModified);
 	}, []);
-
-	useEffect(() => {
-		getBooks({ page: 0, pageSize: 10000 })
-			.then(books => {
-				setBooks(books.data.books.map((book: IBook) => ({
-					...book,
-					showName: `${book.title} 
-                        ${book.autor && book.autor[0] && book.autor[0].firstName ? "/ " + book.autor[0].firstName : ""} 
-                        ${book.autor && book.autor[0] && book.autor[0].lastName ? book.autor[0].lastName : ""} 
-                        ${book.published && book.published?.year ? "/ " + book.published?.year : ""}`
-				}))
-					.filter((book: IBook) => !book.deletedAt)
-					.sort((a: Partial<IBook>, b: Partial<IBook>) => a.title!.localeCompare(b.title!)));
-			})
-			.catch(err => {
-				toast.error("Nepodarilo sa nacitat knihy!");
-				console.error("Couldnt fetch books", err)
-			});
-
-		getUsers().then(user => {
-			setUsers(user.data.users.map((user: IUser) => ({
-				...user,
-				fullName: `${user.lastName}, ${user.firstName}`
-			})).sort((a: any, b: any) => a.fullName!.localeCompare(b.fullName!)));
-		}).catch(err => console.trace("Error while fetching Users", err));
-	}, [])
 
 	//ERROR HANDLING
 	useEffect(() => {
@@ -149,12 +160,13 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 					id="modalMultiselectFromBooks"
 					selectionLimit={1}
 					options={books}
-					displayValue="title"
+					displayValue="showName"
 					label="*Z knihy"
 					value={formData?.fromBook}
 					name="fromBook"
 					onChange={handleInputChange}
 					customerror={getErrorMsg("fromBook")}
+					onSearch={setSearchTerm}
 				/>
 			</div>
 			<div className="col-3">

@@ -185,12 +185,13 @@ export const getAutorInfo = async (
 }
 
 // ### QUOTES ###
-export const getQuotes = async (activeUsers: string[]): Promise<AxiosResponse<ApiQuoteDataType>> => {
+export const getQuotes = async (filterByBook: string[], activeUsers: string[]): Promise<AxiosResponse<ApiQuoteDataType>> => {
 	try {
 		const quotes: AxiosResponse<ApiQuoteDataType> = await axios.get(
 			baseUrl + "/quotes", {
 			params: {
-				activeUsers: activeUsers
+				activeUsers: activeUsers,
+				filterByBook: filterByBook,
 		}}
 		)
 		return quotes

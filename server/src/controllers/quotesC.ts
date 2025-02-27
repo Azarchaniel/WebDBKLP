@@ -1,29 +1,25 @@
 import { Request, Response } from "express";
-import {IPopulateOptions, IQuote, IUser} from "../types";
+import {IPopulateOptions, IQuote, IBook} from "../types";
 import Quote from "../models/quote"
 import { optionFetchAllExceptDeleted } from "../utils/constants";
-import User from "../models/user";
 
 const populateOptions: IPopulateOptions[] = [
     { path: 'fromBook', model: 'Book', populate: {path: 'autor', model: 'Autor'} },
     { path: 'owner', model: 'User' }
 ];
 
-const getBooksFromQuotes = (quotes: IQuote[]): (string | undefined)[] => {
-    const bookIdsSet = new Set(
-        quotes.map(quote => quote.fromBook?._id?.toString()).filter(Boolean)
-    );
-    return Array.from(bookIdsSet);
-}
-
 const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
     try {
-        let { activeUsers } = req.query;
+        let { activeUsers, filterByBook } = req.query;
 
         const query: any = { ...optionFetchAllExceptDeleted };
 
         if (activeUsers) {
             query.owner = { $in: activeUsers };
+        }
+
+        if (filterByBook) {
+            query.fromBook = { $in: filterByBook };
         }
 
         const quotes: IQuote[] = await Quote.find(query)
@@ -32,9 +28,12 @@ const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
 
         const count = await Quote.countDocuments(query);
 
-        const bookIds = getBooksFromQuotes(quotes);
+        const onlyQuotedBooks =
+            Array.from(
+                new Set(quotes.map(q => q.fromBook))
+            ).sort((a: IBook, b: IBook) => a.title.localeCompare(b.title, "sk"));
 
-        res.status(200).json({ quotes, count, bookIds })
+        res.status(200).json({ quotes, count, onlyQuotedBooks })
     } catch (error) {
         res.status(500);
         console.error(error);
@@ -60,7 +59,6 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
 
     try {
         if (!id) {
-            console.log(req.body);
             const quote: IQuote = new Quote({
                 text: text,
                 note: note,
@@ -103,7 +101,6 @@ const deleteQuote = async (req: Request, res: Response): Promise<void> => {
     try {
         const {
             params: {id},
-            body,
         } = req
         const deletedQuote: IQuote | null = await Quote.findByIdAndUpdate(
             {_id: id},

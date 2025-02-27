@@ -15,6 +15,7 @@ interface MultiselectInputProps extends Omit<InputProps, "onChange"> {
     emptyRecordMsg?: string;
     selectionLimit?: number;
     onChange: ({name, value}: {name: string, value: string}) => void;
+	onSearch?: (searchTerm: string) => void;
 	customerror?: string;
 }
 
@@ -58,6 +59,7 @@ export const MultiselectField = React.memo(({
 	selectionLimit,
 	emptyRecordMsg = "Žiadny záznam nenájdený!",
 	customerror,
+	onSearch,
 }: MultiselectInputProps) => {
 	useEffect(() => {
 		const inputElement: any = document.getElementById(`${id}`);
@@ -87,6 +89,7 @@ export const MultiselectField = React.memo(({
 			selectedValues={value}
 			onSelect={(value) => onChange({name: name, value: value})}
 			onRemove={(removedList, _) => onChange({name: name, value: removedList})}
+			onSearch={(value: string) => onSearch ? onSearch(value) : null}
 		/>
 	)
 })
