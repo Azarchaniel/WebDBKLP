@@ -1,10 +1,10 @@
 import Sidebar from "../../components/Sidebar";
 import AddQuote from "./AddQuote";
-import {IBook, IQuote, IUser} from "../../type";
+import {IBook, IQuote} from "../../type";
 import QuoteItem from "./QuoteItem";
 import Toast from "../../components/Toast";
 import React, {useEffect, useState} from "react";
-import {addQuote, deleteQuote, getBooks, getBooksByIds, getQuotes} from "../../API";
+import {addQuote, deleteQuote, getQuotes} from "../../API";
 import {toast} from "react-toastify";
 import {darkenLightenColor, randomMinMax} from "../../utils/utils";
 import Header from "../../components/AppHeader";
@@ -13,6 +13,7 @@ import Multiselect from "multiselect-react-dropdown";
 import {useReadLocalStorage} from "usehooks-ts";
 import {ScrollToTopBtn} from "../../utils/elements";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
+import {isUserLoggedIn} from "../../utils/user";
 
 export default function QuotePage() {
 	const [books, setBooks] = useState<IBook[]>([]);
@@ -108,7 +109,7 @@ export default function QuotePage() {
 		<main className='App'>
 			<Header/>
 			<Sidebar/>
-			<AddQuote saveQuote={handleSaveQuote} onClose={() => {}}/>
+			{isUserLoggedIn() && <AddQuote saveQuote={handleSaveQuote} onClose={() => {}}/>}
 			<div style={{position: "fixed", top: "20rem", zIndex: 1000}}>
 				{loading ? <LoadingBooks/> : <></>}
 			</div>

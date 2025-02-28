@@ -1,8 +1,12 @@
 import {Response, Request} from 'express';
 import {IUser} from '../types';
 import User from '../models/user';
-import { optionFetchAllExceptDeleted } from '../utils/constants';
+import {optionFetchAllExceptDeleted} from '../utils/constants';
 import {sortByParam} from "../utils/utils";
+import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken';
+
+const secretKey = process.env.SECRET_KEY;
 
 const getAllUsers = async (_: Request, res: Response): Promise<void> => {
     try {
@@ -24,69 +28,51 @@ const getUser = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
-// TODO: frontend
+const loginUser = async (req: Request, res: Response): Promise<Response> => {
+    // https://jsfiddle.net/Azarchaniel/4gvexLyt/7/ - to create or verify pass
+    const {email, password} = req.body.params;
 
-// const addUser = async (req: Request, res: Response): Promise<void> => {
-//     const {firstName, lastName, hashedPassword} = req.body;
-//     try {
-//         const user: IUser = new User({
-//             firstName: firstName,
-//             lastName: lastName,
-//             hashedPassword: hashedPassword
-//         });
-//
-//         const newUser: IUser = await user.save()
-//         const allUsers: IUser[] = await User.find()
-//
-//         res.status(201).json({message: 'User added', user: newUser, users: allUsers})
-//     } catch (error) {
-//         throw error
-//     }
-// }
-//
-// const updateUser = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const {
-//             params: {id},
-//             body,
-//         } = req
-//         const updateUser: IUser | null = await User.findByIdAndUpdate(
-//             {_id: id},
-//             body
-//         )
-//         const allUsers: IUser[] = await User.find()
-//         res.status(200).json({
-//             message: 'User updated',
-//             user: updateUser,
-//             users: allUsers,
-//         })
-//     } catch (error) {
-//         throw error
-//     }
-// }
-//
-// const deleteUser = async (req: Request, res: Response): Promise<void> => {
-//     try {
-//         const {
-//             params: {id},
-//             body,
-//         } = req
-//         const deletedUser: IUser | null = await User.findByIdAndUpdate(
-//             {_id: id},
-//             {
-//                 ...body,
-//                 isDeleted: true
-//             }
-//         )
-//         const allUsers: IUser[] = await User.find()
-//         res.status(200).json({
-//             message: 'User deleted',
-//             user: deletedUser,
-//             users: allUsers,
-//         })
-//     } catch (error) {
-//         throw error
-//     }
-// }
+    if (!email || !password) {
+        console.error(`All fields are required! Email: ${email}, password: ${password}`)
+        return res.status(403).json({message: 'All fields are required'})
+    }
 
-export {getAllUsers, getUser};
+    const user = await User.findOne({email});
+
+    if (!user) {
+        console.error("User not found", email);
+        return res.status(403).json({message: "Auth has failed"});
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user?.hashedPassword);
+
+    if (!passwordMatch) {
+        console.error("Passwords do not match");
+        return res.status(403).json({error: 'Authentication failed'});
+    }
+
+    if (!secretKey) {
+        console.error("Secret key not found");
+        return res.status(500).json({message: 'An internal server issue occurred, try again later'});
+    }
+
+    const token = jwt.sign({userId: user._id, email: user.email}, secretKey, {
+        expiresIn: '1h',
+    });
+
+    res.cookie("token", token, {
+        httpOnly: false,
+        secure: true
+    });
+
+    return res.status(200).json({token, userId: user._id});
+    //return res.status(200).json({
+    //     token,
+    //     userId: user._id,
+    //     email: user.email,
+    //     roles: user.roles, // Example: ['user', 'admin']
+    //     expiresIn: 60 * 60, // Expiry in seconds
+    // });
+}
+
+export {getAllUsers, getUser, loginUser};

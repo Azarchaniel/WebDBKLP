@@ -1214,3 +1214,32 @@ button:focus {
     cursor: pointer;
   }
 }
+
+//Login
+.passwordContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .passwordToggle {
+    position: absolute;
+    right: 0;
+    top: calc((24px - (1.5rem / 2)) / 2 ); // 24px - height of input
+    cursor: pointer;
+    width: 3rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  // todo: create class hideBtn
+  button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--anchor);
+    font-size: 1.5rem;
+    padding: 0;
+    margin-top: 0;
+    transform: scaleX(-1); //mirror view
+  }
+}

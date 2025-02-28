@@ -11,6 +11,7 @@ import Header from "../../components/AppHeader";
 import {tableHeaderColor} from "../../utils/constants";
 import {ShowHideRow} from "../../components/books/ShowHideRow";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
+import {isUserLoggedIn} from "../../utils/user";
 
 export default function LPPage() {
 	const [updateLP, setUpdateLP] = useState<ILP>();
@@ -102,7 +103,7 @@ export default function LPPage() {
 		<main className='App'>
 			<Header/>
 			<Sidebar />
-			<AddLP saveLp={handleSaveLP} />
+			{isUserLoggedIn() && <AddLP saveLp={handleSaveLP} />}
 			<div ref={popRef} className={`showHideColumns ${hidden.control ? "hidden" : "shown"}`}>
 				<ShowHideRow label="Podnázov" init={hidden.subtitle} onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})} />
 				<ShowHideRow label="Dátum pridania" init={hidden.createdAt} onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})} />
@@ -189,7 +190,7 @@ export default function LPPage() {
 					}
 				]}
 				data={LPs}
-				actions={[
+				actions={isUserLoggedIn() ? [
 					{
 						icon: "visibility",
 						tooltip: "Zobraz/Skry stĺpce",
@@ -208,7 +209,7 @@ export default function LPPage() {
 						tooltip: "Vymazať",
 						onClick: (_: any, rowData: unknown) =>
 							handleDeleteLP((rowData as ILP)._id)}
-				]}
+				] : []}
 			/>
 			{Boolean(updateLP) && <AddLP saveLp={handleSaveLP} lp={updateLP} />}
 			<Toast />

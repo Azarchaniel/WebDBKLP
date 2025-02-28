@@ -13,6 +13,7 @@ import {TooltipedText} from "../../utils/elements";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
 import AutorDetail from "./AutorDetail";
 import {countryCode} from "../../utils/locale";
+import {isUserLoggedIn} from "../../utils/user";
 
 export default function AutorPage() {
 	const [autors, setAutors] = useState<IAutor[]>([]);
@@ -93,7 +94,7 @@ export default function AutorPage() {
 			{/* TODO: remove Header and Sidebar from here */}
 			<Header/>
 			<Sidebar/>
-			<AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>
+			{isUserLoggedIn() && <AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>}
 			<MaterialTableCustom
 				title={`Autori (${countAll})`}
 				loading={loading}
@@ -158,7 +159,7 @@ export default function AutorPage() {
 					}
 				]}
 				data={autors}
-				actions={[
+				actions={isUserLoggedIn() ? [
 					{
 						icon: "create",
 						tooltip: "Upraviť",
@@ -169,7 +170,7 @@ export default function AutorPage() {
 						tooltip: "Vymazať",
 						onClick: (_: any, rowData: unknown) => handleDeleteAutor((rowData as IAutor)._id),
 					}
-				]}
+				] : []}
 				detailPanel={[
 					{
 						icon: "search",

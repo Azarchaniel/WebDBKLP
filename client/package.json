@@ -26,6 +26,7 @@
     "date-fns": "^4.1.0",
     "eslint-config-prettier": "^9.1.0",
     "font-awesome": "^4.7.0",
+    "jwt-decode": "^4.0.0",
     "multiselect-react-dropdown": "^2.0.25",
     "npm-check-updates": "^17.1.11",
     "postcss": "^8.4.49",
