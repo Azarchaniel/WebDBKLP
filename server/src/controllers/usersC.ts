@@ -6,9 +6,6 @@ import {sortByParam} from "../utils/utils";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 
-const secretKey = process.env.SECRET_KEY;
-const refreshKey = process.env.REFRESH_TOKEN_SECRET;
-
 const getAllUsers = async (_: Request, res: Response): Promise<void> => {
     try {
         const users: IUser[] = await User.find(optionFetchAllExceptDeleted)
@@ -52,22 +49,22 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
         return res.status(403).json({error: 'Authentication failed'});
     }
 
-    if (!secretKey) {
+    if (!`${process.env.SECRET_KEY}`) {
         console.error("Secret key not found");
         return res.status(500).json({message: 'An internal server issue occurred, try again later'});
     }
 
-    if (!refreshKey) {
+    if (!`${process.env.REFRESH_TOKEN_SECRET}`) {
         console.error("Refresh key not found");
     }
 
-    const token = jwt.sign({userId: user._id, email: user.email}, secretKey, {
+    const token = jwt.sign({userId: user._id, email: user.email}, `${process.env.SECRET_KEY}`, {
         expiresIn: '1h',
     });
 
     const refreshToken = jwt.sign(
         { userId: user._id },
-        refreshKey!,
+        `${process.env.REFRESH_TOKEN_SECRET}`!,
         { expiresIn: '7d' } // Long-lived
     );
 
@@ -96,20 +93,20 @@ const refreshToken = async (req: Request, res: Response): Promise<Response> => {
 
     try {
         // Verify the refresh token
-        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as CustomJwtPayload;
+        const decoded = jwt.verify(refreshToken,  `${process.env.REFRESH_TOKEN_SECRET}`) as CustomJwtPayload;
         if (!decoded) return res.status(401).json({ message: 'Invalid refresh token' });
 
         // Issue a new access token
         const newAccessToken = jwt.sign(
             { userId: decoded.userId },
-            process.env.ACCESS_TOKEN_SECRET!,
+            `${process.env.SECRET_KEY}`,
             { expiresIn: '15m' }
         );
 
         // Optionally, issue a new refresh token
         const newRefreshToken = jwt.sign(
             { userId: decoded.userId },
-            process.env.REFRESH_TOKEN_SECRET!,
+            `${process.env.REFRESH_TOKEN_SECRET}`,
             { expiresIn: '7d' }
         );
 

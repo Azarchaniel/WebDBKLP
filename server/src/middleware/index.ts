@@ -12,8 +12,8 @@ const userVerification  = (req: Request, res: Response, next: NextFunction) => {
 
     if (!token) return res.status(401).send("Unauthorized");
 
-    if (!process.env.SECRET_KEY) throw "Secret key not found";
-    const decodedToken: JwtPayload = jwt.verify(token!, process.env.SECRET_KEY) as JwtPayload;
+    if (!`${process.env.SECRET_KEY}`) throw "Secret key not found";
+    const decodedToken: JwtPayload = jwt.verify(token!, `${process.env.SECRET_KEY}`) as JwtPayload;
 
     (res as CustomVerificationResponse).userData = { userId: decodedToken.userId };
 

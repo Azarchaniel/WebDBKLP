@@ -27,7 +27,6 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 	const [autors, setAutors] = useState<IAutor[] | []>([]);
 	const [errors, setErrors] = useState<ValidationError[]>([{label: "Názov LP musí obsahovať aspoň jeden znak!", target: "title"}]);
 
-	const langRef = useRef(null);
 	const countryRef = useRef(null);
 
 	useEffect(() => {
@@ -89,7 +88,6 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 	}, [formData])
 
 	const handleInputChange = useCallback((input: any) => {
-		console.log(input);
 		let name: string, value: string;
 
 		if ("target" in input) { // if it is a regular event
@@ -190,7 +188,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 					<InputField
 						value={(formData as ILP)?.countLp || ""}
 						placeholder='Počet platní'
-						name="subtitle"
+						name="countLp"
 						onChange={handleInputChange}
 					/>
 				</div>
@@ -241,24 +239,13 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 					/>
 				</div>
 				<div className="col">
-					<Multiselect
+					<MultiselectField
 						options={langCode}
 						displayValue="value"
-						placeholder="Jazyk"
-						closeIcon="cancel"
-						onSelect={(picked: ILangCode[]) => {
-							setFormData({...formData, language: picked.map(v => v.key)})
-						}}
-						style={{
-							inputField: {marginLeft: "0.5rem"},
-							searchBox: {
-								width: "100%",
-								paddingRight: "5px",
-								marginRight: "-5px",
-								borderRadius: "3px"
-							}
-						}}
-						ref={langRef}
+						label="Jazyk"
+						value={formData?.language}
+						name="language"
+						onChange={handleInputChange}
 					/>
 				</div>
 			</div>

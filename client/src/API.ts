@@ -411,7 +411,7 @@ export const addLP = async (
                 country: formData["published.country"] ?? ""
             },
         }
-        console.trace(lp);
+
         const saveLP: AxiosResponse<ApiLPDataType> = await axiosInstance.post(
             baseUrl + "/add-lp",
             lp

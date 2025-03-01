@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
 import {Multiselect} from "multiselect-react-dropdown";
 import {multiselectStyle} from "../utils/constants";
 
@@ -17,6 +17,7 @@ interface MultiselectInputProps extends Omit<InputProps, "onChange"> {
     onChange: ({name, value}: { name: string, value: string }) => void;
     onSearch?: (searchTerm: string) => void;
     customerror?: string;
+    reset?: number;
 }
 
 export const InputField = React.memo((props: InputProps) => {
@@ -60,9 +61,12 @@ export const MultiselectField = React.memo(({
                                                 emptyRecordMsg = "Žiadny záznam nenájdený!",
                                                 customerror,
                                                 onSearch,
+                                                reset
                                             }: MultiselectInputProps) => {
+    const inputElement: any = document.getElementById(`${id}`);
+    const multiselectRef = useRef<any>(null);
+
     useEffect(() => {
-        const inputElement: any = document.getElementById(`${id}`);
         if (inputElement) {
             if (customerror) {
                 inputElement.style.border = "2px dotted red";
@@ -73,6 +77,11 @@ export const MultiselectField = React.memo(({
         }
 
     }, [customerror]);
+
+    useEffect(() => {
+        if (multiselectRef)
+            multiselectRef.current.resetSelectedValues();
+    }, [reset]);
 
     return (
         <Multiselect
@@ -91,9 +100,10 @@ export const MultiselectField = React.memo(({
             onSelect={(value) => onChange({name: name, value: value})}
             onRemove={(removedList, _) => onChange({name: name, value: removedList})}
             onSearch={(value: string) => onSearch ? onSearch(value) : null}
+            ref={multiselectRef}
         />
     )
-})
+});
 
 interface PasswordFieldProps {
     maskCharacters?: string[];

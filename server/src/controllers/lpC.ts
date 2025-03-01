@@ -63,7 +63,7 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
             })
 
             const newLp: ILp = await lp.save()
-            const allLps: ILp[] = await Lp.find().populate([
+            const allLps: ILp[] = await Lp.find(optionFetchAllExceptDeleted).populate([
                 {path: 'autor', model: 'Autor'},
             ]).exec()
 

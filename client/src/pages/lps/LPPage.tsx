@@ -142,25 +142,11 @@ export default function LPPage() {
 						hidden: hidden.subtitle
 					},
 					{
-						title: "ISBN",
-						field: "ISBN",
-						headerStyle: {
-							backgroundColor: tableHeaderColor
-						}
-					},
-					{
 						title: "Jazyk",
 						field: "language",
 						headerStyle: {
 							backgroundColor: tableHeaderColor
 						}
-					},
-					{
-						title: "Poznámka",
-						field: "note",
-						headerStyle: {
-							backgroundColor: tableHeaderColor
-						},
 					},
 					{
 						title: "Počet LP",

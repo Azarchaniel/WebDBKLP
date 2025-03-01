@@ -113,6 +113,7 @@ const LoginModal: React.FC = () => {
                 <Modal
                     customKey="logout"
                     title="Odhlásenie"
+                    onClose={() => setShowModal(false)}
                     body={<span>Skutočne sa chceš odhlásiť?</span>}
                     footer={<form
                         className="column"

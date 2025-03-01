@@ -24,7 +24,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	const [formData, setFormData] = useState(data as any);
 	const [errors, setErrors] = useState<ValidationError[]>(
 		[{label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName"}]);
-	const [roleOptions, setRoleOptions] = useState(autorRoles);
+	const [reset, doReset] = useState<number>(0);
 
 	useEffect(() => {
 		onChange(formData)
@@ -33,8 +33,10 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	// clear form btn
 	useEffect(() => {
 		if (!data) return;
-		if (Object.keys(data).length === 0 && data.constructor === Object) setFormData(data);
-		setRoleOptions(roleOptions);
+		if (Object.keys(data).length === 0 && data.constructor === Object) {
+			setFormData(data);
+			doReset(prev => prev + 1);
+		}
 	}, [data]);
 
 	//edit autor
@@ -42,10 +44,17 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 		if (!data) return;
 		const typedData = data as IAutor;
 
+		let role: any[] = [];
+		if ("role" in typedData) {
+			role = autorRoles.filter(obj => (typedData?.role as string[]).includes(obj?.value))
+		} else {
+			role = [];
+		}
+
 		const toBeModified: IAutor = {
 			...data,
 			nationality: countryCode.filter((country: ILangCode) => typedData?.nationality?.includes(country.key)),
-			role: autorRoles.filter(obj => (typedData.role as string[]).includes(obj.value)),
+			role: role,
 			dateOfBirth: typedData?.dateOfBirth ?
 				new Date(typedData?.dateOfBirth as string | number | Date) :
 				undefined,
@@ -240,12 +249,13 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 			<div className="row">
 				<div className="col">
 					<MultiselectField
-						options={roleOptions}
+						options={autorRoles}
 						displayValue="showValue"
 						label="Role"
 						value={formData?.role}
 						name="role"
 						onChange={handleInputChange}
+						reset={reset}
 					/>
 				</div>
 			</div>
