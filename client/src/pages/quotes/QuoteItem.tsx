@@ -3,6 +3,7 @@ import {IQuote} from "../../type";
 import AddQuote from "./AddQuote";
 import {formPersonsFullName, stringifyUsers} from "../../utils/utils";
 import {Wysiwyg} from "../../components/Wysiwyg";
+import {isUserLoggedIn} from "../../utils/user";
 
 type Props = { quote: IQuote, bcgrClr: string } & {
 	deleteQuote: (_id: string) => void,
@@ -41,11 +42,11 @@ const Quote: React.FC<Props> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {
 				{quote.owner && <p><span className="quoteOwner">Pridal: {stringifyUsers(quote.owner, false)}</span></p>}
 				{quote.note && <p><span className="quoteOwner">Poznámka: {quote.note}</span></p>}
 			</div>
-			<div className='Card--button'>
+			{isUserLoggedIn() && <div className='Card--button'>
 				<i className="fas fa-pen" onClick={() => setUpdate(quote)}/>
 				&nbsp;&nbsp;&nbsp;
 				<i className="fas fa-trash" onClick={() => deleteQuote(quote._id)}/>
-			</div>
+			</div>}
 			{Boolean(update) &&
 				<AddQuote
 					key={quote._id}

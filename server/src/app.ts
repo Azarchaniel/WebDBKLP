@@ -7,9 +7,24 @@ const app: Express = express()
 
 const PORT: string | number = process.env.PORT || 4000
 
+const allowedOrigins = ['http://localhost:3000', 'https://webdbklp.onrender.com/'];
+app.use(
+    cors({
+        origin: function (origin, callback) {
+            // Check if the incoming origin is in the whitelist (allow listed origins)
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error(`CORS not allowed for origin: ${origin}`));
+            }
+        },
+        credentials: true, // Allow cookies and credentials
+    })
+);
+
+
 app.use(express.json({limit: '20mb'}));
-app.use(express.urlencoded({limit: '20mb'}));
-app.use(cors())
+app.use(express.urlencoded({limit: '20mb', extended: true}));
 app.use(routes)
 
 const uri: string = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`

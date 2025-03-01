@@ -614,12 +614,33 @@ body, html, main, #root {
 .header {
   position: fixed;
   top: 0;
-  width: 100%;
+  width: calc(100% - 3rem);
   height: 45px;
   background-color: var(--menu);
   display: flex;
   align-items: center;
   z-index: 99;
+
+  &Users {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+  }
+
+  &Login {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-right: 1rem;
+
+    button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      color: white;
+      font-size: 1.5rem;
+    }
+  }
 
   span {
     display: flex;
@@ -806,7 +827,7 @@ body, html, main, #root {
   color: black;
   min-width: 250px;
   max-width: 80vw;
-  min-height: 300px;
+  //min-height: 300px;
   max-height: 80vh;
 
   &Body {
@@ -1191,5 +1212,34 @@ button:focus {
     border: none;
     background: none;
     cursor: pointer;
+  }
+}
+
+//Login
+.passwordContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .passwordToggle {
+    position: absolute;
+    right: 0;
+    top: calc((24px - (1.5rem / 2)) / 2 ); // 24px - height of input
+    cursor: pointer;
+    width: 3rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  // todo: create class hideBtn
+  button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--anchor);
+    font-size: 1.5rem;
+    padding: 0;
+    margin-top: 0;
+    transform: scaleX(-1); //mirror view
   }
 }

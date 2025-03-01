@@ -1,4 +1,5 @@
 import {Router} from 'express'
+import type {Request, Response, NextFunction} from 'express';
 import {
     getAllBooks,
     addBook,
@@ -7,14 +8,32 @@ import {
     getBook,
     dashboard,
     getInfoFromISBN,
-    getBooksByIds, getAllAutorsBooks
+    getBooksByIds,
+    getAllAutorsBooks,
+    loginUser,
+    refreshToken,
 } from '../controllers'
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
 import {getAllUsers, getUser} from "../controllers";
 import {addLp, deleteLp, getAllLps, getLp} from "../controllers";
+import {userVerification} from "../middleware";
 
 const router: Router = Router()
+
+router.use((req: Request, res: Response, next: NextFunction) => {
+    const publicRoutes = ['/login', '/refresh-token'];
+
+    if (publicRoutes.includes(req.path)) {
+        return next();
+    }
+
+    userVerification(req, res, next);
+})
+
+// ### USER ###
+router.post('/login', loginUser)
+router.post('/refresh-token', refreshToken)
 
 // ### BOOKS ###
 router.get('/book/:id', getBook)
@@ -51,6 +70,7 @@ router.post('/delete-lp/:id', deleteLp)
 
 router.get('/webScrapper',)
 
+// ### DASHBOARD ###
 router.get('/count-books/:id', dashboard.countBooks)
 router.get('/get-dimensions-statistics', dashboard.getDimensionsStatistics)
 router.get('/get-language-statistics', dashboard.getLanguageStatistics)
