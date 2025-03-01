@@ -8,7 +8,10 @@ import {
     getBook,
     dashboard,
     getInfoFromISBN,
-    getBooksByIds, getAllAutorsBooks, loginUser
+    getBooksByIds,
+    getAllAutorsBooks,
+    loginUser,
+    refreshToken,
 } from '../controllers'
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
@@ -19,7 +22,7 @@ import {userVerification} from "../middleware";
 const router: Router = Router()
 
 router.use((req: Request, res: Response, next: NextFunction) => {
-    const publicRoutes = ['/login'];
+    const publicRoutes = ['/login', '/refresh-token'];
 
     if (publicRoutes.includes(req.path)) {
         return next();
@@ -30,6 +33,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
 // ### USER ###
 router.post('/login', loginUser)
+router.post('/refresh-token', refreshToken)
 
 // ### BOOKS ###
 router.get('/book/:id', getBook)

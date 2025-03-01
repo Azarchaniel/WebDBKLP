@@ -1,5 +1,5 @@
 import {Response, Request} from 'express';
-import {IUser} from '../types';
+import {CustomJwtPayload, IUser} from '../types';
 import User from '../models/user';
 import {optionFetchAllExceptDeleted} from '../utils/constants';
 import {sortByParam} from "../utils/utils";
@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 
 const secretKey = process.env.SECRET_KEY;
+const refreshKey = process.env.REFRESH_TOKEN_SECRET;
 
 const getAllUsers = async (_: Request, res: Response): Promise<void> => {
     try {
@@ -56,16 +57,27 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
         return res.status(500).json({message: 'An internal server issue occurred, try again later'});
     }
 
+    if (!refreshKey) {
+        console.error("Refresh key not found");
+    }
+
     const token = jwt.sign({userId: user._id, email: user.email}, secretKey, {
         expiresIn: '1h',
     });
+
+    const refreshToken = jwt.sign(
+        { userId: user._id },
+        refreshKey!,
+        { expiresIn: '7d' } // Long-lived
+    );
+
 
     res.cookie("token", token, {
         httpOnly: false,
         secure: true
     });
 
-    return res.status(200).json({token, userId: user._id});
+    return res.status(200).json({token, refreshToken, userId: user._id});
     //return res.status(200).json({
     //     token,
     //     userId: user._id,
@@ -75,4 +87,38 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
     // });
 }
 
-export {getAllUsers, getUser, loginUser};
+const refreshToken = async (req: Request, res: Response): Promise<Response> => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+        return res.status(400).json({ message: 'Refresh token is required' });
+    }
+
+    try {
+        // Verify the refresh token
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as CustomJwtPayload;
+        if (!decoded) return res.status(401).json({ message: 'Invalid refresh token' });
+
+        // Issue a new access token
+        const newAccessToken = jwt.sign(
+            { userId: decoded.userId },
+            process.env.ACCESS_TOKEN_SECRET!,
+            { expiresIn: '15m' }
+        );
+
+        // Optionally, issue a new refresh token
+        const newRefreshToken = jwt.sign(
+            { userId: decoded.userId },
+            process.env.REFRESH_TOKEN_SECRET!,
+            { expiresIn: '7d' }
+        );
+
+        return res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+    } catch (error) {
+        console.error("Error while refreshing token", error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+
+}
+
+export {getAllUsers, getUser, loginUser, refreshToken};

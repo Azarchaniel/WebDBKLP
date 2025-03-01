@@ -1,6 +1,7 @@
 import axios, {AxiosRequestConfig, AxiosResponse} from "axios"
 import {ApiAutorDataType, ApiBookDataType, ApiLPDataType, ApiQuoteDataType, ApiUserDataType, IBook} from "./type";
 import {toast} from "react-toastify";
+import {jwtDecode} from "jwt-decode";
 
 const baseUrl: string = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
 
@@ -10,8 +11,15 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(
-    (config: AxiosRequestConfig<any>): any => {
-        const token = localStorage.getItem("token");
+    async (config: AxiosRequestConfig<any>): Promise<any> => {
+        let token = localStorage.getItem("token");
+
+        const refreshToken = localStorage.getItem('refreshToken');
+
+        // Skip refresh if no refreshToken is available
+        if (!refreshToken) {
+            return config; // Pass through without refreshing the token
+        }
 
         if (token) {
             config.headers = {
@@ -19,6 +27,33 @@ axiosInstance.interceptors.request.use(
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}` // Attach token to Authorization header
             };
+
+            const { exp } = jwtDecode(token);
+            const now = Date.now() / 1000;
+
+            if (!exp) {
+                console.error("Token has no expiration date!");
+                return config;
+            }
+
+            if (exp - now < 60) {
+                console.warn("Token is about to expire!");
+
+                const response = await axios.post(baseUrl + '/refresh-token', {
+                    refreshToken: localStorage.getItem('refreshToken'),
+                });
+
+                // Update tokens
+                token = response.data.accessToken;
+                localStorage.setItem('accessToken', token!);
+                localStorage.setItem('refreshToken', response.data.refreshToken);
+
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        }
+
+        if (token) {
+            config.headers!.Authorization = `Bearer ${token}`;
         }
 
         return config;

@@ -1,8 +1,7 @@
 import React, {ChangeEvent, useState} from "react";
 import {Modal, showError} from "./Modal";
-import {login} from "../API";
 import {toast} from "react-toastify";
-import {isUserLoggedIn} from "../utils/user";
+import {isUserLoggedIn, loginUser, logoutUser} from "../utils/user";
 import {CustomPasswordField, InputField} from "./InputFields";
 
 const LoginModal: React.FC = () => {
@@ -40,39 +39,20 @@ const LoginModal: React.FC = () => {
     };
 
     const sendLogin = async () => {
-        try {
-            const res = await login(form); // Make the API call (assumes `login` is defined elsewhere)
-
-            if (res.status === 200) {
-                setError("");
-
-                // @ts-ignore
-                const {token, userId} = res.data;
-
-                // Save token to localStorage or sessionStorage
-                localStorage.setItem('token', token);
-
-                // Optionally save the userId (if required elsewhere)
-                localStorage.setItem('userId', userId);
-
-                console.info("Login Successful:", res.data);
-                window.location.replace("/"); //replace instead of navigate, so there is refresh
+        loginUser(form)
+            .then(_ => {
                 setShowModal(false);
-            } else {
-                throw new Error('Unexpected response');
-            }
-        } catch (err: any) {
-            console.error("Login Error:", err);
-
-            toast.error("Nepodarilo sa prihlásiť!")
-            setError("Prihlásenie sa nepodarilo, skús znova.")
-        }
+                window.location.replace("/"); //replace instead of navigate, so there is refresh
+            })
+            .catch(err => {
+                console.error(err.message);
+                toast.error("Nepodarilo sa prihlásiť!");
+                setError("Prihlásenie sa nepodarilo, skús znova.");
+            });
     }
 
     const sendLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        window.location.replace("/");
+        logoutUser();
     }
 
     return (
