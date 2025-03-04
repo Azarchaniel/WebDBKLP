@@ -19,8 +19,7 @@ const getAllUsers = async (_: Request, res: Response): Promise<void> => {
 const getUser = async (req: Request, res: Response): Promise<void> => {
     try {
         const user: IUser | null = await User.findById(req.params.id);
-        const allUsers: IUser[] = await User.find()
-        res.status(200).json({user: user, allUsers: allUsers})
+        res.status(200).json({user: user})
     } catch (err) {
         throw err;
     }
@@ -74,7 +73,7 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
         secure: true
     });
 
-    return res.status(200).json({token, refreshToken, userId: user._id});
+    return res.status(200).json({token, refreshToken, user: user});
     //return res.status(200).json({
     //     token,
     //     userId: user._id,

@@ -1,4 +1,4 @@
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import {login} from "../API";
 
 let lastLogTime = 0;
@@ -37,12 +37,12 @@ export const loginUser = async (loginForm: {
 
         if (res.status === 200) {
             // @ts-ignore
-            const {token, refreshToken, userId} = res.data;
+            const {token, refreshToken, user} = res.data;
 
             // Save token to localStorage or sessionStorage
             localStorage.setItem('token', token);
             localStorage.setItem('refreshToken', refreshToken);
-            localStorage.setItem('userId', userId);
+            localStorage.setItem('user', JSON.stringify(user));
         } else {
             throw new Error('Unexpected response');
         }
@@ -54,6 +54,6 @@ export const loginUser = async (loginForm: {
 export const logoutUser = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
-    localStorage.removeItem('userId');
+    localStorage.removeItem('user');
     window.location.replace("/");
 }

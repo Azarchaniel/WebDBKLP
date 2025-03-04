@@ -1,6 +1,6 @@
-@import "./styles/mixin";
-@import "https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap";
-@import "https://fonts.cdnfonts.com/css/lucida-handwriting-std";
+@use "./styles/mixin" as mixin;
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap");
+@import url("https://fonts.cdnfonts.com/css/lucida-handwriting-std");
 
 :root {
   --background: #EEEEEE;
@@ -263,8 +263,9 @@ body, html, main, #root {
   user-select: none;
 
   &:hover {
-    color: var(--anchor);
+    color: var(--anchor) !important;
     text-decoration: none;
+    border-color: var(--anchor) !important;
   }
 
   &.activeLink {
@@ -633,12 +634,22 @@ body, html, main, #root {
     align-items: center;
     margin-right: 1rem;
 
-    button {
-      background-color: transparent;
-      border: none;
+    .loginBtn {
       cursor: pointer;
       color: white;
-      font-size: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0.4rem;
+      i {
+        margin: 0 0 0 1rem;
+        font-size: 1.5rem;
+      }
+    }
+
+    .loggedIn {
+      border: 1px solid white;
+      border-radius: 7px;
     }
   }
 
@@ -815,7 +826,7 @@ body, html, main, #root {
 }
 
 .customModal {
-  @include box-shadow;
+  @include mixin.box-shadow();
   z-index: 1002;
   display: flex;
   flex-direction: column;

@@ -1,5 +1,13 @@
 import axios, {AxiosRequestConfig, AxiosResponse} from "axios"
-import {ApiAutorDataType, ApiBookDataType, ApiLPDataType, ApiQuoteDataType, ApiUserDataType, IBook} from "./type";
+import {
+    ApiAutorDataType,
+    ApiBookDataType,
+    ApiLPDataType,
+    ApiQuoteDataType,
+    ApiUserDataType,
+    IBook,
+    IUser
+} from "./type";
 import {toast} from "react-toastify";
 import {jwtDecode} from "jwt-decode";
 
@@ -344,6 +352,17 @@ export const getUsers = async (): Promise<AxiosResponse<ApiUserDataType>> => {
             baseUrl + "/users"
         )
         return users
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
+export const getUser = async (userId: string): Promise<AxiosResponse<IUser>> => {
+    try {
+        const user: AxiosResponse<any> = await axiosInstance.get(
+            baseUrl + `/user/${userId}`,
+        )
+        return user;
     } catch (error: any) {
         throw new Error(error)
     }

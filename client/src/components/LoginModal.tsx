@@ -55,13 +55,21 @@ const LoginModal: React.FC = () => {
         logoutUser();
     }
 
+    const getLoggedUser = () => {
+        if (!localStorage.getItem("user")) return "";
+        return JSON.parse(localStorage.getItem("user")!).firstName
+    }
+
     return (
         <>
-            <button
-                className="fa fa-user-circle"
+            <div
+                className={`${isUserLoggedIn() ? "loggedIn" : ""} customLink loginBtn`}
                 onClick={() => setShowModal(true)}
                 title={isUserLoggedIn() ? "Odhlásiť sa" : "Prihlásiť sa"}
-            />
+            >
+                {getLoggedUser()}
+                <i className="fa fa-user-circle" />
+            </div>
             {showModal && !isUserLoggedIn() &&
                 <Modal
                     customKey="login"
