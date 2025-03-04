@@ -1,5 +1,5 @@
-import {ILocation, IPublished, IUser} from "../type";
-import {createColumnHelper} from "@tanstack/react-table";
+import {IBook, ILocation, IPublished, IUser} from "../type";
+import {ColumnDef, createColumnHelper, SortingState} from "@tanstack/react-table";
 import {formatDimension, getBookLocation} from "./utils";
 import React from "react";
 
@@ -17,7 +17,7 @@ export const cities = [{value: "spisska", showValue: "Spišská"},
 
 const columnHelper = createColumnHelper<any>();
 
-export const getBookTableColumns = (): any => [
+export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'autorsFull',
         header: 'Autor',
@@ -135,7 +135,6 @@ export const getBookTableColumns = (): any => [
             return readBy?.map(user => user.firstName).join(', ') || '';
         },
     },
-
     {
         accessorKey: 'note',
         header: 'Poznámka'
@@ -197,4 +196,16 @@ export const autorRoles = [
     {value: "ilustrator", showValue: "Ilustrátor"},
     {value: "musician", showValue: "Hudobník"},
     {value: "boardGameAutor", showValue: "Autor spol. hier"}
-]
+];
+
+export const DEFAULT_PAGINATION = {
+    page: 1,
+    pageSize: 50,
+    search: "",
+    sorting: [{
+        id: "title",
+        desc: false
+    }] as SortingState
+};
+
+export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];

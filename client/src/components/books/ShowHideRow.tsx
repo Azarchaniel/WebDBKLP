@@ -15,7 +15,7 @@ export const ShowHideRow = React.memo(({label, init, onChange}: ShowHideRowProps
 				className="hideShowCheckbox"
 				checked={state}
 				onChange={() => {onChange(!state); setState(!state)}}
-				title={state ? "Zobraziť" : "Skryť"}
+				title={state ? "Skryť" : "Zobraziť"}
 			/>
 			{label}
 		</label>

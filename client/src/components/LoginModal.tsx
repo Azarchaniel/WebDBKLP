@@ -1,8 +1,10 @@
-import React, {ChangeEvent, useState} from "react";
+import React, {ChangeEvent, useEffect, useState} from "react";
 import {Modal, showError} from "./Modal";
 import {toast} from "react-toastify";
 import {isUserLoggedIn, loginUser, logoutUser} from "../utils/user";
 import {CustomPasswordField, InputField} from "./InputFields";
+import {useLocalStorage} from "usehooks-ts";
+import {IUser} from "../type";
 
 const LoginModal: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
@@ -11,7 +13,7 @@ const LoginModal: React.FC = () => {
         password: ""
     });
     const [error, setError] = useState("Zadaj užívateľský email!");
-
+    const [loggedUser] = useLocalStorage("user", {} as IUser);
 
     const getErrMsg = (form: any) => {
         const {email, password} = form;
@@ -55,11 +57,6 @@ const LoginModal: React.FC = () => {
         logoutUser();
     }
 
-    const getLoggedUser = () => {
-        if (!localStorage.getItem("user")) return "";
-        return JSON.parse(localStorage.getItem("user")!).firstName
-    }
-
     return (
         <>
             <div
@@ -67,7 +64,7 @@ const LoginModal: React.FC = () => {
                 onClick={() => setShowModal(true)}
                 title={isUserLoggedIn() ? "Odhlásiť sa" : "Prihlásiť sa"}
             >
-                {getLoggedUser()}
+                {loggedUser.firstName}
                 <i className="fa fa-user-circle" />
             </div>
             {showModal && !isUserLoggedIn() &&

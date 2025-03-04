@@ -6,8 +6,9 @@ import {
     ColumnDef,
     flexRender, SortingState, getExpandedRowModel, ExpandedState,
 } from '@tanstack/react-table';
-import {LoadingBooks} from "./LoadingBooks";
-import BookDetail from "../pages/books/BookDetail";
+import {LoadingBooks} from "../LoadingBooks";
+import BookDetail from "../../pages/books/BookDetail";
+import Pagination from "./Pagination";
 
 type PropsMT = {
     title: string;
@@ -103,6 +104,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                             <LoadingBooks/>
                         </div>
                     ) : (
+                        <>
                         <table className="serverPaginationTable" style={{color: "black", width: "100%"}}>
                             <thead className="tableHeader">
                             {table.getHeaderGroups().map((headerGroup) => (
@@ -141,7 +143,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                             )}
                                         </th>
                                     ))}
-                                    <th></th>
+                                    <th className="TSPactionsRow"/>
                                 </tr>
                             ))}
                             </thead>
@@ -172,80 +174,15 @@ const ServerPaginationTable: React.FC<PropsMT> =
                             ))}
                             </tbody>
                         </table>
+                            <Pagination
+                                currentPage={currentPage}
+                                pageSize={currentPageSize}
+                                totalPages={maxPage}
+                                onPageChange={setCurrentPage}
+                                onPageSizeChange={setCurrentPageSize}
+                            />
+                        </>
                     )}
-                </div>
-
-                {/* FOOTER / PAGINATION */}
-
-                <div className="row tableNavigationRow">
-                    <div>
-                        <span style={{marginRight: "1rem"}}>Záznamov na stranu: </span>
-                        <select
-                            style={{marginRight: "2rem"}}
-                            value={currentPageSize}
-                            onChange={(e) => setCurrentPageSize(Number(e.target.value))}
-                        >
-                            {[10, 20, 50, 100].map((size) => (
-                                <option key={size} value={size}>
-                                    {size}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <button
-                        className="tabNav first"
-                        onClick={() => setCurrentPage(1)}
-                        disabled={currentPage <= 1}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                             className="lucide lucide-chevron-first">
-                            <path d="m17 18-6-6 6-6"/>
-                            <path d="M7 6v12"/>
-                        </svg>
-                    </button>
-                    <button
-                        className="tabNav previous"
-                        onClick={() => setCurrentPage((prev) => prev - 1)}
-                        disabled={currentPage <= 1}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                             className="lucide lucide-chevron-left">
-                            <path d="m15 18-6-6 6-6"/>
-                        </svg>
-                    </button>
-                    <span className="pageSelector"
-                          onClick={() => setCurrentPage(currentPage - 2)}>{currentPage > 2 ? currentPage - 2 : null}</span>
-                    <span className="pageSelector"
-                          onClick={() => setCurrentPage(currentPage - 1)}>{currentPage > 1 ? currentPage - 1 : null}</span>
-                    <span className="pageSelector current">{currentPage}</span>
-                    <span className="pageSelector"
-                          onClick={() => setCurrentPage(currentPage + 1)}>{(currentPage + 1) <= maxPage ? currentPage + 1 : null}</span>
-                    <span className="pageSelector"
-                          onClick={() => setCurrentPage(currentPage + 2)}>{(currentPage + 2) <= maxPage ? currentPage + 2 : null}</span>
-                    <button
-                        className="tabNav next"
-                        onClick={() => setCurrentPage((prev) => prev + 1)}
-                        disabled={currentPage >= maxPage}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                             className="lucide lucide-chevron-right">
-                            <path d="m9 18 6-6-6-6"/>
-                        </svg>
-                    </button>
-                    <button
-                        className="tabNav last"
-                        onClick={() => setCurrentPage(maxPage)}
-                        disabled={currentPage >= maxPage}
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="m7 18 6-6-6-6"/>
-                            <path d="M17 6v12"/>
-                        </svg>
-                    </button>
                 </div>
             </div>
         );

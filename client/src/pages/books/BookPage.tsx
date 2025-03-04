@@ -9,34 +9,30 @@ import {stringifyAutors, stringifyUsers} from "../../utils/utils";
 import Header from "../../components/AppHeader";
 import {useReadLocalStorage} from "usehooks-ts";
 import {ShowHideRow} from "../../components/books/ShowHideRow";
-import {getBookTableColumns} from "../../utils/constants";
+import {DEFAULT_PAGINATION, getBookTableColumns} from "../../utils/constants";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
-import ServerPaginationTable from "../../components/TableSP";
-import {SortingState} from "@tanstack/react-table";
+import ServerPaginationTable from "../../components/table/TableSP";
 import {isUserLoggedIn} from "../../utils/user";
+import {ColumnDef} from "@tanstack/react-table";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
-    const [pagination, setPagination] = useState({
-        page: 1,
-        pageSize: 50,
-        search: "",
-        sorting: [{
-            id: "title",
-            desc: false
-        }] as SortingState
-    });
+    const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [updateBook, setUpdateBook] = useState<IBook>();
     const [hidden, setHidden] = useState<IBookHidden>({
         control: true,
+        autorsFull: true,
         editorsFull: false,
         ilustratorsFull: false,
         translatorsFull: true,
         subtitle: false,
-        content: true,
+        content: false,
         dimensions: false,
+        ISBN: true,
+        language: false,
+        numberOfPages: false,
         height: false,
         width: false,
         depth: false,
@@ -46,11 +42,13 @@ export default function BookPage() {
         published: true,
         exLibris: true,
         readBy: true,
+        note: true,
         createdAt: true,
         location: true,
         ownersFull: true
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
+    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const popRef = useRef(null);
     const activeUsers = useReadLocalStorage("activeUsers");
 
@@ -98,7 +96,14 @@ export default function BookPage() {
     }
 
     useEffect(() => {
-        fetchBooks();
+        if (!timeoutId || pagination.search === "") fetchBooks();
+        if (timeoutId) clearTimeout(timeoutId);
+
+        const newTimeoutId = setTimeout(() => {
+            fetchBooks();
+        }, 1000); // Wait 1s before making the request
+
+        setTimeoutId(newTimeoutId);
     }, [pagination]);
 
     const [wasCheckedLoading, setWasCheckedLoading] = useState<boolean>(false);
@@ -167,6 +172,35 @@ export default function BookPage() {
         setPagination(prevState => ({...prevState, page: newPage, pageSize: newPageSize}));
     };
 
+    const getColumnsForHidden = () => {
+        const columnsForHidden = getBookTableColumns().filter((column: ColumnDef<IBook, any>) =>
+            column["accessorKey" as keyof typeof column] !== "title" /* TEMPORARY ->  */ || column["accessorKey" as keyof typeof column] !== "wasChecked");
+
+        return columnsForHidden.map((column: any) => {
+            const {header, accessorKey}: {header: string, accessorKey: keyof typeof column} = column;
+
+            if (column.id === "dimensions") {
+                return <ShowHideRow
+                    label="Rozmery"
+                    init={hidden.dimensions}
+                    onChange={() => setHidden({
+                        ...hidden,
+                        dimensions: !hidden.dimensions,
+                        height: !hidden.dimensions,
+                        width: !hidden.dimensions,
+                        depth: !hidden.dimensions,
+                        weight: !hidden.dimensions
+                    })}/>
+            }
+
+            return <ShowHideRow
+                label={header}
+                init={hidden[accessorKey as string]}
+                onChange={() => setHidden({...hidden, [accessorKey]: !hidden[accessorKey as string]})}
+            />
+        })
+    }
+
     return (
         <main className='App'>
             {/* TODO: remove Header and Sidebar from here */}
@@ -178,41 +212,7 @@ export default function BookPage() {
                 saveResultSuccess={saveBookSuccess}
             />}
             <div ref={popRef} className={`showHideColumns ${hidden.control ? "hidden" : "shown"}`}>
-                <ShowHideRow label="Editor" init={hidden.editorsFull}
-                             onChange={() => setHidden({...hidden, editorsFull: !hidden.editorsFull})}/>
-                <ShowHideRow label="Prekladateľ" init={hidden.translatorsFull}
-                             onChange={() => setHidden({...hidden, translatorsFull: !hidden.translatorsFull})}/>
-                <ShowHideRow label="Ilustrátor" init={hidden.ilustratorsFull}
-                             onChange={() => setHidden({...hidden, ilustratorsFull: !hidden.ilustratorsFull})}/>
-                <ShowHideRow label="Podnázov" init={hidden.subtitle}
-                             onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})}/>
-                <ShowHideRow label="Obsah" init={hidden.content}
-                             onChange={() => setHidden({...hidden, content: !hidden.content})}/>
-                <ShowHideRow
-                    label="Rozmery"
-                    init={hidden.dimensions}
-                    onChange={() => setHidden({
-                        ...hidden,
-                        dimensions: !hidden.dimensions,
-                        height: !hidden.dimensions,
-                        width: !hidden.dimensions,
-                        depth: !hidden.dimensions,
-                        weight: !hidden.dimensions
-                    })}/>
-                <ShowHideRow label="Vydané" init={hidden.published}
-                             onChange={() => setHidden({...hidden, published: !hidden.published})}/>
-                <ShowHideRow label="Edícia" init={hidden.edition}
-                             onChange={() => setHidden({...hidden, edition: !hidden.edition})}/>
-                <ShowHideRow label="Séria" init={hidden.serie}
-                             onChange={() => setHidden({...hidden, serie: !hidden.serie})}/>
-                <ShowHideRow label="Ex Libris" init={hidden.exLibris}
-                             onChange={() => setHidden({...hidden, exLibris: !hidden.exLibris})}/>
-                <ShowHideRow label="Dátum pridania" init={hidden.createdAt}
-                             onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})}/>
-                <ShowHideRow label="Umiestnenie" init={hidden.location}
-                             onChange={() => setHidden({...hidden, location: !hidden.location})}/>
-                <ShowHideRow label="Majiteľ" init={hidden.ownersFull}
-                             onChange={() => setHidden({...hidden, ownersFull: !hidden.ownersFull})}/>
+                {getColumnsForHidden()}
             </div>
             <ServerPaginationTable
                 title={`Knihy (${countAll})`}
@@ -227,10 +227,16 @@ export default function BookPage() {
                 hiddenCols={hidden}
                 actions={
                     <div className="row justify-center mb-4 mr-2">
-                        <input
-                            placeholder="Vyhľadaj názov/autora"
-                            onChange={(e) => setPagination(prevState => ({...prevState, search: e.target.value}))}
-                        />
+                        <div className="searchWrapper">
+                            {/* reset pagination on search*/}
+                            <input
+                                placeholder="Vyhľadaj názov/autora"
+                                value={pagination.search}
+                                onChange={(e) =>
+                                    setPagination(prevState => ({...prevState, page: DEFAULT_PAGINATION.page, search: e.target.value}))}
+                            />
+                            <button onClick={() => setPagination(prevState => ({...prevState, page: DEFAULT_PAGINATION.page, search: ""}))}>✖</button>
+                        </div>
                         <i
                             className="fas fa-bars bookTableAction ml-4"
                             title="Zobraz/skry stĺpce"

@@ -253,8 +253,6 @@ body, html, main, #root {
       cursor: pointer;
     }
   }
-
-
 }
 
 .customLink {
@@ -285,12 +283,14 @@ body, html, main, #root {
 .showHideColumns {
   border: solid 1px black;
   position: absolute;
-  z-index: 100;
+  z-index: 98;
   background: white;
   color: black;
   right: 6.5rem;
   top: 7rem;
-  padding: 1rem 1rem 0;
+  padding: 1rem;
+  max-height: 25rem;
+  overflow: auto;
 
   input {
     margin-right: 1rem;
@@ -1071,6 +1071,7 @@ input:invalid {
 
 /* TAN STACK TABLE */
 .serverPaginationTable {
+  margin-bottom: 3rem;
   .tableHeader {
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
@@ -1096,6 +1097,14 @@ input:invalid {
 
       &title {
         min-width: 15rem;
+      }
+
+      &autorsFull {
+        min-width: 12rem;
+      }
+
+      &actionsRow {
+        width: 8rem;
       }
     }
   }
@@ -1143,6 +1152,8 @@ input:invalid {
   justify-content: space-between;
   padding-right: 4rem;
   color: black;
+  height: 2rem;
+  margin-bottom: 1rem;
 }
 
 .pageSelector {
@@ -1162,10 +1173,16 @@ input:invalid {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  height: 2rem;
+  height: 3rem;
   flex-direction: row;
-  margin-top: 0.5rem;
   color: black;
+  background: var(--background);
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding-right: 2.5rem;
+  z-index: 2;
+  width: 100%;
 }
 
 button:focus {
@@ -1195,6 +1212,24 @@ button:focus {
   &:disabled {
     color: lightgray;
     cursor: not-allowed;
+  }
+}
+
+.searchWrapper {
+  position: relative;
+  border: none !important;
+  display: flex;
+  align-items: center;
+  button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    right: 0.5rem;
+    color: black;
+    &:hover {
+      color: var(--anchor);
+    }
   }
 }
 
