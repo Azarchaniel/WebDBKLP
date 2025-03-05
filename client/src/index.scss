@@ -357,7 +357,7 @@ body, html, main, #root {
   pointer-events: none;
 
   &:hover {
-    background-color: blue !important;
+    background-color: var(--background) !important;
   }
 }
 
@@ -386,6 +386,10 @@ body, html, main, #root {
     &:hover {
       background-color: #f1f1f1;
     }
+  }
+
+  td::after {
+    background-color: transparent !important; /* Remove background color */
   }
 }
 

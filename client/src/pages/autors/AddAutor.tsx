@@ -8,15 +8,17 @@ interface Props {
     saveAutor: (formData: IAutor) => void;
     onClose: () => void;
     autor?: IAutor;
+	saveResultSuccess?: boolean;
 }
 
-const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose}: Props) => {
+const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose, saveResultSuccess}: Props) => {
 	const [showModal, setShowModal] = useState(false);
 	const [autorData, setAutorData] = useState<IAutor | object>();
 	const [error, setError] = useState<ValidationError[] | undefined>([{
 		label: "Priezvisko autora musí obsahovať aspoň jeden znak!",
 		target: "lastName"
 	}]);
+	const [outline, setOutline] = useState<React.CSSProperties>();
 
 	useEffect(() => {
 		if (autor) {
@@ -24,6 +26,20 @@ const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose}: Props) => {
 			setAutorData(autor);
 		}
 	}, []);
+
+	useEffect(() => {
+		switch (saveResultSuccess) {
+			case true:
+				setOutline({outline: "10px solid green"});
+				break;
+			case false:
+				setOutline({outline: "10px solid red"});
+				break;
+			default:
+				setOutline({outline: "none"});
+				break;
+		}
+	}, [saveResultSuccess]);
 
 	return (
 		<>
@@ -46,6 +62,7 @@ const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose}: Props) => {
                 		cleanFields={() => setAutorData({})}
                 		error={error}
                 	/>}
+					overrideStyle={outline}
                 />
 			}
 

@@ -5,35 +5,46 @@ import {addAutor, deleteAutor, getAutor, getAutors} from "../../API";
 import {toast} from "react-toastify";
 import Sidebar from "../../components/Sidebar";
 import Toast from "../../components/Toast";
-import MaterialTableCustom from "../../components/MaterialTableCustom";
-import {shortenStringKeepWord, stringifyAutors} from "../../utils/utils";
+import {stringifyAutors} from "../../utils/utils";
 import Header from "../../components/AppHeader";
-import {tableHeaderColor} from "../../utils/constants";
-import {TooltipedText} from "../../utils/elements";
+import {DEFAULT_PAGINATION} from "../../utils/constants";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
-import AutorDetail from "./AutorDetail";
-import {countryCode} from "../../utils/locale";
 import {isUserLoggedIn} from "../../utils/user";
+import {getAutorTableColumns} from "../../utils/tableColumns";
+import ServerPaginationTable from "../../components/table/TableSP";
+import AutorDetail from "./AutorDetail";
 
 export default function AutorPage() {
 	const [autors, setAutors] = useState<IAutor[]>([]);
 	const [countAll, setCountAll] = useState<number>(0);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [updateAutor, setUpdateAutor] = useState<IAutor>();
+	const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
+	const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+	const [saveAutorSuccess, setSaveAutorSuccess] = useState<boolean | undefined>(undefined);
 
 	useEffect(() => {
 		fetchAutors();
 	}, [])
 
+	useEffect(() => {
+		if (!timeoutId || pagination.search === "") return fetchAutors();
+		if (timeoutId) clearTimeout(timeoutId);
+
+		const newTimeoutId = setTimeout(() => {
+			fetchAutors();
+		}, 1000); // Wait 1s before making the request
+
+		setTimeoutId(newTimeoutId);
+	}, [pagination]);
+
 	// ### AUTORS ###
 	const fetchAutors = (): void => {
 		setLoading(true);
-		getAutors()
+		getAutors(pagination)
 			.then(({data: {autors, count}}: any) => {
 				setCountAll(count);
-				setAutors(
-					autors.filter((autor: IAutor) => !autor.deletedAt)
-				);
+				setAutors(autors);
 			})
 			.catch((err: Error) => console.trace(err))
 			.finally(() => setLoading(false));
@@ -49,12 +60,22 @@ export default function AutorPage() {
 				const autorNames = stringifyAutors({autor: data.autor})[0].autorsFull;
 
 				toast.success(`Autor ${autorNames} bol úspešne ${formData._id ? "uložený" : "pridaný"}.`);
+				setSaveAutorSuccess(true)
 				setAutors(data.autors);
 			})
+			.catch((err) => {
+				console.trace(err)
+				setSaveAutorSuccess(false);
+			});
 	}
 
-	const handleUpdateAutor = (autor: IAutor): any => {
-		setUpdateAutor(autor);
+	const handleUpdateAutor = (_id: string): any => {
+		setSaveAutorSuccess(undefined);
+		getAutor(_id)
+			.then(({data}) => {
+				setUpdateAutor(data.autor);
+			})
+			.catch((err) => console.trace(err))
 	}
 
 	const handleDeleteAutor = (_id: string): void => {
@@ -89,101 +110,68 @@ export default function AutorPage() {
 			.catch((err) => console.trace(err))
 	}
 
+	const handlePageSizeChange = (newPageSize: number) => {
+		const newPage = Math.floor(((pagination.page - 1) * pagination.pageSize) / newPageSize) + 1;
+		setPagination(prevState => ({...prevState, page: newPage, pageSize: newPageSize}));
+	};
+
 	return (
 		<main className='App'>
 			{/* TODO: remove Header and Sidebar from here */}
 			<Header/>
 			<Sidebar/>
 			{isUserLoggedIn() && <AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>}
-			<MaterialTableCustom
+			<ServerPaginationTable
 				title={`Autori (${countAll})`}
-				loading={loading}
-				pageSizeChange={() => {}}
-				pageChange={() => {}}
-				totalCount={countAll}
-				columns={[
-					{
-						title: "Meno",
-						field: "firstName",
-						headerStyle: {
-							backgroundColor: tableHeaderColor
-						},
-					},
-					{
-						title: "Priezvisko",
-						field: "lastName",
-						defaultSort: "asc",
-						customSort: (a: IAutor, b: IAutor) => a.lastName?.localeCompare(b.lastName),
-						headerStyle: {
-							backgroundColor: tableHeaderColor
-						},
-						cellStyle: {
-							fontWeight: "bold"
-						}
-					},
-					{
-						title: "Národnosť",
-						field: "nationality",
-						headerStyle: {
-							backgroundColor: tableHeaderColor
-						},
-						render: (rowData: IAutor) => countryCode.filter(cc => cc.key === rowData?.nationality).map(cc => cc.value) ?? "-"
-					},
-					{
-						title: "Narodenie",
-						field: "dateOfBirth",
-						type: "date",
-						dateSetting: {locale: "sk-SK"},
-						headerStyle: {
-							backgroundColor: tableHeaderColor
-						}
-					},
-					{
-						title: "Úmrtie",
-						field: "dateOfDeath",
-						type: "date",
-						dateSetting: {locale: "sk-SK"},
-						headerStyle: {
-							backgroundColor: tableHeaderColor
-						}
-					},
-					{
-						title: "Poznámka",
-						field: "note",
-						headerStyle: {
-							backgroundColor: tableHeaderColor
-						},
-						render: (rowData: IAutor) => {
-							return rowData.note && rowData.note?.length > 30 ? TooltipedText(shortenStringKeepWord(rowData.note, 30), rowData.note) : rowData.note;
-						}
-					}
-				]}
 				data={autors}
-				actions={isUserLoggedIn() ? [
-					{
-						icon: "create",
-						tooltip: "Upraviť",
-						onClick: (_: any, rowData: unknown) => handleUpdateAutor(rowData as IAutor),
-					},
-					{
-						icon: "delete",
-						tooltip: "Vymazať",
-						onClick: (_: any, rowData: unknown) => handleDeleteAutor((rowData as IAutor)._id),
-					}
-				] : []}
-				detailPanel={[
-					{
-						icon: "search",
-						tooltip: "Detaily",
-						render: (rowData: any) => <AutorDetail data={rowData} />
-					},
-				]}
+				columns={getAutorTableColumns()}
+				pageChange={(page) => setPagination(prevState => ({...prevState, page: page}))}
+				pageSizeChange={handlePageSizeChange}
+				sortingChange={(sorting) => setPagination(prevState => ({...prevState, sorting: sorting}))}
+				totalCount={countAll}
+				loading={loading}
+				pagination={pagination}
+				actions={
+					<div className="row justify-center mb-4 mr-2">
+						<div className="searchWrapper">
+							{/* reset pagination on search*/}
+							<input
+								placeholder="Vyhľadaj autora"
+								value={pagination.search}
+								onChange={(e) =>
+									setPagination(prevState => ({...prevState, page: DEFAULT_PAGINATION.page, search: e.target.value}))}
+							/>
+							<button onClick={() => setPagination(prevState => ({...prevState, page: DEFAULT_PAGINATION.page, search: ""}))}>✖</button>
+						</div>
+					</div>
+				}
+				rowActions={(_id, expandRow) => (
+					isUserLoggedIn() ? <div className="actionsRow" style={{pointerEvents: "auto"}}>
+						<button
+							title="¨Vymazať"
+							onClick={() => handleDeleteAutor(_id)}
+							className="fa fa-trash"
+						/>
+						<button
+							title="Upraviť"
+							className="fa fa-pencil-alt"
+							onClick={() => handleUpdateAutor(_id)}
+						/>
+						<button
+							title="Detaily"
+							className="fa fa-chevron-down"
+							onClick={() => expandRow()}
+						/>
+					</div> : <></>
+				)}
+				expandedElement={(data) => <AutorDetail data={data} />}
 			/>
 			{Boolean(updateAutor) &&
 				<AddAutor
 					saveAutor={handleSaveAutor}
 					autor={updateAutor}
 					onClose={() => setUpdateAutor(undefined)}
+					saveResultSuccess={saveAutorSuccess}
 				/>}
 			<Toast/>
 		</main>

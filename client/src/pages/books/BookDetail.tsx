@@ -1,10 +1,8 @@
-import {IAutor, IBook, IUser} from "../../type";
-import React, {ReactElement} from "react";
-import {formatDimension} from "../../utils/utils";
-
-type Props = {
-    data: IExtendedBook
-}
+import React from "react";
+import { IAutor, IBook, ILangCode, IUser } from "../../type";
+import { formatDimension } from "../../utils/utils";
+import { langCode } from "../../utils/locale";
+import { cities } from "../../utils/constants";
 
 interface IExtendedBook extends IBook {
 	autorsFull?: string | null;
@@ -13,85 +11,181 @@ interface IExtendedBook extends IBook {
 	translatorsFull?: string | null;
 }
 
-const BookDetail: React.FC<Props> = ({data}) => {
-	const showAutorRow = (parameterToCheck: keyof IExtendedBook, parameterToGet: keyof IExtendedBook, singular: string, plural: string): ReactElement => {
-		if (!data[parameterToCheck] || !data[parameterToGet]) return <></>;
+interface Props {
+	data: IExtendedBook;
+}
 
-		else {
-			return <p>
-				{`${(data[parameterToCheck] as IAutor[]).length === 1 ? singular : plural} ${data[parameterToGet]}`}
-			</p>
-		}
-	}
+const BookDetail: React.FC<Props> = ({ data }) => {
+	// Helper functions
+	const renderContributorRow = (
+		contributors: keyof IExtendedBook,
+		contributorsText: keyof IExtendedBook,
+		singularLabel: string,
+		pluralLabel: string
+	) => {
+		if (!data[contributors] || !data[contributorsText]) return null;
 
-	const returnDimensions = () => {
+		const count = (data[contributors] as IAutor[]).length;
+		const label = count === 1 ? singularLabel : pluralLabel;
+
+		return <p>{`${label} ${data[contributorsText]}`}</p>;
+	};
+
+	const renderDimensions = () => {
 		if (!data.dimensions) return null;
-		const {dimensions} = data;
+
+		const { dimensions } = data;
+
 		return (
 			<>
 				<p>Rozmery: </p>
 				<table className="bookDimensions">
 					<tbody>
 					<tr>
-						<td>Výška: {formatDimension(dimensions?.height) ?? "-"} cm</td>
-						<td>Šírka: {formatDimension(dimensions?.width) ?? "-"} cm</td>
+						<td>Výška: {formatDimension(dimensions.height) ?? "-"} cm</td>
+						<td>Šírka: {formatDimension(dimensions.width) ?? "-"} cm</td>
 					</tr>
 					<tr>
-						<td>Hrúbka: {formatDimension(dimensions?.depth) ?? "-"} cm</td>
-						<td>{dimensions.weight ? `Hmotnosť: ${formatDimension(dimensions?.weight) ?? "-"} g` : null}</td>
+						<td>Hrúbka: {formatDimension(dimensions.depth) ?? "-"} cm</td>
+						<td>
+							{dimensions.weight && `Hmotnosť: ${formatDimension(dimensions.weight) ?? "-"} g`}
+						</td>
 					</tr>
 					</tbody>
 				</table>
 				<p />
 			</>
-		)
-	}
+		);
+	};
 
-	return (<>
+	const renderLanguage = () => {
+		if (!data.language || data.language.length === 0) return null;
+
+		const languageText = Array.isArray(data.language)
+			? langCode
+				.filter((lang: ILangCode) =>
+					(data.language as unknown as string[])?.includes(lang.key)
+				)
+				.map(l => l.value)
+				.join(", ")
+			: data.language;
+
+		return <p>Jazyk: {languageText}</p>;
+	};
+
+	const renderPublisherInfo = () => {
+		const { publisher, year, country } = data.published;
+
+		if (!publisher && !year && !country) return null;
+
+		const publisherText = `${publisher ?? "-"}`;
+		const yearText = year ? `, ${year}` : "";
+		const countryText = country ? `, ${country}` : "";
+
+		return <p>Vydavateľ: {publisherText}{yearText}{countryText}</p>;
+	};
+
+	const renderLocation = () => {
+		if (!data.location) return null;
+
+		const cityName = cities
+			.filter(c => c.value === data.location?.city)
+			.map(c => c.showValue)
+			.join(", ");
+		const shelf = data.location.shelf ?? "";
+
+		return <p>Umiestnenie: {`${cityName} ${shelf}`}</p>;
+	};
+
+	const renderPeopleList = (people: IUser[] | undefined, label: string) => {
+		if (!people || people.length === 0) return null;
+
+		const namesList = people.map(person => person.firstName).join(", ");
+
+		return <p>{label}: {namesList}</p>;
+	};
+
+	const renderExternalLinks = () => {
+		if (!data.hrefDatabazeKnih && !data.hrefGoodReads) return null;
+
+		return (
+			<p className="detailHrefs">
+				{data.hrefDatabazeKnih && (
+					<a href={data.hrefDatabazeKnih} target="_blank" rel="noopener noreferrer">
+						<img
+							src="img/DBKicon.png"
+							width="32"
+							alt="DBK"
+							style={{ marginLeft: "0.3rem" }}
+						/>
+					</a>
+				)}
+				{data.hrefGoodReads && (
+					<a href={data.hrefGoodReads} target="_blank" rel="noopener noreferrer">
+						<img
+							src="https://www.goodreads.com/favicon.ico"
+							width="32"
+							alt="GR"
+							style={{ marginLeft: "0.3rem" }}
+						/>
+					</a>
+				)}
+			</p>
+		);
+	};
+
+	const renderBookCover = () => {
+		return (
+			<p>
+				{data.picture ? (
+					<img src={data.picture} alt="titulka" />
+				) : (
+					<img
+						src="img/no_thumbnail.svg"
+						alt="no_thumbnail"
+						style={{ maxWidth: "20rem" }}
+					/>
+				)}
+			</p>
+		);
+	};
+
+	// Main render
+	return (
 		<div className="row tableDetailRow">
 			<div className="w-25">
-				<p>{data.picture ? <img src={data.picture} alt='titulka'/> :
-					<img src="img/no_thumbnail.svg" alt="no_thumbnail" style={{maxWidth: "20rem"}}/>}
-				</p>
-				<p className="detailHrefs">
-					{data.hrefDatabazeKnih ?
-						<a href={data.hrefDatabazeKnih} target="_blank">
-							<img src="img/DBKicon.png" width="32" alt="DBK"
-								style={{marginLeft: "0.3rem"}}/>
-						</a> : null}
-					{data.hrefGoodReads ?
-						<a href={data.hrefGoodReads} target="_blank">
-							<img src="https://www.goodreads.com/favicon.ico" width="32" alt="GR"
-								style={{marginLeft: "0.3rem"}}/>
-						</a> : null}
-				</p>
+				{renderBookCover()}
+				{renderExternalLinks()}
 			</div>
+
 			<div className="w-25">
 				<h1>{data.title}</h1>
-				<h4>{data.subtitle ?? ""}</h4>
-				<h3>{showAutorRow("autor", "autorsFull", "Autor: ", "Autori: ")}</h3>
-				{showAutorRow("editor", "editorsFull", "Editor: ", "Editori: ")}
-				{showAutorRow("ilustrator", "ilustratorsFull", "Ilustrátor: ", "Ilustrátori: ")}
-				{showAutorRow("translator", "translatorsFull", "Prekladateľ: ", "Prekladatelia: ")}
-				{data.language && data.language.length > 0 ?
-					<p>Jazyk: {Array.isArray(data.language) ? data.language.join(", ") : data.language}</p> : null}
-				{data.ISBN ? <p>ISBN: {data.ISBN}</p> : null}
-				{data.numberOfPages ? <p>Počet strán: {data.numberOfPages}</p> : null}
-				{data.published.publisher || data.published.year || data.published.country ?
-					<p>Vydavateľ: {`${data.published.publisher ?? "-"}${", " + data.published.year ?? "-"}${", " + data.published.country ?? ""}`}</p> : null}
-				{data.location ?
-					<p>Umiestnenie: {`${data.location.city + ", " ?? "-"}${data.location.shelf ?? ""}`}</p> : null}
-				{data.owner && data.owner.length > 0 ?
-					<p>Majiteľ: {data.owner.map((owner: IUser, index: number) => index > 0 ? owner.firstName : owner.firstName + ", ")}</p> : null}
-				{data.readBy && data.readBy.length > 0 ?
-					<p>Prečítané: {data.readBy.map((rb: IUser, index: number) => index > 0 ? rb.firstName : rb.firstName + ", ")}</p> : null}
-				{returnDimensions()}
-				{data.note ? <p>Poznámka: {data.note}</p> : null}
-				{<p>Ex Libris: {data.exLibris ? <span className="trueMark"/> :
-					<span className="falseMark"/>}</p>}
+				{data.subtitle && <h4>{data.subtitle}</h4>}
+
+				<h3>{renderContributorRow("autor", "autorsFull", "Autor: ", "Autori: ")}</h3>
+				{renderContributorRow("editor", "editorsFull", "Editor: ", "Editori: ")}
+				{renderContributorRow("ilustrator", "ilustratorsFull", "Ilustrátor: ", "Ilustrátori: ")}
+				{renderContributorRow("translator", "translatorsFull", "Prekladateľ: ", "Prekladatelia: ")}
+
+				{renderLanguage()}
+				{data.ISBN && <p>ISBN: {data.ISBN}</p>}
+				{data.numberOfPages && <p>Počet strán: {data.numberOfPages}</p>}
+				{renderPublisherInfo()}
+				{renderLocation()}
+				{renderPeopleList(data.owner, "Majiteľ")}
+				{renderPeopleList(data.readBy, "Prečítané")}
+				{renderDimensions()}
+				{data.note && <p>Poznámka: {data.note}</p>}
+
+				<p>
+					Ex Libris: {data.exLibris ?
+					<span className="trueMark"/> :
+					<span className="falseMark"/>
+				}
+				</p>
 			</div>
 		</div>
-	</>)
-}
+	);
+};
 
 export default BookDetail;

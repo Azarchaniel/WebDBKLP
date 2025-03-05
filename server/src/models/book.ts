@@ -72,7 +72,7 @@ bookSchema.pre(['save', 'updateOne', 'findOneAndUpdate', 'deleteOne', 'findOneAn
 
         if (docInstance instanceof mongoose.Document) {
             // For `save` middleware
-            const normalizedFields = await normalizeSearchFields(docInstance);
+            const normalizedFields = await normalizeSearchFields(docInstance, "book");
             docInstance.normalizedSearchField = normalizedFields;
         } else {
             // @ts-ignore
@@ -83,7 +83,7 @@ bookSchema.pre(['save', 'updateOne', 'findOneAndUpdate', 'deleteOne', 'findOneAn
             const doc = await this.model.findOne(this.getQuery());
 
             if (doc) {
-                const normalizedFields = await normalizeSearchFields(doc);
+                const normalizedFields = await normalizeSearchFields(doc, "book");
                 // @ts-ignore
                 this.setUpdate({
                     ...updateQuery,

@@ -1,11 +1,13 @@
 import React, {useCallback, useEffect, useState} from "react";
-import DatePicker from "react-datepicker";
+import DatePicker, {registerLocale} from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {countryCode} from "../../utils/locale";
 import {IAutor, ILangCode, ValidationError} from "../../type";
 import {InputField, MultiselectField} from "../InputFields";
 import {showError} from "../Modal";
 import {autorRoles} from "../../utils/constants";
+import {sk} from "date-fns/locale/sk";
+registerLocale('sk', sk)
 
 interface BodyProps {
     data: IAutor | object;

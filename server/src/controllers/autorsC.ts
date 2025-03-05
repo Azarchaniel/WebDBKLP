@@ -1,18 +1,72 @@
 import {Response, Request} from 'express';
 import {IAutor} from '../types';
 import Autor from "../models/autor";
-import {optionFetchAllExceptDeleted} from '../utils/constants';
 import Book from "../models/book";
+import diacritics from "diacritics";
+import {PipelineStage, Types} from "mongoose";
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
-        const autors: IAutor[] = await Autor.find(optionFetchAllExceptDeleted)
-        const count: number = await Autor.countDocuments(optionFetchAllExceptDeleted)
+        let {page, pageSize, search = "", sorting} = req.query;
+
+        // Set default pagination values if not provided
+        if (!page) page = "1";
+        if (!pageSize) pageSize = "10_000";
+
+        // Parse sorting parameters
+        let sortParams: Array<{ id: string; desc: string }> = [];
+        if (typeof sorting === "string") {
+            sortParams = JSON.parse(sorting);
+        } else if (Array.isArray(sorting)) {
+            sortParams = sorting as Array<{ id: string; desc: string }>;
+        }
+
+        // Build the sort object for MongoDB
+        const sortOptions: { [key: string]: 1 | -1 } = {};
+        if (sortParams.length > 0) {
+            sortParams.forEach((param) => {
+                sortOptions[param.id] = param.desc === "true" ? -1 : 1;
+            });
+        } else {
+            // Default sorting if no sorting parameters are provided
+            sortOptions["lastName"] = 1;
+        }
+
+        let query: Record<string, any> = {deletedAt: {$eq: null}};
+
+        const normalizedSearchFields = [
+            "firstName", "lastName"
+        ];
+
+        // Add search conditions to the query if a search term is provided
+        if (search) {
+            query = {
+                ...query,
+                $or: normalizedSearchFields.map(field => ({
+                    [`normalizedSearchField.${field}`]: {$regex: diacritics.remove(search as string), $options: "i"}
+                }))
+            };
+        }
+
+        const pipeline: PipelineStage[] = [
+            {$match: query}
+        ];
+
+        const paginationPipeline = [
+            ...pipeline,
+            {$match: query}, // Match by default query (e.g., deletedAt)
+            {$sort: sortOptions},
+            {$skip: (parseInt(page as string) - 1) * parseInt(pageSize as string)},
+            {$limit: parseInt(pageSize as string)},
+        ];
+
+        const autors = await Autor.aggregate(paginationPipeline);
+        const count: number = (await Autor.aggregate(pipeline)).length;
 
         res.status(200).json({autors: autors, count: count})
     } catch (error) {
-        res.status(500);
-        throw error
+        console.error("Error fetching autors:", error);
+        res.status(500).json({message: "Internal server error"});
     }
 }
 
@@ -23,6 +77,7 @@ const getAutor = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({autor: autor, autors: allAutors})
     } catch (err) {
         console.error("Can't find autor", err);
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
@@ -30,18 +85,26 @@ const getAllAutorsBooks = async (req: Request, res: Response): Promise<void> => 
     try {
         const {id} = req.params; //autor ID
 
+        if (!id) {
+            res.status(204).send();
+            return;
+        }
+
+        const searchId = new Types.ObjectId(id);
+
         const books = await Book.find({
             $or: [
-                { autor: id },
-                { translator: id },
-                { editor: id },
-                { ilustrator: id }
+                { autor: searchId },
+                { translator: searchId },
+                { editor: searchId },
+                { ilustrator: searchId }
             ]
         });
 
         res.status(200).json({books});
     } catch (error) {
         console.error("Error fetching books:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
@@ -65,7 +128,8 @@ const addAutor = async (req: Request, res: Response): Promise<void> => {
 
         res.status(201).json({message: 'Autor added', autor: newAutor, autors: allAutors})
     } catch (error) {
-        throw error
+        console.error("Error adding autor:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
@@ -95,7 +159,8 @@ const updateAutor = async (req: Request, res: Response): Promise<void> => {
             autors: allAutors,
         })
     } catch (error) {
-        throw error
+        console.error("Error updating autor:", error);
+        res.status(500).json({error: "Internal server error"});
     }
 }
 
@@ -119,7 +184,8 @@ const deleteAutor = async (req: Request, res: Response): Promise<void> => {
             autors: allAutors,
         })
     } catch (error) {
-        throw error
+        console.error("Error deleting autor:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 

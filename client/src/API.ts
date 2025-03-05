@@ -36,7 +36,7 @@ axiosInstance.interceptors.request.use(
                 Authorization: `Bearer ${token}` // Attach token to Authorization header
             };
 
-            const { exp } = jwtDecode(token);
+            const {exp} = jwtDecode(token);
             const now = Date.now() / 1000;
 
             if (!exp) {
@@ -194,10 +194,18 @@ export const getInfoAboutBook = async (isbn: string): Promise<any> => {
 }
 
 // ### AUTOR ###
-export const getAutors = async (): Promise<AxiosResponse<ApiAutorDataType>> => {
+export const getAutors = async (params?: any): Promise<AxiosResponse<ApiAutorDataType>> => {
     try {
         const autors: AxiosResponse<ApiAutorDataType> = await axiosInstance.get(
-            baseUrl + "/autors"
+            baseUrl + "/autors", {
+                params: {
+                    page: params.page ?? 1, // API expects 1-based index
+                    pageSize: params.pageSize ?? 10_000,
+                    search: params.search ?? "",
+                    sorting: params.sorting ?? {id: "title", desc: false},
+                    filterUsers: params.activeUsers,
+                }
+            }
         )
         return autors
     } catch (error: any) {

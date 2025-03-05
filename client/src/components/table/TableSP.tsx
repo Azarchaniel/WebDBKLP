@@ -29,6 +29,7 @@ type PropsMT = {
         search?: string;
     };
     hiddenCols?: { [columnId: string]: boolean };
+    expandedElement?: (data: any) => ReactElement;
 };
 
 const ServerPaginationTable: React.FC<PropsMT> =
@@ -44,7 +45,8 @@ const ServerPaginationTable: React.FC<PropsMT> =
          totalCount,
          loading = false,
          pagination = {page: 1, pageSize: 50, sorting: {id: "", desc: true}},
-         hiddenCols
+         hiddenCols,
+         expandedElement
      }) => {
         const [currentPage, setCurrentPage] = useState(pagination.page);
         const [currentPageSize, setCurrentPageSize] = useState(pagination.pageSize);
@@ -165,8 +167,9 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                     </tr>
                                     {row.getIsExpanded() && (
                                         <tr style={{pointerEvents: "none"}}>
-                                            <td colSpan={row.getAllCells().length} style={{pointerEvents: "none"}}>
-                                                <BookDetail data={row.original} />
+                                            {/* +1 is because of Actions column */}
+                                            <td colSpan={row.getAllCells().length + 1} style={{pointerEvents: "none"}}>
+                                                {expandedElement && expandedElement(row.original)}
                                             </td>
                                         </tr>
                                     )}

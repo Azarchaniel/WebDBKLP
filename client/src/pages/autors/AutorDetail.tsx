@@ -18,9 +18,9 @@ const AutorDetail: React.FC<Props> = ({data}) => {
     useEffect(() => {
         if (!data) return;
 
-        getAutorInfo(data.rowData?._id)
+        getAutorInfo(data._id)
             .then((res) => {
-                setAutorData({...data.rowData, books: (res.data as any).books});
+                setAutorData({...data, books: (res.data as any).books});
             })
             .catch((err) => {
                 console.error(err);
@@ -39,15 +39,15 @@ const AutorDetail: React.FC<Props> = ({data}) => {
                         </tr>
                         <tr>
                             <td>Národnosť:</td>
-                            <td>{countryCode.filter(cc => cc.key === autorData?.nationality).map(cc => cc.value) ?? "-"}</td>
+                            <td>{autorData?.nationality ? countryCode.filter(cc => cc.key === autorData?.nationality).map(cc => cc.value) : "-"}</td>
                         </tr>
                         <tr>
                             <td>Dátum narodenia:</td>
-                            <td>{new Date(autorData?.dateOfBirth as Date).toLocaleDateString("sk-SK") ?? "-"}</td>
+                            <td>{autorData?.dateOfBirth ? new Date(autorData?.dateOfBirth as Date).toLocaleDateString("sk-SK") : "-"}</td>
                         </tr>
                         <tr>
                             <td>Dátum úmrtia:</td>
-                            <td>{new Date(autorData?.dateOfDeath as Date).toLocaleDateString("sk-SK") ?? "-"}</td>
+                            <td>{autorData?.dateOfDeath ? new Date(autorData?.dateOfDeath as Date).toLocaleDateString("sk-SK") : "-"}</td>
                         </tr>
                         <tr>
                             <td>Role:</td>

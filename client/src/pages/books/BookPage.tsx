@@ -9,11 +9,13 @@ import {stringifyAutors, stringifyUsers} from "../../utils/utils";
 import Header from "../../components/AppHeader";
 import {useReadLocalStorage} from "usehooks-ts";
 import {ShowHideRow} from "../../components/books/ShowHideRow";
-import {DEFAULT_PAGINATION, getBookTableColumns} from "../../utils/constants";
+import {DEFAULT_PAGINATION} from "../../utils/constants";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
 import {isUserLoggedIn} from "../../utils/user";
 import {ColumnDef} from "@tanstack/react-table";
+import {getBookTableColumns} from "../../utils/tableColumns";
+import BookDetail from "./BookDetail";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
@@ -82,6 +84,7 @@ export default function BookPage() {
     // ### BOOKS ###
     const fetchBooks = (): void => {
         try {
+            setLoading(true);
             getBooks({...pagination, activeUsers})
                 .then(({data: {books, count}}: IBook[] | any) => {
                     setCountAll(count);
@@ -96,7 +99,7 @@ export default function BookPage() {
     }
 
     useEffect(() => {
-        if (!timeoutId || pagination.search === "") fetchBooks();
+        if (!timeoutId || pagination.search === "") return fetchBooks();
         if (timeoutId) clearTimeout(timeoutId);
 
         const newTimeoutId = setTimeout(() => {
@@ -106,7 +109,7 @@ export default function BookPage() {
         setTimeoutId(newTimeoutId);
     }, [pagination]);
 
-    const [wasCheckedLoading, setWasCheckedLoading] = useState<boolean>(false);
+    const [wasCheckedLoading, setWasCheckedLoading] = useState<boolean>(false); //TEMP
     const handleSaveBook = (formData: IBook, wasCheckedBox?: boolean): void => {
         if (wasCheckedBox) setWasCheckedLoading(true); //TEMP
 
@@ -274,6 +277,7 @@ export default function BookPage() {
                         />
                     </div> : <></>
                 )}
+                expandedElement={(data) => <BookDetail data={data} />}
             />
             {Boolean(updateBook) &&
                 <AddBook

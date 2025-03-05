@@ -373,23 +373,39 @@ function setNestedValue(obj: Record<string, any>, path: string[], value: any): v
  * Normalizes specified fields into a nested JSON object where keys are field names, and values are normalized strings.
  * Only fields with non-empty normalized values are included.
  * @param doc - Document containing the fields to normalize.
+ * @param model - choose what model are being normalized.
  * @returns A promise that resolves to a nested object with normalized search fields.
  */
-export async function normalizeSearchFields(doc: any): Promise<Record<string, any>> {
+export async function normalizeSearchFields(doc: any, model: "book" | "autor" | "lp"): Promise<Record<string, any>> {
     const normalizedFields: Record<string, any> = {};
 
-    // Fields to normalize
-    const fieldsToNormalize: Record<string, any> = {
-        autor: doc.autor,
-        editor: doc.editor,
-        ilustrator: doc.ilustrator,
-        title: doc.title,
-        subtitle: doc.subtitle,
-        edition: doc.edition,
-        serie: doc.serie,
-        note: doc.note,
-        published: doc.published,
-    };
+    let fieldsToNormalize: Record<string, any> = {};
+    switch (model) {
+        case "book":
+            fieldsToNormalize = {
+                autor: doc.autor,
+                editor: doc.editor,
+                ilustrator: doc.ilustrator,
+                title: doc.title,
+                subtitle: doc.subtitle,
+                edition: doc.edition,
+                serie: doc.serie,
+                note: doc.note,
+                published: doc.published,
+            };
+            break
+        case "autor":
+            fieldsToNormalize = {
+                firstName: doc.firstName,
+                lastName: doc.lastName,
+            };
+            break;
+        case "lp":
+            console.warn("TO SPECIFIE")
+            break;
+        default:
+            console.error("Unknown model")
+    }
 
     // Normalize fields and add them as nested properties
     for (const [key, value] of Object.entries(fieldsToNormalize)) {
