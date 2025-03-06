@@ -25,14 +25,14 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	const [books, setBooks] = useState<IBook[]>();
 	const [users, setUsers] = useState<IUser[] | undefined>();
 	const [searchTerm, setSearchTerm] = useState<string>("");
-	const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+	const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 	const [errors, setErrors] = useState<ValidationError[]>([
 		{label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"},
 		{label: "Musí byť vybraná kniha!", target: "fromBook"}
 	]);
 
 	const fetchBooks = () => {
-		getBooks({ page: 1, pageSize: 25, search: debouncedSearchTerm })
+		getBooks({ page: 1, pageSize: 25, search: searchTerm })
 			.then(books => {
 				setBooks(books.data.books.map((book: IBook) => ({
 					...book,
@@ -56,10 +56,6 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	};
 
 	useEffect(() => {
-		fetchBooks();
-	}, [debouncedSearchTerm]);
-
-	useEffect(() => {
 		onChange(formData)
 	}, [formData]);
 
@@ -68,10 +64,26 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 	}, [data]);
 
 	useEffect(() => {
-		const timeoutId = setTimeout(() => {
-			setDebouncedSearchTerm(searchTerm);
-		}, 500);
-		return () => clearTimeout(timeoutId);
+		// Clear any existing timeout when pagination changes
+		if (timeoutId) clearTimeout(timeoutId);
+
+		// If search is empty, fetch immediately
+		if (searchTerm === "") {
+			fetchBooks();
+			return;
+		}
+
+		// Set a new timeout for debounced fetching
+		const newTimeoutId = setTimeout(() => {
+			fetchBooks();
+		}, 1000); // Wait 1s before making the request
+
+		setTimeoutId(newTimeoutId);
+
+		// Cleanup function to clear timeout if component unmounts or pagination changes again
+		return () => {
+			if (newTimeoutId) clearTimeout(newTimeoutId);
+		};
 	}, [searchTerm]);
 
 	useEffect(() => {

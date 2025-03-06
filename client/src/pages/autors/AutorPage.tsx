@@ -133,7 +133,7 @@ export default function AutorPage() {
 				pagination={pagination}
 				actions={
 					<div className="row justify-center mb-4 mr-2">
-						<div className="searchWrapper">
+						<div className="searchTableWrapper">
 							{/* reset pagination on search*/}
 							<input
 								placeholder="Vyhľadaj autora"

@@ -316,7 +316,9 @@ const customOrder = ['Ľuboš', 'Žaneta', 'Jakub', 'Jaroslav', 'Magdaléna', 'C
 export const sortByParam = (data: any, param: string) =>
     data.sort((a: any, b: any) => customOrder.indexOf(a[param]) - customOrder.indexOf(b[param]));
 
-export const formatMongoDbDecimal = (num: string) => {
+export const formatMongoDbDecimal = (num: unknown) => {
+    if (!num) return;
+    if (typeof num !== "string") return num;
     return mongoose.Types.Decimal128.fromString((num).replace(",","."));
 }
 

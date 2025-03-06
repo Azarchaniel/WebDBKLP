@@ -104,11 +104,11 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
         const books: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
             baseUrl + "/books", {
                 params: {
-                    page: params.page ?? 1, // API expects 1-based index
-                    pageSize: params.pageSize ?? 10_000,
-                    search: params.search ?? "",
-                    sorting: params.sorting ?? {id: "title", desc: false},
-                    filterUsers: params.activeUsers,
+                    page: params?.page ?? 1, // API expects 1-based index
+                    pageSize: params?.pageSize ?? 10_000,
+                    search: params?.search ?? "",
+                    sorting: params?.sorting ?? {id: "title", desc: false},
+                    filterUsers: params?.activeUsers,
                 }
             });
         return books
@@ -199,11 +199,11 @@ export const getAutors = async (params?: any): Promise<AxiosResponse<ApiAutorDat
         const autors: AxiosResponse<ApiAutorDataType> = await axiosInstance.get(
             baseUrl + "/autors", {
                 params: {
-                    page: params.page ?? 1, // API expects 1-based index
-                    pageSize: params.pageSize ?? 10_000,
-                    search: params.search ?? "",
-                    sorting: params.sorting ?? {id: "title", desc: false},
-                    filterUsers: params.activeUsers,
+                    page: params?.page ?? 1, // API expects 1-based index
+                    pageSize: params?.pageSize ?? 10_000,
+                    search: params?.search ?? "",
+                    sorting: params?.sorting ?? {id: "lastName", desc: false},
+                    filterUsers: params?.activeUsers,
                 }
             }
         )

@@ -54,6 +54,9 @@ export default function BookPage() {
     const popRef = useRef(null);
     const activeUsers = useReadLocalStorage("activeUsers");
 
+    const [requestId, setRequestId] = useState(0);
+    const latestRequestIdRef = useRef(0);
+
     //fetch books on page init
     useEffect(() => {
         fetchBooks();
@@ -85,28 +88,53 @@ export default function BookPage() {
     const fetchBooks = (): void => {
         try {
             setLoading(true);
+
+            // Increment and capture the current request ID
+            const currentRequestId = requestId + 1;
+            setRequestId(currentRequestId);
+            latestRequestIdRef.current = currentRequestId;
+
             getBooks({...pagination, activeUsers})
                 .then(({data: {books, count}}: IBook[] | any) => {
-                    setCountAll(count);
-                    books.map((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false))
-                    setClonedBooks(stringifyAutors(books));
+                    // Only update state if this is still the latest request
+                    if (currentRequestId === latestRequestIdRef.current) {
+                        setCountAll(count);
+                        books.map((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false))
+                        setClonedBooks(stringifyAutors(books));
+                    }
                 })
                 .catch((err: Error) => console.trace(err))
-                .finally(() => setLoading(false))
+                .finally(() => {
+                    // Only update loading state if this is still the latest request
+                    if (currentRequestId === latestRequestIdRef.current) {
+                        setLoading(false);
+                    }
+                })
         } catch (err) {
             console.error('Error fetching books:', err);
         }
     }
-
     useEffect(() => {
-        if (!timeoutId || pagination.search === "") return fetchBooks();
+        // Clear any existing timeout when pagination changes
         if (timeoutId) clearTimeout(timeoutId);
 
+        // If search is empty, fetch immediately
+        if (pagination.search === "") {
+            fetchBooks();
+            return;
+        }
+
+        // Set a new timeout for debounced fetching
         const newTimeoutId = setTimeout(() => {
             fetchBooks();
         }, 1000); // Wait 1s before making the request
 
         setTimeoutId(newTimeoutId);
+
+        // Cleanup function to clear timeout if component unmounts or pagination changes again
+        return () => {
+            if (newTimeoutId) clearTimeout(newTimeoutId);
+        };
     }, [pagination]);
 
     const [wasCheckedLoading, setWasCheckedLoading] = useState<boolean>(false); //TEMP
@@ -180,7 +208,7 @@ export default function BookPage() {
             column["accessorKey" as keyof typeof column] !== "title" /* TEMPORARY ->  */ || column["accessorKey" as keyof typeof column] !== "wasChecked");
 
         return columnsForHidden.map((column: any) => {
-            const {header, accessorKey}: {header: string, accessorKey: keyof typeof column} = column;
+            const {header, accessorKey}: { header: string, accessorKey: keyof typeof column } = column;
 
             if (column.id === "dimensions") {
                 return <ShowHideRow
@@ -230,15 +258,24 @@ export default function BookPage() {
                 hiddenCols={hidden}
                 actions={
                     <div className="row justify-center mb-4 mr-2">
-                        <div className="searchWrapper">
+                        <div className="searchTableWrapper">
                             {/* reset pagination on search*/}
                             <input
-                                placeholder="Vyhľadaj názov/autora"
+                                placeholder="Vyhľadaj knihu"
                                 value={pagination.search}
                                 onChange={(e) =>
-                                    setPagination(prevState => ({...prevState, page: DEFAULT_PAGINATION.page, search: e.target.value}))}
+                                    setPagination(prevState => ({
+                                        ...prevState,
+                                        page: DEFAULT_PAGINATION.page,
+                                        search: e.target.value
+                                    }))}
                             />
-                            <button onClick={() => setPagination(prevState => ({...prevState, page: DEFAULT_PAGINATION.page, search: ""}))}>✖</button>
+                            <button onClick={() => setPagination(prevState => ({
+                                ...prevState,
+                                page: DEFAULT_PAGINATION.page,
+                                search: ""
+                            }))}>✖
+                            </button>
                         </div>
                         <i
                             className="fas fa-bars bookTableAction ml-4"
@@ -277,7 +314,7 @@ export default function BookPage() {
                         />
                     </div> : <></>
                 )}
-                expandedElement={(data) => <BookDetail data={data} />}
+                expandedElement={(data) => <BookDetail data={data}/>}
             />
             {Boolean(updateBook) &&
                 <AddBook
