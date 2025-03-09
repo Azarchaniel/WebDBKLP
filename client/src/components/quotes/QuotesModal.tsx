@@ -59,8 +59,20 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 		onChange(formData)
 	}, [formData]);
 
+
 	useEffect(() => {
-		if (data) setFormData(data);
+		if (!data) return;
+		if (Object.keys(data).length === 0 && data.constructor === Object) {
+			const typedData = data as IBook;
+			const enrichedData = {
+				...typedData, showName: `${typedData.title} 
+                        ${typedData.autor && typedData.autor[0] && typedData.autor[0].firstName ? "/ " + typedData.autor[0].firstName : ""} 
+                        ${typedData.autor && typedData.autor[0] && typedData.autor[0].lastName ? typedData.autor[0].lastName : ""} 
+                        ${typedData.published && typedData.published?.year ? "/ " + typedData.published?.year : ""}`
+			};
+			setFormData(enrichedData);
+		}
+
 	}, [data]);
 
 	useEffect(() => {

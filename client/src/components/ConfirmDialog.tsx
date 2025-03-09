@@ -1,88 +1,111 @@
-import React, {FC} from "react";
-import {Modal} from "./Modal";
-import {createRoot, Root} from "react-dom/client";
+import React, { FC, useCallback } from "react";
+import { Modal } from "./Modal";
+import { createRoot } from "react-dom/client";
 
 interface ConfirmDialogProps {
-    text: string;
-    title: string;
-    onOk?: () => void;
-    onCancel?: () => void;
+	text: string;
+	title: string;
+	onOk?: () => void;
+	onCancel?: () => void;
 }
 
-const ConfirmDialog: FC<ConfirmDialogProps> = ({text, title, onOk, onCancel}: ConfirmDialogProps) => {
+const ConfirmDialog: FC<ConfirmDialogProps> = React.memo(({
+															  text,
+															  title,
+															  onOk,
+															  onCancel
+														  }: ConfirmDialogProps) => {
+	const handleOk = useCallback(() => {
+		if (onOk) onOk();
+	}, [onOk]);
+
+	const handleCancel = useCallback(() => {
+		if (onCancel) onCancel();
+	}, [onCancel]);
+
+	const bodyElement = <span>{text}</span>;
+	const footerElement = (
+		<div className="buttons">
+			<button
+				type="button"
+				className="btn btn-secondary"
+				onClick={handleCancel}
+			>
+				Zrušiť
+			</button>
+			<button
+				type="submit"
+				onClick={handleOk}
+				className="btn btn-success"
+			>
+				Potvrdiť
+			</button>
+		</div>
+	);
+
 	return (
 		<Modal
-			customKey="confirmDialog"
+			customKey={`confirmDialog-${title}`}
 			title={title}
-			body={<span>{text}</span>}
-			footer={
-				<div className="buttons">
-					<button type="button" className="btn btn-secondary"
-						onClick={onCancel}>Zrušiť
-					</button>
-					<button type="submit"
-						onClick={onOk}
-						className="btn btn-success">Potvrdiť
-					</button>
-				</div>
-			}
-			onClose={onCancel}
+			body={bodyElement}
+			footer={footerElement}
+			onClose={handleCancel}
 			overrideStyle={{
 				minHeight: "100px",
 				minWidth: "350px",
 				alignItems: "flex-start",
 			}}
 		/>
-	)
-}
+	);
+});
 
-interface ConfirmDialogOptions {
-    text: string;
-    title: string;
-    onOk?: () => void;
-    onCancel?: () => void;
-}
+const DialogManager = (() => {
+	let rootElement: HTMLDivElement | null = null;
+	let rootInstance: ReturnType<typeof createRoot> | null = null;
 
-let root: Root | null = null;
-let container: HTMLElement | null = null;
+	const getRoot = () => {
+		if (!rootElement) {
+			rootElement = document.createElement('div');
+			rootElement.id = 'confirm-dialog-root';
+			document.body.appendChild(rootElement);
+			rootInstance = createRoot(rootElement);
+		}
+		return rootInstance;
+	};
 
-export const openConfirmDialog = ({
-									  text,
-									  title,
-									  onOk,
-									  onCancel,
-								  }: ConfirmDialogOptions) => {
-	const handleClose = () => {
-		if (root && container) {
-			root.unmount();
-			document.body.removeChild(container);
-			root = null;
-			container = null;
+	return {
+		show: (props: ConfirmDialogProps) => {
+			const root = getRoot();
+			const handleClose = () => {
+				root?.render(null);
+			};
+
+			root?.render(
+				<ConfirmDialog
+					{...props}
+					onOk={() => {
+						if (props.onOk) props.onOk();
+						handleClose();
+					}}
+					onCancel={() => {
+						if (props.onCancel) props.onCancel();
+						handleClose();
+					}}
+				/>
+			);
 		}
 	};
+})();
 
-	const handleOk = () => {
-		if (onOk) onOk();
-		handleClose();
-	};
+interface ConfirmDialogOptions {
+	text: string;
+	title: string;
+	onOk?: () => void;
+	onCancel?: () => void;
+}
 
-	const handleCancel = () => {
-		if (onCancel) onCancel();
-		handleClose();
-	};
-
-	if (!container) {
-		container = document.createElement("div");
-		document.body.appendChild(container);
-		root = createRoot(container);
-	}
-
-	root?.render(
-		<ConfirmDialog
-			text={text}
-			title={title}
-			onOk={handleOk}
-			onCancel={handleCancel}
-		/>
-	);
+export const openConfirmDialog = (options: ConfirmDialogOptions) => {
+	requestAnimationFrame(() => {
+		DialogManager.show(options);
+	});
 };

@@ -1,24 +1,28 @@
-import {createPortal} from "react-dom";
-import React, {ReactElement} from "react";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
+import React, { ReactElement, memo } from "react";
+import { createPortal } from "react-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 
 interface ModalProps {
 	customKey: string;
-    title: string;
-    body: ReactElement;
-    footer?: ReactElement;
-    onClose?: () => void;
-    overrideStyle?: React.CSSProperties;
+	title: string;
+	body: ReactElement;
+	footer?: ReactElement;
+	onClose?: () => void;
+	overrideStyle?: React.CSSProperties;
 }
 
-export const Modal: React.FC<ModalProps> = ({customKey, title, body, footer, onClose, overrideStyle}: ModalProps) => {
-	return createPortal(
+export const Modal: React.FC<ModalProps> = memo(({
+													 customKey,
+													 title,
+													 body,
+													 footer,
+													 onClose,
+													 overrideStyle
+												 }: ModalProps) => {
+	const modalContent = (
 		<div className="customModalWrapper" key={customKey}>
-			<div className="customModalBackdrop"
-				/*onClick={onClose}*/
-			/>
-
+			<div className="customModalBackdrop" />
 			<div className="customModal" style={overrideStyle}>
 				<div className="customModalHeader">
 					<span>{title}</span>
@@ -28,27 +32,32 @@ export const Modal: React.FC<ModalProps> = ({customKey, title, body, footer, onC
 						className="closeModal"
 						onClick={onClose}
 						title="Zavrieť okno"
-					>&times;</button>
+					>
+						&times;
+					</button>
 				</div>
-				<div className="customModalBody">
-					{body}
-				</div>
-				{footer && <div className="customModalFooter">
-					{footer}
-				</div>}
+				<div className="customModalBody">{body}</div>
+				{footer && <div className="customModalFooter">{footer}</div>}
 			</div>
-		</div>, document.body);
+		</div>
+	);
 
-}
+	return createPortal(modalContent, document.body);
+});
 
 export const showError = (error: string | any[] | undefined) => {
-	if (!error || (Array.isArray(error) && error.length === 0)) return <></>;
+	if (!error || (Array.isArray(error) && error.length === 0)) return null;
 
+	let errorMessage: string;
 	if (Array.isArray(error) && error.length > 0) {
-		error = error[0].label;
+		errorMessage = error[0].label;
+	} else {
+		errorMessage = String(error);
 	}
 
 	return (
-		<div className="alert alert-danger"><FontAwesomeIcon icon={faExclamationTriangle}/> {error}</div>
+		<div className="alert alert-danger">
+			<FontAwesomeIcon icon={faExclamationTriangle} /> {errorMessage}
+		</div>
 	);
-}
+};

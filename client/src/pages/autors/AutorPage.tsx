@@ -136,6 +136,7 @@ export default function AutorPage() {
 						<div className="searchTableWrapper">
 							{/* reset pagination on search*/}
 							<input
+								className="form-control"
 								placeholder="Vyhľadaj autora"
 								value={pagination.search}
 								onChange={(e) =>

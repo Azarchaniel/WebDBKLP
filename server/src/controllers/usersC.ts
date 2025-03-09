@@ -58,13 +58,13 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
     }
 
     const token = jwt.sign({userId: user._id, email: user.email}, `${process.env.SECRET_KEY}`, {
-        expiresIn: '1h',
+        expiresIn: '3h',
     });
 
     const refreshToken = jwt.sign(
         { userId: user._id },
         `${process.env.REFRESH_TOKEN_SECRET}`!,
-        { expiresIn: '7d' } // Long-lived
+        { expiresIn: '3d' } // Long-lived
     );
 
 

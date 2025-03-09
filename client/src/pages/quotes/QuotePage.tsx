@@ -48,13 +48,14 @@ export default function QuotePage() {
 
 	const updateFilteredBooks = (books: IBook[]): void => {
 		setBooksToFilter(books);
-		fetchQuotes();
+		fetchQuotes(books.map((book: IBook) => book._id));
 	}
 
 	// ### QUOTES ###
-	const fetchQuotes = (): void => {
+	const fetchQuotes = (books?: string[]): void => {
 		setLoading(true);
-		getQuotes(booksToFilter.map(book => book._id), activeUser)
+
+		getQuotes(books, activeUser)
 			.then(({data: {quotes, count, onlyQuotedBooks}}: IQuote[] | any) => {
 				setInitQuotes(quotes);
 				setFilteredQuotes(quotes);
@@ -94,10 +95,9 @@ export default function QuotePage() {
 					.catch((err) => {
 						toast.error("Chyba! Citát nemožno vymazať!");
 						console.trace(err);
-					})
+					});
 			},
-			onCancel: () => {
-			}
+			onCancel: () => {}
 		});
 	}
 

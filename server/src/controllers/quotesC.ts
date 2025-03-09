@@ -62,7 +62,7 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
             const quote: IQuote = new Quote({
                 text: text,
                 note: note,
-                fromBook: fromBook[0]._id,
+                fromBook: fromBook[0]?._id,
                 owner: owner,
                 pageNo: pageNo
             });
