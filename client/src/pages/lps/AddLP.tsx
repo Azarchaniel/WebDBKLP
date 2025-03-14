@@ -5,13 +5,16 @@ import {LPsModalBody, LPsModalButtons} from "../../components/lps/LPsModal";
 
 type Props = {
     saveLp: (formData: ILP | any) => void;
+	onClose: () => void;
     lp?: ILP;
+	saveResultSuccess?: boolean;
 }
 
-const AddLp: React.FC<Props> = ({saveLp, lp}: Props) => {
+const AddLp: React.FC<Props> = ({saveLp, lp, onClose, saveResultSuccess}: Props) => {
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [lpData, setLpData] = useState<ILP | object>();
 	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Názov LP musí obsahovať aspoň jeden znak!", target: "title"}]);
+	const [outline, setOutline] = useState<React.CSSProperties>();
 
 	useEffect(() => {
 		if (lp) {
@@ -24,6 +27,20 @@ const AddLp: React.FC<Props> = ({saveLp, lp}: Props) => {
 		setLpData(data);
 	}
 
+	useEffect(() => {
+		switch (saveResultSuccess) {
+			case true:
+				setOutline({outline: "10px solid green"});
+				break;
+			case false:
+				setOutline({outline: "10px solid red"});
+				break;
+			default:
+				setOutline({outline: "none"});
+				break;
+		}
+	}, [saveResultSuccess]);
+
 	return (
 		<>
 			<button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>
@@ -31,7 +48,10 @@ const AddLp: React.FC<Props> = ({saveLp, lp}: Props) => {
                 <Modal
 					customKey={lp?._id || "new"}
 					title={(lp ? "Uprav" : "Pridaj") + " LP"}
-                	onClose={() => setShowModal(false)}
+					onClose={() => {
+						setShowModal(false);
+						onClose();
+					}}
                 	body={<LPsModalBody
                 		data={lpData as ILP}
                 		onChange={onChange}
@@ -39,9 +59,13 @@ const AddLp: React.FC<Props> = ({saveLp, lp}: Props) => {
                 	/>}
                 	footer={<LPsModalButtons
                 		saveLP={() => saveLp(lpData as ILP)}
-                		cleanFields={() => setLpData({})}
+						cleanFields={() => {
+							setLpData({});
+							setOutline({outline: "none"});
+						}}
                 		error={error}
                 	/>}
+					overrideStyle={outline}
                 />
 			}
 		</>

@@ -155,6 +155,7 @@ type ValidationOptions = {
 
 export const validateNumber = (value: any, options?: ValidationOptions): boolean => {
 	if (value === undefined || value === null) return true;
+	if (value === "") return true;
 
 	const { mustBePositive = false, mustBeInteger = false } = options || {};
 

@@ -137,6 +137,7 @@ export default function AutorPage() {
 							{/* reset pagination on search*/}
 							<input
 								className="form-control"
+								style={{paddingRight: "2rem"}}
 								placeholder="Vyhľadaj autora"
 								value={pagination.search}
 								onChange={(e) =>

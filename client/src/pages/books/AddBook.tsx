@@ -55,7 +55,10 @@ const AddBook: React.FC<Props> = ({saveBook, book, onClose, saveResultSuccess}: 
                 	/>}
                 	footer={<BooksModalButtons
                 		saveBook={() => saveBook(bookData as IBook)}
-                		cleanFields={() => setBookData({})}
+                		cleanFields={() => {
+							setBookData({});
+							setOutline({outline: "none"});
+						}}
                 		error={error}
                 	/>}
 					overrideStyle={outline}

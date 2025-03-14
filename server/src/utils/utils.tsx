@@ -189,7 +189,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         await page.click('a[href=""]');
         await page.waitForSelector("div[id='more_book_info']");
 
-        /*const title = await getContentFromElement(page, "h1[itemprop='name']");
+        const title = await getContentFromElement(page, "h1[itemprop='name']");
         const autor = await getContentFromElement(page, "span[itemprop='author']");
         const translator = await getContentFromElement(page, "span[itemprop='translator']");
         const ilustrator = await getContentFromElement(page, "span[itemprop='ilustrator']");
@@ -199,15 +199,15 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         const language = await getContentFromElement(page, "span[itemprop='language']"); // TODO: normalize: slovencina
         const serieTitle = await getContentFromElement(page, "a[class='odright_pet']");
         const serieNo = getNumberFromString(await getContentFromElement(page, "span[class='odright_pet']"));
-        const editionTitle = await getContentFromElement(page, "span[itemprop='bookEdition']");
-        const editionNo = getNumberFromString(await getContentFromElement(page, "em[class='info st_normal']"));*/
+        const editionTitle = await getContentFromElement(page, "a[itemprop=\"bookEdition\"]");
+        const editionNo = getNumberFromString(await getContentFromElement(page, "em[class='info st_normal']"));
         const urlDB = page.url();
         const imgHref = await page.$eval("img[class='kniha_img coverOnDetail']", el => el.src);
 
         await browser.close();
 
         return {
-            /*title: title?.replace(" přehled", ""),
+            title: title?.replace(" přehled", ""),
             autor: [autor].map(autor => autor?.replace(" (p)", "")),
             translator: [translator],
             ilustrator: [ilustrator],
@@ -225,7 +225,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
             edition: {
                 title: editionTitle,
                 no: editionNo,
-            },*/
+            },
             hrefDatabazeKnih: urlDB,
             picture: imgHref,
         }
@@ -247,10 +247,10 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
 
         const bookFetched = json.GoodreadsResponse.book[0];
 
-        //const {author} = bookFetched.authors[0];
+        const {author} = bookFetched.authors[0];
 
         return {
-            /*title: bookFetched.title[0],
+            title: bookFetched.title[0],
             autor: filterAuthorsFromGR(author, GoodReadsRoles.AUTHOR),
             translator: filterAuthorsFromGR(author, GoodReadsRoles.TRANSLATOR),
             ilustrator: filterAuthorsFromGR(author, GoodReadsRoles.ILUSTRATOR),
@@ -261,7 +261,7 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
                 country: [mapGRlanguageToCode(bookFetched.country_code[0])],
             },
             numberOfPages: bookFetched.num_pages[0],
-            language: [mapGRlanguageToCode(bookFetched.language_code[0])],*/
+            language: [mapGRlanguageToCode(bookFetched.language_code[0])],
             hrefGoodReads: bookFetched.url[0],
             picture: bookFetched.image_url[0],
         };

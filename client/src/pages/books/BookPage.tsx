@@ -262,6 +262,7 @@ export default function BookPage() {
                             {/* reset pagination on search*/}
                             <input
                                 placeholder="Vyhľadaj knihu"
+                                style={{paddingRight: "2rem"}}
                                 className="form-control"
                                 value={pagination.search}
                                 onChange={(e) =>

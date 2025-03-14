@@ -31,7 +31,7 @@ const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
         const onlyQuotedBooks =
             Array.from(
                 new Set(quotes.map(q => q.fromBook))
-            ).sort((a: IBook, b: IBook) => a.title.localeCompare(b.title, "sk"));
+            ).filter(b => b).sort((a: IBook, b: IBook) => a.title.localeCompare(b.title, "sk"));
 
         res.status(200).json({ quotes, count, onlyQuotedBooks })
     } catch (error) {

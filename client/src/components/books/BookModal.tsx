@@ -114,7 +114,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 			setUsers(user.data.users.map((user: IUser) => ({
 				...user,
 				fullName: formPersonsFullName(user)
-			})).sort((a: any, b: any) => a.fullName!.localeCompare(b.fullName!)));
+			})));
 		}).catch();
 	}, [])
 

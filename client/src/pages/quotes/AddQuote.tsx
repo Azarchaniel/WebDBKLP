@@ -8,12 +8,14 @@ interface Props {
     saveQuote: (formData: IQuote | any) => void;
 	onClose: () => void;
     quote?: IQuote | undefined;
+	saveResultSuccess?: boolean;
 }
 
-const AddQuote: React.FC<Props> = ({saveQuote, quote, onClose}: Props) => {
+const AddQuote: React.FC<Props> = ({saveQuote, quote, onClose, saveResultSuccess}: Props) => {
 	const [showModal, setShowModal] = useState<boolean>(false);
 	const [quoteData, setQuoteData] = useState<IQuote | object>();
 	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"}]);
+	const [outline, setOutline] = useState<React.CSSProperties>();
 
 	useEffect(() => {
 		if (quote) {
@@ -21,6 +23,20 @@ const AddQuote: React.FC<Props> = ({saveQuote, quote, onClose}: Props) => {
 			setQuoteData(quote);
 		}
 	}, []);
+
+	useEffect(() => {
+		switch (saveResultSuccess) {
+			case true:
+				setOutline({outline: "10px solid green"});
+				break;
+			case false:
+				setOutline({outline: "10px solid red"});
+				break;
+			default:
+				setOutline({outline: "none"});
+				break;
+		}
+	}, [saveResultSuccess]);
 
 	return (
 		<>
@@ -44,6 +60,7 @@ const AddQuote: React.FC<Props> = ({saveQuote, quote, onClose}: Props) => {
                 		cleanFields={() => setQuoteData({})}
                 		error={error}
                 	/>}
+					overrideStyle={outline}
                 />
 			}
 			<ReactTooltip place="bottom"/>

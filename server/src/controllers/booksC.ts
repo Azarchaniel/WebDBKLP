@@ -175,6 +175,7 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
         const data = req.body;
 
         const book: IBook = normalizeBook(data);
+        book.wasChecked = true; //TEMP
 
         const bookToSave = new Book(book);
 

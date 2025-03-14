@@ -95,13 +95,13 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'edition',
         header: 'Edícia',
-        cell: ({ cell }: { cell: any }) => cell.getValue()?.title ?? "" + ` ${cell.getValue()?.no ?? ""}`,
+        cell: ({ cell }: { cell: any }) => `${cell.getValue()?.title ?? ""} ${cell.getValue()?.no ? "(" + cell.getValue()?.no + ")" : ""}`,
         sortingFn: "alphanumeric",
     },
     {
         accessorKey: 'serie',
         header: 'Séria',
-        cell: ({ cell }: { cell: any }) => cell.getValue()?.title ?? "" + ` ${cell.getValue()?.no ?? ""}`,
+        cell: ({ cell }: { cell: any }) => `${cell.getValue()?.title ?? ""} ${cell.getValue()?.no ? "(" + cell.getValue()?.no + ")" : ""}`,
         sortingFn: "alphanumeric",
     },
     {

@@ -23,6 +23,7 @@ export default function QuotePage() {
 	const [countAll, setCountAll] = useState<number>(0);
 	const activeUser = useReadLocalStorage("activeUsers") as string[];
 	const [loading, setLoading] = useState(true);
+	const [saveAutorSuccess, setSaveAutorSuccess] = useState<boolean | undefined>(undefined);
 
 	const generateColors = (length: number) => {
 		let colors = ["#77dd77", "#836953", "#89cff0", "#99c5c4", "#9adedb", "#aa9499", "#aaf0d1", "#b2fba5", "#b39eb5", "#bdb0d0",
@@ -61,6 +62,7 @@ export default function QuotePage() {
 				setFilteredQuotes(quotes);
 				setCountAll(count);
 				setBooks(onlyQuotedBooks);
+				console.log(onlyQuotedBooks);
 			})
 			.catch((err: Error) => console.trace(err))
 			.finally(() => setLoading(false))
@@ -73,10 +75,12 @@ export default function QuotePage() {
 					throw new Error("Citát sa nepodarilo pridať!")
 				}
 				toast.success("Citát bol úspešne pridaný.");
+				setSaveAutorSuccess(true);
 			})
 			.catch((err) => {
 				toast.error("Citát sa nepodarilo pridať!");
 				console.trace(err);
+				setSaveAutorSuccess(false);
 			})
 	}
 
@@ -109,7 +113,7 @@ export default function QuotePage() {
 		<main className='App'>
 			<Header/>
 			<Sidebar/>
-			{isUserLoggedIn() && <AddQuote saveQuote={handleSaveQuote} onClose={() => {}}/>}
+			{isUserLoggedIn() && <AddQuote saveQuote={handleSaveQuote} onClose={() => {}} saveResultSuccess={saveAutorSuccess}/>}
 			<div style={{position: "fixed", top: "20rem", zIndex: 1000}}>
 				{loading ? <LoadingBooks/> : <></>}
 			</div>

@@ -51,7 +51,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 			setUsers(user.data.users.map((user: IUser) => ({
 				...user,
 				fullName: `${user.lastName}, ${user.firstName}`
-			})).sort((a: any, b: any) => a.fullName!.localeCompare(b.fullName!)));
+			})));
 		}).catch(err => console.trace("Error while fetching Users", err));
 	};
 

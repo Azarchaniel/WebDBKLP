@@ -59,7 +59,10 @@ const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose, saveResultSuccess
                 	/>}
                 	footer={<AutorsModalButtons
                 		saveAutor={() => saveAutor(autorData as IAutor)}
-                		cleanFields={() => setAutorData({})}
+						cleanFields={() => {
+							setAutorData({});
+							setOutline({outline: "none"});
+						}}
                 		error={error}
                 	/>}
 					overrideStyle={outline}

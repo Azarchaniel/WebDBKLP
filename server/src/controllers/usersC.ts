@@ -9,6 +9,7 @@ import jwt from 'jsonwebtoken';
 const getAllUsers = async (_: Request, res: Response): Promise<void> => {
     try {
         const users: IUser[] = await User.find(optionFetchAllExceptDeleted)
+
         res.status(200).json({users: sortByParam(users, "firstName")})
     } catch (error) {
         res.status(500);
