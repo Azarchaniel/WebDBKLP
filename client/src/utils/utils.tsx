@@ -26,7 +26,7 @@ export const stringifyAutors = (
 			people = Array.isArray(people) ? people : [people];
 
 			entity[targetField] = people
-				.map((person: IAutor) => `${person.lastName}, ${person.firstName}`)
+				.map((person: IAutor) => person.fullName)
 				.join("; ");
 		}
 	};

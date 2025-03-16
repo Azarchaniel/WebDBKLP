@@ -73,8 +73,7 @@ const getAllAutors = async (req: Request, res: Response): Promise<void> => {
 const getAutor = async (req: Request, res: Response): Promise<void> => {
     try {
         const autor: IAutor | null = await Autor.findById(req.params.id);
-        const allAutors: IAutor[] = await Autor.find()
-        res.status(200).json({autor: autor, autors: allAutors})
+        res.status(200).json({autor: autor})
     } catch (err) {
         console.error("Can't find autor", err);
         res.status(500).json({ error: "Internal server error" });

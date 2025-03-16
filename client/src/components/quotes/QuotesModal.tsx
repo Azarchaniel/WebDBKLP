@@ -30,6 +30,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 		{label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"},
 		{label: "Musí byť vybraná kniha!", target: "fromBook"}
 	]);
+	const [fetchedUsers, setFetchedUsers] = useState<boolean>(false);
 
 	const fetchBooks = () => {
 		getBooks({ page: 1, pageSize: 25, search: searchTerm })
@@ -46,34 +47,45 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 				toast.error("Nepodarilo sa načítať knihy!");
 				console.error("Couldn't fetch books", err)
 			});
+	};
+
+	const fetchUsers = () => {
+		if (fetchedUsers) return;
 
 		getUsers().then(user => {
 			setUsers(user.data.users.map((user: IUser) => ({
 				...user,
 				fullName: `${user.lastName}, ${user.firstName}`
 			})));
+			setFetchedUsers(true);
 		}).catch(err => console.trace("Error while fetching Users", err));
-	};
+	}
 
 	useEffect(() => {
 		onChange(formData)
 	}, [formData]);
 
-
+	// clear form btn
 	useEffect(() => {
 		if (!data) return;
-		if (Object.keys(data).length === 0 && data.constructor === Object) {
-			const typedData = data as IBook;
-			const enrichedData = {
-				...typedData, showName: `${typedData.title} 
-                        ${typedData.autor && typedData.autor[0] && typedData.autor[0].firstName ? "/ " + typedData.autor[0].firstName : ""} 
-                        ${typedData.autor && typedData.autor[0] && typedData.autor[0].lastName ? typedData.autor[0].lastName : ""} 
-                        ${typedData.published && typedData.published?.year ? "/ " + typedData.published?.year : ""}`
-			};
-			setFormData(enrichedData);
-		}
-
+		if (Object.keys(data).length === 0 && data.constructor === Object) setFormData(data);
 	}, [data]);
+
+	// edit
+	useEffect(() => {
+		if (!data) return;
+
+		const typedData = data as IQuote;
+		const enrichedData = {
+			...typedData,
+			fromBook: typedData.fromBook ? [{...typedData.fromBook, showName: `${typedData.fromBook.title} 
+					${typedData.fromBook.autor && typedData.fromBook.autor[0] && typedData.fromBook.autor[0].firstName ? "/ " + typedData.fromBook.autor[0].firstName : ""} 
+					${typedData.fromBook.autor && typedData.fromBook.autor[0] && typedData.fromBook.autor[0].lastName ? typedData.fromBook.autor[0].lastName : ""} 
+					${typedData.fromBook.published && typedData.fromBook.published?.year ? "/ " + typedData.fromBook.published?.year : ""}`}] : [],
+			owner: formPersonsFullName((data as IQuote)?.owner)
+		};
+		setFormData(enrichedData);
+	}, []);
 
 	useEffect(() => {
 		// Clear any existing timeout when pagination changes
@@ -97,18 +109,6 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 			if (newTimeoutId) clearTimeout(newTimeoutId);
 		};
 	}, [searchTerm]);
-
-	useEffect(() => {
-		if (!data) return;
-
-		const toBeModified: IQuote = {
-			...data,
-			fromBook: (data as IQuote)?.fromBook ? [(data as IQuote)?.fromBook] : [],
-			owner: formPersonsFullName((data as IQuote)?.owner),
-		} as unknown as IQuote;
-
-		setFormData(toBeModified);
-	}, []);
 
 	//ERROR HANDLING
 	useEffect(() => {
@@ -191,6 +191,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 					onChange={handleInputChange}
 					customerror={getErrorMsg("fromBook")}
 					onSearch={setSearchTerm}
+					onClick={fetchBooks}
 				/>
 			</div>
 			<div className="col-3">
@@ -212,6 +213,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 					value={formData?.owner}
 					name="owner"
 					onChange={handleInputChange}
+					onClick={fetchUsers}
 				/>
 			</div>
 		</div>

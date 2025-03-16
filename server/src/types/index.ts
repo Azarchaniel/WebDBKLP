@@ -8,4 +8,9 @@ export * from './published';
 export * from './location';
 export * from './dimension';
 
-export interface IPopulateOptions {path: string, model: string, populate?: IPopulateOptions}
+export interface IPopulateOptions {
+    path: string,
+    model: string,
+    populate?: IPopulateOptions,
+    select?: string
+}

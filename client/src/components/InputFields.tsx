@@ -1,4 +1,4 @@
-import React, {forwardRef, useEffect, useImperativeHandle, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Multiselect} from "multiselect-react-dropdown";
 import {multiselectStyle} from "../utils/constants";
 
@@ -18,6 +18,7 @@ interface MultiselectInputProps extends Omit<InputProps, "onChange"> {
     onSearch?: (searchTerm: string) => void;
     customerror?: string;
     reset?: number;
+    onClick?: () => void;
 }
 
 export const InputField = React.memo((props: InputProps) => {
@@ -61,7 +62,8 @@ export const MultiselectField = React.memo(({
                                                 emptyRecordMsg = "Žiadny záznam nenájdený!",
                                                 customerror,
                                                 onSearch,
-                                                reset
+                                                reset,
+                                                onClick
                                             }: MultiselectInputProps) => {
     const inputElement: any = document.getElementById(`${id}`);
     const multiselectRef = useRef<any>(null);
@@ -84,24 +86,26 @@ export const MultiselectField = React.memo(({
     }, [reset]);
 
     return (
-        <Multiselect
-            id={id}
-            options={options}
-            isObject={true}
-            selectionLimit={selectionLimit}
-            displayValue={displayValue}
-            closeOnSelect={true}
-            placeholder={label}
-            closeIcon="cancel"
-            emptyRecordMsg={emptyRecordMsg}
-            style={multiselectStyle}
-            avoidHighlightFirstOption={true}
-            selectedValues={value}
-            onSelect={(value) => onChange({name: name, value: value})}
-            onRemove={(removedList, _) => onChange({name: name, value: removedList})}
-            onSearch={(value: string) => onSearch ? onSearch(value) : null}
-            ref={multiselectRef}
-        />
+        <div onClick={onClick}>
+            <Multiselect
+                id={id}
+                options={options}
+                isObject={true}
+                selectionLimit={selectionLimit}
+                displayValue={displayValue}
+                closeOnSelect={true}
+                placeholder={label}
+                closeIcon="cancel"
+                emptyRecordMsg={emptyRecordMsg}
+                style={multiselectStyle}
+                avoidHighlightFirstOption={true}
+                selectedValues={value}
+                onSelect={(value) => onChange({name: name, value: value})}
+                onRemove={(removedList, _) => onChange({name: name, value: removedList})}
+                onSearch={(value: string) => onSearch ? onSearch(value) : null}
+                ref={multiselectRef}
+            />
+        </div>
     )
 });
 

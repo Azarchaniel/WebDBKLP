@@ -62,7 +62,6 @@ export default function QuotePage() {
 				setFilteredQuotes(quotes);
 				setCountAll(count);
 				setBooks(onlyQuotedBooks);
-				console.log(onlyQuotedBooks);
 			})
 			.catch((err: Error) => console.trace(err))
 			.finally(() => setLoading(false))

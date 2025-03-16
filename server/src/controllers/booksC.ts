@@ -160,11 +160,7 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
             .findById(req.params.id)
             .populate(populateOptionsBook)
             .exec();
-        const allBooks = await Book
-            .find()
-            .populate(populateOptionsBook)
-            .exec()
-        res.status(200).json({book: book, books: allBooks})
+        res.status(200).json({book: book})
     } catch (err) {
         throw err;
     }

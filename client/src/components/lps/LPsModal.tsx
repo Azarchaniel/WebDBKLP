@@ -26,6 +26,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 	const [formData, setFormData] = useState(data as any);
 	const [autors, setAutors] = useState<IAutor[] | []>([]);
 	const [errors, setErrors] = useState<ValidationError[]>([{label: "Názov LP musí obsahovať aspoň jeden znak!", target: "title"}]);
+	const [fetchedAutors, setFetchedAutors] = useState<boolean>(false);
 
 	const countryRef = useRef(null);
 
@@ -52,20 +53,19 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 		setFormData(toBeModified);
 	}, []);
 
-	useEffect(() => {
+	const fetchAutors = () => {
+		if (fetchedAutors) return;
+
 		getAutors()
 			.then(aut => {
-				//TODO: move to BE
-				setAutors(aut.data.autors.map((aut: IAutor) => ({
-					...aut,
-					fullName: `${aut.lastName}, ${aut.firstName}`
-				})).sort((a: Partial<IAutor>, b: Partial<IAutor>) => a.fullName!.localeCompare(b.fullName!)));
+				setAutors(aut.data.autors);
+				setFetchedAutors(true);
 			})
 			.catch(err => {
 				toast.error("Nepodarilo sa nacitat autorov!");
 				console.error("Couldnt fetch autors", err)
 			});
-	}, [formData])
+	};
 
 	//error handling
 	useEffect(() => {
@@ -152,6 +152,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 						name="autor"
 						onChange={handleInputChange}
 						emptyRecordMsg="Žiadny autori nenájdení"
+						onClick={fetchAutors}
 					/>
 				</div>
 			</div>

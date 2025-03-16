@@ -29,6 +29,8 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 	const [autors, setAutors] = useState<IAutor[] | []>();
 	const [users, setUsers] = useState<IUser[] | undefined>();
 	const [errors, setErrors] = useState<ValidationError[]>([{label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title"}]);
+	const [fetchedAutors, setFetchedAutors] = useState<boolean>(false);
+	const [fetchedUsers, setFetchedUsers] = useState<boolean>(false);
 
 	useEffect(() => {
 		onChange(formData);
@@ -71,10 +73,6 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 
 		const toBeModified: IBook = {
 			...data,
-			autor: formPersonsFullName(typedData.autor),
-			translator: formPersonsFullName(typedData.translator),
-			editor: formPersonsFullName(typedData.editor),
-			ilustrator: formPersonsFullName(typedData.ilustrator),
 			location: {city: cities.filter(c => c.value === (data as IBook)?.location?.city)},
 			published: {
 				...(data as IBook).published,
@@ -96,27 +94,34 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 		setFormData(toBeModified);
 	}, []);
 
-	useEffect(() => {
+	const fetchAutors = () => {
+		if (fetchedAutors) return;
+
 		getAutors()
 			.then(aut => {
-				//constructing fullName for autocomplete
-				setAutors(aut.data.autors.map((aut: IAutor) => ({
-					...aut,
-					fullName: formPersonsFullName(aut) as string,
-				})).sort((a: Partial<IAutor>, b: Partial<IAutor>) => a.fullName!.localeCompare(b.fullName!)));
+				setAutors(aut.data.autors);
+				setFetchedAutors(true);
 			})
 			.catch(err => {
 				toast.error("Nepodarilo sa nacitat autorov!");
 				console.error("Couldnt fetch autors", err)
 			});
+	};
+
+	const fetchUsers = () => {
+		if (fetchedUsers) return;
 
 		getUsers().then(user => {
 			setUsers(user.data.users.map((user: IUser) => ({
 				...user,
 				fullName: formPersonsFullName(user)
 			})));
-		}).catch();
-	}, [])
+			setFetchedUsers(true);
+		}).catch(err => {
+			toast.error("Nepodarilo sa nacitat uzivatelov!");
+			console.error("Couldnt fetch users", err)
+		});
+	};
 
 	//error handling
 	useEffect(() => {
@@ -243,6 +248,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					name="autor"
 					onChange={handleInputChange}
 					emptyRecordMsg="Žiadny autor nenájdený"
+					onClick={fetchAutors}
 				/>
 			</div>
 			<div className="ISBN">
@@ -274,6 +280,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					name="translator"
 					onChange={handleInputChange}
 					emptyRecordMsg="Žiadny autor nenájdený"
+					onClick={fetchAutors}
 				/>
 			</div>
 			<div className="Editor">
@@ -285,6 +292,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					name="editor"
 					onChange={handleInputChange}
 					emptyRecordMsg="Žiadny autor nenájdený"
+					onClick={fetchAutors}
 				/>
 			</div>
 			<div className="Ilustrator">
@@ -296,6 +304,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					name="ilustrator"
 					onChange={handleInputChange}
 					emptyRecordMsg="Žiadny autor nenájdený"
+					onClick={fetchAutors}
 				/>
 			</div>
 			<div className="Name">
@@ -461,6 +470,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					value={formData?.readBy}
 					name="readBy"
 					onChange={handleInputChange}
+					onClick={fetchUsers}
 				/>
 			</div>
 
@@ -472,6 +482,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 					value={formData?.owner}
 					name="owner"
 					onChange={handleInputChange}
+					onClick={fetchUsers}
 				/>
 			</div>
 			<div className="Ex-Libris">

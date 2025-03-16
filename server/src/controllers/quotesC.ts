@@ -4,7 +4,12 @@ import Quote from "../models/quote"
 import { optionFetchAllExceptDeleted } from "../utils/constants";
 
 const populateOptions: IPopulateOptions[] = [
-    { path: 'fromBook', model: 'Book', populate: {path: 'autor', model: 'Autor'} },
+    {
+        path: 'fromBook',
+        model: 'Book',
+        select: 'title autor published',
+        populate: {path: 'autor', model: 'Autor'}
+    },
     { path: 'owner', model: 'User' }
 ];
 
