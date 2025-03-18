@@ -26,11 +26,9 @@ interface ButtonsProps {
 
 export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
 	const [formData, setFormData] = useState(data as any);
-	const [autors, setAutors] = useState<IAutor[] | []>();
-	const [users, setUsers] = useState<IUser[] | undefined>();
+	const [autors, setAutors] = useState<IAutor[]>([]);
+	const [users, setUsers] = useState<IUser[]>([]);
 	const [errors, setErrors] = useState<ValidationError[]>([{label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title"}]);
-	const [fetchedAutors, setFetchedAutors] = useState<boolean>(false);
-	const [fetchedUsers, setFetchedUsers] = useState<boolean>(false);
 
 	useEffect(() => {
 		onChange(formData);
@@ -69,8 +67,8 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 	//edit book
 	useEffect(() => {
 		if (!data) return;
-		const typedData: IBook = data as IBook;
 
+		const typedData: IBook = data as IBook;
 		const toBeModified: IBook = {
 			...data,
 			location: {city: cities.filter(c => c.value === (data as IBook)?.location?.city)},
@@ -95,12 +93,11 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 	}, []);
 
 	const fetchAutors = () => {
-		if (fetchedAutors) return;
+		if (autors.length > 0) return;
 
 		getAutors()
 			.then(aut => {
 				setAutors(aut.data.autors);
-				setFetchedAutors(true);
 			})
 			.catch(err => {
 				toast.error("Nepodarilo sa nacitat autorov!");
@@ -109,14 +106,13 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 	};
 
 	const fetchUsers = () => {
-		if (fetchedUsers) return;
+		if (users.length > 0) return;
 
 		getUsers().then(user => {
 			setUsers(user.data.users.map((user: IUser) => ({
 				...user,
 				fullName: formPersonsFullName(user)
 			})));
-			setFetchedUsers(true);
 		}).catch(err => {
 			toast.error("Nepodarilo sa nacitat uzivatelov!");
 			console.error("Couldnt fetch users", err)

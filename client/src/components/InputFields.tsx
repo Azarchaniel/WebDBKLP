@@ -81,7 +81,7 @@ export const MultiselectField = React.memo(({
     }, [customerror]);
 
     useEffect(() => {
-        if (multiselectRef)
+        if (reset && multiselectRef)
             multiselectRef.current.resetSelectedValues();
     }, [reset]);
 
