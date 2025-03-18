@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "System for cataloging books",
   "main": "client/index.js",
+  "homepage": "/",
   "scripts": {
     "install-server": "cd server && npm run build",
     "start-server": "cd server && npm run startProduction",
