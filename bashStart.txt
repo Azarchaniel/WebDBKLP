@@ -1,2 +1,0 @@
-cd 'C:\Users\Ľuboš Csonka\WebDBKLP\server'; npm start
-cd 'C:\Users\Ľuboš Csonka\WebDBKLP\client'; npm start
