@@ -22,6 +22,7 @@ autorSchema.index({
 });
 
 autorSchema.pre(['save', 'updateOne', 'findOneAndUpdate', 'deleteOne', 'findOneAndDelete'], async function (next) {
+    //FIXME: is this called correctly after update? fullName wasn't changed properly
     // normalization for search
     try {
         const docInstance = this;

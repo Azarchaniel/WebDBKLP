@@ -204,6 +204,7 @@ export const getAutors = async (params?: any): Promise<AxiosResponse<ApiAutorDat
                     search: params?.search ?? "",
                     sorting: params?.sorting ?? {id: "lastName", desc: false},
                     filterUsers: params?.activeUsers,
+                    dataFrom: params?.dataFrom
                 }
             }
         )

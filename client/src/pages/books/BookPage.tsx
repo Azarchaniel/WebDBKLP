@@ -160,42 +160,51 @@ export default function BookPage() {
 
     const handleUpdateBook = (_id: string): void => {
         setSaveBookSuccess(undefined);
-        getBook(_id)
-            .then(({data}) => {
-                setUpdateBook(data.book);
-            })
-            .catch((err) => console.trace(err))
+
+        const bookToUpdate = clonedBooks.find((book: IBook) => book._id === _id);
+
+        if (bookToUpdate) {
+            setUpdateBook(bookToUpdate);
+        } else {
+            getBook(_id)
+                .then(({data}) => {
+                    setUpdateBook(data.book);
+                })
+                .catch((err) => console.trace(err))
+        }
     }
 
     const handleDeleteBook = (_id: string): void => {
-        getBook(_id)
-            .then(({status, data}) => {
-                if (status !== 200) {
-                    throw new Error("Error! Book not found")
-                }
+        let bookToDelete = clonedBooks.find((book: IBook) => book._id === _id);
 
-                openConfirmDialog({
-                    text: `Naozaj chceš vymazať knihu ${data.book?.title}?`,
-                    title: "Vymazať knihu?",
-                    onOk: () => {
-                        deleteBook(_id)
-                            .then(({status, data}) => {
-                                if (status !== 200) {
-                                    throw new Error("Error! Book not deleted")
-                                }
-                                toast.success(`Kniha ${data.book?.title} bola úspešne vymazaná.`);
-                                fetchBooks();
-                            })
-                            .catch((err) => {
-                                toast.error("Chyba! Knihu nemožno vymazať!");
-                                console.trace(err);
-                            })
-                    },
-                    onCancel: () => {
-                    }
-                });
-            })
-            .catch((err) => console.trace(err))
+        if (!bookToDelete) {
+            getBook(_id)
+                .then(({data}) => {
+                    bookToDelete = data.book;
+                })
+                .catch((err) => console.trace(err))
+        }
+
+        openConfirmDialog({
+            text: `Naozaj chceš vymazať knihu ${bookToDelete?.title}?`,
+            title: "Vymazať knihu?",
+            onOk: () => {
+                deleteBook(_id)
+                    .then(({status}) => {
+                        if (status !== 200) {
+                            throw new Error("Error! Book not deleted")
+                        }
+                        toast.success(`Kniha ${bookToDelete.title} bola úspešne vymazaná.`);
+                        fetchBooks();
+                    })
+                    .catch((err) => {
+                        toast.error("Chyba! Knihu nemožno vymazať!");
+                        console.trace(err);
+                    })
+            },
+            onCancel: () => {
+            }
+        });
     }
 
     const handlePageSizeChange = (newPageSize: number) => {

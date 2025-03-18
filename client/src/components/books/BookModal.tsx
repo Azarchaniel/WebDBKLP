@@ -29,6 +29,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 	const [autors, setAutors] = useState<IAutor[]>([]);
 	const [users, setUsers] = useState<IUser[]>([]);
 	const [errors, setErrors] = useState<ValidationError[]>([{label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title"}]);
+	const [dataFrom, setDataFrom] = useState<Date | undefined>();
 
 	useEffect(() => {
 		onChange(formData);
@@ -93,11 +94,13 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 	}, []);
 
 	const fetchAutors = () => {
-		if (autors.length > 0) return;
-
-		getAutors()
-			.then(aut => {
-				setAutors(aut.data.autors);
+		getAutors({dataFrom})
+			.then(({data, status}) => {
+				if (status === 204) {
+					return;
+				}
+				setAutors(data.autors);
+				setDataFrom(data.latestUpdate);
 			})
 			.catch(err => {
 				toast.error("Nepodarilo sa nacitat autorov!");

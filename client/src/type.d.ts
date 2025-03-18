@@ -85,6 +85,8 @@ type ApiAutorDataType = {
     autors: IAutor[]
     autor?: IAutor
     count?: number
+    status?: number;
+    latestUpdate?: Date;
 }
 
 type ApiQuoteDataType = {

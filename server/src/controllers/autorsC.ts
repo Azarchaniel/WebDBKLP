@@ -7,7 +7,16 @@ import {PipelineStage, Types} from "mongoose";
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
-        let {page, pageSize, search = "", sorting} = req.query;
+        let {page, pageSize, search = "", sorting, dataFrom} = req.query;
+
+        const latestUpdate: {updatedAt: Date | undefined} = await Autor.findOne().sort({ updatedAt: -1 }).select('updatedAt').lean() as unknown as {updatedAt: Date | undefined};
+
+        // Check if dataFrom is provided and if it's more recent than the latest update
+        if (dataFrom && latestUpdate?.updatedAt && new Date(dataFrom as string) >= new Date(latestUpdate.updatedAt)) {
+            // No new data, send 204 No Content and return
+            res.status(204).send();
+            return;
+        }
 
         // Set default pagination values if not provided
         if (!page) page = "1";
@@ -63,7 +72,7 @@ const getAllAutors = async (req: Request, res: Response): Promise<void> => {
         const autors = await Autor.aggregate(paginationPipeline);
         const count: number = (await Autor.aggregate(pipeline)).length;
 
-        res.status(200).json({autors: autors, count: count})
+        res.status(200).json({autors: autors, count: count, latestUpdate: latestUpdate?.updatedAt})
     } catch (error) {
         console.error("Error fetching autors:", error);
         res.status(500).json({message: "Internal server error"});
