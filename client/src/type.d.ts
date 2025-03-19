@@ -35,7 +35,6 @@ export interface ILP extends IBaseType {
     autor?: IAutor[];
     title: string;
     subtitle?: string;
-    edition?: IEditionSerie;
     countLp: number;
     speed: number;
     published?: IPublished;

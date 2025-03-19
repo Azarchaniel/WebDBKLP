@@ -1146,7 +1146,7 @@ input:invalid {
   }
 
   .TSP {
-    &exLibris, &height, &width, &depth, &numberOfPages, &createdAt {
+    &exLibris, &height, &width, &depth, &numberOfPages, &createdAt, &countLp, &speed {
       display: table-cell;
       text-align: center;
     }

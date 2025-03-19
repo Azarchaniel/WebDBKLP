@@ -212,6 +212,7 @@ export default function BookPage() {
         setPagination(prevState => ({...prevState, page: newPage, pageSize: newPageSize}));
     };
 
+    //TODO: move to utils - getBookTableColumns, IBook, setHidden
     const getColumnsForHidden = () => {
         const columnsForHidden = getBookTableColumns().filter((column: ColumnDef<IBook, any>) =>
             column["accessorKey" as keyof typeof column] !== "title" /* TEMPORARY ->  */ || column["accessorKey" as keyof typeof column] !== "wasChecked");

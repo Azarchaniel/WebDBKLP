@@ -2,7 +2,7 @@ import {Response, Request} from 'express';
 import {IBook, IUser} from '../types';
 import Book from '../models/book';
 import User from '../models/user';
-import {formatMongoDbDecimal, getIdFromArray, sortByParam, webScrapper} from "../utils/utils";
+import {createLookupStage, formatMongoDbDecimal, getIdFromArray, sortByParam, webScrapper} from "../utils/utils";
 import mongoose, {PipelineStage, Types} from 'mongoose';
 import {populateOptionsBook} from "../utils/constants";
 import diacritics from "diacritics";
@@ -92,11 +92,6 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         if (filterUsers) {
             query = {...query, owner: {$in: (filterUsers as string[]).map(userId => new Types.ObjectId(userId))}};
         }
-
-        // Refactored: Helper function for $lookup
-        const createLookupStage = (from: string, localField: string, as: string) => ({
-            $lookup: {from, localField, foreignField: "_id", as}
-        });
 
         const normalizedSearchFields = [
             "autor", "editor", "ilustrator", "translator", "title", "subtitle", "content", "edition", "serie", "note", "published"

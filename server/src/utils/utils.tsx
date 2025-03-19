@@ -403,7 +403,12 @@ export async function normalizeSearchFields(doc: any, model: "book" | "autor" | 
             };
             break;
         case "lp":
-            console.warn("TO SPECIFIE")
+            fieldsToNormalize = {
+                title: doc.title,
+                subtitle: doc.subtitle,
+                note: doc.note,
+                published: doc.published,
+            };
             break;
         default:
             console.error("Unknown model")
@@ -427,5 +432,9 @@ export async function normalizeSearchFields(doc: any, model: "book" | "autor" | 
 
     return normalizedFields;
 }
+
+export const createLookupStage = (from: string, localField: string, as: string) => ({
+    $lookup: {from, localField, foreignField: "_id", as}
+});
 
 

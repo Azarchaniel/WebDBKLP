@@ -400,10 +400,17 @@ export const login = async (
 }
 
 // ### LP ###
-export const getLPs = async (): Promise<AxiosResponse<ApiLPDataType>> => {
+export const getLPs = async (params?: any): Promise<AxiosResponse<ApiLPDataType>> => {
     try {
         const lps: AxiosResponse<ApiLPDataType> = await axiosInstance.get(
-            baseUrl + "/lps"
+            baseUrl + "/lps", {
+                params: {
+                    page: params?.page ?? 1,
+                    pageSize: params?.pageSize ?? 10_000,
+                    search: params?.search ?? "",
+                    sorting: params?.sorting ?? {id: "lastName", desc: false}
+                }
+            }
         )
         return lps
     } catch (error: any) {

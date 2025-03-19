@@ -3,7 +3,7 @@ import {IAutor, IBook, ILocation, IPublished, IUser} from "../type";
 import {formatDimension, getBookLocation} from "./utils";
 import React from "react";
 import {tableHeaderColor} from "./constants";
-import {countryCode} from "./locale";
+import {countryCode, langCode} from "./locale";
 
 const columnHelper = createColumnHelper<any>();
 
@@ -195,4 +195,62 @@ export const getAutorTableColumns = (): ColumnDef<IAutor, any>[] => [
         accessorKey: 'note',
         header: 'Poznámka'
     }
+];
+
+// LPs
+export const getLPTableColumns = (): ColumnDef<any, any>[] => [
+    {
+        accessorKey: 'autorsFull',
+        header: 'Autor',
+        sortUndefined: "last"
+    },
+    {
+        accessorKey: 'title',
+        header: 'Názov',
+        cell: (info: any) => (
+            <b>
+                {info.getValue() as unknown as string}
+            </b>
+        ),
+        sortUndefined: "last"
+    },
+    {
+        accessorKey: 'subtitle',
+        header: 'Podnázov'
+    },
+    {
+        accessorKey: 'language',
+        header: 'Jazyk',
+        cell: ({ cell }: { cell: any }) => langCode
+            .filter(lang => (Array.isArray(cell.getValue()) ? cell.getValue() : []).includes(lang.key))
+            .map(lang => lang.value)
+            .join(', ')
+    },
+    {
+        accessorKey: 'countLp',
+        header: 'Počet LP'
+    },
+    {
+        accessorKey: 'speed',
+        header: 'Rýchlosť'
+    },
+    {
+        accessorKey: 'published',
+        header: 'Vydané',
+        cell: ({ cell }: { cell: any }) => {
+            const published = cell.getValue() as IPublished;
+            return published ? `${published?.publisher} (${published?.year ?? "?"})` : null;
+        },
+    },
+    {
+        accessorKey: 'createdAt',
+        header: 'Dátum pridania',
+        cell: ({cell}: { cell: any }) => {
+            const value = cell.getValue() as unknown as string;
+            const date = new Date(value).toLocaleDateString("cs-CZ");
+            const time = new Date(value).toLocaleTimeString("cs-CZ");
+            return <span title={time} style={{pointerEvents: "auto"}}>{date}</span>
+        },
+        sortingFn: "datetime"
+    },
 ];

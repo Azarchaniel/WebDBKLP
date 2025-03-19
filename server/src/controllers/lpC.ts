@@ -1,17 +1,70 @@
 import {Response, Request} from 'express';
 import {ILp} from '../types';
 import Lp from '../models/lp';
-import { optionFetchAllExceptDeleted } from '../utils/constants';
+import {optionFetchAllExceptDeleted} from '../utils/constants';
+import diacritics from "diacritics";
+import {PipelineStage} from "mongoose";
+import {createLookupStage} from "../utils/utils";
 
-const getAllLps = async (_: Request, res: Response): Promise<void> => {
+const getAllLps = async (req: Request, res: Response): Promise<void> => {
     try {
-        const lps: ILp[] = await Lp
-            .find(optionFetchAllExceptDeleted)
-            .populate([
-                {path: 'autor', model: 'Autor'},
-            ])
-            .exec();
-        const count: number = await Lp.countDocuments(optionFetchAllExceptDeleted);
+        let {page, pageSize, search = "", sorting} = req.query;
+
+        if (!page) page = "1";
+        if (!pageSize) pageSize = "10_000";
+
+        // Parse sorting parameters
+        let sortParams: Array<{ id: string; desc: string }> = [];
+        if (typeof sorting === "string") {
+            sortParams = JSON.parse(sorting);
+        } else if (Array.isArray(sorting)) {
+            sortParams = sorting as Array<{ id: string; desc: string }>;
+        }
+
+        // Build the sort object for MongoDB
+        const sortOptions: { [key: string]: 1 | -1 } = {};
+        if (sortParams.length > 0) {
+            sortParams.forEach((param) => {
+                sortOptions[param.id] = param.desc === "true" ? -1 : 1;
+            });
+        } else {
+            // Default sorting if no sorting parameters are provided
+            sortOptions["lastName"] = 1;
+        }
+
+        let query: Record<string, any> = {deletedAt: {$eq: null}};
+
+        const normalizedSearchFields = [
+            "title",
+            "subtitle",
+            "note",
+            "published"
+        ];
+
+        // Add search conditions to the query if a search term is provided
+        if (search) {
+            query = {
+                ...query,
+                $or: normalizedSearchFields.map(field => ({
+                    [`normalizedSearchField.${field}`]: {$regex: diacritics.remove(search as string), $options: "i"}
+                }))
+            };
+        }
+
+        const pipeline: PipelineStage[] = [
+            {$match: query},
+        ];
+
+        const paginationPipeline = [
+            ...pipeline,
+            createLookupStage("autors", "autor", "autor"),
+            {$sort: sortOptions},
+            {$skip: (parseInt(page as string) - 1) * parseInt(pageSize as string)},
+            {$limit: parseInt(pageSize as string)},
+        ];
+
+        const lps: ILp[] = await Lp.aggregate(paginationPipeline);
+        const count: number = (await Lp.aggregate(pipeline)).length;
 
         res.status(200).json({lps: lps, count: count})
     } catch (error) {
@@ -90,7 +143,6 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
         throw Error("Error while creating/editing LP \n" + error)
     }
 }
-
 
 
 const deleteLp = async (req: Request, res: Response): Promise<void> => {
