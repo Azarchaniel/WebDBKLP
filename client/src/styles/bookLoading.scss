@@ -7,11 +7,15 @@ $delay : $duration*0.16;
   background: radial-gradient($accent $dot, transparent 0) 0 -2.5px;
 }
 
-body {
-  background-color: transparent;
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100vh;
-  margin: 0;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  pointer-events: all;
 }
 
 .bookshelf_wrapper {

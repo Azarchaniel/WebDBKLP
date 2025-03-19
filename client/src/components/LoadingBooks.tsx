@@ -12,7 +12,7 @@ export const LoadingBooks: React.FC = () => {
 	}, []);
 
 	return (
-		<>
+		<div className="backdrop">
 			<div className="bookshelf_wrapper" style={{display: hidden ? "none" : "block"}}>
 				<ul className="books_list">
 					<li className="book_item first"/>
@@ -25,7 +25,7 @@ export const LoadingBooks: React.FC = () => {
 				<div className="shelf"/>
 				<p className="textPatience">Trpezlivosť, prosím...</p>
 			</div>
-		</>
+		</div>
 	)
 }
 
