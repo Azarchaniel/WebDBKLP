@@ -69,7 +69,7 @@ const getAllAutors = async (req: Request, res: Response): Promise<void> => {
             {$limit: parseInt(pageSize as string)},
         ];
 
-        const autors = await Autor.aggregate(paginationPipeline);
+        const autors = await Autor.aggregate(paginationPipeline).collation({ locale: "cs", strength: 2, numericOrdering: true });
         const count: number = (await Autor.aggregate(pipeline)).length;
 
         res.status(200).json({autors: autors, count: count, latestUpdate: latestUpdate?.updatedAt})
@@ -107,7 +107,7 @@ const getAllAutorsBooks = async (req: Request, res: Response): Promise<void> => 
                 { editor: searchId },
                 { ilustrator: searchId }
             ]
-        });
+        }).sort( {title: 1} );
 
         res.status(200).json({books});
     } catch (error) {

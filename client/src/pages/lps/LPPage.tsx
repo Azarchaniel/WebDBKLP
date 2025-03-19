@@ -167,6 +167,7 @@ export default function LPPage() {
 				totalCount={countAll}
 				loading={loading}
 				pagination={pagination}
+				hiddenCols={hidden}
 				actions={
 					<div className="row justify-center mb-4 mr-2">
 						<div className="searchTableWrapper">
@@ -190,6 +191,11 @@ export default function LPPage() {
 							}))}>✖
 							</button>
 						</div>
+						<i
+							className="fas fa-bars bookTableAction ml-4"
+							title="Zobraz/skry stĺpce"
+							onClick={() => setHidden({...hidden, control: !hidden.control})}
+						/>
 					</div>
 				}
 				rowActions={(_id) => (

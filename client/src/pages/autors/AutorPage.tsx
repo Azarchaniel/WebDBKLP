@@ -13,13 +13,14 @@ import {isUserLoggedIn} from "../../utils/user";
 import {getAutorTableColumns} from "../../utils/tableColumns";
 import ServerPaginationTable from "../../components/table/TableSP";
 import AutorDetail from "./AutorDetail";
+import {SortingState} from "@tanstack/react-table";
 
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [updateAutor, setUpdateAutor] = useState<IAutor>();
-    const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
+    const [pagination, setPagination] = useState({...DEFAULT_PAGINATION, sorting: [{id: "lastName", desc: false}] as SortingState});
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const [saveAutorSuccess, setSaveAutorSuccess] = useState<boolean | undefined>(undefined);
 

@@ -126,7 +126,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             {$limit: parseInt(pageSize as string)},
         ]
 
-        const books = await Book.aggregate(paginationPipeline).collation({ locale: "sk", numericOrdering: true });
+        const books = await Book.aggregate(paginationPipeline).collation({ locale: "cs", strength: 2, numericOrdering: true });
 
         // Count total documents (for pagination)
         const count = (await Book.aggregate(pipeline)).length;
