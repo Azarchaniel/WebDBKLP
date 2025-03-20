@@ -132,6 +132,21 @@ export const getBooksByIds = async (ids: string[]): Promise<AxiosResponse<ApiBoo
     }
 }
 
+export const checkBooksUpdated = async (dataFrom?: Date): Promise<AxiosResponse<{ latestUpdate: Date }>> => {
+    try {
+        const response: AxiosResponse<{ latestUpdate: Date }> = await axiosInstance.get(
+            baseUrl + "/books/check-updated", {
+                params: {
+                    dataFrom
+                }
+            }
+        );
+        return response;
+    } catch (error: any) {
+        throw new Error(error);
+    }
+};
+
 export const getBook = async (
     _id: string
 ): Promise<AxiosResponse<ApiBookDataType>> => {

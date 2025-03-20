@@ -139,6 +139,28 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+const checkBooksUpdated = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { dataFrom } = req.query;
+
+        // Find the most recently updated book
+        const latestUpdate: {updatedAt: Date | undefined} = await Book.findOne().sort({ updatedAt: -1 }).select('updatedAt').lean() as unknown as {updatedAt: Date | undefined};
+
+        // Check if dataFrom is provided and if it's more recent than the latest update
+        if (dataFrom && latestUpdate?.updatedAt && new Date(dataFrom as string) >= new Date(latestUpdate.updatedAt)) {
+            // No new data, send 204 No Content and return
+            res.status(204).end();
+            return;
+        }
+
+        // Data is not up-to-date, send 200 OK with the latest update timestamp
+        res.status(200).json({ latestUpdate: latestUpdate?.updatedAt });
+    } catch (error) {
+        console.error("Error checking book updates:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
     try {
         const {ids} = req.query;
@@ -740,4 +762,4 @@ const dashboard = {
 
 }
 
-export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN, getBooksByIds}
+export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN, getBooksByIds, checkBooksUpdated}

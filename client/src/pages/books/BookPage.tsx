@@ -1,6 +1,6 @@
 import {IBook, IBookHidden} from "../../type";
-import React, {useEffect, useRef, useState} from "react";
-import {addBook, deleteBook, getBook, getBooks} from "../../API";
+import React, {useEffect, useMemo, useRef, useState} from "react";
+import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import AddBook from "./AddBook";
 import Sidebar from "../../components/Sidebar";
@@ -16,10 +16,16 @@ import {isUserLoggedIn} from "../../utils/user";
 import {ColumnDef} from "@tanstack/react-table";
 import {getBookTableColumns} from "../../utils/tableColumns";
 import BookDetail from "./BookDetail";
+import {loadFirstPageFromCache, saveFirstPageToCache} from "../../utils/indexDb";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
-    const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
+    const [pagination, setPagination] = useState({
+        page: DEFAULT_PAGINATION.page,
+        pageSize: DEFAULT_PAGINATION.pageSize,
+        search: DEFAULT_PAGINATION.search,
+        sorting: [...DEFAULT_PAGINATION.sorting]
+    });
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [updateBook, setUpdateBook] = useState<IBook>();
@@ -51,11 +57,17 @@ export default function BookPage() {
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+    const [dataFrom, setDataFrom] = useState<Date>(new Date());
     const popRef = useRef(null);
     const activeUsers = useReadLocalStorage("activeUsers");
+    const memoizedActiveUsers = useMemo(() => activeUsers, [JSON.stringify(activeUsers)]);
 
     const [requestId, setRequestId] = useState(0);
     const latestRequestIdRef = useRef(0);
+
+    const checkIfFirstPage = () => {
+        return JSON.stringify(pagination) === JSON.stringify(DEFAULT_PAGINATION);
+    }
 
     //fetch books on page init
     useEffect(() => {
@@ -65,7 +77,7 @@ export default function BookPage() {
     //fetch books when changed user
     useEffect(() => {
         fetchBooks();
-    }, [activeUsers]);
+    }, [memoizedActiveUsers]);
 
     useEffect(() => {
         function handleClickOutside(event: Event) {
@@ -85,7 +97,7 @@ export default function BookPage() {
     }, [popRef]);
 
     // ### BOOKS ###
-    const fetchBooks = (): void => {
+    const fetchBooks = async (): Promise<void> => {
         try {
             setLoading(true);
 
@@ -94,13 +106,41 @@ export default function BookPage() {
             setRequestId(currentRequestId);
             latestRequestIdRef.current = currentRequestId;
 
+            // Check if data is up-to-date
+            const {data: {latestUpdate}, status} = await checkBooksUpdated(dataFrom);
+
+            // For first page only with default pagination and no new books, try to load from cache first
+            if (checkIfFirstPage()) {
+                if (status === 204) {
+                    const cachedData = await loadFirstPageFromCache();
+
+                    if (cachedData && currentRequestId === latestRequestIdRef.current) {
+                        // Successfully loaded from cache
+                        setCountAll(cachedData.count);
+                        setClonedBooks(cachedData.books.sort((a, b) => a.title.localeCompare(b.title)));
+                        setLoading(false);
+                        setDataFrom(latestUpdate);
+
+                        return;
+                    }
+                }
+            }
+
+            // Always fetch fresh data from API
             getBooks({...pagination, activeUsers})
                 .then(({data: {books, count}}: IBook[] | any) => {
                     // Only update state if this is still the latest request
                     if (currentRequestId === latestRequestIdRef.current) {
                         setCountAll(count);
-                        books.map((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false))
-                        setClonedBooks(stringifyAutors(books));
+                        const processedBooks = stringifyAutors(books);
+                        processedBooks.map((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false));
+                        setClonedBooks(processedBooks);
+                        setDataFrom(latestUpdate);
+
+                        // If this is first page without search, update the cache
+                        if (checkIfFirstPage()) {
+                            saveFirstPageToCache(books, count, pagination);
+                        }
                     }
                 })
                 .catch((err: Error) => console.trace(err))
@@ -109,11 +149,13 @@ export default function BookPage() {
                     if (currentRequestId === latestRequestIdRef.current) {
                         setLoading(false);
                     }
-                })
+                });
         } catch (err) {
             console.error('Error fetching books:', err);
+            setLoading(false);
         }
-    }
+    };
+
     useEffect(() => {
         // Clear any existing timeout when pagination changes
         if (timeoutId) clearTimeout(timeoutId);
@@ -261,7 +303,10 @@ export default function BookPage() {
                 columns={getBookTableColumns()}
                 pageChange={(page) => setPagination(prevState => ({...prevState, page: page}))}
                 pageSizeChange={handlePageSizeChange}
-                sortingChange={(sorting) => setPagination(prevState => ({...prevState, sorting: sorting}))}
+                sortingChange={(sorting) => {
+                    if (sorting.length === 0) sorting = DEFAULT_PAGINATION.sorting;
+                    setPagination(prevState => ({...prevState, sorting: sorting}))
+                }}
                 totalCount={countAll}
                 loading={loading}
                 pagination={pagination}

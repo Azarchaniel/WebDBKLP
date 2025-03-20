@@ -1,5 +1,6 @@
 import {jwtDecode} from "jwt-decode";
 import {login} from "../API";
+import {clearCache} from "./indexDb";
 
 let lastLogTime = 0;
 
@@ -51,9 +52,10 @@ export const loginUser = async (loginForm: {
     }
 }
 
-export const logoutUser = () => {
+export const logoutUser = async () => {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
+    await clearCache(); //clear IndexDB - cached Books data
     window.location.replace("/");
 }
