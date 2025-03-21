@@ -74,6 +74,17 @@ export const saveFirstPageToCache = async (books: IBook[], count: number, pagina
     }
 };
 
+export const getCachedTimestamp = async () => {
+    try {
+        const db = await getDB();
+
+        const metadata = await db.get('metadata', 'firstPageData');
+        return metadata?.timestamp;
+    } catch (err) {
+        console.error("Cannot get cached timestamp",err);
+    }
+}
+
 /**
  * Load books from cache
  * @returns Cached books data or null if cache is invalid

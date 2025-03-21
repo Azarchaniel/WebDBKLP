@@ -146,11 +146,16 @@ const checkBooksUpdated = async (req: Request, res: Response): Promise<void> => 
         // Find the most recently updated book
         const latestUpdate: {updatedAt: Date | undefined} = await Book.findOne().sort({ updatedAt: -1 }).select('updatedAt').lean() as unknown as {updatedAt: Date | undefined};
 
-        // Check if dataFrom is provided and if it's more recent than the latest update
-        if (dataFrom && latestUpdate?.updatedAt && new Date(dataFrom as string) >= new Date(latestUpdate.updatedAt)) {
-            // No new data, send 204 No Content and return
-            res.status(204).end();
-            return;
+        if (dataFrom && latestUpdate?.updatedAt && !isNaN(Number(dataFrom))) {
+            const dataFromNumber = Number(dataFrom);
+            const latestUpdateTime = latestUpdate?.updatedAt?.getTime();
+
+            // Check if dataFrom is provided and if it's more recent than the latest update
+            if (dataFromNumber >= latestUpdateTime) {
+                // No new data, send 204 No Content and return
+                res.status(204).end();
+                return;
+            }
         }
 
         // Data is not up-to-date, send 200 OK with the latest update timestamp

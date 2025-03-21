@@ -1,4 +1,4 @@
-import {IBook, IBookHidden} from "../../type";
+import {IBook, IBookHidden, IUser} from "../../type";
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
@@ -16,7 +16,7 @@ import {isUserLoggedIn} from "../../utils/user";
 import {ColumnDef} from "@tanstack/react-table";
 import {getBookTableColumns} from "../../utils/tableColumns";
 import BookDetail from "./BookDetail";
-import {loadFirstPageFromCache, saveFirstPageToCache} from "../../utils/indexDb";
+import {getCachedTimestamp, loadFirstPageFromCache, saveFirstPageToCache} from "../../utils/indexDb";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
@@ -57,9 +57,8 @@ export default function BookPage() {
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
-    const [dataFrom, setDataFrom] = useState<Date>(new Date());
     const popRef = useRef(null);
-    const activeUsers = useReadLocalStorage("activeUsers");
+    const activeUsers: IUser[] | null = useReadLocalStorage("activeUsers");
     const memoizedActiveUsers = useMemo(() => activeUsers, [JSON.stringify(activeUsers)]);
 
     const [requestId, setRequestId] = useState(0);
@@ -76,7 +75,20 @@ export default function BookPage() {
 
     //fetch books when changed user
     useEffect(() => {
-        fetchBooks();
+        // Clear any existing timeout when pagination changes
+        if (timeoutId) clearTimeout(timeoutId);
+
+        // Set a new timeout for debounced fetching
+        const newTimeoutId = setTimeout(() => {
+            fetchBooks();
+        }, 1000); // Wait 1s before making the request
+
+        setTimeoutId(newTimeoutId);
+
+        // Cleanup function to clear timeout if component unmounts or pagination changes again
+        return () => {
+            if (newTimeoutId) clearTimeout(newTimeoutId);
+        };
     }, [memoizedActiveUsers]);
 
     useEffect(() => {
@@ -107,22 +119,19 @@ export default function BookPage() {
             latestRequestIdRef.current = currentRequestId;
 
             // Check if data is up-to-date
-            const {data: {latestUpdate}, status} = await checkBooksUpdated(dataFrom);
+            const {status} = await checkBooksUpdated(await getCachedTimestamp());
 
             // For first page only with default pagination and no new books, try to load from cache first
-            if (checkIfFirstPage()) {
-                if (status === 204) {
-                    const cachedData = await loadFirstPageFromCache();
+            if (checkIfFirstPage() && activeUsers?.length === 0 && status === 204) {
+                const cachedData = await loadFirstPageFromCache();
 
-                    if (cachedData && currentRequestId === latestRequestIdRef.current) {
-                        // Successfully loaded from cache
-                        setCountAll(cachedData.count);
-                        setClonedBooks(cachedData.books.sort((a, b) => a.title.localeCompare(b.title)));
-                        setLoading(false);
-                        setDataFrom(latestUpdate);
+                if (cachedData && currentRequestId === latestRequestIdRef.current) {
+                    // Successfully loaded from cache
+                    setCountAll(cachedData.count);
+                    setClonedBooks(cachedData.books.sort((a, b) => a.title.localeCompare(b.title)));
+                    setLoading(false);
 
-                        return;
-                    }
+                    return;
                 }
             }
 
@@ -135,10 +144,9 @@ export default function BookPage() {
                         const processedBooks = stringifyAutors(books);
                         processedBooks.map((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false));
                         setClonedBooks(processedBooks);
-                        setDataFrom(latestUpdate);
 
                         // If this is first page without search, update the cache
-                        if (checkIfFirstPage()) {
+                        if (checkIfFirstPage() && activeUsers?.length === 0) {
                             saveFirstPageToCache(books, count, pagination);
                         }
                     }
