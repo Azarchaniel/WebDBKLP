@@ -57,12 +57,10 @@ export default function BookPage() {
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+    const [controller, setController] = useState<AbortController | null>(null);
     const popRef = useRef(null);
     const activeUsers: IUser[] | null = useReadLocalStorage("activeUsers");
     const memoizedActiveUsers = useMemo(() => activeUsers, [JSON.stringify(activeUsers)]);
-
-    const [requestId, setRequestId] = useState(0);
-    const latestRequestIdRef = useRef(0);
 
     const checkIfFirstPage = () => {
         return JSON.stringify(pagination) === JSON.stringify(DEFAULT_PAGINATION);
@@ -113,10 +111,13 @@ export default function BookPage() {
         try {
             setLoading(true);
 
-            // Increment and capture the current request ID
-            const currentRequestId = requestId + 1;
-            setRequestId(currentRequestId);
-            latestRequestIdRef.current = currentRequestId;
+            // Abort previous request
+            if (controller) {
+                controller.abort();
+            }
+            // Create new AbortController
+            const newController = new AbortController();
+            setController(newController);
 
             // Check if data is up-to-date
             const {status} = await checkBooksUpdated(await getCachedTimestamp());
@@ -125,7 +126,7 @@ export default function BookPage() {
             if (checkIfFirstPage() && activeUsers?.length === 0 && status === 204) {
                 const cachedData = await loadFirstPageFromCache();
 
-                if (cachedData && currentRequestId === latestRequestIdRef.current) {
+                if (cachedData) {
                     // Successfully loaded from cache
                     setCountAll(cachedData.count);
                     setClonedBooks(cachedData.books.sort((a, b) => a.title.localeCompare(b.title)));
@@ -138,26 +139,18 @@ export default function BookPage() {
             // Always fetch fresh data from API
             getBooks({...pagination, activeUsers})
                 .then(({data: {books, count}}: IBook[] | any) => {
-                    // Only update state if this is still the latest request
-                    if (currentRequestId === latestRequestIdRef.current) {
-                        setCountAll(count);
-                        const processedBooks = stringifyAutors(books);
-                        processedBooks.map((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false));
-                        setClonedBooks(processedBooks);
+                    setCountAll(count);
+                    const processedBooks = stringifyAutors(books);
+                    processedBooks.map((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false));
+                    setClonedBooks(processedBooks);
 
-                        // If this is first page without search, update the cache
-                        if (checkIfFirstPage() && activeUsers?.length === 0) {
-                            saveFirstPageToCache(books, count, pagination);
-                        }
+                    // If this is first page without search, update the cache
+                    if (checkIfFirstPage() && activeUsers?.length === 0) {
+                        saveFirstPageToCache(books, count, pagination);
                     }
                 })
                 .catch((err: Error) => console.trace(err))
-                .finally(() => {
-                    // Only update loading state if this is still the latest request
-                    if (currentRequestId === latestRequestIdRef.current) {
-                        setLoading(false);
-                    }
-                });
+                .finally(() => setLoading(false));
         } catch (err) {
             console.error('Error fetching books:', err);
             setLoading(false);
