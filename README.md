@@ -8,6 +8,9 @@ cd ./server; npm run start
 cd ./client; npx run start
 
 ### TODO
+- [ ] lagging in autors
+- [ ] cache first page of books
+- [ ] responsivity
 - [ ] divide CSS into chunks based on page
 - [ ] better granulating - what is possible, move to components
 - [ ] in BookDetail, when clicking on Edice/Serie, filter every book from Edice/Serie

@@ -43,7 +43,14 @@ export const autorRoles = [
     {value: "boardGameAutor", showValue: "Autor spol. hier"}
 ];
 
-export const DEFAULT_PAGINATION = {
+interface IPagination {
+    page: number;
+    pageSize: number;
+    sorting: SortingState;
+    search?: string;
+}
+
+export const DEFAULT_PAGINATION: IPagination = Object.freeze({
     page: 1,
     pageSize: 50,
     search: "",
@@ -51,6 +58,6 @@ export const DEFAULT_PAGINATION = {
         id: "title",
         desc: false
     }] as SortingState
-};
+});
 
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];

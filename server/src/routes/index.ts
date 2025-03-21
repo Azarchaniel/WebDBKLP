@@ -11,7 +11,7 @@ import {
     getBooksByIds,
     getAllAutorsBooks,
     loginUser,
-    refreshToken,
+    refreshToken, checkBooksUpdated,
 } from '../controllers'
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
@@ -43,6 +43,8 @@ router.put('/edit-book/:id', updateBook)
 router.post('/delete-book/:id', deleteBook)
 router.get('/get-book-info/:isbn', getInfoFromISBN)
 router.get('/books-by-ids', getBooksByIds)
+router.get('/books/check-updated', checkBooksUpdated)
+
 
 // ### AUTORS ###
 router.get('/autor/:id', getAutor)

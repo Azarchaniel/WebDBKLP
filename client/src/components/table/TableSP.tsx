@@ -7,7 +7,6 @@ import {
     flexRender, SortingState, getExpandedRowModel, ExpandedState,
 } from '@tanstack/react-table';
 import {LoadingBooks} from "../LoadingBooks";
-import BookDetail from "../../pages/books/BookDetail";
 import Pagination from "./Pagination";
 
 type PropsMT = {
@@ -44,7 +43,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
          sortingChange,
          totalCount,
          loading = false,
-         pagination = {page: 1, pageSize: 50, sorting: {id: "", desc: true}},
+         pagination = {page: 1, pageSize: 50, sorting: [{id: "", desc: true}]},
          hiddenCols,
          expandedElement
      }) => {
