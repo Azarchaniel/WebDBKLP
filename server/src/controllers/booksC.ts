@@ -9,10 +9,10 @@ import diacritics from "diacritics";
 
 const normalizeBook = (data: any): IBook => {
     const city = data.location ?
-        Array.isArray(data.location?.city) ? data?.location?.city?.[0]?.value : data?.location?.city
+        Array.isArray(data.location?.city) ? data?.location?.city?.[0]?.key : data?.location?.city
         : null;
     const countryPublished = data.published ?
-        Array.isArray(data.published?.country) ? data?.published?.country?.[0]?.value : data?.published?.country
+        Array.isArray(data.published?.country) ? data?.published?.country?.[0]?.key : data?.published?.country
         : null;
 
     return {
@@ -94,7 +94,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         }
 
         const normalizedSearchFields = [
-            "autor", "editor", "ilustrator", "translator", "title", "subtitle", "content", "edition", "serie", "note", "published"
+            "autor", "editor", "ilustrator", "translator", "title", "subtitle", "content", "edition", "serie", "note", "published", "ISBN"
         ];
 
         // Add search conditions to the query if a search term is provided
@@ -102,7 +102,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             query = {
                 ...query,
                 $or: normalizedSearchFields.map(field => ({
-                    [`normalizedSearchField.${field}`]: {$regex: diacritics.remove(search as string), $options: "i"}
+                    [`normalizedSearchField.${field}`]: {$regex: diacritics.remove(search as string).replace(/-/g, ""), $options: "i"}
                 }))
             };
         }
