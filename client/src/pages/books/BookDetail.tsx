@@ -1,7 +1,7 @@
 import React from "react";
 import { IAutor, IBook, ILangCode, IUser } from "../../type";
-import { formatDimension } from "../../utils/utils";
-import { langCode } from "../../utils/locale";
+import {formatDimension, getPublishedCountry} from "../../utils/utils";
+import {langCode} from "../../utils/locale";
 import { cities } from "../../utils/constants";
 
 interface IExtendedBook extends IBook {
@@ -80,7 +80,7 @@ const BookDetail: React.FC<Props> = ({ data }) => {
 
 		const publisherText = `${publisher ?? "-"}`;
 		const yearText = year ? `, ${year}` : "";
-		const countryText = country ? `, ${country}` : "";
+		const countryText = country ? `, ${getPublishedCountry(country)?.value ?? ""}` : "";
 
 		return <p>Vydavateľ: {publisherText}{yearText}{countryText}</p>;
 	};

@@ -1,5 +1,6 @@
-import {IAutor, ILocation, IUser} from "../type";
+import {IAutor, ILangCode, ILocation, IUser} from "../type";
 import {cities} from "./constants";
+import {countryCode} from "./locale";
 
 export const shortenStringKeepWord = (text: string, maxLength: number): string => {
 	if (!text) return "";
@@ -212,4 +213,8 @@ export const formatDimension = (dimension: any) => {
 				{minimumFractionDigits: 1, maximumFractionDigits: 1}) as unknown as number;
 
 	return parseFloat(dimension).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) as unknown as number;
+}
+
+export const getPublishedCountry = (publishedCountry: any): ILangCode | undefined => {
+	return countryCode.find((country: ILangCode) => (publishedCountry as unknown as string[])?.includes(country.key));
 }

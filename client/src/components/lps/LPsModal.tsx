@@ -6,7 +6,7 @@ import {Multiselect} from "multiselect-react-dropdown";
 import {IAutor, ILangCode, ILP, ValidationError} from "../../type";
 import {getAutors} from "../../API";
 import {showError} from "../Modal";
-import {formPersonsFullName} from "../../utils/utils";
+import {formPersonsFullName, getPublishedCountry} from "../../utils/utils";
 import {InputField, MultiselectField} from "../InputFields";
 
 interface BodyProps {
@@ -49,7 +49,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
         const toBeModified: ILP = {
             ...data,
             autor: formPersonsFullName((data as ILP)?.autor),
-            published: {country: countryCode.find((country: ILangCode) => ((data as ILP)?.published?.country as unknown as string[])?.includes(country.key))},
+            published: {country: getPublishedCountry((data as ILP)?.published?.country)},
             language: langCode.filter((lang: ILangCode) => ((data as ILP)?.language as unknown as string[])?.includes(lang.key))
         } as ILP;
 

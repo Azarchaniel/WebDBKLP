@@ -96,6 +96,7 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
         } = req.body;
 
         const languageNormalized = language?.map((lang: { key: string; value: string }) => lang.key);
+        const publishedCountryNormalized = Array.isArray(published.country) ? published.country?.[0] : published.country;
 
         if (!_id) {
             const lp: ILp = new Lp({
@@ -109,7 +110,7 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
                 published: {
                     publisher: published?.publisher,
                     year: published?.year ?? undefined,
-                    country: published?.country ?? ''
+                    country: publishedCountryNormalized ?? ''
                 },
                 speed: speed,
                 deletedAt: null
@@ -126,7 +127,8 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
                 {_id: _id},
                 {
                     ...req.body,
-                    language: languageNormalized
+                    language: languageNormalized,
+                    published: {...published, country: publishedCountryNormalized}
                 }
             )
             const allLps: ILp[] = await Lp.find().populate([

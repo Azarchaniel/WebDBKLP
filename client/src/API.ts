@@ -452,15 +452,19 @@ export const addLP = async (
     formData: /*ILP*/any
 ): Promise<AxiosResponse<ApiLPDataType>> => {
     try {
+        const {
+            "published.country": country,
+            ...lpData // Use rest operator to get the remaining properties
+        } = formData;
 
-        const lp: any/*Omit<ILP, '_id'>*/ = {
-            ...formData,
+        // Construct the lp object with the nested published property
+        const lp: any = {
+            ...lpData, // Spread the remaining properties
             published: {
-                publisher: formData["published.publisher"] ?? "",
-                year: formData["published.year"] ?? undefined,
-                country: formData["published.country"] ?? ""
+                ...lpData["published"],
+                country: country ?? ""
             },
-        }
+        };
 
         const saveLP: AxiosResponse<ApiLPDataType> = await axiosInstance.post(
             baseUrl + "/add-lp",
