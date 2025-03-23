@@ -240,7 +240,7 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
     try {
         console.log("GR called ", isbn);
 
-        const url = `https://www.goodreads.com/book/isbn/${isbn}?key=${process.env.GOODREADS_API_KEY}`;
+        const url = `https://www.goodreads.com/book/isbn/${isbn}?key=cvAALPZ596Xc4Fnrv6pnw`;
         const response = await axios.get(url);
         const parser = new xml2js.Parser();
         const json = await parser.parseStringPromise(response.data);
