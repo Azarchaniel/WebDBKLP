@@ -136,15 +136,13 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
                     {
                         $and: [
                             queryOptions[0], // Prioritize lastName condition
-                            {$or: firstNameConditions} // Include firstName conditions only when lastName matches
+                            firstName ? {$or: firstNameConditions} : {} // Include firstName conditions only when lastName matches
                         ]
-                    },
-                    ...queryOptions // Fall back to matching lastName alone
+                    }
                 ];
             }
 
             let foundAuthor = await Autor.findOne({$or: queryOptions}).collation({locale: "cs", strength: 1});
-
 
             if (!foundAuthor) {
                 foundAuthor = await Autor.create({firstName: firstName, lastName: lastName});
@@ -240,7 +238,7 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
     try {
         console.log("GR called ", isbn);
 
-        const url = `https://www.goodreads.com/book/isbn/${isbn}?key=${process.env.GOODREADS_API_KEY}`;
+        const url = `https://www.goodreads.com/book/isbn/${isbn}?key=cvAALPZ596Xc4Fnrv6pnw`;
         const response = await axios.get(url);
         const parser = new xml2js.Parser();
         const json = await parser.parseStringPromise(response.data);
@@ -394,6 +392,7 @@ export async function normalizeSearchFields(doc: any, model: "book" | "autor" | 
                 serie: doc.serie,
                 note: doc.note,
                 published: doc.published,
+                ISBN: doc.ISBN,
             };
             break
         case "autor":
@@ -416,6 +415,11 @@ export async function normalizeSearchFields(doc: any, model: "book" | "autor" | 
 
     // Normalize fields and add them as nested properties
     for (const [key, value] of Object.entries(fieldsToNormalize)) {
+        if (key === "ISBN") {
+            normalizedFields["ISBN"] = (value as string).replace(/-/g, "");
+            break;
+        }
+
         const normalizedValue = await normalizeFieldValue(value);
         if (normalizedValue) {
             // Handle nested paths (e.g., "edition.title") by splitting by "."

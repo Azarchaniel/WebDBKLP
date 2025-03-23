@@ -6,7 +6,8 @@ export const connectDBforMigration = () => {
 
     const PORT: string | number = 4001
 
-    const uri: string = `mongodb+srv://Azarchaniel:lubos26csonka@cluster0.og6qo.mongodb.net/WebDBKLP?retryWrites=true&w=majority`;
+    console.log(" === set correct password === ");
+    const uri: string = `mongodb+srv://Azarchaniel:----------@cluster0.og6qo.mongodb.net/WebDBKLP?retryWrites=true&w=majority`;
 
     mongoose.set("strictQuery", false);
 

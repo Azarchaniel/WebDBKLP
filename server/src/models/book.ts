@@ -49,7 +49,8 @@ bookSchema.index({
         "normalizedSearchField.edition": "text",
         "normalizedSearchField.serie": "text",
         "normalizedSearchField.note": "text",
-        "normalizedSearchField.published": "text"
+        "normalizedSearchField.published": "text",
+        "normalizedSearchField.ISBN": "text"
 });
 
 bookSchema.pre('save', function (next) {
