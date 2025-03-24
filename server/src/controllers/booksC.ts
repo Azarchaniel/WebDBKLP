@@ -9,7 +9,7 @@ import diacritics from "diacritics";
 
 const normalizeBook = (data: any): IBook => {
     const city = data.location ?
-        Array.isArray(data.location?.city) ? data?.location?.city?.[0]?.key : data?.location?.city
+        Array.isArray(data.location?.city) ? data?.location?.city?.[0]?.value : data?.location?.city
         : null;
     const countryPublished = data.published ?
         Array.isArray(data.published?.country) ? data?.published?.country?.[0]?.key : data?.published?.country
