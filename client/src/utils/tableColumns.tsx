@@ -239,7 +239,7 @@ export const getLPTableColumns = (): ColumnDef<any, any>[] => [
         header: 'Vydané',
         cell: ({ cell }: { cell: any }) => {
             const published = cell.getValue() as IPublished;
-            return published ? `${published?.publisher} (${published?.year ?? "?"})` : null;
+            return published  ? `${published?.publisher ?? ""} (${published?.year ?? "-"})` : null;
         },
     },
     {

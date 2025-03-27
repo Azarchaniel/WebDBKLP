@@ -6,7 +6,7 @@ import Toast from "../../components/Toast";
 import React, {useEffect, useState} from "react";
 import {addQuote, deleteQuote, getQuotes} from "../../API";
 import {toast} from "react-toastify";
-import {darkenLightenColor, randomMinMax} from "../../utils/utils";
+import {darkenLightenColor, generateColors, getRandomShade, randomMinMax} from "../../utils/utils";
 import Header from "../../components/AppHeader";
 import { LoadingBooks } from "../../components/LoadingBooks";
 import Multiselect from "multiselect-react-dropdown";
@@ -14,6 +14,12 @@ import {useReadLocalStorage} from "usehooks-ts";
 import {ScrollToTopBtn} from "../../utils/elements";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
 import {isUserLoggedIn} from "../../utils/user";
+
+interface QuoteGroup {
+	bookId: string;
+	quotes: IQuote[];
+	baseColor: string;
+}
 
 export default function QuotePage() {
 	const [books, setBooks] = useState<IBook[]>([]);
@@ -24,28 +30,37 @@ export default function QuotePage() {
 	const activeUser = useReadLocalStorage("activeUsers") as string[];
 	const [loading, setLoading] = useState(true);
 	const [saveAutorSuccess, setSaveAutorSuccess] = useState<boolean | undefined>(undefined);
-
-	const generateColors = (length: number) => {
-		let colors = ["#77dd77", "#836953", "#89cff0", "#99c5c4", "#9adedb", "#aa9499", "#aaf0d1", "#b2fba5", "#b39eb5", "#bdb0d0",
-			"#bee7a5", "#befd73", "#c1c6fc", "#c6a4a4", "#c8ffb0", "#cb99c9", "#cef0cc", "#cfcfc4", "#d8a1c4", "#dea5a4", "#deece1",
-			"#dfd8e1", "#e5d9d3", "#e9d1bf", "#f49ac2", "#f4bfff", "#fdfd96", "#ff6961", "#ff964f", "#ff9899", "#ffb7ce", "#ca9bf7"];
-
-		while (colors.length < length) {
-			// if there are more quotes than colors, duplicate arr of colors, but randomly change shade of a color by +- 40 perc
-			colors = colors.flatMap((item: string) => [item, darkenLightenColor(item, randomMinMax(30, -30, true))]);
-			colors = Array.from(new Set(colors));
-		}
-		return Array.from(new Set(colors));
-	}
+	const [quoteGroups, setQuoteGroups] = useState<QuoteGroup[]>([]);
 
 	useEffect(() => {
 		fetchQuotes();
 	}, [activeUser]);
 
-	const colors = React.useMemo(
-		() => generateColors(initQuotes.length),
-		[initQuotes.length]
-	);
+	useEffect(() => {
+		groupQuotesByBook();
+	}, [filteredQuotes]);
+
+	const groupQuotesByBook = () => {
+		const groups: { [bookId: string]: QuoteGroup } = {};
+		const baseColors = generateColors(books.length);
+		let colorIndex = 0;
+
+		filteredQuotes.forEach((quote) => {
+			const bookId = quote.fromBook?._id;
+			if (!bookId) return;
+
+			if (!groups[bookId]) {
+				groups[bookId] = {
+					bookId: bookId,
+					quotes: [],
+					baseColor: baseColors[colorIndex++ % baseColors.length], // Assign a base color
+				};
+			}
+			groups[bookId].quotes.push(quote);
+		});
+
+		setQuoteGroups(Object.values(groups));
+	};
 
 	const updateFilteredBooks = (books: IBook[]): void => {
 		setBooksToFilter(books);
@@ -146,18 +161,21 @@ export default function QuotePage() {
 				}}
 			/>
 			<div className="quote_container">
-				{
-					filteredQuotes.length ?
-						filteredQuotes?.map((quote: IQuote, index: number) => {
-							return <QuoteItem
+				{quoteGroups.length > 0 ? (
+					quoteGroups.map((group) =>
+						group.quotes.map((quote) => (
+							<QuoteItem
+								key={quote._id}
 								deleteQuote={handleDeleteQuote}
 								saveQuote={handleSaveQuote}
 								quote={quote}
-								bcgrClr={colors[index]}
+								bcgrClr={getRandomShade(group.baseColor)} // Get a random shade
 							/>
-						}) :
-						<span style={{color: "black"}}>Žiadne citáty neboli nájdené!</span>
-				}
+						))
+					)
+				) : (
+					<span style={{ color: "black" }}>Žiadne citáty neboli nájdené!</span>
+				)}
 			</div>
 			<ScrollToTopBtn scrollToTop={() => scrollToTopOfPage()}/>
 			<Toast/>

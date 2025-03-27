@@ -80,19 +80,36 @@ export const darkenLightenColor = (hex: string, percent: number): string => {
 	g = Math.min(255, Math.max(0, g + Math.round((percent / 100) * 255)));
 	b = Math.min(255, Math.max(0, b + Math.round((percent / 100) * 255)));
 
-	const calcChannel = (channel: number) =>
-		channel <= 0.03928 ? channel / 12.92 : Math.pow((channel + 0.055) / 1.055, 2.4);
-	const luminance =
-		0.2126 * calcChannel(r) + 0.7152 * calcChannel(g) + 0.0722 * calcChannel(b);
+	let luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 
 	//color is too dark, dump it and create new
-	if (r < 15 || g < 15 || b < 15) return darkenLightenColor(hex, 35);
-	if (luminance < 2500) return darkenLightenColor(hex, -40);
+	const luminanceThreshold = 65; // range is 0..255, where 0 is the darkest and 255 is the lightest. Values greater than 128 are considered light
+	// If the color is too dark, lighten it
+	if (luminance < luminanceThreshold) {
+		return darkenLightenColor(hex, 30); // Lighten by 30%
+	}
 
 	// Convert back to hex and return
 	const toHex = (value: number) => value.toString(16).padStart(2, "0");
 	return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
+export const generateColors = (length: number) => {
+	let colors = ["#77dd77", "#836953", "#89cff0", "#99c5c4", "#9adedb", "#aa9499", "#aaf0d1", "#b2fba5", "#b39eb5", "#bdb0d0",
+		"#bee7a5", "#befd73", "#c1c6fc", "#c6a4a4", "#c8ffb0", "#cb99c9", "#cef0cc", "#cfcfc4", "#d8a1c4", "#dea5a4", "#deece1",
+		"#dfd8e1", "#e5d9d3", "#e9d1bf", "#f49ac2", "#f4bfff", "#fdfd96", "#ff6961", "#ff964f", "#ff9899", "#ffb7ce", "#ca9bf7"];
+
+	while (colors.length < length) {
+		// if there are more quotes than colors, duplicate arr of colors, but randomly change shade of a color by +- 40 perc
+		colors = colors.flatMap((item: string) => [item, darkenLightenColor(item, randomMinMax(30, -30, true))]);
+		colors = Array.from(new Set(colors));
+	}
+	return Array.from(new Set(colors));
+}
+
+export const getRandomShade = (hexColor: string): string => {
+	return darkenLightenColor(hexColor, randomMinMax(30, -30, true));
+};
 
 export const getCssPropertyValue = (propertyName: string) => {
 	return getComputedStyle(document.body).getPropertyValue(propertyName);
