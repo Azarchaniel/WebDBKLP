@@ -13,4 +13,5 @@ export interface ILp extends Document {
     language: string;
     note: string;
     deletedAt?: Date;
+    normalizedSearchField?: {[key: string]: string};
 }

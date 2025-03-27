@@ -14,7 +14,8 @@ const lpSchema: Schema = new Schema({
     speed: Number,
     language: {type: [String], required: true},
     note: {type: String, required: false},
-    deletedAt: {type: Date}
+    deletedAt: {type: Date},
+    normalizedSearchField: {type: JSON, required: false},
 }, {timestamps: true})
 
 lpSchema.index({

@@ -11,4 +11,5 @@ export interface IAutor extends Document {
     fullName?: string;
     deletedAt?: Date;
     role?: string[];
+    normalizedSearchField?: {[key: string]: string};
 }
