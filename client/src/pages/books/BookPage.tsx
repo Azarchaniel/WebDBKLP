@@ -290,18 +290,26 @@ export default function BookPage() {
 
     const [selectedBooks, setSelectedBooks] = useState<any[]>([]);
     const [hasMore, setHasMore] = useState<boolean>(true);
+    const [acLoading, setAcLoading] = useState<boolean>(false);
 
     const handleSearch = useCallback(async (query: string, page: number): Promise<any[]> => {
         try {
-            const response = await getBooks({ search: query, page, pageSize: 10 }); // Adjust pageSize as needed
+            setAcLoading(true);
+            const response = await getBooks({ search: query, page, pageSize: 10 });
             const { books, count } = response.data;
-            console.log(books, count)
-            if (!count) return [];
+
+            if (!count) {
+                setAcLoading(false);
+                return [];
+            }
             setHasMore(books.length > 0 && count > (page * 10)); // Check if there are more pages
 
-            return books.map((book: any) => ({ _id: book._id, title: book.title }));
+            const foundBooks = books.map((book: any) => ({ _id: book._id, title: book.title }));
+            setAcLoading(false);
+            return foundBooks;
         } catch (error) {
             console.error('Error fetching books:', error);
+            setAcLoading(false);
             return [];
         }
     }, []);
@@ -309,7 +317,6 @@ export default function BookPage() {
     const handleBookChange = (data: { name: string; value: any[] }) => {
         setSelectedBooks(data.value);
     };
-
 
     return (
         <main className='App'>
@@ -344,13 +351,13 @@ export default function BookPage() {
                             <LazyLoadMultiselect
                                 value={selectedBooks}
                                 displayValue="title"
-                                placeholder="Search for books..."
+                                placeholder="Vyhľadaj knihu..."
                                 onChange={handleBookChange}
                                 name="books"
                                 onSearch={handleSearch}
                                 hasMore={hasMore}
-                                loading={loading}
-                                pageSize={10}
+                                loading={acLoading}
+                                createNew={(neww) => console.log("creating new item", neww)}
                             />
                             <input
                                 placeholder="Vyhľadaj knihu"

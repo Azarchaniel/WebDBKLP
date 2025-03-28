@@ -23,27 +23,29 @@ interface MultiselectInputProps {
     selectionLimit?: number;
     emptyRecordMsg?: string;
     customerror?: boolean;
-    onSearch: (query: string, page: number) => Promise<Option[]>; // Modified onSearch
+    onSearch: (query: string, page: number) => Promise<Option[]>;
     reset?: boolean;
     hasMore?: boolean;
     loading?: boolean;
     pageSize?: number;
+    createNew?: (query: string) => void;
 }
 
 export const LazyLoadMultiselect = React.memo(({
                                                    value,
                                                    displayValue,
-                                                   placeholder = "Select...",
+                                                   placeholder = "Vyhľadaj...",
                                                    onChange,
                                                    name,
                                                    id,
                                                    selectionLimit,
-                                                   emptyRecordMsg = "No options found",
+                                                   emptyRecordMsg = "Žiaden záznam nenájdený",
                                                    customerror,
                                                    onSearch,
                                                    reset,
                                                    hasMore = false,
-                                                   loading = false
+                                                   loading = false,
+                                                   createNew,
                                                }: MultiselectInputProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -85,7 +87,6 @@ export const LazyLoadMultiselect = React.memo(({
         };
     }, []);
 
-    // Debounce function without lodash
     const debounce = useCallback((func: (query: string, page: number) => void, delay: number) => {
         let timeoutId: NodeJS.Timeout;
         return (...args: [string, number]) => {
@@ -162,7 +163,7 @@ export const LazyLoadMultiselect = React.memo(({
         if (loading || !hasMore) return;
         const nextPage = currentPage + 1;
         setCurrentPage(nextPage);
-        await debouncedSearch(searchQuery, nextPage);
+        debouncedSearch(searchQuery, nextPage);
     }, [currentPage, debouncedSearch, hasMore, loading, searchQuery]);
 
     const filteredOptionsToDisplay = useMemo(() => {
@@ -171,13 +172,22 @@ export const LazyLoadMultiselect = React.memo(({
         );
     }, [filteredOptions, selectedValues, displayValue]);
 
-    const handleInputClick = useCallback(async () => {
+    const handleInputClick = useCallback(() => {
         setIsOpen(true);
         if (inputRef.current) inputRef.current.focus();
         if (inputValue === "") {
-            await debouncedSearch("", 1);
+            debouncedSearch("", 1);
         }
     }, [inputValue, debouncedSearch]);
+
+    const handleCreateNew = useCallback(() => {
+        if (createNew && searchQuery) {
+            createNew(searchQuery);
+            setIsOpen(false);
+            // setInputValue("");
+            // setSearchQuery("");
+        }
+    }, [createNew, searchQuery]);
 
     return (
         <div
@@ -186,7 +196,6 @@ export const LazyLoadMultiselect = React.memo(({
             className={`chip-multiselect ${customerror ? 'error' : ''}`}
         >
             <div className="chip-container">
-                {/* Selected chips are now rendered before the input */}
                 {selectedValues.map((item, index) => (
                     <div key={index} className="chip">
                         {item[displayValue]}
@@ -201,7 +210,6 @@ export const LazyLoadMultiselect = React.memo(({
                         </span>
                     </div>
                 ))}
-                {/* Input field is now after the chips */}
                 <input
                     ref={inputRef}
                     type="text"
@@ -215,8 +223,15 @@ export const LazyLoadMultiselect = React.memo(({
             </div>
             {isOpen && (
                 <div className="autocomplete-menu">
-                    {filteredOptionsToDisplay.length === 0 && !loading ? (
-                        <div className="autocomplete-item empty">{emptyRecordMsg}</div>
+                    {filteredOptionsToDisplay.length === 0 && !loading && searchQuery.length > 0 ? (
+                        <>
+                            <div className="autocomplete-item empty">{emptyRecordMsg}</div>
+                            {createNew && (
+                                <div className="autocomplete-item create-new" onClick={handleCreateNew}>
+                                    Vytvoriť "{searchQuery}"
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <>
                             {filteredOptionsToDisplay.map((option, index) => (
@@ -229,7 +244,7 @@ export const LazyLoadMultiselect = React.memo(({
                                 </div>
                             ))}
                             {loading && (
-                                <div className="autocomplete-item loading">Loading...</div>
+                                <div className="autocomplete-item loading">Načítava sa...</div>
                             )}
                             {hasMore && !loading && (
                                 <div
