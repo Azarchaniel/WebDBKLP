@@ -106,7 +106,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                         </div>
                     ) : (
                         <>
-                        <table className="serverPaginationTable" style={{color: "black", width: "100%"}}>
+                        <table className="serverPaginationTable">
                             <thead className="tableHeader">
                             {table.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>

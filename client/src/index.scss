@@ -485,7 +485,7 @@ body, html, main, #root {
     position: absolute;
     border-radius: 4em;
     left: 0;
-    top:0;
+    top: 0;
     width: 100%;
     height: 100%;
     opacity: 0;
@@ -498,7 +498,7 @@ body, html, main, #root {
     position: absolute;
     border-radius: 4em;
     left: 0;
-    top:0;
+    top: 0;
     opacity: 1;
     transition: 0s;
   }
@@ -649,6 +649,7 @@ body, html, main, #root {
       justify-content: center;
       align-items: center;
       padding: 0.4rem;
+
       i {
         margin: 0 0 0 1rem;
         font-size: 1.5rem;
@@ -1077,7 +1078,9 @@ input:invalid {
 
 /* TAN STACK TABLE */
 .serverPaginationTable {
-  margin-bottom: 3rem;
+  color: black;
+  width: 100%;
+
   .tableHeader {
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
@@ -1236,6 +1239,7 @@ button:focus {
     padding: 5px;
     box-shadow: none;
   }
+
   display: flex;
   align-items: center;
 
@@ -1248,6 +1252,7 @@ button:focus {
     position: absolute;
     right: 0.5rem;
     color: black;
+
     &:hover {
       color: var(--anchor);
     }
@@ -1283,6 +1288,7 @@ button:focus {
     border: none;
     background: none;
     cursor: pointer;
+
     &:hover {
       color: var(--anchor);
     }
@@ -1298,7 +1304,7 @@ button:focus {
   .passwordToggle {
     position: absolute;
     right: 0;
-    top: calc((24px - (1.5rem / 2)) / 2 ); // 24px - height of input
+    top: calc((24px - (1.5rem / 2)) / 2); // 24px - height of input
     cursor: pointer;
     width: 3rem;
     display: flex;

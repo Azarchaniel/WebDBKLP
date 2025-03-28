@@ -9,21 +9,18 @@ cd ./client; npx run start
 
 ### TODO
 - [ ] lagging in autors
-- [ ] pagination in Select
+- [X] pagination in Select
 - [X] cache first page of books
 - [ ] responsivity
 - [ ] divide CSS into chunks based on page
 - [ ] better granulating - what is possible, move to components
-- [ ] in BookDetail, when clicking on Edice/Serie, filter every book from Edice/Serie
-- - [ ] but this requires to have Edice/Serie as entry in DB with ID
-- - [ ] which require CRUD form Edice/Serie
-- - [ ] I need it in DB for MultiSelect anyway
+- [ ] in BookTable, when clicking on property, filter the value of property
 - [ ] lazy loading quotes https://medium.com/@iamusamasattar/how-to-implement-scroll-pagination-in-mern-application-f253f170754f
-- [ ] rework Autocomplete - custom - if there is no item found, parse the string and create item
+- [X] rework Autocomplete - custom - if there is no item found, parse the string and create item
 - [ ] (in far future) localization 
 - [ ] allow user to add tags - "fantasy", "read2012"
 - [ ] connect to devices camera and read the bar code to get ISBN
-- [ ] allow to pick search column - send as a JSON to BE
+- [ ] allow to pick search column and filtering - send as a JSON to BE
 
 ### Known problems and how to fix it
 
