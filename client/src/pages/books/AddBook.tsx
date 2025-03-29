@@ -11,17 +11,10 @@ type Props = {
 }
 
 const AddBook: React.FC<Props> = ({saveBook, book, onClose, saveResultSuccess}: Props) => {
-	const [showModal, setShowModal] = useState<boolean>(false);
-	const [bookData, setBookData] = useState<IBook | object>();
+	const [showModal, setShowModal] = useState<boolean>(Boolean(book));
+	const [bookData, setBookData] = useState<IBook | object>(book || {});
 	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title"}]);
 	const [outline, setOutline] = useState<React.CSSProperties>();
-
-	useEffect(() => {
-		if (book) {
-			setBookData(book);
-			setShowModal(true);
-		}
-	}, []);
 
 	useEffect(() => {
 		switch (saveResultSuccess) {

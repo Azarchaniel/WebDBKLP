@@ -3,7 +3,7 @@ import DatePicker, {registerLocale} from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {countryCode} from "../../utils/locale";
 import {IAutor, ILangCode, ValidationError} from "../../type";
-import {InputField, MultiselectField} from "../InputFields";
+import {InputField, LazyLoadMultiselect} from "../InputFields";
 import {showError} from "../Modal";
 import {autorRoles} from "../../utils/constants";
 import {sk} from "date-fns/locale/sk";
@@ -224,14 +224,15 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 
 			<div className="row">
 				<div className="col">
-					<MultiselectField
+					<LazyLoadMultiselect
 						selectionLimit={1}
+						value={formData?.nationality || []}
 						options={countryCode}
 						displayValue="value"
-						label="Národnosť"
-						value={formData?.nationality}
-						name="nationality"
+						placeholder="Národnosť"
 						onChange={handleInputChange}
+						name="nationality"
+						reset={Boolean(reset)}
 					/>
 				</div>
 				<div className="col">
@@ -250,14 +251,14 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 
 			<div className="row">
 				<div className="col">
-					<MultiselectField
+					<LazyLoadMultiselect
 						options={autorRoles}
 						displayValue="showValue"
-						label="Role"
-						value={formData?.role}
+						placeholder="Role"
+						value={formData?.role || []}
 						name="role"
 						onChange={handleInputChange}
-						reset={reset}
+						reset={Boolean(reset)}
 					/>
 				</div>
 			</div>

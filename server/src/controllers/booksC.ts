@@ -4,7 +4,7 @@ import Book from '../models/book';
 import User from '../models/user';
 import {createLookupStage, formatMongoDbDecimal, getIdFromArray, sortByParam, webScrapper} from "../utils/utils";
 import mongoose, {PipelineStage, Types} from 'mongoose';
-import {populateOptionsBook} from "../utils/constants";
+import {optionFetchAllExceptDeleted, populateOptionsBook} from "../utils/constants";
 import diacritics from "diacritics";
 
 const normalizeBook = (data: any): IBook => {
@@ -665,7 +665,7 @@ const dashboard = {
                 params: {userId}
             } = req
 
-            let users = await User.find({});
+            let users = await User.find(optionFetchAllExceptDeleted);
             let response = [];
 
             if (userId) {
@@ -717,7 +717,7 @@ const dashboard = {
     },
     getReadBy: async (req: Request, res: Response): Promise<void> => {
         try {
-            const users = (await User.find().select('_id firstName lastName')) as Partial<IUser>[];
+            const users = (await User.find(optionFetchAllExceptDeleted).select('_id firstName lastName')) as Partial<IUser>[];
             const totalBooksRead = await Book.countDocuments({deletedAt: {$ne: undefined}});
 
             const result: any[] = await Promise.all(

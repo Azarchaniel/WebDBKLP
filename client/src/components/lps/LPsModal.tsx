@@ -1,13 +1,11 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
-import {toast} from "react-toastify";
+import React, {useCallback, useEffect, useState} from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import {countryCode, langCode} from "../../utils/locale";
-import {Multiselect} from "multiselect-react-dropdown";
-import {IAutor, ILangCode, ILP, ValidationError} from "../../type";
-import {getAutors} from "../../API";
+import {ILangCode, ILP, ValidationError} from "../../type";
 import {showError} from "../Modal";
 import {formPersonsFullName, getPublishedCountry} from "../../utils/utils";
-import {InputField, MultiselectField} from "../InputFields";
+import {InputField, LazyLoadMultiselect} from "../InputFields";
+import {fetchAutors} from "../../utils/fetch";
 
 interface BodyProps {
     data: ILP | object;
@@ -24,14 +22,10 @@ interface ButtonsProps {
 
 export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
     const [formData, setFormData] = useState(data as any);
-    const [autors, setAutors] = useState<IAutor[] | []>([]);
     const [errors, setErrors] = useState<ValidationError[]>([{
         label: "Názov LP musí obsahovať aspoň jeden znak!",
         target: "title"
     }]);
-    const [fetchedAutors, setFetchedAutors] = useState<boolean>(false);
-
-    const countryRef = useRef(null);
 
     useEffect(() => {
         onChange(formData)
@@ -46,29 +40,17 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
     useEffect(() => {
         if (!data) return;
 
+        const country = getPublishedCountry((data as ILP)?.published?.country);
+
         const toBeModified: ILP = {
             ...data,
             autor: formPersonsFullName((data as ILP)?.autor),
-            published: {country: getPublishedCountry((data as ILP)?.published?.country)},
+            published: {...(data as ILP)?.published, country: country ? [country] : []},
             language: langCode.filter((lang: ILangCode) => ((data as ILP)?.language as unknown as string[])?.includes(lang.key))
         } as ILP;
 
         setFormData(toBeModified);
     }, []);
-
-    const fetchAutors = () => {
-        if (fetchedAutors) return;
-
-        getAutors()
-            .then(aut => {
-                setAutors(aut.data.autors);
-                setFetchedAutors(true);
-            })
-            .catch(err => {
-                toast.error("Nepodarilo sa nacitat autorov!");
-                console.error("Couldnt fetch autors", err)
-            });
-    };
 
     //error handling
     useEffect(() => {
@@ -147,15 +129,13 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
             <div style={{height: "5px", width: "100%"}}/>
             <div className="row">
                 <div className="col">
-                    <MultiselectField
-                        options={autors}
+                    <LazyLoadMultiselect
+                        value={formData?.autor || []}
                         displayValue="fullName"
-                        label="Autor"
-                        value={formData?.autor}
-                        name="autor"
+                        placeholder="Autor"
                         onChange={handleInputChange}
-                        emptyRecordMsg="Žiadny autori nenájdení"
-                        onClick={fetchAutors}
+                        name="autor"
+                        onSearch={fetchAutors}
                     />
                 </div>
             </div>
@@ -189,27 +169,20 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                     />
                 </div>
                 <div className="col">
-                    <Multiselect
+                    <LazyLoadMultiselect
+                        selectionLimit={1}
+                        value={formData?.published?.country}
                         options={countryCode}
                         displayValue="value"
                         placeholder="Krajina vydania"
-                        closeIcon="cancel"
-                        onSelect={(picked: ILangCode[]) => {
+                        onChange={(data) => {
+                            console.log(data.value.map(v => v.key));
                             setFormData({
                                 ...formData,
-                                "published.country": picked.map(v => v.key)
+                                "published.country": data.value.map(v => v.key)
                             })
                         }}
-                        style={{
-                            inputField: {marginLeft: "0.5rem"},
-                            searchBox: {
-                                width: "100%",
-                                paddingRight: "5px",
-                                marginRight: "-5px",
-                                borderRadius: "3px"
-                            }
-                        }}
-                        ref={countryRef}
+                        name="published.country"
                     />
                 </div>
             </div>
@@ -224,13 +197,14 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                     />
                 </div>
                 <div className="col">
-                    <MultiselectField
-                        options={langCode}
+                    <LazyLoadMultiselect
+                        selectionLimit={1}
+                        value={formData?.language || []}
+                        options={countryCode}
                         displayValue="value"
-                        label="Jazyk"
-                        value={formData?.language}
-                        name="language"
+                        placeholder="Jazyk"
                         onChange={handleInputChange}
+                        name="language"
                     />
                 </div>
             </div>

@@ -1,15 +1,16 @@
-import {IAutor, IBook, ILangCode, IUser, ValidationError} from "../../type";
+import {IBook, ILangCode, ValidationError} from "../../type";
 import React, {useCallback, useEffect, useState} from "react";
-import {getAutors, getInfoAboutBook, getUsers} from "../../API";
+import {getInfoAboutBook} from "../../API";
 import {toast} from "react-toastify";
 import {checkIsbnValidity, formatDimension, formPersonsFullName, validateNumber} from "../../utils/utils";
 import {countryCode, langCode} from "../../utils/locale";
 import {showError} from "../Modal";
-import {InputField, MultiselectField} from "../InputFields";
+import {InputField, LazyLoadMultiselect} from "../InputFields";
 import {cities} from "../../utils/constants";
 import {openLoadingBooks} from "../LoadingBooks";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
+import {fetchAutors, fetchUsers} from "../../utils/fetch";
 
 interface BodyProps {
     data: IBook | object;
@@ -26,10 +27,7 @@ interface ButtonsProps {
 
 export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
 	const [formData, setFormData] = useState(data as any);
-	const [autors, setAutors] = useState<IAutor[]>([]);
-	const [users, setUsers] = useState<IUser[]>([]);
 	const [errors, setErrors] = useState<ValidationError[]>([{label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title"}]);
-	const [dataFrom, setDataFrom] = useState<Date | undefined>();
 
 	useEffect(() => {
 		onChange(formData);
@@ -93,34 +91,10 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 		setFormData(toBeModified);
 	}, []);
 
-	const fetchAutors = () => {
-		getAutors({dataFrom})
-			.then(({data, status}) => {
-				if (status === 204) {
-					return;
-				}
-				setAutors(data.autors);
-				setDataFrom(data.latestUpdate);
-			})
-			.catch(err => {
-				toast.error("Nepodarilo sa nacitat autorov!");
-				console.error("Couldnt fetch autors", err)
-			});
-	};
+	useEffect(() => {
+		fetchUsers("", 1);
+	}, []);
 
-	const fetchUsers = () => {
-		if (users.length > 0) return;
-
-		getUsers().then(user => {
-			setUsers(user.data.users.map((user: IUser) => ({
-				...user,
-				fullName: formPersonsFullName(user)
-			})));
-		}).catch(err => {
-			toast.error("Nepodarilo sa nacitat uzivatelov!");
-			console.error("Couldnt fetch users", err)
-		});
-	};
 
 	//error handling
 	useEffect(() => {
@@ -239,15 +213,13 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 				/>
 			</div>
 			<div className="Autor">
-				<MultiselectField
-					options={autors}
+				<LazyLoadMultiselect
+					value={formData?.autor || []}
 					displayValue="fullName"
-					label="Autor"
-					value={formData?.autor}
-					name="autor"
+					placeholder="Autor"
 					onChange={handleInputChange}
-					emptyRecordMsg="Žiadny autor nenájdený"
-					onClick={fetchAutors}
+					name="autor"
+					onSearch={fetchAutors}
 				/>
 			</div>
 			<div className="ISBN">
@@ -271,39 +243,33 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 				</button>
 			</div>
 			<div className="Translator">
-				<MultiselectField
-					options={autors}
+				<LazyLoadMultiselect
+					value={formData?.translator || []}
 					displayValue="fullName"
-					label="Prekladateľ"
-					value={formData?.translator}
-					name="translator"
+					placeholder="Prekladateľ"
 					onChange={handleInputChange}
-					emptyRecordMsg="Žiadny autor nenájdený"
-					onClick={fetchAutors}
+					name="translator"
+					onSearch={fetchAutors}
 				/>
 			</div>
 			<div className="Editor">
-				<MultiselectField
-					options={autors}
+				<LazyLoadMultiselect
+					value={formData?.editor || []}
 					displayValue="fullName"
-					label="Editor"
-					value={formData?.editor}
-					name="editor"
+					placeholder="Editor"
 					onChange={handleInputChange}
-					emptyRecordMsg="Žiadny autor nenájdený"
-					onClick={fetchAutors}
+					name="editor"
+					onSearch={fetchAutors}
 				/>
 			</div>
 			<div className="Ilustrator">
-				<MultiselectField
-					options={autors}
+				<LazyLoadMultiselect
+					value={formData?.ilustrator || []}
 					displayValue="fullName"
-					label="Ilustrátor"
-					value={formData?.ilustrator}
-					name="ilustrator"
+					placeholder="Ilustrátor"
 					onChange={handleInputChange}
-					emptyRecordMsg="Žiadny autor nenájdený"
-					onClick={fetchAutors}
+					name="ilustrator"
+					onSearch={fetchAutors}
 				/>
 			</div>
 			<div className="Name">
@@ -356,25 +322,26 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 				/>
 			</div>
 			<div className="Krajina">
-				<MultiselectField
+				<LazyLoadMultiselect
 					selectionLimit={1}
+					value={formData?.published?.country}
 					options={countryCode}
 					displayValue="value"
-					label="Krajina vydania"
-					value={formData?.published?.country}
-					name="published.country"
+					placeholder="Krajina vydania"
 					onChange={handleInputChange}
+					name="published.country"
 				/>
 			</div>
 
 			<div className="Mesto">
-				<MultiselectField
+				<LazyLoadMultiselect
+					selectionLimit={1}
+					value={formData?.location?.city}
 					options={cities}
 					displayValue="showValue"
-					label="Mesto"
-					value={formData?.location?.city}
-					name="location.city"
+					placeholder="Mesto"
 					onChange={handleInputChange}
+					name="location.city"
 				/>
 			</div>
 			<div className="Police">
@@ -386,13 +353,13 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 				/>
 			</div>
 			<div className="language">
-				<MultiselectField
+				<LazyLoadMultiselect
+					value={formData?.language}
 					options={langCode}
 					displayValue="value"
-					label="Jazyk"
-					value={formData?.language}
-					name="language"
+					placeholder="Jazyk"
 					onChange={handleInputChange}
+					name="language"
 				/>
 			</div>
 
@@ -462,26 +429,24 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 				/>
 			</div>
 			<div className="Precitane">
-				<MultiselectField
-					options={users}
+				<LazyLoadMultiselect
+					value={formData?.readBy || []}
 					displayValue="fullName"
-					label="Prečítané"
-					value={formData?.readBy}
-					name="readBy"
+					placeholder="Prečítané"
 					onChange={handleInputChange}
-					onClick={fetchUsers}
+					name="readBy"
+					onSearch={fetchUsers}
 				/>
 			</div>
 
 			<div className="Vlastnik">
-				<MultiselectField
-					options={users}
+				<LazyLoadMultiselect
+					value={formData?.owner || []}
 					displayValue="fullName"
-					label="Vlastník"
-					value={formData?.owner}
-					name="owner"
+					placeholder="Vlastník"
 					onChange={handleInputChange}
-					onClick={fetchUsers}
+					name="owner"
+					onSearch={fetchUsers}
 				/>
 			</div>
 			<div className="Ex-Libris">

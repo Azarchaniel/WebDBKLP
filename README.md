@@ -9,7 +9,7 @@ cd ./client; npx run start
 
 ### TODO
 - [ ] lagging in autors
-- [ ] pagination in Select
+- [X] pagination in Select
 - [X] cache first page of books
 - [ ] responsivity
 - [ ] divide CSS into chunks based on page

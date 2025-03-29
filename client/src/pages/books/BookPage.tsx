@@ -17,7 +17,6 @@ import {ColumnDef} from "@tanstack/react-table";
 import {getBookTableColumns} from "../../utils/tableColumns";
 import BookDetail from "./BookDetail";
 import {getCachedTimestamp, loadFirstPageFromCache, saveFirstPageToCache} from "../../utils/indexDb";
-import {LazyLoadMultiselect} from "../../components/Autocomplete";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
@@ -62,8 +61,6 @@ export default function BookPage() {
     const popRef = useRef(null);
     const activeUsers: IUser[] | null = useReadLocalStorage("activeUsers");
     const memoizedActiveUsers = useMemo(() => activeUsers, [JSON.stringify(activeUsers)]);
-
-    const [selectedBook, setSelectedBook] = useState<any | null>(null);
 
     const checkIfFirstPage = () => {
         return JSON.stringify(pagination) === JSON.stringify(DEFAULT_PAGINATION);
@@ -288,36 +285,6 @@ export default function BookPage() {
         })
     }
 
-    const [selectedBooks, setSelectedBooks] = useState<any[]>([]);
-    const [hasMore, setHasMore] = useState<boolean>(true);
-    const [acLoading, setAcLoading] = useState<boolean>(false);
-
-    const handleSearch = useCallback(async (query: string, page: number): Promise<any[]> => {
-        try {
-            setAcLoading(true);
-            const response = await getBooks({ search: query, page, pageSize: 10 });
-            const { books, count } = response.data;
-
-            if (!count) {
-                setAcLoading(false);
-                return [];
-            }
-            setHasMore(books.length > 0 && count > (page * 10)); // Check if there are more pages
-
-            const foundBooks = books.map((book: any) => ({ _id: book._id, title: book.title }));
-            setAcLoading(false);
-            return foundBooks;
-        } catch (error) {
-            console.error('Error fetching books:', error);
-            setAcLoading(false);
-            return [];
-        }
-    }, []);
-
-    const handleBookChange = (data: { name: string; value: any[] }) => {
-        setSelectedBooks(data.value);
-    };
-
     return (
         <main className='App'>
             {/* TODO: remove Header and Sidebar from here */}
@@ -348,17 +315,6 @@ export default function BookPage() {
                 actions={
                     <div className="row justify-center mb-4 mr-2">
                         <div className="searchTableWrapper">
-                            <LazyLoadMultiselect
-                                value={selectedBooks}
-                                displayValue="title"
-                                placeholder="Vyhľadaj knihu..."
-                                onChange={handleBookChange}
-                                name="books"
-                                onSearch={handleSearch}
-                                hasMore={hasMore}
-                                loading={acLoading}
-                                createNew={(neww) => console.log("creating new item", neww)}
-                            />
                             <input
                                 placeholder="Vyhľadaj knihu"
                                 style={{paddingRight: "2rem"}}

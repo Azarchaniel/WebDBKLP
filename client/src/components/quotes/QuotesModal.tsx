@@ -1,11 +1,12 @@
 import {IBook, IQuote, IUser, ValidationError} from "../../type";
 import React, {useCallback, useEffect, useState} from "react";
-import {getBooks, getUsers} from "../../API";
+import {getBooks} from "../../API";
 import {toast} from "react-toastify";
 import {showError} from "../Modal";
-import {InputField, MultiselectField} from "../InputFields";
+import {InputField, LazyLoadMultiselect, MultiselectField} from "../InputFields";
 import {formPersonsFullName} from "../../utils/utils";
 import {Wysiwyg} from "../Wysiwyg";
+import {fetchUsers} from "../../utils/fetch";
 
 interface BodyProps {
     data: IQuote | object;
@@ -48,18 +49,6 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 				console.error("Couldn't fetch books", err)
 			});
 	};
-
-	const fetchUsers = () => {
-		if (fetchedUsers) return;
-
-		getUsers().then(user => {
-			setUsers(user.data.users.map((user: IUser) => ({
-				...user,
-				fullName: `${user.lastName}, ${user.firstName}`
-			})));
-			setFetchedUsers(true);
-		}).catch(err => console.trace("Error while fetching Users", err));
-	}
 
 	useEffect(() => {
 		onChange(formData)
@@ -206,14 +195,13 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 		<div style={{height: "5px", width: "100%"}}/>
 		<div className="row">
 			<div className="col">
-				<MultiselectField
-					options={users}
+				<LazyLoadMultiselect
+					value={formData?.owner || []}
 					displayValue="fullName"
-					label="Vlastník"
-					value={formData?.owner}
-					name="owner"
+					placeholder="Vlastník"
 					onChange={handleInputChange}
-					onClick={fetchUsers}
+					name="owner"
+					onSearch={fetchUsers}
 				/>
 			</div>
 		</div>
