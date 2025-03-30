@@ -6,6 +6,7 @@ import {createLookupStage, formatMongoDbDecimal, getIdFromArray, sortByParam, we
 import mongoose, {PipelineStage, Types} from 'mongoose';
 import {optionFetchAllExceptDeleted, populateOptionsBook} from "../utils/constants";
 import diacritics from "diacritics";
+import {buildPaginationPipeline, fetchDataWithPagination} from "../utils/queryUtils";
 
 const normalizeBook = (data: any): IBook => {
     const city = data.location ?
@@ -62,55 +63,13 @@ const normalizeBook = (data: any): IBook => {
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        let {page, pageSize, search = "", sorting, filterUsers} = req.query;
+        const {page = "1", pageSize = "10_000", search = "", sorting, filterUsers} = req.query;
 
-        // Set default pagination values if not provided
-        if (!page) page = "1";
-        if (!pageSize) pageSize = "10_000";
-
-        // Parse sorting parameters
-        let sortParams: Array<{ id: string; desc: string }> = [];
-        if (typeof sorting === "string") {
-            sortParams = JSON.parse(sorting);
-        } else if (Array.isArray(sorting)) {
-            sortParams = sorting as Array<{ id: string; desc: string }>;
-        }
-
-        // Build the sort object for MongoDB
-        const sortOptions: { [key: string]: 1 | -1 } = {};
-        if (sortParams.length > 0) {
-            sortParams.forEach((param) => {
-                sortOptions[param.id] = param.desc === "true" ? -1 : 1;
-            });
-        } else {
-            // Default sorting if no sorting parameters are provided
-            sortOptions["title"] = 1;
-        }
-
-        // Handle filterUsers
-        let query: Record<string, any> = {deletedAt: {$eq: null}};
-        if (filterUsers) {
-            query = {...query, owner: {$in: (filterUsers as string[]).map(userId => new Types.ObjectId(userId))}};
-        }
-
-        const normalizedSearchFields = [
+        const searchFields = [
             "autor", "editor", "ilustrator", "translator", "title", "subtitle", "content", "edition", "serie", "note", "published", "ISBN"
         ];
 
-        // Add search conditions to the query if a search term is provided
-        if (search) {
-            query = {
-                ...query,
-                $or: normalizedSearchFields.map(field => ({
-                    [`normalizedSearchField.${field}`]: {$regex: diacritics.remove(search as string).replace(/-/g, ""), $options: "i"}
-                }))
-            };
-        }
-
-        // Aggregation pipeline
-        const pipeline: PipelineStage[] = [
-            {$match: query}, // Match by default query (e.g., deletedAt)
-            // Lookups to populate related fields
+        const lookupStages = [
             createLookupStage("autors", "autor", "autor"),
             createLookupStage("autors", "editor", "editor"),
             createLookupStage("autors", "ilustrator", "ilustrator"),
@@ -119,19 +78,29 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             createLookupStage("users", "readBy", "readBy")
         ];
 
-        const paginationPipeline = [
-            ...pipeline,
-            {$sort: sortOptions},
-            {$skip: (parseInt(page as string) - 1) * parseInt(pageSize as string)},
-            {$limit: parseInt(pageSize as string)},
-        ]
+        let additionalQuery: Record<string, any> = {};
+        if (filterUsers) {
+            additionalQuery = {owner: {$in: (filterUsers as string[]).map(userId => new Types.ObjectId(userId))}};
+        }
 
-        const books = await Book.aggregate(paginationPipeline).collation({ locale: "cs", strength: 2, numericOrdering: true });
-        // Count total documents (for pagination)
-        const count = (await Book.aggregate(pipeline)).length;
+        const parsedPage = parseInt(page as string, 10);
+        const parsedPageSize = parseInt(pageSize as string, 10);
 
-        // Send response
-        res.status(200).json({books, count});
+        const {data, count} = await fetchDataWithPagination(
+            Book,
+            {
+                page: isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage,
+                pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 10_000 : parsedPageSize,
+                search: search as string,
+                sorting: sorting as string,
+                searchFields
+            },
+            lookupStages,
+            additionalQuery
+        );
+
+
+        res.status(200).json({books: data, count});
     } catch (error) {
         console.error("Error fetching books:", error);
         res.status(500).json({message: "Internal server error"});
@@ -193,17 +162,11 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
         // Aggregation pipeline
         const pipeline: PipelineStage[] = [
             {$match: query}, // Match by query (ids and search)
-            // Lookups to populate related fields
-            createLookupStage("autors", "autor", "autor"),
-            {$sort: {title: 1}} // Sort by title
+            createLookupStage("autors", "autor", "autor")
         ];
-        const paginationPipeline = [
-            ...pipeline,
-            {$skip: (validPage - 1) * validPageSize},
-            {$limit: validPageSize},
-        ]
+        const paginationPipeline = buildPaginationPipeline(validPage, validPageSize, {title: 1})
 
-        const books = await Book.aggregate(paginationPipeline).collation({ locale: "cs", strength: 2, numericOrdering: true });
+        const books = await Book.aggregate([...pipeline, ...paginationPipeline]).collation({ locale: "cs", strength: 2, numericOrdering: true });
         const count = await Book.aggregate(pipeline).collation({ locale: "cs", strength: 2, numericOrdering: true }).count("count");
         const totalCount = count[0]?.count ?? 0;
 

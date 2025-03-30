@@ -376,7 +376,7 @@ function setNestedValue(obj: Record<string, any>, path: string[], value: any): v
  * @param model - choose what model are being normalized.
  * @returns A promise that resolves to a nested object with normalized search fields.
  */
-export async function normalizeSearchFields(doc: any, model: "book" | "autor" | "lp"): Promise<Record<string, any>> {
+export async function normalizeSearchFields(doc: any, model: string): Promise<Record<string, any>> {
     const normalizedFields: Record<string, any> = {};
 
     let fieldsToNormalize: Record<string, any> = {};

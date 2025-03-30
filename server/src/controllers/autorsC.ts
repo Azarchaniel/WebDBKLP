@@ -2,77 +2,31 @@ import {Response, Request} from 'express';
 import {IAutor} from '../types';
 import Autor from "../models/autor";
 import Book from "../models/book";
-import diacritics from "diacritics";
-import {PipelineStage, Types} from "mongoose";
+import {Types} from "mongoose";
+import {fetchDataWithPagination} from "../utils/queryUtils";
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
-        let {page, pageSize, search = "", sorting, dataFrom} = req.query;
+        const {page = "1", pageSize = "10_000", search = "", sorting = {lastName: 1}, dataFrom} = req.query;
 
-        const latestUpdate: {updatedAt: Date | undefined} = await Autor.findOne().sort({ updatedAt: -1 }).select('updatedAt').lean() as unknown as {updatedAt: Date | undefined};
+        const searchFields = ["firstName", "lastName"];
+        const parsedPage = parseInt(page as string, 10);
+        const parsedPageSize = parseInt(pageSize as string, 10);
 
-        // Check if dataFrom is provided and if it's more recent than the latest update
-        if (dataFrom && latestUpdate?.updatedAt && new Date(dataFrom as string) >= new Date(latestUpdate.updatedAt)) {
-            // No new data, send 204 No Content and return
-            res.status(204).send();
-            return;
-        }
+        const {data, count, latestUpdate} = await fetchDataWithPagination(
+            Autor,
+            {
+                page: isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage,
+                pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 10_000 : parsedPageSize,
+                search: search as string,
+                sorting: sorting as string,
+                dataFrom: dataFrom as string,
+                searchFields
+            },
+            []
+        );
 
-        // Set default pagination values if not provided
-        if (!page) page = "1";
-        if (!pageSize) pageSize = "10_000";
-
-        // Parse sorting parameters
-        let sortParams: Array<{ id: string; desc: string }> = [];
-        if (typeof sorting === "string") {
-            sortParams = JSON.parse(sorting);
-        } else if (Array.isArray(sorting)) {
-            sortParams = sorting as Array<{ id: string; desc: string }>;
-        }
-
-        // Build the sort object for MongoDB
-        const sortOptions: { [key: string]: 1 | -1 } = {};
-        if (sortParams.length > 0) {
-            sortParams.forEach((param) => {
-                sortOptions[param.id] = param.desc === "true" ? -1 : 1;
-            });
-        } else {
-            // Default sorting if no sorting parameters are provided
-            sortOptions["lastName"] = 1;
-        }
-
-        let query: Record<string, any> = {deletedAt: {$eq: null}};
-
-        const normalizedSearchFields = [
-            "firstName", "lastName"
-        ];
-
-        // Add search conditions to the query if a search term is provided
-        if (search) {
-            query = {
-                ...query,
-                $or: normalizedSearchFields.map(field => ({
-                    [`normalizedSearchField.${field}`]: {$regex: diacritics.remove(search as string), $options: "i"}
-                }))
-            };
-        }
-
-        const pipeline: PipelineStage[] = [
-            {$match: query}
-        ];
-
-        const paginationPipeline = [
-            ...pipeline,
-            {$match: query}, // Match by default query (e.g., deletedAt)
-            {$sort: sortOptions},
-            {$skip: (parseInt(page as string) - 1) * parseInt(pageSize as string)},
-            {$limit: parseInt(pageSize as string)},
-        ];
-
-        const autors = await Autor.aggregate(paginationPipeline).collation({ locale: "cs", strength: 2, numericOrdering: true });
-        const count: number = (await Autor.aggregate(pipeline)).length;
-
-        res.status(200).json({autors: autors, count: count, latestUpdate: latestUpdate?.updatedAt})
+        res.status(200).json({autors: data, count: count, latestUpdate: latestUpdate})
     } catch (error) {
         console.error("Error fetching autors:", error);
         res.status(500).json({message: "Internal server error"});

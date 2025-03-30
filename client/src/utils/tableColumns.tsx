@@ -142,6 +142,17 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
         sortingFn: "datetime"
     },
     {
+        accessorKey: 'updatedAt',
+        header: 'Dátum úpravy',
+        cell: ({cell}: { cell: any }) => {
+            const value = cell.getValue() as unknown as string;
+            const date = new Date(value).toLocaleDateString("cs-CZ");
+            const time = new Date(value).toLocaleTimeString("cs-CZ");
+            return <span title={time} style={{pointerEvents: "auto"}}>{date}</span>
+        },
+        sortingFn: "datetime"
+    },
+    {
         accessorKey: 'location',
         header: 'Umiestnenie',
         cell: ({cell}: { cell: any }) => getBookLocation(cell.getValue() as unknown as ILocation),
