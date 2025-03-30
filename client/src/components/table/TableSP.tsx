@@ -13,7 +13,7 @@ type PropsMT = {
     title: string;
     data: any[];
     columns: ColumnDef<any>[];
-    pageChange: (page: number) => void;
+    pageChange: (page: number, letter?: string) => void;
     pageSizeChange: (pageSize: number) => void;
     sortingChange: (sorting: SortingState) => void;
     totalCount: number;
@@ -26,6 +26,7 @@ type PropsMT = {
         pageSize: number;
         sorting: SortingState;
         search?: string;
+        letter?: string;
     };
     hiddenCols?: { [columnId: string]: boolean };
     expandedElement?: (data: any) => ReactElement;
@@ -43,7 +44,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
          sortingChange,
          totalCount,
          loading = false,
-         pagination = {page: 1, pageSize: 50, sorting: [{id: "", desc: true}]},
+         pagination = {page: 1, pageSize: 50, sorting: [{id: "", desc: true}], letter: undefined},
          hiddenCols,
          expandedElement
      }) => {
@@ -51,6 +52,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
         const [currentPageSize, setCurrentPageSize] = useState(pagination.pageSize);
         const [sorting, setSorting] = React.useState<SortingState>([])
         const [expanded, setExpanded] = useState<ExpandedState>({});
+        const [letter, setLetter] = useState<string | undefined>();
 
         const maxPage = Math.ceil(totalCount / currentPageSize);
 
@@ -64,8 +66,8 @@ const ServerPaginationTable: React.FC<PropsMT> =
         }, [sorting]);
 
         useEffect(() => {
-            pageChange(currentPage);
-        }, [currentPage]);
+            pageChange(currentPage, letter);
+        }, [currentPage, letter]);
 
         useEffect(() => {
             pageSizeChange(currentPageSize);
@@ -180,7 +182,10 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                 currentPage={currentPage}
                                 pageSize={currentPageSize}
                                 totalPages={maxPage}
-                                onPageChange={setCurrentPage}
+                                onPageChange={(page, letter) => {
+                                    setCurrentPage(page);
+                                    setLetter(letter);
+                                }}
                                 onPageSizeChange={setCurrentPageSize}
                             />
                         </>

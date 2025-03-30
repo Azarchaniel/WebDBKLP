@@ -24,7 +24,8 @@ export default function BookPage() {
         page: DEFAULT_PAGINATION.page,
         pageSize: DEFAULT_PAGINATION.pageSize,
         search: DEFAULT_PAGINATION.search,
-        sorting: [...DEFAULT_PAGINATION.sorting]
+        sorting: [...DEFAULT_PAGINATION.sorting],
+        letter: DEFAULT_PAGINATION.letter
     });
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
@@ -302,7 +303,8 @@ export default function BookPage() {
                 title={`Knihy (${countAll})`}
                 data={clonedBooks}
                 columns={getBookTableColumns()}
-                pageChange={(page) => setPagination(prevState => ({...prevState, page: page}))}
+                pageChange={(page, letter) => setPagination(prevState =>
+                    ({...prevState, page: page, letter: letter}))}
                 pageSizeChange={handlePageSizeChange}
                 sortingChange={(sorting) => {
                     if (sorting.length === 0) sorting = DEFAULT_PAGINATION.sorting;

@@ -109,6 +109,7 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
                     search: params?.search ?? "",
                     sorting: params?.sorting ?? {id: "title", desc: false},
                     filterUsers: params?.activeUsers,
+                    letter: params?.letter
                 }
             });
         return books

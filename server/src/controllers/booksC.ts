@@ -62,7 +62,8 @@ const normalizeBook = (data: any): IBook => {
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        let {page, pageSize, search = "", sorting, filterUsers} = req.query;
+        let {page, pageSize, search = "", sorting, filterUsers, letter = ""} = req.query;
+        console.log("---", letter, "---")
 
         // Set default pagination values if not provided
         if (!page) page = "1";
@@ -127,9 +128,27 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         ]
 
         const books = await Book.aggregate(paginationPipeline).collation({ locale: "cs", strength: 2, numericOrdering: true });
-
         // Count total documents (for pagination)
         const count = (await Book.aggregate(pipeline)).length;
+
+        /*if (letter && letter.length === 1) {
+            const letterRegex = new RegExp(`^${diacritics.remove(letter)}`, "i");
+
+            // Fetch all books with correct collation
+            const allBooks = await Book.aggregate([...pipeline, { $sort: { title: 1 } }])
+                .collation({ locale: "cs", strength: 2, numericOrdering: true });
+
+            // Find first book starting with letter
+            const position = allBooks.findIndex(book => letterRegex.test(diacritics.remove(book.title)));
+
+            if (position === -1) {
+                return res.status(404).json({ message: `Couldn't find any book starting with letter "${letter}".` });
+            }
+
+            // Correct page calculation
+            page = (Math.ceil((position + 1) / parseInt(pageSize as string))).toString();
+            console.log(position, page);
+        }*/
 
         // Send response
         res.status(200).json({books, count});

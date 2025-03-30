@@ -1,15 +1,54 @@
-import React from "react";
+import React, {useState} from "react";
 import {PAGE_SIZE_OPTIONS} from "../../utils/constants";
 
 type PaginationProps = {
     currentPage: number;
     pageSize: number;
     totalPages: number;
-    onPageChange: (page: number) => void;
+    onPageChange: (page: number, letter?: string) => void;
     onPageSizeChange: (size: number) => void;
 };
 
-const Pagination: React.FC<PaginationProps> = ({ currentPage, pageSize, totalPages, onPageChange, onPageSizeChange }) => {
+const Pagination: React.FC<PaginationProps> = ({
+                                                   currentPage,
+                                                   pageSize,
+                                                   totalPages,
+                                                   onPageChange,
+                                                   onPageSizeChange
+                                               }) => {
+    const [inputPage, setInputPage] = useState<string>(currentPage.toString());
+    const [letter, setLetter] = useState<string>("");
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        setInputPage(value);
+    };
+
+    const handleInputBlur = () => {
+        const page = parseInt(inputPage);
+
+        if (letter.length === 1 && letter.match(/[A-Z]/i)) {
+            return onPageChange(page, letter);
+        }
+
+        if (!isNaN(page) && page >= 1 && page <= totalPages) {
+            onPageChange(page);
+        } else {
+            setInputPage(currentPage.toString());
+        }
+    };
+
+    const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            handleInputBlur();
+        }
+    };
+
+    const handleLetterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value.toUpperCase();
+        setLetter(value);
+    };
+
     return (
         <div className="row tableNavigationRow">
             <div>
@@ -26,8 +65,27 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, pageSize, totalPag
                     ))}
                 </select>
             </div>
+            <input
+                type="text"
+                value={inputPage}
+                onChange={handleInputChange}
+                onBlur={handleInputBlur}
+                onKeyDown={handleInputKeyDown}
+                className="pageInput form-control"
+                title="Skoč na stranu"
+            />
+            <input
+                type="text"
+                placeholder="P"
+                maxLength={1}
+                onChange={handleLetterChange}
+                onBlur={handleInputBlur}
+                onKeyDown={handleInputKeyDown}
+                className="pageInput form-control"
+                title="Skoč na písmeno"
+            />
             <button
-                className="tabNav first"
+                className=" tabNav first"
                 onClick={() => onPageChange(1)}
                 disabled={currentPage <= 1}
             >
