@@ -194,7 +194,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         const yearOfPublish = await getContentFromElement(page, "span[itemprop='datePublished']");
         const publisher = await getContentFromElement(page, "span[itemprop='publisher']");
         const noPages = await getContentFromElement(page, "span[itemprop='numberOfPages']");
-        const language = await getContentFromElement(page, "span[itemprop='language']"); // TODO: normalize: slovencina
+        const language = await getContentFromElement(page, "span[itemprop='language']");
         const serieTitle = await getContentFromElement(page, "a[class='odright_pet']");
         const serieNo = getNumberFromString(await getContentFromElement(page, "span[class='odright_pet']"));
         const editionTitle = await getContentFromElement(page, "a[itemprop=\"bookEdition\"]");

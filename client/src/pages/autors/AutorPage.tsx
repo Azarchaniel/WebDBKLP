@@ -3,10 +3,7 @@ import React, {useEffect, useState} from "react";
 import {IAutor} from "../../type";
 import {addAutor, deleteAutor, getAutor, getAutors} from "../../API";
 import {toast} from "react-toastify";
-import Sidebar from "../../components/Sidebar";
-import Toast from "../../components/Toast";
 import {stringifyAutors} from "../../utils/utils";
-import Header from "../../components/AppHeader";
 import {DEFAULT_PAGINATION} from "../../utils/constants";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
 import {isUserLoggedIn} from "../../utils/user";
@@ -14,13 +11,17 @@ import {getAutorTableColumns} from "../../utils/tableColumns";
 import ServerPaginationTable from "../../components/table/TableSP";
 import AutorDetail from "./AutorDetail";
 import {SortingState} from "@tanstack/react-table";
+import Layout from "../../Layout";
 
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [updateAutor, setUpdateAutor] = useState<IAutor>();
-    const [pagination, setPagination] = useState({...DEFAULT_PAGINATION, sorting: [{id: "lastName", desc: false}] as SortingState});
+    const [pagination, setPagination] = useState({
+        ...DEFAULT_PAGINATION,
+        sorting: [{id: "lastName", desc: false}] as SortingState
+    });
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const [saveAutorSuccess, setSaveAutorSuccess] = useState<boolean | undefined>(undefined);
 
@@ -114,7 +115,8 @@ export default function AutorPage() {
                         console.trace(err);
                     })
             },
-            onCancel: () => {}
+            onCancel: () => {
+            }
         });
     }
 
@@ -124,10 +126,7 @@ export default function AutorPage() {
     };
 
     return (
-        <main className='App'>
-            {/* TODO: remove Header and Sidebar from here */}
-            <Header/>
-            <Sidebar/>
+        <Layout>
             {isUserLoggedIn() && <AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>}
             <ServerPaginationTable
                 title={`Autori (${countAll})`}
@@ -192,7 +191,6 @@ export default function AutorPage() {
                     onClose={() => setUpdateAutor(undefined)}
                     saveResultSuccess={saveAutorSuccess}
                 />}
-            <Toast/>
-        </main>
+        </Layout>
     )
 }

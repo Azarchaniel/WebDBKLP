@@ -3,10 +3,7 @@ import React, {useEffect, useMemo, useRef, useState} from "react";
 import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import AddBook from "./AddBook";
-import Sidebar from "../../components/Sidebar";
-import Toast from "../../components/Toast";
 import {stringifyAutors, stringifyUsers} from "../../utils/utils";
-import Header from "../../components/AppHeader";
 import {useReadLocalStorage} from "usehooks-ts";
 import {ShowHideRow} from "../../components/books/ShowHideRow";
 import {DEFAULT_PAGINATION} from "../../utils/constants";
@@ -17,6 +14,8 @@ import {ColumnDef} from "@tanstack/react-table";
 import {getBookTableColumns} from "../../utils/tableColumns";
 import BookDetail from "./BookDetail";
 import {getCachedTimestamp, loadFirstPageFromCache, saveFirstPageToCache} from "../../utils/indexDb";
+import {useClickOutside} from "../../utils/hooks";
+import Layout from "../../Layout";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
@@ -58,9 +57,17 @@ export default function BookPage() {
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const [controller, setController] = useState<AbortController | null>(null);
-    const popRef = useRef(null);
     const activeUsers: IUser[] | null = useReadLocalStorage("activeUsers");
     const memoizedActiveUsers = useMemo(() => activeUsers, [JSON.stringify(activeUsers)]);
+    const popRef = useRef<HTMLDivElement>(null);
+    const exceptRef = useRef<HTMLDivElement>(null);
+
+    useClickOutside(popRef, () => {
+        setHidden(prevState => ({
+            ...prevState,
+            control: true
+        }));
+    }, exceptRef);
 
     const checkIfFirstPage = () => {
         return JSON.stringify(pagination) === JSON.stringify(DEFAULT_PAGINATION);
@@ -292,10 +299,7 @@ export default function BookPage() {
     }
 
     return (
-        <main className='App'>
-            {/* TODO: remove Header and Sidebar from here */}
-            <Header/>
-            <Sidebar/>
+        <Layout>
             {isUserLoggedIn() && <AddBook
                 saveBook={handleSaveBook}
                 onClose={() => setUpdateBook(undefined)}
@@ -341,6 +345,7 @@ export default function BookPage() {
                             </button>
                         </div>
                         <i
+                            ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
                             title="Zobraz/skry stĺpce"
                             onClick={() => setHidden({...hidden, control: !hidden.control})}
@@ -390,7 +395,6 @@ export default function BookPage() {
                     onClose={() => setUpdateBook(undefined)}
                     saveResultSuccess={saveBookSuccess}
                 />}
-            <Toast/>
-        </main>
+        </Layout>
     );
 }
