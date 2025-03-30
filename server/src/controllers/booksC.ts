@@ -219,7 +219,8 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
         let { pageSize = "10_000", filterUsers, letter = "" } = req.query;
 
         if (!letter || letter.length !== 1) {
-            return res.status(400).json({ message: "Invalid letter parameter." });
+            res.status(400).json({ message: "Invalid letter parameter." });
+            return;
         }
 
         let query: Record<string, any> = { deletedAt: { $eq: null } };
@@ -238,7 +239,8 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
         const position = countBefore.length > 0 ? countBefore[0].count : 0;
 
         if (position === 0) {
-            return res.status(404).json({ message: `Couldn't find any book starting with letter "${letter}".` });
+            res.status(404).json({ message: `Couldn't find any book starting with letter "${letter}".` });
+            return;
         }
 
         // Calculate the page number
