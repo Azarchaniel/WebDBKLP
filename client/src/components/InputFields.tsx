@@ -306,7 +306,7 @@ interface AutocompleteInputProps {
     selectionLimit?: number;
     emptyRecordMsg?: string;
     customerror?: boolean;
-    onSearch?: (query: string, page: number) => Promise<Option[]>; // Now optional
+    onSearch?: (query: string, page: number, ids?: string[]) => Promise<Option[]>; // Now optional
     reset?: boolean;
     createNew?: (query: string) => void;
     options?: Option[]; // New optional prop for finite data
@@ -429,29 +429,29 @@ export const LazyLoadMultiselect = React.memo(({
         if (inputRef.current) inputRef.current.focus();
     }, [selectedValues, displayValue, onChange, name]);
 
-    const debouncedSearch = useMemo(() =>
-            debounce(async (query: string, page: number) => {
-                if (onSearch) {
-                    setLoadingStatus("loading"); // Start loading
-                    const newOptions = await onSearch(query, page);
-                    setFilteredOptions((prevOptions) => {
-                        if (page === 1) {
-                            return newOptions;
-                        } else {
-                            return [...prevOptions, ...newOptions];
-                        }
-                    });
-                    setLoadingStatus(newOptions.length > 0 ? "hasMore" : "noMore"); // Check if there are more items
-                } else {
-                    // Client-side filtering
-                    const filtered = options.filter(option =>
-                        option[displayValue].toLowerCase().includes(query.toLowerCase())
-                    );
-                    setFilteredOptions(filtered);
-                    setLoadingStatus("noMore"); // No more items to load
-                }
-            }, 300),
-        [onSearch, debounce, options, displayValue]
+    const debouncedSearch = useCallback(
+        debounce(async (query: string, page: number) => {
+            if (onSearch) {
+                setLoadingStatus("loading"); // Start loading
+                const newOptions = await onSearch(query, page);
+                setFilteredOptions((prevOptions) => {
+                    if (page === 1) {
+                        return newOptions;
+                    } else {
+                        return [...prevOptions, ...newOptions];
+                    }
+                });
+                setLoadingStatus(newOptions.length > 0 ? "hasMore" : "noMore"); // Check if there are more items
+            } else {
+                // Client-side filtering
+                const filtered = options.filter(option =>
+                    option[displayValue].toLowerCase().includes(query.toLowerCase())
+                );
+                setFilteredOptions(filtered);
+                setLoadingStatus("noMore"); // No more items to load
+            }
+        }, 300),
+        [onSearch, options, displayValue]
     );
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -565,6 +565,7 @@ export const LazyLoadMultiselect = React.memo(({
             id={id}
             className={`chip-multiselect ${customerror ? 'error' : ''}`}
         >
+            {/* TODO: show error */}
             <div className="chip-container">
                 {Array.isArray(selectedValues) && selectedValues.length > 0 && selectedValues.map((item, index) => (
                     <div key={index} className="chip">

@@ -168,13 +168,52 @@ const checkBooksUpdated = async (req: Request, res: Response): Promise<void> => 
 
 const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {ids} = req.query;
-        const books = await Book.find({_id: {$in: ids}}).populate(populateOptionsBook);
-        res.status(200).json({books});
+        let {ids, search = "", page = "1", pageSize = "10"} = req.query;
+
+        // Validate and parse query parameters
+        const parsedIds = Array.isArray(ids) ? ids : typeof ids === "string" ? [ids] : [];
+        const parsedPage = parseInt(page as string, 10);
+        const parsedPageSize = parseInt(pageSize as string, 10);
+
+        // Ensure parsedPage and parsedPageSize are positive integers
+        const validPage = !isNaN(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+        const validPageSize = !isNaN(parsedPageSize) && parsedPageSize > 0 ? parsedPageSize : 10;
+
+        // Build the query
+        const query: mongoose.FilterQuery<IBook> = {
+            _id: {$in: parsedIds.map((id) => new Types.ObjectId(id as string))}
+        };
+
+        // Add search condition if a search term is provided
+        if (search) {
+            query.$or = [
+                { "title": {$regex: diacritics.remove(search as string).replace(/-/g, ""), $options: "i"}}
+            ];
+        }
+
+        // Aggregation pipeline
+        const pipeline: PipelineStage[] = [
+            {$match: query}, // Match by query (ids and search)
+            // Lookups to populate related fields
+            createLookupStage("autors", "autor", "autor"),
+            {$sort: {title: 1}} // Sort by title
+        ];
+        const paginationPipeline = [
+            ...pipeline,
+            {$skip: (validPage - 1) * validPageSize},
+            {$limit: validPageSize},
+        ]
+
+        const books = await Book.aggregate(paginationPipeline).collation({ locale: "cs", strength: 2, numericOrdering: true });
+        const count = await Book.aggregate(pipeline).collation({ locale: "cs", strength: 2, numericOrdering: true }).count("count");
+        const totalCount = count[0]?.count ?? 0;
+
+        res.status(200).json({books, count: totalCount});
     } catch (error) {
-        console.error("Error fetching books:", error);
+        console.error("Error fetching books by ids:", error);
+        res.status(500).json({message: "Internal server error"});
     }
-}
+};
 
 const getBook = async (req: Request, res: Response): Promise<void> => {
     try {
