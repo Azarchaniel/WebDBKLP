@@ -62,8 +62,7 @@ const normalizeBook = (data: any): IBook => {
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        let {page, pageSize, search = "", sorting, filterUsers, letter = ""} = req.query;
-        console.log("---", letter, "---")
+        let {page, pageSize, search = "", sorting, filterUsers} = req.query;
 
         // Set default pagination values if not provided
         if (!page) page = "1";
@@ -130,25 +129,6 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         const books = await Book.aggregate(paginationPipeline).collation({ locale: "cs", strength: 2, numericOrdering: true });
         // Count total documents (for pagination)
         const count = (await Book.aggregate(pipeline)).length;
-
-        /*if (letter && letter.length === 1) {
-            const letterRegex = new RegExp(`^${diacritics.remove(letter)}`, "i");
-
-            // Fetch all books with correct collation
-            const allBooks = await Book.aggregate([...pipeline, { $sort: { title: 1 } }])
-                .collation({ locale: "cs", strength: 2, numericOrdering: true });
-
-            // Find first book starting with letter
-            const position = allBooks.findIndex(book => letterRegex.test(diacritics.remove(book.title)));
-
-            if (position === -1) {
-                return res.status(404).json({ message: `Couldn't find any book starting with letter "${letter}".` });
-            }
-
-            // Correct page calculation
-            page = (Math.ceil((position + 1) / parseInt(pageSize as string))).toString();
-            console.log(position, page);
-        }*/
 
         // Send response
         res.status(200).json({books, count});
@@ -231,6 +211,43 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
     } catch (error) {
         console.error("Error fetching books by ids:", error);
         res.status(500).json({message: "Internal server error"});
+    }
+};
+
+const getPageByStartingLetter = async (req: Request, res: Response): Promise<void> => {
+    try {
+        let { pageSize = "10_000", filterUsers, letter = "" } = req.query;
+
+        if (!letter || letter.length !== 1) {
+            return res.status(400).json({ message: "Invalid letter parameter." });
+        }
+
+        let query: Record<string, any> = { deletedAt: { $eq: null } };
+
+        if (filterUsers) {
+            query = { ...query, owner: { $in: (filterUsers as string[]).map(userId => new Types.ObjectId(userId)) } };
+        }
+
+        // Count books before the first matching book
+        const countBefore = await Book.aggregate([
+            { $match: query },
+            { $match: { title: { $lt: letter } } }, // Count books with titles before the letter
+            { $count: "count" }
+        ]).collation({ locale: "cs", strength: 2, numericOrdering: true });
+
+        const position = countBefore.length > 0 ? countBefore[0].count : 0;
+
+        if (position === 0) {
+            return res.status(404).json({ message: `Couldn't find any book starting with letter "${letter}".` });
+        }
+
+        // Calculate the page number
+        const page = Math.ceil((position + 1) / parseInt(pageSize as string));
+
+        res.status(200).json({ page });
+    } catch (error) {
+        console.error("Error calculating page:", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
@@ -825,4 +842,4 @@ const dashboard = {
 
 }
 
-export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN, getBooksByIds, checkBooksUpdated}
+export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN, getBooksByIds, checkBooksUpdated, getPageByStartingLetter}

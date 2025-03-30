@@ -1,11 +1,14 @@
 import React, {useState} from "react";
 import {PAGE_SIZE_OPTIONS} from "../../utils/constants";
+import {getPageByStartingLetter} from "../../API";
+import {IUser} from "../../type";
+import {useReadLocalStorage} from "usehooks-ts";
 
 type PaginationProps = {
     currentPage: number;
     pageSize: number;
     totalPages: number;
-    onPageChange: (page: number, letter?: string) => void;
+    onPageChange: (page: number) => void;
     onPageSizeChange: (size: number) => void;
 };
 
@@ -17,7 +20,7 @@ const Pagination: React.FC<PaginationProps> = ({
                                                    onPageSizeChange
                                                }) => {
     const [inputPage, setInputPage] = useState<string>(currentPage.toString());
-    const [letter, setLetter] = useState<string>("");
+    const activeUsers: IUser[] | null = useReadLocalStorage("activeUsers");
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
@@ -26,10 +29,6 @@ const Pagination: React.FC<PaginationProps> = ({
 
     const handleInputBlur = () => {
         const page = parseInt(inputPage);
-
-        if (letter.length === 1 && letter.match(/[A-Z]/i)) {
-            return onPageChange(page, letter);
-        }
 
         if (!isNaN(page) && page >= 1 && page <= totalPages) {
             onPageChange(page);
@@ -44,9 +43,12 @@ const Pagination: React.FC<PaginationProps> = ({
         }
     };
 
-    const handleLetterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const value = event.target.value.toUpperCase();
-        setLetter(value);
+    const handleLetterChangeKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            const value = (event.target as HTMLInputElement).value.toUpperCase();
+            const { data } = await getPageByStartingLetter(value, pageSize, activeUsers?.map(u => u._id));
+            onPageChange(data.page);
+        }
     };
 
     return (
@@ -78,9 +80,7 @@ const Pagination: React.FC<PaginationProps> = ({
                 type="text"
                 placeholder="P"
                 maxLength={1}
-                onChange={handleLetterChange}
-                onBlur={handleInputBlur}
-                onKeyDown={handleInputKeyDown}
+                onKeyDown={handleLetterChangeKeyDown}
                 className="pageInput form-control"
                 title="Skoč na písmeno"
             />

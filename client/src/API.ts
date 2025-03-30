@@ -108,8 +108,7 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
                     pageSize: params?.pageSize ?? 10_000,
                     search: params?.search ?? "",
                     sorting: params?.sorting ?? {id: "title", desc: false},
-                    filterUsers: params?.activeUsers,
-                    letter: params?.letter
+                    filterUsers: params?.activeUsers
                 }
             });
         return books
@@ -150,6 +149,25 @@ export const checkBooksUpdated = async (dataFrom?: Date): Promise<AxiosResponse<
         throw new Error(error);
     }
 };
+
+interface IPageByLetter { page: number }
+export const getPageByStartingLetter = async (letter: string, pageSize: number, filterUsers?: string[]): Promise<AxiosResponse<IPageByLetter>> => {
+    try {
+        const response: AxiosResponse<IPageByLetter> = await axiosInstance.get(
+            baseUrl + "/books/get-page-by-starting-letter", {
+                params: {
+                    letter,
+                    pageSize,
+                    filterUsers
+                }
+            }
+        );
+        return response;
+    } catch (error: any) {
+        console.error("Cannot get page by starting letter: ", error);
+        throw new Error(error);
+    }
+}
 
 export const getBook = async (
     _id: string
