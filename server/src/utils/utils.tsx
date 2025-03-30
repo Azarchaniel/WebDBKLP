@@ -416,7 +416,7 @@ export async function normalizeSearchFields(doc: any, model: "book" | "autor" | 
     // Normalize fields and add them as nested properties
     for (const [key, value] of Object.entries(fieldsToNormalize)) {
         if (key === "ISBN") {
-            normalizedFields["ISBN"] = (value as string).replace(/-/g, "");
+            normalizedFields["ISBN"] = (value as string)?.replace(/-/g, "");
             break;
         }
 

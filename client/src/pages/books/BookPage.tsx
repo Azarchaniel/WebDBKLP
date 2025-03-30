@@ -1,5 +1,5 @@
 import {IBook, IBookHidden, IUser} from "../../type";
-import React, {useEffect, useMemo, useRef, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import AddBook from "./AddBook";
@@ -317,7 +317,6 @@ export default function BookPage() {
                 actions={
                     <div className="row justify-center mb-4 mr-2">
                         <div className="searchTableWrapper">
-                            {/* reset pagination on search*/}
                             <input
                                 placeholder="Vyhľadaj knihu"
                                 style={{paddingRight: "2rem"}}

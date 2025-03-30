@@ -11,17 +11,10 @@ type Props = {
 }
 
 const AddLp: React.FC<Props> = ({saveLp, lp, onClose, saveResultSuccess}: Props) => {
-	const [showModal, setShowModal] = useState<boolean>(false);
-	const [lpData, setLpData] = useState<ILP | object>();
+	const [showModal, setShowModal] = useState<boolean>(Boolean(lp));
+	const [lpData, setLpData] = useState<ILP | object>(lp || {});
 	const [error, setError] = useState<ValidationError[] | undefined>([{label: "Názov LP musí obsahovať aspoň jeden znak!", target: "title"}]);
 	const [outline, setOutline] = useState<React.CSSProperties>();
-
-	useEffect(() => {
-		if (lp) {
-			setLpData(lp);
-			setShowModal(true);
-		}
-	}, []);
 
 	const onChange = (data: any) => {
 		setLpData(data);

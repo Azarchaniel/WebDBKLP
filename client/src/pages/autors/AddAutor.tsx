@@ -12,20 +12,13 @@ interface Props {
 }
 
 const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose, saveResultSuccess}: Props) => {
-	const [showModal, setShowModal] = useState(false);
-	const [autorData, setAutorData] = useState<IAutor | object>();
+	const [showModal, setShowModal] = useState(Boolean(autor));
+	const [autorData, setAutorData] = useState<IAutor | object>(autor || {});
 	const [error, setError] = useState<ValidationError[] | undefined>([{
 		label: "Priezvisko autora musí obsahovať aspoň jeden znak!",
 		target: "lastName"
 	}]);
 	const [outline, setOutline] = useState<React.CSSProperties>();
-
-	useEffect(() => {
-		if (autor) {
-			setShowModal(true);
-			setAutorData(autor);
-		}
-	}, []);
 
 	useEffect(() => {
 		switch (saveResultSuccess) {

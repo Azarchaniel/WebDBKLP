@@ -1,11 +1,10 @@
-import {IBook, IQuote, IUser, ValidationError} from "../../type";
+import {IQuote, ValidationError} from "../../type";
 import React, {useCallback, useEffect, useState} from "react";
-import {getBooks, getUsers} from "../../API";
-import {toast} from "react-toastify";
 import {showError} from "../Modal";
-import {InputField, MultiselectField} from "../InputFields";
+import {InputField, LazyLoadMultiselect} from "../InputFields";
 import {formPersonsFullName} from "../../utils/utils";
 import {Wysiwyg} from "../Wysiwyg";
+import {fetchBooks, fetchUsers} from "../../utils/fetch";
 
 interface BodyProps {
     data: IQuote | object;
@@ -22,44 +21,10 @@ interface ButtonsProps {
 
 export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
 	const [formData, setFormData] = useState<IQuote | any>(data);
-	const [books, setBooks] = useState<IBook[]>();
-	const [users, setUsers] = useState<IUser[] | undefined>();
-	const [searchTerm, setSearchTerm] = useState<string>("");
-	const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 	const [errors, setErrors] = useState<ValidationError[]>([
 		{label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"},
 		{label: "Musí byť vybraná kniha!", target: "fromBook"}
 	]);
-	const [fetchedUsers, setFetchedUsers] = useState<boolean>(false);
-
-	const fetchBooks = () => {
-		getBooks({ page: 1, pageSize: 25, search: searchTerm })
-			.then(books => {
-				setBooks(books.data.books.map((book: IBook) => ({
-					...book,
-					showName: `${book.title} 
-                        ${book.autor && book.autor[0] && book.autor[0].firstName ? "/ " + book.autor[0].firstName : ""} 
-                        ${book.autor && book.autor[0] && book.autor[0].lastName ? book.autor[0].lastName : ""} 
-                        ${book.published && book.published?.year ? "/ " + book.published?.year : ""}`
-				})));
-			})
-			.catch(err => {
-				toast.error("Nepodarilo sa načítať knihy!");
-				console.error("Couldn't fetch books", err)
-			});
-	};
-
-	const fetchUsers = () => {
-		if (fetchedUsers) return;
-
-		getUsers().then(user => {
-			setUsers(user.data.users.map((user: IUser) => ({
-				...user,
-				fullName: `${user.lastName}, ${user.firstName}`
-			})));
-			setFetchedUsers(true);
-		}).catch(err => console.trace("Error while fetching Users", err));
-	}
 
 	useEffect(() => {
 		onChange(formData)
@@ -86,29 +51,6 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 		};
 		setFormData(enrichedData);
 	}, []);
-
-	useEffect(() => {
-		// Clear any existing timeout when pagination changes
-		if (timeoutId) clearTimeout(timeoutId);
-
-		// If search is empty, fetch immediately
-		if (searchTerm === "") {
-			fetchBooks();
-			return;
-		}
-
-		// Set a new timeout for debounced fetching
-		const newTimeoutId = setTimeout(() => {
-			fetchBooks();
-		}, 1000); // Wait 1s before making the request
-
-		setTimeoutId(newTimeoutId);
-
-		// Cleanup function to clear timeout if component unmounts or pagination changes again
-		return () => {
-			if (newTimeoutId) clearTimeout(newTimeoutId);
-		};
-	}, [searchTerm]);
 
 	//ERROR HANDLING
 	useEffect(() => {
@@ -179,19 +121,15 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 		</div>
 		<div style={{height: "5px", width: "100%"}}/>
 		<div className="row">
-			<div className="col-5">
-				<MultiselectField
-					id="modalMultiselectFromBooks"
-					selectionLimit={1}
-					options={books}
-					displayValue="showName"
-					label="*Z knihy"
+			<div className="col-9">
+				<LazyLoadMultiselect
 					value={formData?.fromBook}
-					name="fromBook"
+					displayValue="showName"
 					onChange={handleInputChange}
-					customerror={getErrorMsg("fromBook")}
-					onSearch={setSearchTerm}
-					onClick={fetchBooks}
+					name="fromBook"
+					placeholder="*Z knihy"
+					onSearch={fetchBooks}
+					//customerror={getErrorMsg("fromBook")}
 				/>
 			</div>
 			<div className="col-3">
@@ -206,14 +144,13 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 		<div style={{height: "5px", width: "100%"}}/>
 		<div className="row">
 			<div className="col">
-				<MultiselectField
-					options={users}
+				<LazyLoadMultiselect
+					value={formData?.owner || []}
 					displayValue="fullName"
-					label="Vlastník"
-					value={formData?.owner}
-					name="owner"
+					placeholder="Vlastník"
 					onChange={handleInputChange}
-					onClick={fetchUsers}
+					name="owner"
+					onSearch={fetchUsers}
 				/>
 			</div>
 		</div>
