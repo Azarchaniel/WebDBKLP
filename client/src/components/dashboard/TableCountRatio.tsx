@@ -38,27 +38,29 @@ export const TableCountRatio = ({data, title}: { data: any[], title: string }) =
 	return (<div className="column">
 		<table border={1} cellPadding="10" cellSpacing="0" style={{width: "100%", textAlign: "center"}}>
 			<thead>
-				<tr>
-					<th className="firstCell">{title}</th>
-					{dimensionGroups.map((column) => (
-						<th key={column}>{column}</th>
-					))}
-				</tr>
+			<tr>
+				<th className="firstCell">{title}</th>
+				{dimensionGroups.map((column) => (
+					<th key={column}>{column}</th>
+				))}
+			</tr>
 			</thead>
 			<tbody>
-				<tr>
-					<td><b>Počet</b></td>
-					{dimensionGroups.map((column) =>
-						<td>{data?.find((sg: any) => sg.group === column)?.count ?? "-"}</td>)}
-				</tr>
-				<tr>
-					<td><b>Pomer</b></td>
-					{dimensionGroups.map((column) =>
-						<td>{toPercentage(data?.find((sg: any) => sg.group === column)?.ratio) ?? "-"}</td>)}
-				</tr>
+			<tr>
+				<td><b>Počet</b></td>
+				{dimensionGroups.map((column) => (
+					<td key={column}>{data?.find((sg: any) => sg.group === column)?.count ?? "-"}</td>
+				))}
+			</tr>
+			<tr>
+				<td><b>Pomer</b></td>
+				{dimensionGroups.map((column) => (
+					<td key={column}>{toPercentage(data?.find((sg: any) => sg.group === column)?.ratio) ?? "-"}</td>
+				))}
+			</tr>
 			</tbody>
 		</table>
 		<div style={{height: "1rem"}}/>
-		<Bar data={dataChart} options={optionsChart} height="70%" />
+		<Bar data={dataChart} options={optionsChart} height="70%"/>
 	</div>)
 }

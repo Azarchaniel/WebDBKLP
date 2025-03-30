@@ -147,22 +147,26 @@ export default function QuotePage() {
             </div>
             <div className="quote_container">
                 {quoteGroups.length > 0 ? (
-                    quoteGroups.map((group) =>
-                        group.quotes.map((quote) => (
-                            <QuoteItem
-                                key={quote._id}
-                                deleteQuote={handleDeleteQuote}
-                                saveQuote={handleSaveQuote}
-                                quote={quote}
-                                bcgrClr={getRandomShade(group.baseColor)} // Get a random shade
-                            />
-                        ))
-                    )
+                    <>
+                        {quoteGroups.map((group) => (
+                            <React.Fragment key={group.bookId}>
+                                {group.quotes.map((quote) => (
+                                    <QuoteItem
+                                        key={quote._id}
+                                        deleteQuote={handleDeleteQuote}
+                                        saveQuote={handleSaveQuote}
+                                        quote={quote}
+                                        bcgrClr={getRandomShade(group.baseColor)}
+                                    />
+                                ))}
+                            </React.Fragment>
+                        ))}
+                    </>
                 ) : (
                     <span style={{color: "black"}}>Žiadne citáty neboli nájdené!</span>
                 )}
             </div>
-            <ScrollToTopBtn scrollToTop={() => scrollToTopOfPage()}/>
+            <ScrollToTopBtn scrollToTop={scrollToTopOfPage}/>
             <Toast/>
         </main>
     )

@@ -49,7 +49,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
      }) => {
         const [currentPage, setCurrentPage] = useState(pagination.page);
         const [currentPageSize, setCurrentPageSize] = useState(pagination.pageSize);
-        const [sorting, setSorting] = React.useState<SortingState>([])
+        const [sorting, setSorting] = React.useState<SortingState>(pagination.sorting)
         const [expanded, setExpanded] = useState<ExpandedState>({});
 
         const maxPage = Math.ceil(totalCount / currentPageSize);
@@ -57,6 +57,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
         useEffect(() => {
             setCurrentPage(pagination.page);
             setCurrentPageSize(pagination.pageSize);
+            setSorting(pagination.sorting);
         }, [pagination]);
 
         useEffect(() => {
@@ -111,7 +112,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                 {table.getHeaderGroups().map((headerGroup) => (
                                     <tr key={headerGroup.id}>
                                         {headerGroup.headers.map((header) => (
-                                            <th key={header.id} colSpan={header.colSpan}
+                                            <th key={`${headerGroup.id}-${header.id}`} colSpan={header.colSpan}
                                                 className={"TSP" + header.column.id}>
                                                 {header.isPlaceholder ? null : (
                                                     <div
@@ -145,28 +146,28 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                                 )}
                                             </th>
                                         ))}
-                                        <th className="TSPactionsRow"/>
+                                        <th key={`${headerGroup.id}-actions`} className="TSPactionsRow"/>
                                     </tr>
                                 ))}
                                 </thead>
 
                                 <tbody style={{pointerEvents: "none"}}>
                                 {table.getRowModel().rows.map((row) => (
-                                    <>
+                                    <React.Fragment key={row.original._id}>
                                         <tr key={row.id}>
                                             {row.getVisibleCells().map((cell) => (
-                                                <td key={cell.id} className={"TSP" + cell.column.id}>
+                                                <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
                                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                 </td>
                                             ))}
                                             {rowActions &&
-                                                <td>
+                                                <td key={`${row.id}-actions`}>
                                                     {rowActions(row.original._id, () => row.toggleExpanded())}
                                                 </td>
                                             }
                                         </tr>
                                         {row.getIsExpanded() && (
-                                            <tr style={{pointerEvents: "none"}}>
+                                            <tr key={`${row.id}-expanded`} style={{pointerEvents: "none"}}>
                                                 {/* +1 is because of Actions column */}
                                                 <td colSpan={row.getAllCells().length + 1}
                                                     style={{pointerEvents: "none"}}>
@@ -174,11 +175,12 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                                 </td>
                                             </tr>
                                         )}
-                                    </>
+                                    </React.Fragment>
                                 ))}
                                 </tbody>
                             </table>
                             <Pagination
+                                key={`pagination-${currentPage}-${currentPageSize}`}
                                 currentPage={currentPage}
                                 pageSize={currentPageSize}
                                 totalPages={maxPage}

@@ -1,5 +1,5 @@
 import {IBook, IBookHidden, IUser} from "../../type";
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import AddBook from "./AddBook";
@@ -255,6 +255,10 @@ export default function BookPage() {
         setPagination(prevState => ({...prevState, page: newPage, pageSize: newPageSize}));
     };
 
+    const handlePageChange = async (page: number) => {
+        setPagination(prevState => ({...prevState, page: page}));
+    };
+
     //TODO: move to utils - getBookTableColumns, IBook, setHidden
     const getColumnsForHidden = () => {
         const columnsForHidden = getBookTableColumns().filter((column: ColumnDef<IBook, any>) =>
@@ -265,6 +269,7 @@ export default function BookPage() {
 
             if (column.id === "dimensions") {
                 return <ShowHideRow
+                    key="dimensions"
                     label="Rozmery"
                     init={hidden.dimensions}
                     onChange={() => setHidden({
@@ -278,6 +283,7 @@ export default function BookPage() {
             }
 
             return <ShowHideRow
+                key={accessorKey as string}
                 label={header}
                 init={hidden[accessorKey as string]}
                 onChange={() => setHidden({...hidden, [accessorKey]: !hidden[accessorKey as string]})}
@@ -302,8 +308,7 @@ export default function BookPage() {
                 title={`Knihy (${countAll})`}
                 data={clonedBooks}
                 columns={getBookTableColumns()}
-                pageChange={(page) => setPagination(prevState =>
-                    ({...prevState, page: page}))}
+                pageChange={handlePageChange}
                 pageSizeChange={handlePageSizeChange}
                 sortingChange={(sorting) => {
                     if (sorting.length === 0) sorting = DEFAULT_PAGINATION.sorting;
@@ -314,7 +319,7 @@ export default function BookPage() {
                 pagination={pagination}
                 hiddenCols={hidden}
                 actions={
-                    <div className="row justify-center mb-4 mr-2">
+                    <div key="actions" className="row justify-center mb-4 mr-2">
                         <div className="searchTableWrapper">
                             <input
                                 placeholder="Vyhľadaj knihu"
@@ -328,7 +333,7 @@ export default function BookPage() {
                                         search: e.target.value
                                     }))}
                             />
-                            <button onClick={() => setPagination(prevState => ({
+                            <button key="clear-search" onClick={() => setPagination(prevState => ({
                                 ...prevState,
                                 page: DEFAULT_PAGINATION.page,
                                 search: ""
@@ -343,9 +348,10 @@ export default function BookPage() {
                     </div>
                 }
                 rowActions={(_id, expandRow) => (
-                    isUserLoggedIn() ? <div className="actionsRow" style={{pointerEvents: "auto"}}>
+                    isUserLoggedIn() ? <div key={_id} className="actionsRow" style={{pointerEvents: "auto"}}>
                         {/* TEMPORARY input*/}
                         <input
+                            key={`checkbox-${_id}`}
                             type="checkbox"
                             title="Zaškrtni, ak sme túto knihu skontrolovali"
                             checked={clonedBooks.find((book: IBook) => book._id === _id)?.wasChecked}
@@ -356,16 +362,19 @@ export default function BookPage() {
                             disabled={wasCheckedLoading}
                         />
                         <button
+                            key={`delete-${_id}`}
                             title="¨Vymazať"
                             onClick={() => handleDeleteBook(_id)}
                             className="fa fa-trash"
                         />
                         <button
+                            key={`edit-${_id}`}
                             title="Upraviť"
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateBook(_id)}
                         />
                         <button
+                            key={`detail-${_id}`}
                             title="Detaily"
                             className="fa fa-chevron-down"
                             onClick={() => expandRow()}

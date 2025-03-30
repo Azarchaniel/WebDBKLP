@@ -47,7 +47,7 @@ export default function DashboardPage() {
         return (
             <Tabs>
                 {readBy.map((user: any) => {
-                    return <Tab label={user.name}>
+                    return <Tab key={user.name} label={user.name}>
                         <ReadByChart data={user.stats}/>
                     </Tab>
                 })}

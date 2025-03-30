@@ -2,10 +2,10 @@ import React, {useState} from "react";
 import "../styles/font-awesome/css/all.css";
 import {ISideMenuItems} from "../type";
 import {Link} from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import {useLocation} from "react-router-dom";
 
 type PropsSB = {
-    parent: ISideMenuItems
+	parent: ISideMenuItems
 }
 
 const hasChildren = (item: ISideMenuItems) => {
@@ -26,14 +26,15 @@ const MenuItem: React.FC<PropsSB> = ({parent}) => {
 			//open
 			return (
 				<div className="SB-Parent">
-					<Link className='customLink' to={parent.route}>{parent.icon ? <i className={parent.icon}>&nbsp;</i> : <></>}
+					<Link className='customLink' to={parent.route}>{parent.icon ?
+						<i className={parent.icon}>&nbsp;</i> : <></>}
 						<span>{parent.title}</span>
 					</Link>
-                    &nbsp;
+					&nbsp;
 					<i className={`fas fa-chevron-${open ? "up" : "down"} SB-chevron`}
-						onClick={() => setOpen(!open)}/>
-					{parent.children && Array.isArray(parent.children) ? parent.children?.map((child: any, index) => {
-						return <div key={index} className="SB-Child">{child.title}</div>
+					   onClick={() => setOpen(!open)}/>
+					{parent.children && Array.isArray(parent.children) ? parent.children?.map((child: any) => {
+						return <div key={child.route} className="SB-Child">{child.title}</div>
 					}) : <></>}
 				</div>
 
@@ -46,9 +47,9 @@ const MenuItem: React.FC<PropsSB> = ({parent}) => {
 						{parent.icon ? <i className={parent.icon}>&nbsp;</i> : <></>}
 						<span>{parent.title}</span>
 					</Link>
-                    &nbsp;
+					&nbsp;
 					<i className={`fas fa-chevron-${open ? "up" : "down"} SB-chevron`}
-						onClick={() => setOpen(!open)}/>
+					   onClick={() => setOpen(!open)}/>
 				</div>
 
 			);
@@ -57,10 +58,11 @@ const MenuItem: React.FC<PropsSB> = ({parent}) => {
 		//single item
 		return (
 			<div className="SB-Parent">
-				<Link className={parent.route === location.pathname ? "customLink activeLink" : "customLink"} to={parent.route}>
+				<Link className={parent.route === location.pathname ? "customLink activeLink" : "customLink"}
+					  to={parent.route}>
 					{parent.icon ? <i className={parent.icon}>&nbsp;</i> : <></>}
 					<span>{parent.title}</span>
-                    &nbsp;
+					&nbsp;
 				</Link>
 			</div>);
 	}
@@ -101,31 +103,32 @@ const Sidebar = () => {
 	];
 
 	const showContent = (contentItems: ISideMenuItems[]) => {
-		return contentItems.map((item: ISideMenuItems, index) => {
+		return contentItems.map((item: ISideMenuItems) => {
 			if (sidebarOpened) {
-				return <MenuItem key={index} parent={item}/>;
+				return <MenuItem key={item.route} parent={item}/>;
 			} else {
 				//sidebar closed
 				if (!item.children) {
-					return <div className="SB-Parent">
+					return <div key={item.route} className="SB-Parent">
 						<Link className='customLink' to={item.route}>
 							{/* if Menu item has icon, show it. Otherwise show only first letter of title */}
 							{item.icon ?
-								<i key={index} className={item.route === location.pathname ? 
-									item.icon + " customLink activeLink" : item.icon}>&nbsp;</i> : 
+								<i key={item.route}
+								   className={item.route === location.pathname ?
+									   item.icon + " customLink activeLink" : item.icon}>&nbsp;</i> :
 								<>{item.title.substring(0, 1)}</>}
 						</Link>
 					</div>
 				} else {
-					return <div className="SB-Parent">
+					return <div key={item.route} className="SB-Parent">
 
 						{item.icon ? <Link className='customLink' to={item.route}>
-							<i key={index} className={item.icon}>&nbsp;</i>
+							<i key={item.route} className={item.icon}>&nbsp;</i>
 						</Link> : <></>}
 						{
-							item.children.map((child: ISideMenuItems, index) =>
-								<Link className='customLink' to={child.route}>
-									<div key={index} className="SB-Child">{child.title.substring(0, 1)}</div>
+							item.children.map((child: ISideMenuItems) =>
+								<Link key={child.route} className='customLink' to={child.route}>
+									<div className="SB-Child">{child.title.substring(0, 1)}</div>
 								</Link>)
 						}
 

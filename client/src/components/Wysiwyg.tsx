@@ -12,7 +12,7 @@ import React, {useEffect} from "react";
 
 interface Props extends EditorProps {
     style?: React.CSSProperties;
-	hideToolbar?: boolean;
+	hidetoolbar?: string;
 	customerror?: string;
 	id?: string;
 }
@@ -35,7 +35,7 @@ export const Wysiwyg: React.FC<Props> = props => {
 	return (
 		<EditorProvider>
 			<Editor {...props}>
-				{!props.hideToolbar && <Toolbar>
+				{props.hidetoolbar !== "true" && <Toolbar>
 					<BtnUndo />
 					<BtnRedo />
 					<Separator />
