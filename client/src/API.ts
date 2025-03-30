@@ -117,12 +117,15 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
     }
 }
 
-export const getBooksByIds = async (ids: string[]): Promise<AxiosResponse<ApiBookDataType>> => {
+export const getBooksByIds = async (params?: any): Promise<AxiosResponse<ApiBookDataType>> => {
     try {
         const books: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
             baseUrl + "/books-by-ids", {
                 params: {
-                    ids
+                    page: params?.page ?? 1, // API expects 1-based index
+                    pageSize: params?.pageSize ?? 10_000,
+                    search: params?.search ?? "",
+                    ids: params?.ids ?? [],
                 }
             });
         return books
