@@ -35,6 +35,8 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 router.post('/login', loginUser)
 router.post('/refresh-token', refreshToken)
 
+router.get('/get-page-by-starting-letter', getPageByStartingLetter)
+
 // ### BOOKS ###
 router.get('/book/:id', getBook)
 router.get('/books', getAllBooks)
@@ -44,8 +46,6 @@ router.post('/delete-book/:id', deleteBook)
 router.get('/get-book-info/:isbn', getInfoFromISBN)
 router.get('/books-by-ids', getBooksByIds)
 router.get('/books/check-updated', checkBooksUpdated)
-router.get('/books/get-page-by-starting-letter', getPageByStartingLetter)
-
 
 // ### AUTORS ###
 router.get('/autor/:id', getAutor)

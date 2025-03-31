@@ -46,7 +46,14 @@ const Pagination: React.FC<PaginationProps> = ({
     const handleLetterChangeKeyDown = async (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
             const value = (event.target as HTMLInputElement).value.toUpperCase();
-            const { data } = await getPageByStartingLetter(value, pageSize, activeUsers?.map(u => u._id));
+
+            const { data } =
+                await getPageByStartingLetter(
+                    value,
+                    pageSize,
+                    window.location.pathname.replace("/", ""),
+                    activeUsers?.map(u => u._id)
+                );
             onPageChange(data.page);
         }
     };

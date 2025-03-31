@@ -194,7 +194,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         const yearOfPublish = await getContentFromElement(page, "span[itemprop='datePublished']");
         const publisher = await getContentFromElement(page, "span[itemprop='publisher']");
         const noPages = await getContentFromElement(page, "span[itemprop='numberOfPages']");
-        const language = await getContentFromElement(page, "span[itemprop='language']"); // TODO: normalize: slovencina
+        const language = await getContentFromElement(page, "span[itemprop='language']");
         const serieTitle = await getContentFromElement(page, "a[class='odright_pet']");
         const serieNo = getNumberFromString(await getContentFromElement(page, "span[class='odright_pet']"));
         const editionTitle = await getContentFromElement(page, "a[itemprop=\"bookEdition\"]");
@@ -376,7 +376,7 @@ function setNestedValue(obj: Record<string, any>, path: string[], value: any): v
  * @param model - choose what model are being normalized.
  * @returns A promise that resolves to a nested object with normalized search fields.
  */
-export async function normalizeSearchFields(doc: any, model: "book" | "autor" | "lp"): Promise<Record<string, any>> {
+export async function normalizeSearchFields(doc: any, model: string): Promise<Record<string, any>> {
     const normalizedFields: Record<string, any> = {};
 
     let fieldsToNormalize: Record<string, any> = {};

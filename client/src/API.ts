@@ -97,6 +97,25 @@ axiosInstance.interceptors.response.use(
     }
 );
 
+interface IPageByLetter { page: number }
+export const getPageByStartingLetter = async (letter: string, pageSize: number, model: string, filterUsers?: string[]): Promise<AxiosResponse<IPageByLetter>> => {
+    try {
+        const response: AxiosResponse<IPageByLetter> = await axiosInstance.get(
+            baseUrl + "/get-page-by-starting-letter", {
+                params: {
+                    letter,
+                    pageSize,
+                    model,
+                    filterUsers
+                }
+            }
+        );
+        return response;
+    } catch (error: any) {
+        console.error("Cannot get page by starting letter: ", error);
+        throw new Error(error);
+    }
+}
 
 //### BOOK ###
 export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataType>> => {
@@ -107,7 +126,7 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
                     page: params?.page ?? 1, // API expects 1-based index
                     pageSize: params?.pageSize ?? 10_000,
                     search: params?.search ?? "",
-                    sorting: params?.sorting ?? {id: "title", desc: false},
+                    sorting: params?.sorting ?? [{id: "title", desc: false}],
                     filterUsers: params?.activeUsers
                 }
             });
@@ -125,6 +144,7 @@ export const getBooksByIds = async (params?: any): Promise<AxiosResponse<ApiBook
                     page: params?.page ?? 1, // API expects 1-based index
                     pageSize: params?.pageSize ?? 10_000,
                     search: params?.search ?? "",
+                    sorting: params?.sorting ?? [{id: "title", desc: false}],
                     ids: params?.ids ?? [],
                 }
             });
@@ -149,25 +169,6 @@ export const checkBooksUpdated = async (dataFrom?: Date): Promise<AxiosResponse<
         throw new Error(error);
     }
 };
-
-interface IPageByLetter { page: number }
-export const getPageByStartingLetter = async (letter: string, pageSize: number, filterUsers?: string[]): Promise<AxiosResponse<IPageByLetter>> => {
-    try {
-        const response: AxiosResponse<IPageByLetter> = await axiosInstance.get(
-            baseUrl + "/books/get-page-by-starting-letter", {
-                params: {
-                    letter,
-                    pageSize,
-                    filterUsers
-                }
-            }
-        );
-        return response;
-    } catch (error: any) {
-        console.error("Cannot get page by starting letter: ", error);
-        throw new Error(error);
-    }
-}
 
 export const getBook = async (
     _id: string
@@ -239,7 +240,7 @@ export const getAutors = async (params?: any): Promise<AxiosResponse<ApiAutorDat
                     page: params?.page ?? 1, // API expects 1-based index
                     pageSize: params?.pageSize ?? 10_000,
                     search: params?.search ?? "",
-                    sorting: params?.sorting ?? {id: "lastName", desc: false},
+                    sorting: params?.sorting ?? [{id: "lastName", desc: false}],
                     filterUsers: params?.activeUsers,
                     dataFrom: params?.dataFrom
                 }

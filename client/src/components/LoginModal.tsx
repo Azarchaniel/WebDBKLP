@@ -83,7 +83,7 @@ const LoginModal: React.FC = () => {
                             }}
                     >
                         <InputField type="email" placeholder="Email" className="form-control" id="email"
-                                    onChange={(e) => updateForm(e)}
+                                    onChange={(e) => updateForm(e)} autoComplete="true"
                         />
                         <CustomPasswordField
                             placeholder="Heslo"

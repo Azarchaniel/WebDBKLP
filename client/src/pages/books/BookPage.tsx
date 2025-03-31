@@ -1,22 +1,19 @@
-import {IBook, IBookHidden, IUser} from "../../type";
+import {IBook, IBookColumnVisibility, IUser} from "../../type";
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import AddBook from "./AddBook";
-import Sidebar from "../../components/Sidebar";
-import Toast from "../../components/Toast";
 import {stringifyAutors, stringifyUsers} from "../../utils/utils";
-import Header from "../../components/AppHeader";
 import {useReadLocalStorage} from "usehooks-ts";
-import {ShowHideRow} from "../../components/books/ShowHideRow";
 import {DEFAULT_PAGINATION} from "../../utils/constants";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
 import {isUserLoggedIn} from "../../utils/user";
-import {ColumnDef} from "@tanstack/react-table";
-import {getBookTableColumns} from "../../utils/tableColumns";
+import {getBookTableColumns, ShowHideColumns} from "../../utils/tableColumns";
 import BookDetail from "./BookDetail";
 import {getCachedTimestamp, loadFirstPageFromCache, saveFirstPageToCache} from "../../utils/indexDb";
+import {useClickOutside} from "../../utils/hooks";
+import Layout from "../../Layout";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
@@ -29,8 +26,8 @@ export default function BookPage() {
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [updateBook, setUpdateBook] = useState<IBook>();
-    const [hidden, setHidden] = useState<IBookHidden>({
-        control: true,
+    const [showColumn, setShowColumn] = useState<IBookColumnVisibility>({
+        control: false,
         autorsFull: true,
         editorsFull: false,
         ilustratorsFull: false,
@@ -51,16 +48,25 @@ export default function BookPage() {
         exLibris: true,
         readBy: true,
         note: true,
-        createdAt: true,
+        createdAt: false,
+        updatedAt: true,
         location: true,
         ownersFull: true
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const [controller, setController] = useState<AbortController | null>(null);
-    const popRef = useRef(null);
     const activeUsers: IUser[] | null = useReadLocalStorage("activeUsers");
     const memoizedActiveUsers = useMemo(() => activeUsers, [JSON.stringify(activeUsers)]);
+    const popRef = useRef<HTMLDivElement>(null);
+    const exceptRef = useRef<HTMLDivElement>(null);
+
+    useClickOutside(popRef, () => {
+        setShowColumn(prevState => ({
+            ...prevState,
+            control: false
+        }));
+    }, exceptRef);
 
     const checkIfFirstPage = () => {
         return JSON.stringify(pagination) === JSON.stringify(DEFAULT_PAGINATION);
@@ -88,23 +94,6 @@ export default function BookPage() {
             if (newTimeoutId) clearTimeout(newTimeoutId);
         };
     }, [memoizedActiveUsers]);
-
-    useEffect(() => {
-        function handleClickOutside(event: Event) {
-            if (popRef.current && !(popRef as any).current.contains(event.target)) {
-                //prevState, otherwise it was overwritting the checkboxes
-                setHidden(prevState => ({
-                    ...prevState,
-                    control: true
-                }));
-            }
-        }
-
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [popRef]);
 
     // ### BOOKS ###
     const fetchBooks = async (): Promise<void> => {
@@ -259,50 +248,15 @@ export default function BookPage() {
         setPagination(prevState => ({...prevState, page: page}));
     };
 
-    //TODO: move to utils - getBookTableColumns, IBook, setHidden
-    const getColumnsForHidden = () => {
-        const columnsForHidden = getBookTableColumns().filter((column: ColumnDef<IBook, any>) =>
-            column["accessorKey" as keyof typeof column] !== "title" /* TEMPORARY ->  */ || column["accessorKey" as keyof typeof column] !== "wasChecked");
-
-        return columnsForHidden.map((column: any) => {
-            const {header, accessorKey}: { header: string, accessorKey: keyof typeof column } = column;
-
-            if (column.id === "dimensions") {
-                return <ShowHideRow
-                    key="dimensions"
-                    label="Rozmery"
-                    init={hidden.dimensions}
-                    onChange={() => setHidden({
-                        ...hidden,
-                        dimensions: !hidden.dimensions,
-                        height: !hidden.dimensions,
-                        width: !hidden.dimensions,
-                        depth: !hidden.dimensions,
-                        weight: !hidden.dimensions
-                    })}/>
-            }
-
-            return <ShowHideRow
-                key={accessorKey as string}
-                label={header}
-                init={hidden[accessorKey as string]}
-                onChange={() => setHidden({...hidden, [accessorKey]: !hidden[accessorKey as string]})}
-            />
-        })
-    }
-
     return (
-        <main className='App'>
-            {/* TODO: remove Header and Sidebar from here */}
-            <Header/>
-            <Sidebar/>
+        <Layout>
             {isUserLoggedIn() && <AddBook
                 saveBook={handleSaveBook}
                 onClose={() => setUpdateBook(undefined)}
                 saveResultSuccess={saveBookSuccess}
             />}
-            <div ref={popRef} className={`showHideColumns ${hidden.control ? "hidden" : "shown"}`}>
-                {getColumnsForHidden()}
+            <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
+                <ShowHideColumns columns={getBookTableColumns()} shown={showColumn} setShown={setShowColumn} />
             </div>
             <ServerPaginationTable
                 title={`Knihy (${countAll})`}
@@ -317,7 +271,7 @@ export default function BookPage() {
                 totalCount={countAll}
                 loading={loading}
                 pagination={pagination}
-                hiddenCols={hidden}
+                hiddenCols={showColumn}
                 actions={
                     <div key="actions" className="row justify-center mb-4 mr-2">
                         <div className="searchTableWrapper">
@@ -341,9 +295,10 @@ export default function BookPage() {
                             </button>
                         </div>
                         <i
+                            ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
                             title="Zobraz/skry stĺpce"
-                            onClick={() => setHidden({...hidden, control: !hidden.control})}
+                            onClick={() => setShowColumn({...showColumn, control: !showColumn.control})}
                         />
                     </div>
                 }
@@ -390,7 +345,6 @@ export default function BookPage() {
                     onClose={() => setUpdateBook(undefined)}
                     saveResultSuccess={saveBookSuccess}
                 />}
-            <Toast/>
-        </main>
+        </Layout>
     );
 }
