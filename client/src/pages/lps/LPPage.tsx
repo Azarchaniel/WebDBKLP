@@ -21,7 +21,7 @@ export default function LPPage() {
     const [saveLpSuccess, setSaveLpSuccess] = useState<boolean | undefined>(undefined);
     const [loading, setLoading] = useState<boolean>(true);
     const [showColumn, setShowColumn] = useState<IBookColumnVisibility>({
-        control: true,
+        control: false,
         autorsFull: true,
         subtitle: false,
         language: false,

@@ -7,6 +7,8 @@ import mongoose, {PipelineStage, Types} from 'mongoose';
 import {optionFetchAllExceptDeleted, populateOptionsBook} from "../utils/constants";
 import diacritics from "diacritics";
 import {buildPaginationPipeline, fetchDataWithPagination} from "../utils/queryUtils";
+import Autor from "../models/autor";
+import Lp from "../models/lp";
 
 const normalizeBook = (data: any): IBook => {
     const city = data.location ?
@@ -179,11 +181,32 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
 
 const getPageByStartingLetter = async (req: Request, res: Response): Promise<void> => {
     try {
-        let { pageSize = "10_000", filterUsers, letter = "" } = req.query;
+        let { pageSize = "10_000", filterUsers, letter = "", model } = req.query;
 
         if (!letter || letter.length !== 1) {
             res.status(400).json({ message: "Invalid letter parameter." });
             return;
+        }
+
+        // Dynamically select the model based on the 'model' query parameter
+        let selectedModel: mongoose.Model<any>;
+        let lookupColumn: string;
+        switch (model) {
+            case "books":
+                selectedModel = Book;
+                lookupColumn = "title";
+                break;
+            case "autors":
+                selectedModel = Autor;
+                lookupColumn = "lastName";
+                break;
+            case "lp":
+                selectedModel = Lp;
+                lookupColumn = "title";
+                break;
+            default:
+                res.status(400).json({ message: "Invalid model parameter." });
+                return;
         }
 
         let query: Record<string, any> = { deletedAt: { $eq: null } };
@@ -192,17 +215,17 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
             query = { ...query, owner: { $in: (filterUsers as string[]).map(userId => new Types.ObjectId(userId)) } };
         }
 
-        // Count books before the first matching book
-        const countBefore = await Book.aggregate([
+        // Count items before the first matching item
+        const countBefore = await selectedModel.aggregate([
             { $match: query },
-            { $match: { title: { $lt: letter } } }, // Count books with titles before the letter
+            { $match: { [lookupColumn]: { $lt: letter } } }, // Count items with titles before the letter
             { $count: "count" }
         ]).collation({ locale: "cs", strength: 2, numericOrdering: true });
 
         const position = countBefore.length > 0 ? countBefore[0].count : 0;
 
         if (position === 0) {
-            res.status(404).json({ message: `Couldn't find any book starting with letter "${letter}".` });
+            res.status(404).json({ message: `Couldn't find any item starting with letter "${letter}".` });
             return;
         }
 
