@@ -1,16 +1,14 @@
-import Sidebar from "../../components/Sidebar";
 import AddLP from "./AddLP";
-import {ILP} from "../../type";
+import {IBookColumnVisibility, ILP} from "../../type";
 import React, {useEffect, useRef, useState} from "react";
 import {addLP, deleteLP, getLPs, getLP} from "../../API";
 import {toast} from "react-toastify";
 import {stringifyAutors} from "../../utils/utils";
 import {DEFAULT_PAGINATION} from "../../utils/constants";
-import {ShowHideRow} from "../../components/books/ShowHideRow";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
 import {isUserLoggedIn} from "../../utils/user";
 import ServerPaginationTable from "../../components/table/TableSP";
-import {getLPTableColumns} from "../../utils/tableColumns";
+import {getLPTableColumns, ShowHideColumns} from "../../utils/tableColumns";
 import {useClickOutside} from "../../utils/hooks";
 import Layout from "../../Layout";
 
@@ -22,21 +20,23 @@ export default function LPPage() {
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const [saveLpSuccess, setSaveLpSuccess] = useState<boolean | undefined>(undefined);
     const [loading, setLoading] = useState<boolean>(true);
-    const [hidden, setHidden] = useState({
+    const [showColumn, setShowColumn] = useState<IBookColumnVisibility>({
         control: true,
-        subtitle: true,
+        autorsFull: true,
+        subtitle: false,
+        language: false,
         createdAt: true,
         speed: true,
         countLp: true,
         published: true
     });
-    const popRef = useRef(null);
-    const exceptRef = useRef(null);
+    const popRef = useRef<HTMLDivElement>(null);
+    const exceptRef = useRef<HTMLDivElement>(null);
 
     useClickOutside(popRef, () => {
-        setHidden(prevState => ({
+        setShowColumn(prevState => ({
             ...prevState,
-            control: true
+            control: false
         }));
     }, exceptRef);
 
@@ -140,17 +140,8 @@ export default function LPPage() {
     return (
         <Layout>
             {isUserLoggedIn() && <AddLP saveLp={handleSaveLP} onClose={() => setUpdateLP(undefined)}/>}
-            <div ref={popRef} className={`showHideColumns ${hidden.control ? "hidden" : "shown"}`}>
-                <ShowHideRow label="Podnázov" init={hidden.subtitle}
-                             onChange={() => setHidden({...hidden, subtitle: !hidden.subtitle})}/>
-                <ShowHideRow label="Dátum pridania" init={hidden.createdAt}
-                             onChange={() => setHidden({...hidden, createdAt: !hidden.createdAt})}/>
-                <ShowHideRow label="Rýchlosť" init={hidden.speed}
-                             onChange={() => setHidden({...hidden, speed: !hidden.speed})}/>
-                <ShowHideRow label="Počet LP" init={hidden.countLp}
-                             onChange={() => setHidden({...hidden, countLp: !hidden.countLp})}/>
-                <ShowHideRow label="Vydané" init={hidden.published}
-                             onChange={() => setHidden({...hidden, published: !hidden.published})}/>
+            <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
+                <ShowHideColumns columns={getLPTableColumns()} shown={showColumn} setShown={setShowColumn} />
             </div>
             <ServerPaginationTable
                 title={`LP (${countAll})`}
@@ -162,7 +153,7 @@ export default function LPPage() {
                 totalCount={countAll}
                 loading={loading}
                 pagination={pagination}
-                hiddenCols={hidden}
+                hiddenCols={showColumn}
                 actions={
                     <div className="row justify-center mb-4 mr-2">
                         <div className="searchTableWrapper">
@@ -190,7 +181,7 @@ export default function LPPage() {
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
                             title="Zobraz/skry stĺpce"
-                            onClick={() => setHidden({...hidden, control: !hidden.control})}
+                            onClick={() => setShowColumn({...showColumn, control: !showColumn.control})}
                         />
                     </div>
                 }

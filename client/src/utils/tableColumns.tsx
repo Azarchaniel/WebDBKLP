@@ -1,9 +1,10 @@
 import {ColumnDef, createColumnHelper} from "@tanstack/react-table";
 import {IAutor, IBook, ILocation, IPublished, IUser} from "../type";
 import {formatDimension, getBookLocation} from "./utils";
-import React from "react";
+import React, {useState} from "react";
 import {tableHeaderColor} from "./constants";
 import {countryCode, langCode} from "./locale";
+import {ShowHideRow} from "../components/books/ShowHideRow";
 
 const columnHelper = createColumnHelper<any>();
 
@@ -95,19 +96,23 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'edition',
         header: 'Edícia',
-        cell: ({ cell }: { cell: any }) => `${cell.getValue()?.title ?? ""} ${cell.getValue()?.no ? "(" + cell.getValue()?.no + ")" : ""}`,
+        cell: ({cell}: {
+            cell: any
+        }) => `${cell.getValue()?.title ?? ""} ${cell.getValue()?.no ? "(" + cell.getValue()?.no + ")" : ""}`,
         sortingFn: "alphanumeric",
     },
     {
         accessorKey: 'serie',
         header: 'Séria',
-        cell: ({ cell }: { cell: any }) => `${cell.getValue()?.title ?? ""} ${cell.getValue()?.no ? "(" + cell.getValue()?.no + ")" : ""}`,
+        cell: ({cell}: {
+            cell: any
+        }) => `${cell.getValue()?.title ?? ""} ${cell.getValue()?.no ? "(" + cell.getValue()?.no + ")" : ""}`,
         sortingFn: "alphanumeric",
     },
     {
         accessorKey: 'published',
         header: 'Vydané',
-        cell: ({ cell }: { cell: any }) => {
+        cell: ({cell}: { cell: any }) => {
             const published = cell.getValue() as IPublished;
             return `${published?.publisher} (${published?.year ?? "?"})`;
         },
@@ -116,12 +121,13 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'exLibris',
         header: 'Ex Libris',
-        cell: ({ cell }: { cell: any }) => (cell.getValue() ? <span className="trueMark"/> : <span className="falseMark"/>),
+        cell: ({cell}: { cell: any }) => (cell.getValue() ? <span className="trueMark"/> :
+            <span className="falseMark"/>),
     },
     {
         accessorKey: 'readBy',
         header: 'Prečítané',
-        cell: ({ cell }: { cell: any }) => {
+        cell: ({cell}: { cell: any }) => {
             const readBy = cell.getValue() as IUser[];
             return readBy?.map(user => user.firstName).join(', ') || '';
         },
@@ -188,19 +194,19 @@ export const getAutorTableColumns = (): ColumnDef<IAutor, any>[] => [
     {
         accessorKey: 'nationality',
         header: 'Národnosť',
-        cell: ({ cell }: { cell: any }) => countryCode.filter(cc => cc.key === cell.getValue()).map(cc => cc.value) ?? "-"
+        cell: ({cell}: { cell: any }) => countryCode.filter(cc => cc.key === cell.getValue()).map(cc => cc.value) ?? "-"
     },
     {
         accessorKey: 'dateOfBirth',
         header: 'Narodenie',
         sortingFn: "datetime",
-        cell: ({ cell }: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString("sk-SK") : null
+        cell: ({cell}: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString("sk-SK") : null
     },
     {
         accessorKey: 'dateOfDeath',
         header: 'Úmrtie',
         sortingFn: "datetime",
-        cell: ({ cell }: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString("sk-SK") : null
+        cell: ({cell}: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString("sk-SK") : null
     },
     {
         accessorKey: 'note',
@@ -232,7 +238,7 @@ export const getLPTableColumns = (): ColumnDef<any, any>[] => [
     {
         accessorKey: 'language',
         header: 'Jazyk',
-        cell: ({ cell }: { cell: any }) => langCode
+        cell: ({cell}: { cell: any }) => langCode
             .filter(lang => (Array.isArray(cell.getValue()) ? cell.getValue() : []).includes(lang.key))
             .map(lang => lang.value)
             .join(', ')
@@ -248,9 +254,9 @@ export const getLPTableColumns = (): ColumnDef<any, any>[] => [
     {
         accessorKey: 'published',
         header: 'Vydané',
-        cell: ({ cell }: { cell: any }) => {
+        cell: ({cell}: { cell: any }) => {
             const published = cell.getValue() as IPublished;
-            return published  ? `${published?.publisher ?? ""} (${published?.year ?? "-"})` : null;
+            return published ? `${published?.publisher ?? ""} (${published?.year ?? "-"})` : null;
         },
     },
     {
@@ -265,3 +271,57 @@ export const getLPTableColumns = (): ColumnDef<any, any>[] => [
         sortingFn: "datetime"
     },
 ];
+
+interface ShowHideColumnsProps<T> {
+    columns: ColumnDef<T, any>[];
+    shown: Record<string, boolean>;
+    setShown: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
+}
+
+export const ShowHideColumns = <T, >({columns, shown, setShown}: ShowHideColumnsProps<T>) => {
+    const [dimensionsHidden, setDimensionsHidden] = useState<boolean>(shown.dimensions ?? false);
+
+    const getColumnsForHidden = () => {
+        // ignore those columns
+        const columnsForHidden = columns.filter((column: ColumnDef<T, any>) => {
+            return (column as any).accessorKey !== "title" &&
+                /* TEMPORARY ->  */ (column as any).accessorKey !== "wasChecked" &&
+                (column as any).accessorKey !== "lastName"
+        });
+
+        return columnsForHidden.map((column: any) => {
+            const {header, accessorKey}: { header: string, accessorKey: keyof typeof column } = column;
+
+            if (column.id === "dimensions") {
+                return <ShowHideRow
+                    key="dimensions"
+                    label="Rozmery"
+                    init={dimensionsHidden}
+                    onChange={() => {
+                        setDimensionsHidden(!dimensionsHidden);
+                        setShown((prevHidden) => ({
+                            ...prevHidden,
+                            dimensions: !dimensionsHidden,
+                            height: !dimensionsHidden,
+                            width: !dimensionsHidden,
+                            depth: !dimensionsHidden,
+                            weight: !dimensionsHidden
+                        }));
+                    }}/>
+            }
+
+            return <ShowHideRow
+                key={accessorKey as string}
+                label={header}
+                init={shown[accessorKey as string]}
+                onChange={() => setShown({...shown, [accessorKey]: !shown[accessorKey as string]})}
+            />
+        })
+    }
+
+    return (
+        <>
+            {getColumnsForHidden()}
+        </>
+    );
+};

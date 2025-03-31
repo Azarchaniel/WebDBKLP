@@ -1,17 +1,18 @@
 import AddAutor from "./AddAutor";
-import React, {useEffect, useState} from "react";
-import {IAutor} from "../../type";
+import React, {useEffect, useRef, useState} from "react";
+import {IAutor, IBookColumnVisibility} from "../../type";
 import {addAutor, deleteAutor, getAutor, getAutors} from "../../API";
 import {toast} from "react-toastify";
 import {stringifyAutors} from "../../utils/utils";
 import {DEFAULT_PAGINATION} from "../../utils/constants";
 import {openConfirmDialog} from "../../components/ConfirmDialog";
 import {isUserLoggedIn} from "../../utils/user";
-import {getAutorTableColumns} from "../../utils/tableColumns";
+import {getAutorTableColumns, ShowHideColumns} from "../../utils/tableColumns";
 import ServerPaginationTable from "../../components/table/TableSP";
 import AutorDetail from "./AutorDetail";
 import {SortingState} from "@tanstack/react-table";
 import Layout from "../../Layout";
+import {useClickOutside} from "../../utils/hooks";
 
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
@@ -24,6 +25,24 @@ export default function AutorPage() {
     });
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const [saveAutorSuccess, setSaveAutorSuccess] = useState<boolean | undefined>(undefined);
+    const [showColumn, setShowColumn] = useState<IBookColumnVisibility>({
+        control: false,
+        firstName: true,
+        lastName: true,
+        nationality: true,
+        dateOfBirth: true,
+        dateOfDeath: true,
+        note: true,
+    });
+    const popRef = useRef<HTMLDivElement>(null);
+    const exceptRef = useRef<HTMLDivElement>(null);
+
+    useClickOutside(popRef, () => {
+        setShowColumn(prevState => ({
+            ...prevState,
+            control: false
+        }));
+    }, exceptRef);
 
     useEffect(() => {
         fetchAutors();
@@ -128,6 +147,9 @@ export default function AutorPage() {
     return (
         <Layout>
             {isUserLoggedIn() && <AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>}
+            <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
+                <ShowHideColumns columns={getAutorTableColumns()} shown={showColumn} setShown={setShowColumn} />
+            </div>
             <ServerPaginationTable
                 title={`Autori (${countAll})`}
                 data={autors}
@@ -138,6 +160,7 @@ export default function AutorPage() {
                 totalCount={countAll}
                 loading={loading}
                 pagination={pagination}
+                hiddenCols={showColumn}
                 actions={
                     <div className="row justify-center mb-4 mr-2">
                         <div className="searchTableWrapper">
@@ -161,6 +184,12 @@ export default function AutorPage() {
                             }))}>✖
                             </button>
                         </div>
+                        <i
+                            ref={exceptRef}
+                            className="fas fa-bars bookTableAction ml-4"
+                            title="Zobraz/skry stĺpce"
+                            onClick={() => setShowColumn({...showColumn, control: !showColumn.control})}
+                        />
                     </div>
                 }
                 rowActions={(_id, expandRow) => (

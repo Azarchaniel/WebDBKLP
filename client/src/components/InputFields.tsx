@@ -273,6 +273,7 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
                 value={showPassword ? realPassword : maskedPassword}
                 onChange={handleInput}
                 onPaste={handlePaste}
+                autoComplete="true"
             />
             <button
                 type="button"

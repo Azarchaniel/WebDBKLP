@@ -142,7 +142,7 @@ interface IEditionSerie {
     title: string;
 }
 
-export interface IBookHidden {
+export interface IBookColumnVisibility {
     [columnId: string]: boolean
 }
 

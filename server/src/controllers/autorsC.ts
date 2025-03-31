@@ -7,7 +7,7 @@ import {fetchDataWithPagination} from "../utils/queryUtils";
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {page = "1", pageSize = "10_000", search = "", sorting = {lastName: 1}, dataFrom} = req.query;
+        const {page = "1", pageSize = "10_000", search = "", sorting, dataFrom} = req.query;
 
         const searchFields = ["firstName", "lastName"];
         const parsedPage = parseInt(page as string, 10);

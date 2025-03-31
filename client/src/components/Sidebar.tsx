@@ -73,7 +73,6 @@ const Sidebar = () => {
 
 	const [sidebarOpened, setSidebarOpened] = useState<boolean>(false);
 
-	//todo: this shouldn't be here - separate data and component
 	const content: ISideMenuItems[] = [
 		{
 			title: "Knihy",

@@ -107,7 +107,7 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
                     page: params?.page ?? 1, // API expects 1-based index
                     pageSize: params?.pageSize ?? 10_000,
                     search: params?.search ?? "",
-                    sorting: params?.sorting ?? {id: "title", desc: false},
+                    sorting: params?.sorting ?? [{id: "title", desc: false}],
                     filterUsers: params?.activeUsers
                 }
             });
@@ -125,6 +125,7 @@ export const getBooksByIds = async (params?: any): Promise<AxiosResponse<ApiBook
                     page: params?.page ?? 1, // API expects 1-based index
                     pageSize: params?.pageSize ?? 10_000,
                     search: params?.search ?? "",
+                    sorting: params?.sorting ?? [{id: "title", desc: false}],
                     ids: params?.ids ?? [],
                 }
             });
@@ -239,7 +240,7 @@ export const getAutors = async (params?: any): Promise<AxiosResponse<ApiAutorDat
                     page: params?.page ?? 1, // API expects 1-based index
                     pageSize: params?.pageSize ?? 10_000,
                     search: params?.search ?? "",
-                    sorting: params?.sorting ?? {id: "lastName", desc: false},
+                    sorting: params?.sorting ?? [{id: "lastName", desc: false}],
                     filterUsers: params?.activeUsers,
                     dataFrom: params?.dataFrom
                 }
