@@ -28,7 +28,6 @@
     "font-awesome": "^4.7.0",
     "idb": "^8.0.2",
     "jwt-decode": "^4.0.0",
-    "multiselect-react-dropdown": "^2.0.25",
     "npm-check-updates": "^17.1.11",
     "postcss": "^8.4.49",
     "react": "^18.0.0",

@@ -7,27 +7,10 @@ import React, {
     useRef,
     useState,
 } from "react";
-import {Multiselect} from "multiselect-react-dropdown";
-import {multiselectStyle} from "../utils/constants";
 import "../styles/Autocomplete.scss";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     customerror?: string;
-}
-
-interface MultiselectInputProps extends Omit<InputProps, "onChange"> {
-    label: string;
-    name: string;
-    options: any[] | undefined;
-    displayValue: string;
-    id?: string;
-    emptyRecordMsg?: string;
-    selectionLimit?: number;
-    onChange: ({name, value}: { name: string, value: string }) => void;
-    onSearch?: (searchTerm: string) => void;
-    customerror?: string;
-    reset?: number;
-    onClick?: () => void;
 }
 
 export const InputField = React.memo((props: InputProps) => {
@@ -57,65 +40,6 @@ export const InputField = React.memo((props: InputProps) => {
             lang="cs-CZ"
         />
     );
-});
-
-export const MultiselectField = React.memo(({
-                                                options,
-                                                value,
-                                                displayValue,
-                                                label,
-                                                onChange,
-                                                name,
-                                                id,
-                                                selectionLimit,
-                                                emptyRecordMsg = "Žiadny záznam nenájdený!",
-                                                customerror,
-                                                onSearch,
-                                                reset,
-                                                onClick
-                                            }: MultiselectInputProps) => {
-    const inputElement: any = document.getElementById(`${id}`);
-    const multiselectRef = useRef<any>(null);
-
-    useEffect(() => {
-        if (inputElement) {
-            if (customerror) {
-                inputElement.style.border = "2px dotted red";
-                inputElement.style.borderRadius = "4px";
-            } else {
-                inputElement.style.border = "none";
-            }
-        }
-
-    }, [customerror]);
-
-    useEffect(() => {
-        if (reset && multiselectRef)
-            multiselectRef.current.resetSelectedValues();
-    }, [reset]);
-
-    return (
-        <div onClick={onClick}>
-            <Multiselect
-                id={id}
-                options={options}
-                isObject={true}
-                selectionLimit={selectionLimit}
-                displayValue={displayValue}
-                closeOnSelect={true}
-                placeholder={label}
-                closeIcon="cancel"
-                emptyRecordMsg={emptyRecordMsg}
-                style={multiselectStyle}
-                avoidHighlightFirstOption={true}
-                selectedValues={value}
-                onSelect={(value) => onChange({name: name, value: value})}
-                onRemove={(removedList, _) => onChange({name: name, value: removedList})}
-                onSearch={(value: string) => onSearch ? onSearch(value) : null}
-                ref={multiselectRef}
-            />
-        </div>
-    )
 });
 
 interface PasswordFieldProps {
@@ -263,30 +187,40 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
         setShowPassword((prev) => !prev); // Toggle the showPassword state
     };
 
+    // the input/password is there to deceive browser to save password
     return (
         <div className="passwordContainer">
-            <input
-                ref={inputRef}
-                type="text"
-                className="form-control"
-                placeholder={placeholder}
-                value={showPassword ? realPassword : maskedPassword}
-                onChange={handleInput}
-                onPaste={handlePaste}
-                autoComplete="true"
-            />
-            <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="passwordToggle"
-                title={showPassword ? 'Skry heslo' : 'Zobraz heslo'}
-            >
-                {showPassword ? (
-                    <i className="fa fa-eye-slash"></i> // Hide icon
-                ) : (
-                    <i className="fa fa-eye"></i> // Show icon
-                )}
-            </button>
+            {realPassword.length === 0 ?
+                <input
+                    type="password"
+                    className="form-control"
+                    onChange={handleInput}
+                    value={realPassword}
+                    placeholder={placeholder}
+                /> :
+                <><input
+                    ref={inputRef}
+                    type="text"
+                    className="form-control"
+                    placeholder={placeholder}
+                    value={showPassword ? realPassword : maskedPassword}
+                    onChange={handleInput}
+                    onPaste={handlePaste}
+                    autoComplete="true"
+                />
+                    <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        className="passwordToggle"
+                        title={showPassword ? 'Skry heslo' : 'Zobraz heslo'}
+                    >
+                        {showPassword ? (
+                            <i className="fa fa-eye-slash"></i> // Hide icon
+                        ) : (
+                            <i className="fa fa-eye"></i> // Show icon
+                        )}
+                    </button>
+                </>}
         </div>
     );
 };
