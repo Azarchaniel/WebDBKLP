@@ -23,7 +23,8 @@ const ConfirmDialog: FC<ConfirmDialogProps> = React.memo(({
 		if (onCancel) onCancel();
 	}, [onCancel]);
 
-	const bodyElement = <span>{text}</span>;
+	// pre-line - if text contains \n, create new line
+	const bodyElement = <span style={{ whiteSpace: 'pre-line' }}>{text}</span>;
 	const footerElement = (
 		<div className="buttons">
 			<button

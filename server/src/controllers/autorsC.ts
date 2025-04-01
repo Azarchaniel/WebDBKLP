@@ -4,6 +4,7 @@ import Autor from "../models/autor";
 import Book from "../models/book";
 import {Types} from "mongoose";
 import {fetchDataWithPagination} from "../utils/queryUtils";
+import Lp from "../models/lp";
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -45,27 +46,53 @@ const getAutor = async (req: Request, res: Response): Promise<void> => {
 
 const getAllAutorsBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {id} = req.params; //autor ID
+        const { id } = req.params; // autor ID
+        const { role } = req.query; // Get the role from query parameters
 
         if (!id) {
             res.status(204).send();
             return;
         }
 
+        if (!role) {
+            res.status(400).json({ message: "Role is required" });
+            return;
+        }
+
         const searchId = new Types.ObjectId(id);
 
-        const books = await Book.find({
-            $or: [
-                { autor: searchId },
-                { translator: searchId },
-                { editor: searchId },
-                { ilustrator: searchId }
-            ]
-        }).sort( {title: 1} );
+        const booksPromises: Promise<any>[] = [];
+        const lpsPromises: Promise<any>[] = [];
 
-        res.status(200).json({books});
+        const roles = (role as string).split(','); // Split the role string into an array
+
+        if (roles.length === 0 || roles.some(r => ["autor", "ilustrator", "editor"].includes(r))) {
+            booksPromises.push(
+                Book.find({
+                    $or: [
+                        { autor: searchId },
+                        { translator: searchId },
+                        { editor: searchId },
+                        { ilustrator: searchId }
+                    ]
+                }).sort({ title: 1 })
+            );
+        }
+
+        if (roles.includes("musician")) {
+            lpsPromises.push(
+                Lp.find({ autor: searchId }).sort({ title: 1 })
+            );
+        }
+
+        const [books, lps] = await Promise.all([
+            Promise.all(booksPromises).then(results => results.flat()),
+            Promise.all(lpsPromises).then(results => results.flat())
+        ]);
+
+        res.status(200).json({ books, lps });
     } catch (error) {
-        console.error("Error fetching books:", error);
+        console.error("Error fetching books/LPs:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 }

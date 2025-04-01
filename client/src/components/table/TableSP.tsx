@@ -58,6 +58,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
             setCurrentPage(pagination.page);
             setCurrentPageSize(pagination.pageSize);
             setSorting(pagination.sorting);
+            setExpanded({});
         }, [pagination]);
 
         useEffect(() => {

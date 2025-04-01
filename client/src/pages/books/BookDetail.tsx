@@ -7,7 +7,7 @@ import { cities } from "../../utils/constants";
 interface IExtendedBook extends IBook {
 	autorsFull?: string | null;
 	editorsFull?: string | null;
-	ilustratorsFull?: string | null;
+	illustratorsFull?: string | null;
 	translatorsFull?: string | null;
 }
 
@@ -15,7 +15,7 @@ interface Props {
 	data: IExtendedBook;
 }
 
-const BookDetail: React.FC<Props> = ({ data }) => {
+const BookDetail: React.FC<Props> = React.memo(({ data }) => {
 	// Helper functions
 	const renderContributorRow = (
 		contributors: keyof IExtendedBook,
@@ -164,7 +164,7 @@ const BookDetail: React.FC<Props> = ({ data }) => {
 
 				<h3>{renderContributorRow("autor", "autorsFull", "Autor: ", "Autori: ")}</h3>
 				{renderContributorRow("editor", "editorsFull", "Editor: ", "Editori: ")}
-				{renderContributorRow("ilustrator", "ilustratorsFull", "Ilustrátor: ", "Ilustrátori: ")}
+				{renderContributorRow("ilustrator", "illustratorsFull", "Ilustrátor: ", "Ilustrátori: ")}
 				{renderContributorRow("translator", "translatorsFull", "Prekladateľ: ", "Prekladatelia: ")}
 
 				{renderLanguage()}
@@ -186,6 +186,6 @@ const BookDetail: React.FC<Props> = ({ data }) => {
 			</div>
 		</div>
 	);
-};
+});
 
 export default BookDetail;

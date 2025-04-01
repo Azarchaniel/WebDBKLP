@@ -314,11 +314,17 @@ export const deleteAutor = async (
 }
 
 export const getAutorInfo = async (
-    _id: string
+    _id: string,
+    role?: string[]
 ): Promise<AxiosResponse<ApiAutorDataType>> => {
     try {
         const enrichedAutor: AxiosResponse<ApiAutorDataType> = await axiosInstance.get(
-            `${baseUrl}/get-autor-info/${_id}`
+            `${baseUrl}/get-autor-info/${_id}`,
+            {
+                params: {
+                    role: role ? role.join(',') : []
+                }
+            }
         )
         return enrichedAutor
     } catch (error: any) {

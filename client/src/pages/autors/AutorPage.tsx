@@ -1,7 +1,7 @@
 import AddAutor from "./AddAutor";
 import React, {useEffect, useRef, useState} from "react";
 import {IAutor, IBookColumnVisibility} from "../../type";
-import {addAutor, deleteAutor, getAutor, getAutors} from "../../API";
+import {addAutor, deleteAutor, getAutor, getAutorInfo, getAutors} from "../../API";
 import {toast} from "react-toastify";
 import {stringifyAutors} from "../../utils/utils";
 import {DEFAULT_PAGINATION} from "../../utils/constants";
@@ -49,7 +49,6 @@ export default function AutorPage() {
     }, [])
 
     useEffect(() => {
-        if (!timeoutId || pagination.search === "") return fetchAutors();
         if (timeoutId) clearTimeout(timeoutId);
 
         const newTimeoutId = setTimeout(() => {
@@ -57,6 +56,10 @@ export default function AutorPage() {
         }, 1000); // Wait 1s before making the request
 
         setTimeoutId(newTimeoutId);
+        // Cleanup function to clear timeout if component unmounts or pagination changes again
+        return () => {
+            if (newTimeoutId) clearTimeout(newTimeoutId);
+        };
     }, [pagination]);
 
     // ### AUTORS ###
@@ -106,37 +109,51 @@ export default function AutorPage() {
         }
     }
 
-    const handleDeleteAutor = (_id: string): void => {
-        let autorToDelete = autors.find((autor: IAutor) => autor._id === _id);
+    const handleDeleteAutor = async (_id: string): Promise<void> => {
+        try {
+            const autorToDelete =
+                autors.find((autor: IAutor) => autor._id === _id) ??
+                (await getAutor(_id)).data.autor;
 
-        if (!autorToDelete) {
-            getAutor(_id)
-                .then(({data}) => {
-                    autorToDelete = data.autor;
-                })
-                .catch((err) => console.trace(err))
-        }
+            const booksOfAutor = (await getAutorInfo(
+                autorToDelete!._id,
+                autorToDelete!.role?.map(r => typeof r === "object" ? r.value : r)) as any
+            ).data.books.length;
 
-        openConfirmDialog({
-            title: "Vymazať autora?",
-            text: `Naozaj chceš vymazať autora ${autorToDelete?.fullName}?`,
-            onOk: () => {
-                deleteAutor(_id)
-                    .then(({status, data}) => {
-                        if (status !== 200) {
-                            throw new Error("Error! Autor not deleted")
-                        }
-                        toast.success(`Autor ${autorToDelete?.fullName} bol úspešne vymazaný.`);
-                        setAutors(data.autors)
-                    })
-                    .catch((err) => {
-                        toast.error("Chyba! Autora nemožno vymazať!");
-                        console.trace(err);
-                    })
-            },
-            onCancel: () => {
+            let warningText: string = "";
+            if (booksOfAutor === 0) {
+                warningText = ""
+            } else if (booksOfAutor === 1) {
+                warningText = "Tento autor má k sebe priradenú " + booksOfAutor + " knihu!"
+            } else if (booksOfAutor > 1 && booksOfAutor < 5) {
+                warningText = "Tento autor má k sebe priradené " + booksOfAutor + " knihy!"
+            } else {
+                warningText = "Tento autor má k sebe priradených " + booksOfAutor + " kníh!"
             }
-        });
+
+            openConfirmDialog({
+                title: "Vymazať autora?",
+                text: `Naozaj chceš vymazať autora ${autorToDelete?.fullName}?\n${warningText}`,
+                onOk: () => {
+                    deleteAutor(_id)
+                        .then(({status, data}) => {
+                            if (status !== 200) {
+                                throw new Error("Error! Autor not deleted")
+                            }
+                            toast.success(`Autor ${autorToDelete?.fullName} bol úspešne vymazaný.`);
+                            setAutors(data.autors)
+                        })
+                        .catch((err) => {
+                            toast.error("Chyba! Autora nemožno vymazať!");
+                            console.trace(err);
+                        })
+                },
+                onCancel: () => {
+                }
+            });
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     const handlePageSizeChange = (newPageSize: number) => {
@@ -148,7 +165,7 @@ export default function AutorPage() {
         <Layout>
             {isUserLoggedIn() && <AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>}
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
-                <ShowHideColumns columns={getAutorTableColumns()} shown={showColumn} setShown={setShowColumn} />
+                <ShowHideColumns columns={getAutorTableColumns()} shown={showColumn} setShown={setShowColumn}/>
             </div>
             <ServerPaginationTable
                 title={`Autori (${countAll})`}

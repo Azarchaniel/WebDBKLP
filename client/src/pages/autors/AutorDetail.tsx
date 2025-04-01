@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {getAutorInfo} from "../../API";
-import {IAutor, IBook} from "../../type";
+import {IBook, ILP} from "../../type";
 import {autorRoles} from "../../utils/constants";
 import {countryCode} from "../../utils/locale";
 
@@ -8,89 +8,110 @@ type Props = {
     data: any;
 }
 
-interface IExtendedAutor extends IAutor {
-    books?: IBook[] | null;
-}
-
-const AutorDetail: React.FC<Props> = ({data}) => {
-    const [autorData, setAutorData] = useState<IExtendedAutor>(data);
+const AutorDetail: React.FC<Props> = React.memo(({data}) => {
+    const [books, setBooks] = useState<IBook[] | null>(null);
+    const [lps, setLps] = useState<ILP[] | null>(null);
 
     useEffect(() => {
         if (!data) return;
 
-        getAutorInfo(data._id)
+        getAutorInfo(data._id, data.role)
             .then((res) => {
-                setAutorData({...data, books: (res.data as any).books});
+                setBooks((res.data as any).books);
+                setLps((res.data as any).lps);
             })
             .catch((err) => {
                 console.error(err);
             });
-    }, []);
+    }, [data]);
 
     return (
         <>
             <div className="row tableDetailRow">
                 <div className="col">
-                    <table className="autorDetailTable" >
+                    <table className="autorDetailTable">
                         <tbody>
                         <tr>
                             <td>Meno:</td>
-                            <td>{autorData?.firstName} {autorData?.lastName} <span className="hiddenId">{autorData?._id}</span></td>
+                            <td>{data?.firstName} {data?.lastName} <span className="hiddenId">{data?._id}</span></td>
                         </tr>
                         <tr>
                             <td>Národnosť:</td>
-                            <td>{autorData?.nationality ? countryCode.filter(cc => cc.key === autorData?.nationality).map(cc => cc.value) : "-"}</td>
+                            <td>{data?.nationality ? countryCode.filter(cc => cc.key === data?.nationality).map(cc => cc.value) : "-"}</td>
                         </tr>
                         <tr>
                             <td>Dátum narodenia:</td>
-                            <td>{autorData?.dateOfBirth ? new Date(autorData?.dateOfBirth as Date).toLocaleDateString("sk-SK") : "-"}</td>
+                            <td>{data?.dateOfBirth ? new Date(data?.dateOfBirth as Date).toLocaleDateString("sk-SK") : "-"}</td>
                         </tr>
                         <tr>
                             <td>Dátum úmrtia:</td>
-                            <td>{autorData?.dateOfDeath ? new Date(autorData?.dateOfDeath as Date).toLocaleDateString("sk-SK") : "-"}</td>
+                            <td>{data?.dateOfDeath ? new Date(data?.dateOfDeath as Date).toLocaleDateString("sk-SK") : "-"}</td>
                         </tr>
                         <tr>
                             <td>Role:</td>
-                            <td>{autorData?.role?.map(role =>
+                            <td>{data?.role?.map((role: string) =>
                                 autorRoles.find(ar => ar.value === role)?.showValue)
                                 .join(", ")}</td>
                         </tr>
                         <tr>
                             <td>Počet kníh:</td>
-                            <td>{autorData?.books?.length}</td>
+                            <td>{books?.length}</td>
+                        </tr>
+                        <tr>
+                            <td>Počet LP:</td>
+                            <td>{lps?.length}</td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
                 <div className="col">
-                    <table className="autorDetailTable">
-                        <thead>
-                        <tr>
-                            <th>Názov</th>
-                            <th>ISBN</th>
-                            <th>Vydané</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {autorData?.books?.map((book, index) => (
-                            <tr key={index}>
-                                <td>{book.title}<span className="hiddenId">{book._id}</span> </td>
-                                <td>{book.ISBN}</td>
-                                <td>
-                                    {book.published?.publisher} ({book.published?.year})
-                                </td>
-                            </tr>
-                        )) ?? (
+                    {Boolean(books?.length) && <><h5>Knihy</h5>
+                        <table className="autorDetailTable">
+                            <thead>
                             <tr>
-                                <td colSpan={3}>No books available</td>
+                                <th>Názov</th>
+                                <th>ISBN</th>
+                                <th>Vydané</th>
                             </tr>
-                        )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                            {books?.map((book, index) => (
+                                <tr key={index}>
+                                    <td>{book.title}<span className="hiddenId">{book._id}</span></td>
+                                    <td>{book.ISBN}</td>
+                                    <td>
+                                        {book.published?.publisher} {book.published?.year ? "(" + book.published?.year + ")" : ""}
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </>}
+
+                    {Boolean(lps?.length) && <><h5>LP</h5>
+                        <table className="autorDetailTable">
+                            <thead>
+                            <tr>
+                                <th>Názov</th>
+                                <th>Vydané</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {lps?.map((lp, index) => (
+                                <tr key={index}>
+                                    <td>{lp.title}<span className="hiddenId">{lp._id}</span></td>
+                                    <td>
+                                        {lp.published?.publisher} {lp.published?.year ? "(" + lp.published?.year + ")" : ""}
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </>}
                 </div>
             </div>
         </>
     )
-}
+});
 
 export default AutorDetail;

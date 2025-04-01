@@ -45,7 +45,6 @@ export default function LPPage() {
     }, [])
 
     useEffect(() => {
-        if (!timeoutId || pagination.search === "") return fetchLPs();
         if (timeoutId) clearTimeout(timeoutId);
 
         const newTimeoutId = setTimeout(() => {
@@ -53,6 +52,10 @@ export default function LPPage() {
         }, 1000); // Wait 1s before making the request
 
         setTimeoutId(newTimeoutId);
+        // Cleanup function to clear timeout if component unmounts or pagination changes again
+        return () => {
+            if (newTimeoutId) clearTimeout(newTimeoutId);
+        };
     }, [pagination]);
 
     // ### QUOTES ###
