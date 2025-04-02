@@ -65,12 +65,13 @@ const getAllAutorsBooks = async (req: Request, res: Response): Promise<void> => 
                     {translator: searchId},
                     {editor: searchId},
                     {ilustrator: searchId}
-                ]
+                ],
+                deletedAt: null
             }).sort({title: 1})
         );
 
         lpsPromises.push(
-            Lp.find({autor: searchId}).sort({title: 1})
+            Lp.find({autor: searchId, deletedAt: null}).sort({title: 1})
         );
 
         const [books, lps] = await Promise.all([
