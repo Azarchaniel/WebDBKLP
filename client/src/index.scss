@@ -153,108 +153,6 @@ body, html, main, #root {
   display: none;
 }
 
-.sideBar {
-  position: fixed;
-  height: 110vh;
-  background-color: var(--menu);
-  margin: -4rem 0 0 -3rem;
-  padding: 3rem 0 1rem 1rem;
-  transition: 0.5s;
-  z-index: 100;
-
-  &Opened {
-    position: fixed;
-    width: 10vw;
-    height: 110vh;
-    background-color: var(--menu);
-    margin: -4rem 0 0 -3rem;
-    padding: 3rem 0 1rem 1rem;
-    transition: 0.5s;
-    z-index: 100;
-
-    .closeIcon {
-      color: white;
-      font-size: xx-large;
-      position: absolute;
-      right: 1rem;
-      top: 0;
-      cursor: pointer;
-
-      &:hover {
-        color: white;
-      }
-    }
-
-    .SB-Parent {
-      font-size: 1.5rem;
-      margin-top: 1rem;
-      cursor: pointer;
-    }
-
-    .SB-Child {
-      color: gray;
-      font-size: 1.1rem;
-      padding-left: 3rem;
-      cursor: pointer;
-    }
-
-    .SB-chevron {
-      position: absolute;
-      right: 0.5rem;
-      padding: 0.5rem;
-      cursor: pointer;
-      border: 1px solid transparent;
-    }
-
-    .SB-chevron:hover {
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 15%;
-      padding: .5rem;
-    }
-  }
-
-  &Closed {
-    position: fixed;
-    width: 50px;
-    height: 110vh;
-    background-color: var(--menu);
-    margin: -4rem 0 0 -3rem;
-    padding-top: 3rem;
-    z-index: 100;
-
-    .closeIcon {
-      color: white;
-      font-size: xx-large;
-      position: absolute;
-      right: 50%;
-      top: 0;
-      cursor: pointer;
-      transition: 0.5s;
-
-      &:hover {
-        color: white;
-      }
-    }
-
-    .SB-Parent {
-      margin-left: 1rem;
-      font-size: 1.5rem;
-      cursor: pointer;
-
-      i {
-        visibility: visible;
-        cursor: pointer;
-      }
-    }
-
-    .SB-Child {
-      color: gray;
-      visibility: visible;
-      cursor: pointer;
-    }
-  }
-}
-
 .customLink {
   text-decoration: none;
   color: white;
@@ -612,12 +510,9 @@ body, html, main, #root {
   grid-area: 10 / 8 / 10 / 13;
 }
 
-.WAMuiChipInput-underline-14::before .WAMuiChipInput-underline-14::after {
-  border-bottom: none;
-}
-
 .chip {
   white-space: wrap !important;
+  color: white;
 }
 
 .header {

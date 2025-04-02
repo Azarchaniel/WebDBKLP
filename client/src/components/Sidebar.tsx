@@ -1,155 +1,68 @@
 import React, {useState} from "react";
 import "../styles/font-awesome/css/all.css";
+import "../styles/sidebar.scss";
 import {ISideMenuItems} from "../type";
-import {Link} from "react-router-dom";
-import {useLocation} from "react-router-dom";
+import {Link, useLocation} from "react-router-dom";
 
-type PropsSB = {
-	parent: ISideMenuItems
-}
+const HamburgerToX = ({onClick, className}: { onClick: () => void; className: string }) => {
+    const [active, setActive] = useState<boolean>(false);
 
-const hasChildren = (item: ISideMenuItems) => {
-	const {children} = item;
-
-	if (children === undefined || children.constructor !== Array) return false;
-	return children.length;
-}
-
-const MenuItem: React.FC<PropsSB> = ({parent}) => {
-	const location = useLocation();
-
-	const [open, setOpen] = useState<boolean>(false)
-
-	if (hasChildren(parent)) {
-		//multi item
-		if (open) {
-			//open
-			return (
-				<div className="SB-Parent">
-					<Link className='customLink' to={parent.route}>{parent.icon ?
-						<i className={parent.icon}>&nbsp;</i> : <></>}
-						<span>{parent.title}</span>
-					</Link>
-					&nbsp;
-					<i className={`fas fa-chevron-${open ? "up" : "down"} SB-chevron`}
-					   onClick={() => setOpen(!open)}/>
-					{parent.children && Array.isArray(parent.children) ? parent.children?.map((child: any) => {
-						return <div key={child.route} className="SB-Child">{child.title}</div>
-					}) : <></>}
-				</div>
-
-			);
-		} else {
-			//closed
-			return (
-				<div className="SB-Parent">
-					<Link className='customLink' to={parent.route}>
-						{parent.icon ? <i className={parent.icon}>&nbsp;</i> : <></>}
-						<span>{parent.title}</span>
-					</Link>
-					&nbsp;
-					<i className={`fas fa-chevron-${open ? "up" : "down"} SB-chevron`}
-					   onClick={() => setOpen(!open)}/>
-				</div>
-
-			);
-		}
-	} else {
-		//single item
-		return (
-			<div className="SB-Parent">
-				<Link className={parent.route === location.pathname ? "customLink activeLink" : "customLink"}
-					  to={parent.route}>
-					{parent.icon ? <i className={parent.icon}>&nbsp;</i> : <></>}
-					<span>{parent.title}</span>
-					&nbsp;
-				</Link>
-			</div>);
-	}
+    return (
+        <div className={className}>
+            <div className="hamburger" onClick={() => {
+                setActive(!active);
+                onClick()
+            }}>
+                <a className={"main-nav-toggle" + (active ? " active-menu" : "")}><i>Menu</i></a>
+            </div>
+        </div>
+    )
 }
 
 const Sidebar = () => {
-	const location = useLocation();
+    const location = useLocation();
+    const [sidebarOpened, setSidebarOpened] = useState<boolean>(false);
 
-	const [sidebarOpened, setSidebarOpened] = useState<boolean>(false);
+    const content: ISideMenuItems[] = [
+        {
+            title: "Knihy",
+            icon: "fas fa-book",
+            route: "/books",
+        },
+        {
+            title: "Autori",
+            icon: "fas fa-feather-alt",
+            route: "/autors",
+        },
+        {
+            title: "LP",
+            icon: "fas fa-record-vinyl",
+            route: "/lp",
+        },
+        {
+            title: "Úryvky",
+            icon: "fas fa-pen-nib",
+            route: "/quotes",
+        },
+        {
+            title: "Spoločenské hry",
+            icon: "fas fa-chess",
+            route: "/board-games",
+        }
+    ];
 
-	const content: ISideMenuItems[] = [
-		{
-			title: "Knihy",
-			icon: "fas fa-book",
-			route: "/books",
-		},
-		{
-			title: "Autori",
-			icon: "fas fa-feather-alt",
-			route: "/autors",
-		},
-		{
-			title: "LP",
-			icon: "fas fa-record-vinyl",
-			route: "/lp",
-		},
-		{
-			title: "Úryvky",
-			icon: "fas fa-pen-nib",
-			route: "/quotes",
-		},
-		{
-			title: "Spoločenské hry",
-			icon: "fas fa-chess",
-			route: "/board-games",
-		}
-	];
-
-	const showContent = (contentItems: ISideMenuItems[]) => {
-		return contentItems.map((item: ISideMenuItems) => {
-			if (sidebarOpened) {
-				return <MenuItem key={item.route} parent={item}/>;
-			} else {
-				//sidebar closed
-				if (!item.children) {
-					return <div key={item.route} className="SB-Parent">
-						<Link className='customLink' to={item.route}>
-							{/* if Menu item has icon, show it. Otherwise show only first letter of title */}
-							{item.icon ?
-								<i key={item.route}
-								   className={item.route === location.pathname ?
-									   item.icon + " customLink activeLink" : item.icon}>&nbsp;</i> :
-								<>{item.title.substring(0, 1)}</>}
-						</Link>
-					</div>
-				} else {
-					return <div key={item.route} className="SB-Parent">
-
-						{item.icon ? <Link className='customLink' to={item.route}>
-							<i key={item.route} className={item.icon}>&nbsp;</i>
-						</Link> : <></>}
-						{
-							item.children.map((child: ISideMenuItems) =>
-								<Link key={child.route} className='customLink' to={child.route}>
-									<div className="SB-Child">{child.title.substring(0, 1)}</div>
-								</Link>)
-						}
-
-					</div>
-				}
-			}
-		});
-	}
-
-	return (
-		<div className={sidebarOpened ? "sideBarOpened" : "sideBarClosed"} id='SS'>
-			{/* controls icon in the upper right of the Menu */}
-			{sidebarOpened ? <span
-				className="closeIcon"
-				onClick={() => setSidebarOpened(!sidebarOpened)}
-			><i className="fas fa-times customLink"/></span> : <span
-				className="closeIcon"
-				onClick={() => setSidebarOpened(!sidebarOpened)}
-			><i className="fas fa-bars customLink"/></span>}
-			{showContent(content)} {/* show content of menu - Knihy, Autori etc */}
-		</div>
-	);
+    return (
+        <nav className={"sideBar" + (sidebarOpened ? " opened" : "")}>
+            <HamburgerToX className="toggleBtn" onClick={() => setSidebarOpened(!sidebarOpened)}/>
+            {content.map(item => (
+                <Link to={item.route} key={item.route} className={location.pathname === item.route ? "active" : ""}>
+                    <i className={item.icon}/>
+                    {sidebarOpened && <span>{item.title}</span>}
+                </Link>
+            ))}
+        </nav>
+    )
 }
+
 
 export default Sidebar;

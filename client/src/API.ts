@@ -4,7 +4,7 @@ import {
     ApiBookDataType,
     ApiLPDataType,
     ApiQuoteDataType,
-    ApiUserDataType,
+    ApiUserDataType, BelongToAutor,
     IBook,
     IUser
 } from "./type";
@@ -314,17 +314,11 @@ export const deleteAutor = async (
 }
 
 export const getAutorInfo = async (
-    _id: string,
-    role?: string[]
-): Promise<AxiosResponse<ApiAutorDataType>> => {
+    _id: string
+): Promise<AxiosResponse<BelongToAutor>> => {
     try {
-        const enrichedAutor: AxiosResponse<ApiAutorDataType> = await axiosInstance.get(
-            `${baseUrl}/get-autor-info/${_id}`,
-            {
-                params: {
-                    role: role ? role.join(',') : []
-                }
-            }
+        const enrichedAutor: AxiosResponse<BelongToAutor> = await axiosInstance.get(
+            `${baseUrl}/get-autor-info/${_id}`
         )
         return enrichedAutor
     } catch (error: any) {

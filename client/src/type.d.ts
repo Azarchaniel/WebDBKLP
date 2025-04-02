@@ -88,6 +88,11 @@ type ApiAutorDataType = {
     latestUpdate?: Date;
 }
 
+type BelongToAutor = {
+    books: IBook[];
+    lps: ILP[];
+}
+
 type ApiQuoteDataType = {
     message: string
     quotes: IQuote[]

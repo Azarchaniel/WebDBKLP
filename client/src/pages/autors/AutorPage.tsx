@@ -115,21 +115,25 @@ export default function AutorPage() {
                 autors.find((autor: IAutor) => autor._id === _id) ??
                 (await getAutor(_id)).data.autor;
 
-            const booksOfAutor = (await getAutorInfo(
-                autorToDelete!._id,
-                autorToDelete!.role?.map(r => typeof r === "object" ? r.value : r)) as any
-            ).data.books.length;
+            const {books, lps} = (await getAutorInfo(autorToDelete!._id)).data;
+
 
             let warningText: string = "";
-            if (booksOfAutor === 0) {
+            if (books.length === 0) {
                 warningText = ""
-            } else if (booksOfAutor === 1) {
-                warningText = "Tento autor má k sebe priradenú " + booksOfAutor + " knihu!"
-            } else if (booksOfAutor > 1 && booksOfAutor < 5) {
-                warningText = "Tento autor má k sebe priradené " + booksOfAutor + " knihy!"
+            } else if (books.length === 1) {
+                warningText = "Tento autor má k sebe priradenú " + books.length + " knihu"
+            } else if (books.length > 1 && books.length < 5) {
+                warningText = "Tento autor má k sebe priradené " + books.length + " knihy"
             } else {
-                warningText = "Tento autor má k sebe priradených " + booksOfAutor + " kníh!"
+                warningText = "Tento autor má k sebe priradených " + books.length + " kníh"
             }
+
+            if (lps.length > 0) {
+                warningText += " a " + lps.length + " LP";
+            }
+
+            if (books.length > 0 || lps.length > 0) warningText += "!";
 
             openConfirmDialog({
                 title: "Vymazať autora?",

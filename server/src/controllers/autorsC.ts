@@ -40,22 +40,16 @@ const getAutor = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({autor: autor})
     } catch (err) {
         console.error("Can't find autor", err);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({error: "Internal server error"});
     }
 }
 
 const getAllAutorsBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { id } = req.params; // autor ID
-        const { role } = req.query; // Get the role from query parameters
+        const {id} = req.params; // autor ID
 
         if (!id) {
             res.status(204).send();
-            return;
-        }
-
-        if (!role) {
-            res.status(400).json({ message: "Role is required" });
             return;
         }
 
@@ -64,36 +58,30 @@ const getAllAutorsBooks = async (req: Request, res: Response): Promise<void> => 
         const booksPromises: Promise<any>[] = [];
         const lpsPromises: Promise<any>[] = [];
 
-        const roles = (role as string).split(','); // Split the role string into an array
+        booksPromises.push(
+            Book.find({
+                $or: [
+                    {autor: searchId},
+                    {translator: searchId},
+                    {editor: searchId},
+                    {ilustrator: searchId}
+                ]
+            }).sort({title: 1})
+        );
 
-        if (roles.length === 0 || roles.some(r => ["autor", "ilustrator", "editor"].includes(r))) {
-            booksPromises.push(
-                Book.find({
-                    $or: [
-                        { autor: searchId },
-                        { translator: searchId },
-                        { editor: searchId },
-                        { ilustrator: searchId }
-                    ]
-                }).sort({ title: 1 })
-            );
-        }
-
-        if (roles.includes("musician")) {
-            lpsPromises.push(
-                Lp.find({ autor: searchId }).sort({ title: 1 })
-            );
-        }
+        lpsPromises.push(
+            Lp.find({autor: searchId}).sort({title: 1})
+        );
 
         const [books, lps] = await Promise.all([
             Promise.all(booksPromises).then(results => results.flat()),
             Promise.all(lpsPromises).then(results => results.flat())
         ]);
 
-        res.status(200).json({ books, lps });
+        res.status(200).json({books, lps});
     } catch (error) {
         console.error("Error fetching books/LPs:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({error: "Internal server error"});
     }
 }
 
@@ -108,7 +96,7 @@ const addAutor = async (req: Request, res: Response): Promise<void> => {
             dateOfDeath: dateOfDeath,
             note: note,
             nationality: nationality?.[0]?.key ?? '',
-            role: role?.map((val: {value: string, showValue: string}) => val.value),
+            role: role?.map((val: { value: string, showValue: string }) => val.value),
             deletedAt: null
         });
 
@@ -118,7 +106,7 @@ const addAutor = async (req: Request, res: Response): Promise<void> => {
         res.status(201).json({message: 'Autor added', autor: newAutor, autors: allAutors})
     } catch (error) {
         console.error("Error adding autor:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({error: "Internal server error"});
     }
 }
 
@@ -138,7 +126,7 @@ const updateAutor = async (req: Request, res: Response): Promise<void> => {
             {
                 ...body,
                 nationality: nationalityValue,
-                role: body.role?.map((val: {value: string, showValue: string}) => val.value),
+                role: body.role?.map((val: { value: string, showValue: string }) => val.value),
             }
         )
         const allAutors: IAutor[] = await Autor.find()
@@ -174,7 +162,7 @@ const deleteAutor = async (req: Request, res: Response): Promise<void> => {
         })
     } catch (error) {
         console.error("Error deleting autor:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({error: "Internal server error"});
     }
 }
 

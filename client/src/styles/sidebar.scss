@@ -1,0 +1,164 @@
+.sideBar {
+  background: var(--menu);
+  width: 3rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+  align-items: center;
+  padding-top: 1rem;
+  font-size: 1.5rem;
+  overflow: hidden;
+  transition: width 0.3s ease-in-out;
+
+  .toggleBtn {
+    cursor: pointer;
+    margin-left: 0;
+    transition: margin-left 0.3s ease-in-out;
+
+    &:hover {
+      color: var(--anchor);
+    }
+  }
+
+  // Link element
+  a {
+    color: white;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    width: 100%;
+
+    &.active {
+      color: var(--anchor);
+    }
+
+    &:hover {
+      color: var(--anchor);
+      text-decoration: none;
+    }
+
+    i {
+      margin-right: 0;
+      transition: margin-right 0.5s ease-in-out;
+      display: flex;
+      justify-content: center;
+      width: 3rem;
+    }
+
+    span {
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.opened {
+  width: 20rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 1rem;
+
+  .toggleBtn {
+    margin-left: 16rem;
+  }
+
+  a {
+    align-items: center;
+
+    &.active {
+      color: var(--anchor);
+    }
+
+    i {
+      margin-right: 1rem;
+      width: auto;
+    }
+
+    span {
+      opacity: 1;
+    }
+  }
+}
+
+// hamburger menu to X
+.hamburger {
+  display: inline-block;
+  height: 2rem;
+  margin-right: 27px;
+  cursor: pointer;
+
+  &:hover { // Add hover effect to the whole hamburger container
+    a.main-nav-toggle {
+      &:after,
+      &:before,
+      i {
+        border-color: var(--anchor); // Change color to var(--anchor) on hover
+        background-color: var(--anchor);
+      }
+    }
+  }
+
+  a.main-nav-toggle {
+    display: block;
+    width: 28px;
+    height: 16px;
+    position: absolute;
+
+    &:after,
+    &:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      height: 0;
+      border-bottom: 4px solid white;
+      width: 100%;
+      left: 0;
+      right: 0;
+      transition: all ease-out 0.3s;
+    }
+
+    &:after {
+      top: 100%;
+    }
+
+    i {
+      display: block;
+      text-indent: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      height: 4px;
+      background-color: white;
+      width: 100%;
+      position: absolute;
+      top: 50%;
+      transition: all ease-out 0.1s;
+    }
+
+    &.active-menu {
+      &:after {
+        transform: rotate(-45deg);
+        transform-origin: center;
+        top: 50%;
+      }
+
+      &:before {
+        transform: rotate(45deg);
+        transform-origin: center;
+        top: 50%
+      }
+
+      i {
+        opacity: 0;
+      }
+    }
+  }
+}

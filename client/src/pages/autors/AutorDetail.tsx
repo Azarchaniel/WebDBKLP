@@ -15,7 +15,7 @@ const AutorDetail: React.FC<Props> = React.memo(({data}) => {
     useEffect(() => {
         if (!data) return;
 
-        getAutorInfo(data._id, data.role)
+        getAutorInfo(data._id)
             .then((res) => {
                 setBooks((res.data as any).books);
                 setLps((res.data as any).lps);
