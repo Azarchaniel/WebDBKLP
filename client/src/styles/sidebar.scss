@@ -1,3 +1,36 @@
+@import "variables";
+
+@media screen and (max-width: $mobile-width) {
+  .sideBar {
+    height: 3rem !important;
+    position: fixed;
+    a:not(:first-child) {
+      display: none;
+    }
+  }
+
+  .opened {
+    width: 100vw !important;
+    height: 37rem !important;
+    display: flex;
+    flex-direction: column;
+
+    .toggleBtn {
+      margin-left: 85vw !important;
+    }
+
+    a {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+
+      &.active {
+        color: var(--anchor);
+      }
+    }
+  }
+}
+
 .sideBar {
   background: var(--menu);
   width: 3rem;
@@ -9,14 +42,13 @@
   left: 0;
   z-index: 999;
   align-items: center;
-  padding-top: 1rem;
+  padding-top: 0.75rem;
   font-size: 1.5rem;
   overflow: hidden;
   transition: width 0.3s ease-in-out;
 
   .toggleBtn {
     cursor: pointer;
-    margin-left: 0;
     transition: margin-left 0.3s ease-in-out;
 
     &:hover {
@@ -101,7 +133,7 @@
       &:after,
       &:before,
       i {
-        border-color: var(--anchor); // Change color to var(--anchor) on hover
+        border-color: var(--anchor);
         background-color: var(--anchor);
       }
     }

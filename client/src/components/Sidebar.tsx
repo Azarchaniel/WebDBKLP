@@ -3,6 +3,7 @@ import "../styles/font-awesome/css/all.css";
 import "../styles/sidebar.scss";
 import {ISideMenuItems} from "../type";
 import {Link, useLocation} from "react-router-dom";
+import {ActivateUserList} from "./ActivateUserList";
 
 const HamburgerToX = ({onClick, className}: { onClick: () => void; className: string }) => {
     const [active, setActive] = useState<boolean>(false);
@@ -52,15 +53,18 @@ const Sidebar = () => {
     ];
 
     return (
-        <nav className={"sideBar" + (sidebarOpened ? " opened" : "")}>
-            <HamburgerToX className="toggleBtn" onClick={() => setSidebarOpened(!sidebarOpened)}/>
-            {content.map(item => (
-                <Link to={item.route} key={item.route} className={location.pathname === item.route ? "active" : ""}>
-                    <i className={item.icon}/>
-                    {sidebarOpened && <span>{item.title}</span>}
-                </Link>
-            ))}
-        </nav>
+        <>
+            <nav className={"sideBar" + (sidebarOpened ? " opened" : "")}>
+                <HamburgerToX className="toggleBtn" onClick={() => setSidebarOpened(!sidebarOpened)}/>
+                {content.map(item => (
+                    <Link to={item.route} key={item.route} className={location.pathname === item.route ? "active" : ""}>
+                        <i className={item.icon}/>
+                        {sidebarOpened && <span>{item.title}</span>}
+                    </Link>
+                ))}
+                <ActivateUserList />
+            </nav>
+        </>
     )
 }
 
