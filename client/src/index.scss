@@ -790,25 +790,25 @@ input:invalid {
   background-size: 17px 1px, 1px 17px, 17px 1px, 1px 17px;
   display: flex;
   flex-direction: row;
-  justify-content: center;
   align-items: center;
   padding: 1rem;
   font-size: 0.75rem;
   line-height: 0.75rem;
   height: 40vh;
-  overflow: hidden;
+  overflow-x: scroll;
+  overflow-y: auto;
 }
 
 .tableLangStats {
   .tableSection {
-    height: 45%;
+    height: 50%;
     max-height: 20vh;
     margin-bottom: 1rem;
     overflow-y: scroll;
   }
 
   .chartSection {
-    height: 45%;
+    height: 47%;
   }
 }
 
@@ -1166,7 +1166,13 @@ button:focus {
 }
 
 @media (max-width: $mobile-width) {
+  .App {
+    margin: 3rem 3rem 0 0;
+  }
+
   .header {
+    margin-left: 3rem; // because of sidebar
+
     .activateUsers {
       display: none !important;
     }
@@ -1181,6 +1187,14 @@ button:focus {
       width: 100%;
       font-size: 1.2rem;
       line-height: 2.5rem;
+    }
+  }
+
+  .customModal {
+    max-width: 90vw;
+
+    &Body {
+      max-width: 90vw;
     }
   }
 }
