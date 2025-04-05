@@ -4,15 +4,13 @@ import QuoteItem from "./QuoteItem";
 import React, {useEffect, useState} from "react";
 import {addQuote, deleteQuote, getQuotes} from "../../API";
 import {toast} from "react-toastify";
-import {generateColors, getRandomShade} from "../../utils/utils";
-import {LoadingBooks} from "../../components/LoadingBooks";
+import {generateColors, getRandomShade, ScrollToTopBtn, isUserLoggedIn, fetchQuotedBooks} from "@utils";
+import {LoadingBooks} from "@components/LoadingBooks";
 import {useReadLocalStorage} from "usehooks-ts";
-import {ScrollToTopBtn} from "../../utils/elements";
-import {openConfirmDialog} from "../../components/ConfirmDialog";
-import {isUserLoggedIn} from "../../utils/user";
-import {LazyLoadMultiselect} from "../../components/InputFields";
-import {fetchQuotedBooks} from "../../utils/fetch";
+import {openConfirmDialog} from "@components/ConfirmDialog";
+import {LazyLoadMultiselect} from "@components/InputFields";
 import Layout from "../../Layout";
+import "@styles/QuotePage.scss";
 
 interface QuoteGroup {
     bookId: string;
@@ -129,7 +127,7 @@ export default function QuotePage() {
                 {loading ? <LoadingBooks/> : <></>}
             </div>
             <h6 className="h6MaterialClone">Citáty ({countAll})</h6>
-            <div className="col-3">
+            <div className="quoteBookSearch">
                 <LazyLoadMultiselect
                     value={booksToFilter}
                     onSearch={(query: string, page: number) =>

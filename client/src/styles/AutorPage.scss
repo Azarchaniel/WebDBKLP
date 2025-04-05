@@ -1,0 +1,110 @@
+@import "variables";
+
+.autorDetail {
+  display: flex;
+  flex-direction: row;
+
+  div {
+    width: 50%;
+    &:first-child {
+      margin-right: 2rem;
+    }
+  }
+
+  &:hover {
+    background-color: #f1f1f1;
+  }
+}
+
+.autorDetailTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+  font-size: 14px;
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+
+  tr {
+    &:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    &:hover {
+      background-color: #f1f1f1;
+    }
+  }
+
+  td::after {
+    background-color: transparent !important; /* Remove background color */
+  }
+}
+
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  width: 100%;
+}
+
+/* Date picker container positioning */
+.date-picker-container {
+  position: relative;
+}
+
+/* Clear input button styling */
+.clearInput {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Full width items */
+.full-width {
+  grid-column: 1 / span 2;
+}
+
+/* Media queries */
+@media screen and (max-width: $tablet-width) {
+  form {
+    grid-template-columns: 1fr;
+  }
+
+  /* Reset all items to full width */
+  form > * {
+    grid-column: 1;
+  }
+
+  /* Reset full-width items to match other items */
+  .full-width {
+    grid-column: 1;
+  }
+}
+
+@media screen and (max-width: $mobile-width) {
+  .react-datepicker-wrapper {
+    width: 100% !important;
+  }
+
+  .autorDetail {
+    flex-direction: column;
+    div {
+      width: 100%;
+      &:first-child {
+        margin-right: unset;
+      }
+    }
+  }
+}

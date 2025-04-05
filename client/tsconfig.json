@@ -26,7 +26,15 @@
     "noFallthroughCasesInSwitch": true,
     "isolatedModules": true,
     "outDir": "dist",
-    "rootDir": "./"
+    "rootDir": "./",
+    "baseUrl": "./src",
+    "paths": {
+      "@styles/*": ["styles/*"],
+      "@components/*": ["components/*"],
+      "@components": ["components"],
+      "@utils": ["utils"],
+      "@utils/*": ["utils/*"]
+    },
   },
   "include": [
     "src/**/*",

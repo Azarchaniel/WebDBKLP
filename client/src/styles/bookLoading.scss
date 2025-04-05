@@ -1,3 +1,5 @@
+@import "variables";
+
 $thickness : 5px;
 $duration : 2500;
 $delay : $duration*0.16;
@@ -5,6 +7,12 @@ $delay : $duration*0.16;
 @mixin polka($size, $dot, $base, $accent){
   background-size:$size $size;
   background: radial-gradient($accent $dot, transparent 0) 0 -2.5px;
+}
+
+@media screen and (max-width: $mobile-width) {
+  .bookshelf_wrapper {
+    right: 55% !important;
+  }
 }
 
 .backdrop {
@@ -22,6 +30,7 @@ $delay : $duration*0.16;
   z-index: 1003;
   position: absolute;
   top: 50vh;
+  right: 50%;
 }
 
 .books_list {

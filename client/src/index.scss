@@ -1,12 +1,7 @@
 @use "./styles/mixin" as mixin;
+@import "./styles/_variables.scss";
 @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap");
 @import url("https://fonts.cdnfonts.com/css/lucida-handwriting-std");
-
-:root {
-  --background: #EEEEEE;
-  --menu: #222831;
-  --anchor: #00ADB5;
-}
 
 body, html, main, #root {
   font-family: 'Nunito', sans-serif;
@@ -56,101 +51,12 @@ body, html, main, #root {
   margin-right: .5rem;
 }
 
-.AutorTable {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--anchor);
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #333333;
-
-  .text {
-    color: #444;
-  }
-}
-
-.quote_container {
-  padding: 10px;
-  column-count: 4;
-  gap: 10px;
-}
-
-.Quote {
-  padding: 10px;
-  color: black;
-  border-radius: 6px;
-  font-size: 110%;
-  position: relative;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  object-fit: cover;
-  break-inside: avoid;
-  margin-bottom: .4rem;
-
-  .Card--button {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    cursor: pointer;
-  }
-
-  .quoteOwner {
-    font-size: 0.85rem;
-    filter: brightness(0.85);
-  }
-}
-
-.LP {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: sienna;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #333333;
-}
-
-.modalBgr {
-  position: fixed;
-  z-index: 5;
-  padding-top: 100px;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgb(0, 0, 0);
-  background-color: rgba(0, 0, 0, 0.4);
-}
-
-.modalBody {
-  background-color: #fefefe;
-  position: fixed;
-  z-index: 20;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 60%;
-  left: 20%;
-  border-radius: 5px;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.modal-title {
-  color: var(--menu);
-}
-
 .clearInput {
   position: absolute;
   border: none;
   background: none;
   top: 19%;
   right: 10%;
-}
-
-.hide-button {
-  display: none;
 }
 
 .customLink {
@@ -166,15 +72,6 @@ body, html, main, #root {
 
   &.activeLink {
     color: var(--anchor);
-  }
-}
-
-.autocomplete-result {
-  list-style: none;
-  margin-left: -1.9rem;
-
-  span {
-    margin-right: 1rem;
   }
 }
 
@@ -201,100 +98,6 @@ body, html, main, #root {
 
 .hidden {
   visibility: hidden;
-}
-
-.MuiPaper-root {
-  margin-left: 0.5rem;
-  background-color: var(--background) !important;
-
-  tr:hover {
-    background-color: var(--anchor);
-    box-shadow: inset 1000rem 1em rgba(255, 255, 255, 0.6);
-  }
-}
-
-.MuiTableRow-footer:hover {
-  background-color: var(--background) !important;
-  box-shadow: none !important;
-}
-
-.MuiPaper-elevation2 {
-  box-shadow: none !important;
-}
-
-.MuiTable-root {
-  width: 99.7% !important;
-}
-
-.MuiTableCell-head, .MuiTableSortLabel-active {
-  font-weight: bold !important;
-  color: white !important;
-  background-color: var(--anchor) !important;
-}
-
-.MuiTableSortLabel-icon {
-  color: white !important;
-}
-
-.MuiTablePagination-toolbar {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-}
-
-.MuiTableHead-root {
-  height: 3rem;
-}
-
-.MuiTablePagination-selectLabel {
-  margin: 0; //fixing not centered pagination in Table
-}
-
-.tableDetailRow {
-  padding: 1rem;
-  pointer-events: none;
-
-  &:hover {
-    background-color: var(--background) !important;
-  }
-}
-
-.autorDetailTable {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 10px 0;
-  font-size: 14px;
-
-  th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-
-  th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-  }
-
-  tr {
-    &:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    &:hover {
-      background-color: #f1f1f1;
-    }
-  }
-
-  td::after {
-    background-color: transparent !important; /* Remove background color */
-  }
-}
-
-.bookDimensions {
-  td {
-    padding: 0 1rem;
-  }
 }
 
 .showHideRow, label, .hideShowCheckbox {
@@ -343,360 +146,13 @@ body, html, main, #root {
   pointer-events: auto;
 }
 
-.container {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 0.5rem 1rem;
-}
-
-.Nazov {
-  grid-area: 1 / 1 / 1 / 7;
-}
-
-.Podnazov {
-  grid-area: 1 / 7 / 1 / 13;
-}
-
-.Autor {
-  grid-area: 2 / 1 / 2 / 10;
-}
-
-.ISBN {
-  grid-area: 2 / 10 / 2 / 13;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.isbnLookup {
-  position: absolute;
-  right: 1rem;
-  cursor: pointer;
-  z-index: 2;
-  border: none;
-  background: none;
-
-  &:after {
-    content: "";
-    display: block;
-    position: absolute;
-    border-radius: 4em;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: all 0.7s;
-    box-shadow: 0 0 3px 12px gray;
-  }
-
-  &:active:after {
-    box-shadow: 0 0 0 0 white;
-    position: absolute;
-    border-radius: 4em;
-    left: 0;
-    top: 0;
-    opacity: 1;
-    transition: 0s;
-  }
-}
-
-.Translator {
-  grid-area: 3 / 1 / 3 / 5;
-}
-
-.Editor {
-  grid-area: 3 / 5 / 3 / 9;
-}
-
-.Ilustrator {
-  grid-area: 3 / 9 / 3 / 13;
-}
-
-.Name {
-  grid-area: 4 / 1 / 4 / 5;
-}
-
-.No {
-  grid-area: 4 / 5 / 4 / 7;
-}
-
-.NameS {
-  grid-area: 4 / 7 / 4 / 11;
-}
-
-.NoS {
-  grid-area: 4 / 11 / 4 / 13;
-}
-
-.Vydavatel {
-  grid-area: 5 / 1 / 5 / 7;
-}
-
-.Rok {
-  grid-area: 5 / 7 / 5 / 9;
-}
-
-.Krajina {
-  grid-area: 5 / 9 / 5 / 13;
-}
-
-.Mesto {
-  grid-area: 6 / 1 / 6 / 5;
-}
-
-.language {
-  grid-area: 6 / 9 / 6 / 13;
-}
-
-.Police {
-  grid-area: 6 / 5 / 6 / 9;
-}
-
-.Vyska {
-  grid-area: 7 / 1 / 7 / 3;
-}
-
-.Sirka {
-  grid-area: 7 / 3 / 7 / 5;
-}
-
-.Hrubka {
-  grid-area: 7 / 5 / 7 / 7;
-}
-
-.Hmotnost {
-  grid-area: 7 / 7 / 7 / 9;
-}
-
-.Page-no {
-  grid-area: 7 / 9 / 7 / 13;
-}
-
-.Obsah {
-  grid-area: 8 / 1 / 8 / 7;
-}
-
-.Poznamka {
-  grid-area: 8 / 1 / 8 / 13;
-}
-
-.Precitane {
-  grid-area: 9 / 1 / 9 / 6;
-}
-
-.Vlastnik {
-  grid-area: 9 / 6 / 9 / 11;
-}
-
-.Ex-Libris {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: black;
-  grid-area: 9 / 11 / 9 / 13;
-}
-
-.pic {
-  grid-area: 10 / 1 / 10 / 4;
-}
-
-.DK {
-  grid-area: 10 / 4 / 10 / 8;
-}
-
-.GR {
-  grid-area: 10 / 8 / 10 / 13;
-}
-
 .chip {
   white-space: wrap !important;
   color: white;
 }
 
-.header {
-  position: fixed;
-  top: 0;
-  width: calc(100% - 3rem);
-  height: 45px;
-  background-color: var(--menu);
-  display: flex;
-  align-items: center;
-  z-index: 99;
-
-  &Users {
-    display: flex;
-    flex-direction: row;
-    flex-grow: 1;
-  }
-
-  &Login {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-right: 1rem;
-
-    .loginBtn {
-      cursor: pointer;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 0.4rem;
-
-      i {
-        margin: 0 0 0 1rem;
-        font-size: 1.5rem;
-      }
-    }
-
-    .loggedIn {
-      border: 1px solid white;
-      border-radius: 7px;
-    }
-  }
-
-  span {
-    display: flex;
-    color: lightgray;
-    margin: 1rem;
-    padding: 0 5px;
-    border-radius: 3px;
-    cursor: pointer;
-  }
-
-  .activeUser {
-    font-weight: bold;
-    color: white;
-  }
-
-  .customLink.appHeader {
-    font-family: "Lucida Handwriting Std", sans-serif;
-    text-decoration: none;
-    color: var(--anchor);
-    margin: 0 1rem;
-    font-size: 2rem;
-
-    &:hover {
-      filter: brightness(1.2);
-      text-decoration: none;
-    }
-  }
-}
-
-.scrollToTop {
-  height: 3rem;
-  width: 3rem;
-  border-radius: 50%;
-  font-size: 1rem;
-  background-color: black;
-  border: none;
-  position: fixed;
-  right: 1rem;
-  bottom: 2rem;
-  z-index: 2;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.7);
-
-    &::after {
-      color: var(--anchor);
-    }
-  }
-
-  &::after {
-    content: "▲";
-    font-size: 1.5rem;
-    color: white;
-    font-weight: bold;
-  }
-}
-
-.addQuote {
-  height: 3rem;
-  width: 3rem;
-  border-radius: 50%;
-  font-size: 1rem;
-  background-color: black;
-  border: none;
-  position: fixed;
-  right: 1rem;
-  top: 8vh;
-  z-index: 2;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.7);
-
-    &::after {
-      color: var(--anchor);
-    }
-  }
-
-  &::after {
-    content: '+';
-    font-size: 2rem;
-    position: absolute;
-    margin-top: -1.6rem;
-    margin-left: -0.6rem;
-    color: white;
-    font-weight: bold;
-  }
-}
-
-.addBtnTable {
-  background-color: black;
-  border: none;
-  color: white;
-  position: fixed;
-  right: 1rem;
-  top: 8vh;
-  height: 3rem;
-  width: 3rem;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.7);
-
-    &::after {
-      color: var(--anchor);
-    }
-  }
-
-  &::after {
-    content: '+';
-    font-weight: bold;
-    font-size: 2rem;
-    margin-top: -0.2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-}
-
-.MuiIconButton-root:hover {
-  background-color: transparent !important;
-}
-
 .moveToLeft {
   margin-right: 3rem !important;
-}
-
-//for Multiselect
-.option {
-  &:hover {
-    background-color: var(--anchor) !important;
-  }
-
-  &::selection {
-    background-color: var(--anchor) !important;
-  }
 }
 
 .h6MaterialClone {
@@ -711,17 +167,6 @@ body, html, main, #root {
   display: flex;
   align-items: center;
   padding-left: 16px;
-}
-
-.rowBtns {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  width: 100%;
-
-  .btn {
-    margin-left: 1rem;
-  }
 }
 
 .hiddenId {
@@ -821,16 +266,6 @@ input:invalid {
   outline: 2px dotted red;
 }
 
-.optionListContainer {
-  position: absolute;
-  z-index: 100;
-
-  .optionContainer {
-    position: fixed;
-    background: white !important;
-  }
-}
-
 /* WYSWIG editor */
 .rsw-editor:has(.rsw-ce[contenteditable="false"]) {
   border: none;
@@ -865,25 +300,26 @@ input:invalid {
   background-size: 17px 1px, 1px 17px, 17px 1px, 1px 17px;
   display: flex;
   flex-direction: row;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   padding: 1rem;
   font-size: 0.75rem;
   line-height: 0.75rem;
   height: 40vh;
-  overflow: hidden;
+  overflow-x: scroll;
+  overflow-y: auto;
 }
 
 .tableLangStats {
   .tableSection {
-    height: 45%;
+    height: 50%;
     max-height: 20vh;
     margin-bottom: 1rem;
     overflow-y: scroll;
   }
 
   .chartSection {
-    height: 45%;
+    height: 47%;
   }
 }
 
@@ -894,6 +330,7 @@ input:invalid {
 
   .dashboardItem {
     height: 20rem;
+    justify-content: unset;
   }
 }
 
@@ -971,232 +408,6 @@ input:invalid {
   }
 }
 
-/* TAN STACK TABLE */
-.serverPaginationTable {
-  color: black;
-  width: 100%;
-
-  .tableHeader {
-    border-top-left-radius: 1rem;
-    border-top-right-radius: 1rem;
-
-    th {
-      border: 1px solid var(--anchor);
-      background-color: var(--anchor);
-      color: white;
-      max-height: 2rem !important;
-      padding: 0 0.5rem;
-    }
-
-    // it's here becuase of Dimensions
-    th[colspan]:not([colspan="1"]) { // select element that has colspan and it is not 1
-      vertical-align: middle;
-      text-align: center;
-    }
-
-    .TSP {
-      &autorsFull {
-        min-width: 12rem;
-      }
-
-      &title {
-        min-width: 15rem;
-      }
-
-      &autorsFull {
-        min-width: 12rem;
-      }
-
-      &actionsRow {
-        width: 8rem;
-      }
-    }
-  }
-
-  tr {
-    height: 4rem;
-    pointer-events: auto;
-
-    &:hover {
-      background-color: var(--anchor);
-      box-shadow: inset 1000rem 1em rgba(255, 255, 255, 0.6);
-    }
-  }
-
-  td {
-    border-bottom: 2px solid lightgray;
-
-    padding: 0 0.5rem;
-    position: relative;
-    pointer-events: auto;
-
-    &:not(:first-child)::after {
-      //line in the middle of the cell
-      content: '';
-      position: absolute;
-      height: 1.8rem;
-      width: 1px;
-      background-color: lightgray;
-      top: 50%;
-      left: 0;
-      transform: translateY(-50%);
-    }
-  }
-
-  .TSP {
-    &exLibris, &height, &width, &depth, &numberOfPages, &createdAt, &countLp, &speed {
-      display: table-cell;
-      text-align: center;
-    }
-  }
-}
-
-.headerTitleAction {
-  display: flex;
-  justify-content: space-between;
-  padding-right: 4rem;
-  color: black;
-  height: 2rem;
-  margin-bottom: 1rem;
-}
-
-.pageSelector {
-  color: black;
-  font-size: 1.25rem;
-  padding: 0 1rem;
-  cursor: pointer;
-
-  &.current {
-    font-weight: bold;
-    color: var(--anchor);
-    cursor: default;
-  }
-}
-
-.tableNavigationRow {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  height: 3rem;
-  flex-direction: row;
-  color: black;
-  background: var(--background);
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  padding-right: 2.5rem;
-  z-index: 2;
-  width: 100%;
-
-  .pageInput {
-    width: 3rem;
-    margin-right: 1rem;
-    padding: 0;
-    text-align: center;
-  }
-}
-
-button:focus {
-  outline: none !important;
-}
-
-.tabNav {
-  color: var(--anchor);
-  border: none;
-  background: none;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  -webkit-transition: background 0.2s, color 0.2s;
-  -moz-transition: background 0.2s, color 0.2s;
-  transition: background 0.2s, color 0.2s;
-
-  &:hover {
-    border-radius: 50%;
-    width: 2rem;
-    height: 2rem;
-    background: rgba(255, 255, 255, 1);
-    color: #64bb5d;
-  }
-
-  &:disabled {
-    color: lightgray;
-    cursor: not-allowed;
-  }
-}
-
-.searchWrapper {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  min-height: 22px;
-  padding: 5px;
-  position: relative;
-}
-
-.searchTableWrapper {
-  input {
-    border-radius: 4px;
-    min-height: 22px;
-    padding: 5px;
-    box-shadow: none;
-  }
-
-  display: flex;
-  align-items: center;
-
-  position: relative;
-
-  button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    position: absolute;
-    right: 0.5rem;
-    color: black;
-
-    &:hover {
-      color: var(--anchor);
-    }
-  }
-}
-
-.bookTableAction {
-  transform: rotate(90deg);
-  font-size: 1.5rem;
-  cursor: pointer;
-
-  &:hover {
-    color: var(--anchor);
-  }
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.select-none {
-  user-select: none;
-}
-
-.actionsRow {
-  width: 5rem;
-  margin-left: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  button {
-    border: none;
-    background: none;
-    cursor: pointer;
-
-    &:hover {
-      color: var(--anchor);
-    }
-  }
-}
-
 //Login
 .passwordContainer {
   position: relative;
@@ -1222,5 +433,55 @@ button:focus {
     padding: 0;
     margin-top: 0;
     transform: scaleX(-1); //mirror view
+  }
+}
+
+// this is here, because it is used in both elements
+.header {
+  .activateUsers {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+  }
+}
+
+.sideBar {
+  .activateUsers {
+    display: none;
+  }
+}
+// ^^^
+
+@media (max-width: $mobile-width) {
+  .App {
+    margin: 3rem 3rem 0 0;
+  }
+
+  .header {
+    margin-left: 3rem; // because of sidebar
+
+    .activateUsers {
+      display: none !important;
+    }
+  }
+
+  .sideBar {
+    .activateUsers {
+      margin-top: 3rem;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center;
+      width: 100%;
+      font-size: 1.2rem;
+      line-height: 2.5rem;
+    }
+  }
+
+  .customModal {
+    max-width: 90vw;
+
+    &Body {
+      max-width: 90vw;
+    }
   }
 }

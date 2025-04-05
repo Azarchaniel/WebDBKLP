@@ -24,10 +24,10 @@ export const ReadByChart = (props: Props) => {
 		maintainAspectRatio: false,
 		plugins: {
 			legend: {
-				position: "chartArea" as const,
+				position: "left" as const,
 				labels: chartLabels
 			}
-		}
+		},
 	}
 
 	return (

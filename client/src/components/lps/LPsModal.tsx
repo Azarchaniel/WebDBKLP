@@ -107,118 +107,112 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 
     return (
         <form>
-            <div className="row">
-                <div className="col">
-                    <InputField
-                        value={(formData as ILP)?.title || ""}
-                        placeholder='*Názov'
-                        name="title"
-                        onChange={handleInputChange}
-                        customerror={getErrorMsg("title")}
-                    />
-                </div>
-                <div className="col">
-                    <InputField
-                        value={(formData as ILP)?.subtitle || ""}
-                        placeholder='Podnázov'
-                        name="subtitle"
-                        onChange={handleInputChange}
-                    />
-                </div>
+            <div className="grid-item">
+                <InputField
+                    value={(formData as ILP)?.title || ""}
+                    placeholder='*Názov'
+                    name="title"
+                    onChange={handleInputChange}
+                    customerror={getErrorMsg("title")}
+                />
             </div>
-            <div style={{height: "5px", width: "100%"}}/>
-            <div className="row">
-                <div className="col">
-                    <LazyLoadMultiselect
-                        value={formData?.autor || []}
-                        displayValue="fullName"
-                        placeholder="Autor"
-                        onChange={handleInputChange}
-                        name="autor"
-                        onSearch={fetchAutors}
-                    />
-                </div>
+
+            <div className="grid-item">
+                <InputField
+                    value={(formData as ILP)?.subtitle || ""}
+                    placeholder='Podnázov'
+                    name="subtitle"
+                    onChange={handleInputChange}
+                />
             </div>
-            <div style={{height: "5px", width: "100%"}}/>
-            <div className="row">
-                <div className="col">
-                    <InputField
-                        value={(formData as ILP)?.speed || ""}
-                        placeholder='Počet otáčok'
-                        name="speed"
-                        onChange={handleInputChange}
-                    />
-                </div>
-                <div className="col">
-                    <InputField
-                        value={(formData as ILP)?.countLp || ""}
-                        placeholder='Počet platní'
-                        name="countLp"
-                        onChange={handleInputChange}
-                    />
-                </div>
+
+            <div className="grid-item full-width">
+                <LazyLoadMultiselect
+                    value={formData?.autor || []}
+                    displayValue="fullName"
+                    placeholder="Autor"
+                    onChange={handleInputChange}
+                    name="autor"
+                    onSearch={fetchAutors}
+                />
             </div>
-            <div style={{height: "5px", width: "100%"}}/>
-            <div className="row">
-                <div className="col">
-                    <InputField
-                        value={(formData as ILP)?.published?.year || ""}
-                        placeholder='Rok vydania'
-                        name='published.year'
-                        onChange={handleInputChange}
-                    />
-                </div>
-                <div className="col">
-                    <LazyLoadMultiselect
-                        selectionLimit={1}
-                        value={formData?.published?.country}
-                        options={countryCode}
-                        displayValue="value"
-                        placeholder="Krajina vydania"
-                        onChange={(data) => {
-                            setFormData({
-                                ...formData,
-                                "published.country": data.value.map(v => v.key)
-                            })
-                        }}
-                        name="published.country"
-                    />
-                </div>
+
+            <div className="grid-item">
+                <InputField
+                    value={(formData as ILP)?.speed || ""}
+                    placeholder='Počet otáčok'
+                    name="speed"
+                    onChange={handleInputChange}
+                />
             </div>
-            <div style={{height: "5px", width: "100%"}}/>
-            <div className="row">
-                <div className="col">
-                    <InputField
-                        value={(formData as ILP)?.published?.publisher || ""}
-                        placeholder='Vydavateľ'
-                        name='published.publisher'
-                        onChange={handleInputChange}
-                    />
-                </div>
-                <div className="col">
-                    <LazyLoadMultiselect
-                        selectionLimit={1}
-                        value={formData?.language || []}
-                        options={countryCode}
-                        displayValue="value"
-                        placeholder="Jazyk"
-                        onChange={handleInputChange}
-                        name="language"
-                    />
-                </div>
+
+            <div className="grid-item">
+                <InputField
+                    value={(formData as ILP)?.countLp || ""}
+                    placeholder='Počet platní'
+                    name="countLp"
+                    onChange={handleInputChange}
+                />
             </div>
-            <div style={{height: "5px", width: "100%"}}/>
-            <div className="row">
-                <div className="col">
-					<textarea id='note' placeholder='Poznámka'
-                              className="form-control"
-                              name="note"
-                              autoComplete="off"
-                              rows={1}
-                              value={formData?.note || ""}
-                              onChange={handleInputChange}
-                    />
-                </div>
+
+            <div className="grid-item">
+                <InputField
+                    value={(formData as ILP)?.published?.year || ""}
+                    placeholder='Rok vydania'
+                    name='published.year'
+                    onChange={handleInputChange}
+                />
+            </div>
+
+            <div className="grid-item">
+                <LazyLoadMultiselect
+                    selectionLimit={1}
+                    value={formData?.published?.country}
+                    options={countryCode}
+                    displayValue="value"
+                    placeholder="Krajina vydania"
+                    onChange={(data) => {
+                        setFormData({
+                            ...formData,
+                            "published.country": data.value.map(v => v.key)
+                        })
+                    }}
+                    name="published.country"
+                />
+            </div>
+
+            <div className="grid-item">
+                <InputField
+                    value={(formData as ILP)?.published?.publisher || ""}
+                    placeholder='Vydavateľ'
+                    name='published.publisher'
+                    onChange={handleInputChange}
+                />
+            </div>
+
+            <div className="grid-item">
+                <LazyLoadMultiselect
+                    selectionLimit={1}
+                    value={formData?.language || []}
+                    options={countryCode}
+                    displayValue="value"
+                    placeholder="Jazyk"
+                    onChange={handleInputChange}
+                    name="language"
+                />
+            </div>
+
+            <div className="grid-item full-width">
+                <textarea
+                    id='note'
+                    placeholder='Poznámka'
+                    className="form-control"
+                    name="note"
+                    autoComplete="off"
+                    rows={1}
+                    value={formData?.note || ""}
+                    onChange={handleInputChange}
+                />
             </div>
         </form>
     );

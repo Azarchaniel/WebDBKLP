@@ -1,0 +1,26 @@
+form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  width: 100%;
+}
+
+.full-width {
+  grid-column: 1 / span 2;
+}
+
+@media screen and (max-width: 768px) {
+  form {
+    grid-template-columns: 1fr;
+  }
+
+  /* Reset all items to single column */
+  form > * {
+    grid-column: 1;
+  }
+
+  /* Reset full-width items to match other items */
+  .full-width {
+    grid-column: 1;
+  }
+}

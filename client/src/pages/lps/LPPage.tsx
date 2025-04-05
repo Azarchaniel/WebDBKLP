@@ -3,13 +3,17 @@ import {IBookColumnVisibility, ILP} from "../../type";
 import React, {useEffect, useRef, useState} from "react";
 import {addLP, deleteLP, getLPs, getLP} from "../../API";
 import {toast} from "react-toastify";
-import {stringifyAutors} from "../../utils/utils";
-import {DEFAULT_PAGINATION} from "../../utils/constants";
-import {openConfirmDialog} from "../../components/ConfirmDialog";
-import {isUserLoggedIn} from "../../utils/user";
-import ServerPaginationTable from "../../components/table/TableSP";
-import {getLPTableColumns, ShowHideColumns} from "../../utils/tableColumns";
-import {useClickOutside} from "../../utils/hooks";
+import {
+    isMobile,
+    stringifyAutors,
+    DEFAULT_PAGINATION,
+    isUserLoggedIn,
+    getLPTableColumns,
+    ShowHideColumns,
+    useClickOutside
+} from "@utils";
+import {openConfirmDialog} from "@components/ConfirmDialog";
+import ServerPaginationTable from "@components/table/TableSP";
 import Layout from "../../Layout";
 
 export default function LPPage() {
@@ -23,12 +27,12 @@ export default function LPPage() {
     const [showColumn, setShowColumn] = useState<IBookColumnVisibility>({
         control: false,
         autorsFull: true,
-        subtitle: false,
-        language: false,
-        createdAt: true,
-        speed: true,
-        countLp: true,
-        published: true
+        subtitle: !isMobile(),
+        language: !isMobile(),
+        createdAt: !isMobile(),
+        speed: !isMobile(),
+        countLp: !isMobile(),
+        published: !isMobile(),
     });
     const popRef = useRef<HTMLDivElement>(null);
     const exceptRef = useRef<HTMLDivElement>(null);
@@ -144,7 +148,7 @@ export default function LPPage() {
         <Layout>
             {isUserLoggedIn() && <AddLP saveLp={handleSaveLP} onClose={() => setUpdateLP(undefined)}/>}
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
-                <ShowHideColumns columns={getLPTableColumns()} shown={showColumn} setShown={setShowColumn} />
+                <ShowHideColumns columns={getLPTableColumns()} shown={showColumn} setShown={setShowColumn}/>
             </div>
             <ServerPaginationTable
                 title={`LP (${countAll})`}
@@ -158,7 +162,7 @@ export default function LPPage() {
                 pagination={pagination}
                 hiddenCols={showColumn}
                 actions={
-                    <div className="row justify-center mb-4 mr-2">
+                    <div className="tableActionsRight">
                         <div className="searchTableWrapper">
                             {/* reset pagination on search*/}
                             <input

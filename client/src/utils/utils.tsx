@@ -235,3 +235,20 @@ export const formatDimension = (dimension: any) => {
 export const getPublishedCountry = (publishedCountry: any): ILangCode | undefined => {
 	return countryCode.find((country: ILangCode) => (publishedCountry as unknown as string[])?.includes(country.key));
 }
+
+/**
+ * Check, if user is on mobile.
+ * Checking if device is touchable and checking media query.
+ * @returns {boolean}
+ */
+export const isMobile = (): boolean => {
+	const hasTouchScreen =
+		'ontouchstart' in window ||
+		navigator.maxTouchPoints > 0 ||
+		(navigator as any).msMaxTouchPoints > 0; // For older IE
+
+	// Check for screen size using matchMedia
+	const isSmallScreen = window.matchMedia('(max-width: 768px)').matches;
+
+	return hasTouchScreen && isSmallScreen;
+};

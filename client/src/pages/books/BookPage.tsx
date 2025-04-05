@@ -3,17 +3,25 @@ import React, {useEffect, useMemo, useRef, useState} from "react";
 import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import AddBook from "./AddBook";
-import {stringifyAutors, stringifyUsers} from "../../utils/utils";
+import {
+    DEFAULT_PAGINATION,
+    stringifyAutors,
+    stringifyUsers,
+    isUserLoggedIn,
+    getBookTableColumns,
+    ShowHideColumns,
+    getCachedTimestamp,
+    loadFirstPageFromCache,
+    saveFirstPageToCache,
+    useClickOutside,
+    isMobile
+} from "@utils";
 import {useReadLocalStorage} from "usehooks-ts";
-import {DEFAULT_PAGINATION} from "../../utils/constants";
-import {openConfirmDialog} from "../../components/ConfirmDialog";
-import ServerPaginationTable from "../../components/table/TableSP";
-import {isUserLoggedIn} from "../../utils/user";
-import {getBookTableColumns, ShowHideColumns} from "../../utils/tableColumns";
+import {openConfirmDialog} from "@components/ConfirmDialog";
+import ServerPaginationTable from "@components/table/TableSP";
 import BookDetail from "./BookDetail";
-import {getCachedTimestamp, loadFirstPageFromCache, saveFirstPageToCache} from "../../utils/indexDb";
-import {useClickOutside} from "../../utils/hooks";
 import Layout from "../../Layout";
+import "@styles/BookPage.scss";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
@@ -31,7 +39,7 @@ export default function BookPage() {
         autorsFull: true,
         editorsFull: false,
         ilustratorsFull: false,
-        translatorsFull: true,
+        translatorsFull: !isMobile(),
         subtitle: false,
         content: false,
         dimensions: false,
@@ -44,14 +52,14 @@ export default function BookPage() {
         weight: false,
         edition: false,
         serie: false,
-        published: true,
-        exLibris: true,
-        readBy: true,
-        note: true,
+        published: !isMobile(),
+        exLibris: !isMobile(),
+        readBy: !isMobile(),
+        note: !isMobile(),
         createdAt: false,
-        updatedAt: true,
-        location: true,
-        ownersFull: true
+        updatedAt: !isMobile(),
+        location: !isMobile(),
+        ownersFull: !isMobile()
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
@@ -256,7 +264,7 @@ export default function BookPage() {
                 saveResultSuccess={saveBookSuccess}
             />}
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
-                <ShowHideColumns columns={getBookTableColumns()} shown={showColumn} setShown={setShowColumn} />
+                <ShowHideColumns columns={getBookTableColumns()} shown={showColumn} setShown={setShowColumn}/>
             </div>
             <ServerPaginationTable
                 title={`Knihy (${countAll})`}
@@ -273,7 +281,7 @@ export default function BookPage() {
                 pagination={pagination}
                 hiddenCols={showColumn}
                 actions={
-                    <div key="actions" className="row justify-center mb-4 mr-2">
+                    <div key="actions" className="tableActionsRight">
                         <div className="searchTableWrapper">
                             <input
                                 placeholder="Vyhľadaj knihu"
