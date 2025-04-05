@@ -1,0 +1,292 @@
+@import "variables";
+
+@media (max-width: $mobile-width) {
+  .headerTitleAction {
+    position: relative;
+    flex-direction: column !important;
+    padding-bottom: 5rem;
+  }
+
+  .tableActionsRight {
+    display: flex;
+    flex-direction: column !important;
+  }
+
+  .bookTableAction {
+    position: absolute;
+    right: 0;
+  }
+
+  .showHideColumns {
+    right: 3.5rem;
+    top: 9rem;
+  }
+
+  .serverPaginationTable {
+    overflow-x: auto !important;
+
+    tr {
+      height: auto !important; // Allow rows to grow as needed
+    }
+
+    td {
+      white-space: normal !important; // Allow text to wrap
+      word-break: break-word; // Break words to prevent overflow
+      min-height: 4rem; // Maintain minimum height
+      height: auto; // Allow height to grow
+      vertical-align: middle; // Center content vertically
+    }
+
+    .TSP {
+      &exLibris, &height, &width, &depth, &numberOfPages, &createdAt, &countLp, &speed {
+        display: table-cell;
+        text-align: center;
+
+        // Make sure these cells can also wrap
+        white-space: normal;
+        word-break: break-word;
+      }
+    }
+  }
+}
+
+.serverPaginationTable {
+  color: black;
+  width: 100%;
+
+  .tableHeader {
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+
+    th {
+      border: 1px solid var(--anchor);
+      background-color: var(--anchor);
+      color: white;
+      max-height: 2rem !important;
+      padding: 0 0.5rem;
+      white-space: normal; // Allow header text to wrap
+      word-break: break-word; // Break long words if needed
+    }
+
+    // it's here becuase of Dimensions
+    th[colspan]:not([colspan="1"]) { // select element that has colspan and it is not 1
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .TSP {
+      &autorsFull {
+        min-width: 12rem;
+      }
+
+      &title {
+        min-width: 15rem;
+      }
+
+      &autorsFull {
+        min-width: 12rem;
+      }
+
+      &actionsRow {
+        width: 8rem;
+      }
+    }
+  }
+
+  tr {
+    height: 4rem;
+    pointer-events: auto;
+
+    // Change fixed height to min-height to allow wrapping
+    min-height: 4rem;
+    height: auto;
+
+    &:hover {
+      background-color: var(--anchor);
+      box-shadow: inset 1000rem 1em rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  td {
+    border-bottom: 2px solid lightgray;
+    padding: 0.5rem; // Increased padding slightly for better readability
+    position: relative;
+    pointer-events: auto;
+    white-space: normal; // Allow text to wrap
+    word-break: break-word; // Break long words if needed
+    vertical-align: middle; // Center content vertically
+
+    &:not(:first-child)::after {
+      //line in the middle of the cell
+      content: '';
+      position: absolute;
+      height: 1.8rem;
+      width: 1px;
+      background-color: lightgray;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+  }
+
+  .TSP {
+    &exLibris, &height, &width, &depth, &numberOfPages, &createdAt, &countLp, &speed {
+      display: table-cell;
+      text-align: center;
+    }
+  }
+}
+
+/* Rest of your CSS remains unchanged */
+.headerTitleAction {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding-right: 4rem;
+  color: black;
+  height: 2rem;
+  margin-bottom: 1rem;
+}
+
+.tableActionsRight {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.pageSelector {
+  color: black;
+  font-size: 1.25rem;
+  padding: 0 1rem;
+  cursor: pointer;
+
+  &.current {
+    font-weight: bold;
+    color: var(--anchor);
+    cursor: default;
+  }
+}
+
+.tableNavigationRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 3rem;
+  flex-direction: row;
+  color: black;
+  background: var(--background);
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  padding-right: 2.5rem;
+  z-index: 2;
+  width: 100%;
+
+  .pageInput {
+    width: 3rem;
+    margin-right: 1rem;
+    padding: 0;
+    text-align: center;
+  }
+}
+
+button:focus {
+  outline: none !important;
+}
+
+.tabNav {
+  color: var(--anchor);
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  -webkit-transition: background 0.2s, color 0.2s;
+  -moz-transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    background: rgba(255, 255, 255, 1);
+    color: #64bb5d;
+  }
+
+  &:disabled {
+    color: lightgray;
+    cursor: not-allowed;
+  }
+}
+
+.searchWrapper {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-height: 22px;
+  padding: 5px;
+  position: relative;
+}
+
+.searchTableWrapper {
+  input {
+    border-radius: 4px;
+    min-height: 22px;
+    padding: 5px;
+    box-shadow: none;
+  }
+
+  display: flex;
+  align-items: center;
+
+  position: relative;
+
+  button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    right: 0.5rem;
+    color: black;
+
+    &:hover {
+      color: var(--anchor);
+    }
+  }
+}
+
+.bookTableAction {
+  transform: rotate(90deg);
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--anchor);
+  }
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.select-none {
+  user-select: none;
+}
+
+.actionsRow {
+  width: 5rem;
+  margin-left: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  button {
+    border: none;
+    background: none;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--anchor);
+    }
+  }
+}

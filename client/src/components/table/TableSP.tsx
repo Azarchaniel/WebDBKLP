@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-table';
 import {LoadingBooks} from "../LoadingBooks";
 import Pagination from "./Pagination";
+import "@styles/table.scss";
 
 type PropsMT = {
     title: string;
@@ -97,7 +98,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
 
         return (
             <div className="p-4">
-                <div className="row headerTitleAction">
+                <div className="headerTitleAction">
                     <h4 className="ml-4 mb-3" style={{color: "black"}}>{title}</h4>
                     {actions}
                 </div>

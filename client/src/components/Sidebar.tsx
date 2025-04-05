@@ -1,12 +1,18 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {forwardRef, useEffect, useRef, useState} from "react";
 import "../styles/font-awesome/css/all.css";
 import "../styles/sidebar.scss";
 import {ISideMenuItems} from "../type";
 import {Link, useLocation} from "react-router-dom";
 import {ActivateUserList} from "./ActivateUserList";
-import {useClickOutside} from "../utils/hooks";
+import {useClickOutside} from "@utils";
 
-const HamburgerToX = ({onClick, className, ref, activeEl}: { onClick: () => void; className: string; ref: React.RefObject<HTMLDivElement>, activeEl: boolean }) => {
+interface HamburgerToXProps {
+    onClick: () => void;
+    className: string;
+    activeEl: boolean;
+}
+
+const HamburgerToX = forwardRef<HTMLDivElement, HamburgerToXProps>(({ onClick, className, activeEl }, ref) => {
     const [active, setActive] = useState<boolean>(activeEl);
 
     useEffect(() => {
@@ -23,7 +29,7 @@ const HamburgerToX = ({onClick, className, ref, activeEl}: { onClick: () => void
             </div>
         </div>
     )
-}
+});
 
 const Sidebar = () => {
     const location = useLocation();

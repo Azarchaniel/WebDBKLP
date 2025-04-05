@@ -1,7 +1,7 @@
 import React from "react";
 import {Link} from "react-router-dom";
 import LoginModal from "./LoginModal";
-import "../styles/header.scss";
+import "@styles/header.scss";
 import {ActivateUserList} from "./ActivateUserList";
 
 const Header: React.FC = () => {

@@ -3,16 +3,22 @@ import React, {useEffect, useMemo, useRef, useState} from "react";
 import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import AddBook from "./AddBook";
-import {stringifyAutors, stringifyUsers} from "../../utils/utils";
+import {
+    DEFAULT_PAGINATION,
+    stringifyAutors,
+    stringifyUsers,
+    isUserLoggedIn,
+    getBookTableColumns,
+    ShowHideColumns,
+    getCachedTimestamp,
+    loadFirstPageFromCache,
+    saveFirstPageToCache,
+    useClickOutside
+} from "@utils";
 import {useReadLocalStorage} from "usehooks-ts";
-import {DEFAULT_PAGINATION} from "../../utils/constants";
-import {openConfirmDialog} from "../../components/ConfirmDialog";
-import ServerPaginationTable from "../../components/table/TableSP";
-import {isUserLoggedIn} from "../../utils/user";
-import {getBookTableColumns, ShowHideColumns} from "../../utils/tableColumns";
+import {openConfirmDialog} from "@components/ConfirmDialog";
+import ServerPaginationTable from "@components/table/TableSP";
 import BookDetail from "./BookDetail";
-import {getCachedTimestamp, loadFirstPageFromCache, saveFirstPageToCache} from "../../utils/indexDb";
-import {useClickOutside} from "../../utils/hooks";
 import Layout from "../../Layout";
 
 export default function BookPage() {
@@ -256,7 +262,7 @@ export default function BookPage() {
                 saveResultSuccess={saveBookSuccess}
             />}
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
-                <ShowHideColumns columns={getBookTableColumns()} shown={showColumn} setShown={setShowColumn} />
+                <ShowHideColumns columns={getBookTableColumns()} shown={showColumn} setShown={setShowColumn}/>
             </div>
             <ServerPaginationTable
                 title={`Knihy (${countAll})`}
@@ -273,7 +279,7 @@ export default function BookPage() {
                 pagination={pagination}
                 hiddenCols={showColumn}
                 actions={
-                    <div key="actions" className="row justify-center mb-4 mr-2">
+                    <div key="actions" className="tableActionsRight">
                         <div className="searchTableWrapper">
                             <input
                                 placeholder="Vyhľadaj knihu"
