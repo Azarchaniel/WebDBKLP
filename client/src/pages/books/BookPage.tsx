@@ -21,6 +21,7 @@ import {openConfirmDialog} from "@components/ConfirmDialog";
 import ServerPaginationTable from "@components/table/TableSP";
 import BookDetail from "./BookDetail";
 import Layout from "../../Layout";
+import "@styles/BookPage.scss";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);

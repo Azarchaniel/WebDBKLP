@@ -163,7 +163,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                                 </td>
                                             ))}
                                             {rowActions &&
-                                                <td key={`${row.id}-actions`}>
+                                                <td key={`${row.id}-actions`} className="TSPactionsRow">
                                                     {rowActions(row.original._id, () => row.toggleExpanded())}
                                                 </td>
                                             }

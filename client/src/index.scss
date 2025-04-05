@@ -51,19 +51,6 @@ body, html, main, #root {
   margin-right: .5rem;
 }
 
-.AutorTable {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--anchor);
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #333333;
-
-  .text {
-    color: #444;
-  }
-}
-
 .quote_container {
   padding: 10px;
   column-count: 4;
@@ -105,47 +92,12 @@ body, html, main, #root {
   border-bottom: 1px solid #333333;
 }
 
-.modalBgr {
-  position: fixed;
-  z-index: 5;
-  padding-top: 100px;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgb(0, 0, 0);
-  background-color: rgba(0, 0, 0, 0.4);
-}
-
-.modalBody {
-  background-color: #fefefe;
-  position: fixed;
-  z-index: 20;
-  margin: auto;
-  padding: 20px;
-  border: 1px solid #888;
-  width: 60%;
-  left: 20%;
-  border-radius: 5px;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.modal-title {
-  color: var(--menu);
-}
-
 .clearInput {
   position: absolute;
   border: none;
   background: none;
   top: 19%;
   right: 10%;
-}
-
-.hide-button {
-  display: none;
 }
 
 .customLink {
@@ -161,15 +113,6 @@ body, html, main, #root {
 
   &.activeLink {
     color: var(--anchor);
-  }
-}
-
-.autocomplete-result {
-  list-style: none;
-  margin-left: -1.9rem;
-
-  span {
-    margin-right: 1rem;
   }
 }
 
@@ -196,62 +139,6 @@ body, html, main, #root {
 
 .hidden {
   visibility: hidden;
-}
-
-.MuiPaper-root {
-  margin-left: 0.5rem;
-  background-color: var(--background) !important;
-
-  tr:hover {
-    background-color: var(--anchor);
-    box-shadow: inset 1000rem 1em rgba(255, 255, 255, 0.6);
-  }
-}
-
-.MuiTableRow-footer:hover {
-  background-color: var(--background) !important;
-  box-shadow: none !important;
-}
-
-.MuiPaper-elevation2 {
-  box-shadow: none !important;
-}
-
-.MuiTable-root {
-  width: 99.7% !important;
-}
-
-.MuiTableCell-head, .MuiTableSortLabel-active {
-  font-weight: bold !important;
-  color: white !important;
-  background-color: var(--anchor) !important;
-}
-
-.MuiTableSortLabel-icon {
-  color: white !important;
-}
-
-.MuiTablePagination-toolbar {
-  display: flex;
-  flex-direction: row;
-  align-items: baseline;
-}
-
-.MuiTableHead-root {
-  height: 3rem;
-}
-
-.MuiTablePagination-selectLabel {
-  margin: 0; //fixing not centered pagination in Table
-}
-
-.tableDetailRow {
-  padding: 1rem;
-  pointer-events: none;
-
-  &:hover {
-    background-color: var(--background) !important;
-  }
 }
 
 .autorDetailTable {
@@ -283,12 +170,6 @@ body, html, main, #root {
 
   td::after {
     background-color: transparent !important; /* Remove background color */
-  }
-}
-
-.bookDimensions {
-  td {
-    padding: 0 1rem;
   }
 }
 
@@ -336,289 +217,6 @@ body, html, main, #root {
 .detailHrefs {
   text-align: left;
   pointer-events: auto;
-}
-
-/* Base container for AddBook modal */
-.container {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 0.5rem 1rem;
-}
-
-/* Desktop layout (default) */
-/* Row 1 */
-.Nazov {
-  grid-area: 1 / 1 / 1 / 7;
-}
-.Podnazov {
-  grid-area: 1 / 7 / 1 / 13;
-}
-
-/* Row 2 */
-.Autor {
-  grid-area: 2 / 1 / 2 / 10;
-}
-.ISBN {
-  grid-area: 2 / 10 / 2 / 13;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.isbnLookup {
-  position: absolute;
-  right: 1rem;
-  cursor: pointer;
-  z-index: 2;
-  border: none;
-  background: none;
-}
-.isbnLookup:after {
-  content: "";
-  display: block;
-  position: absolute;
-  border-radius: 4em;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: all 0.7s;
-  box-shadow: 0 0 3px 12px gray;
-}
-.isbnLookup:active:after {
-  box-shadow: 0 0 0 0 white;
-  position: absolute;
-  border-radius: 4em;
-  left: 0;
-  top: 0;
-  opacity: 1;
-  transition: 0s;
-}
-
-/* Row 3 */
-.Translator {
-  grid-area: 3 / 1 / 3 / 5;
-}
-.Editor {
-  grid-area: 3 / 5 / 3 / 9;
-}
-.Ilustrator {
-  grid-area: 3 / 9 / 3 / 13;
-}
-
-/* Row 4 */
-.Name {
-  grid-area: 4 / 1 / 4 / 5;
-}
-.No {
-  grid-area: 4 / 5 / 4 / 7;
-}
-.NameS {
-  grid-area: 4 / 7 / 4 / 11;
-}
-.NoS {
-  grid-area: 4 / 11 / 4 / 13;
-}
-
-/* Row 5 */
-.Vydavatel {
-  grid-area: 5 / 1 / 5 / 7;
-}
-.Rok {
-  grid-area: 5 / 7 / 5 / 9;
-}
-.Krajina {
-  grid-area: 5 / 9 / 5 / 13;
-}
-
-/* Row 6 */
-.Mesto {
-  grid-area: 6 / 1 / 6 / 5;
-}
-.Police {
-  grid-area: 6 / 5 / 6 / 9;
-}
-.language {
-  grid-area: 6 / 9 / 6 / 13;
-}
-
-/* Row 7 */
-.Vyska {
-  grid-area: 7 / 1 / 7 / 3;
-}
-.Sirka {
-  grid-area: 7 / 3 / 7 / 5;
-}
-.Hrubka {
-  grid-area: 7 / 5 / 7 / 7;
-}
-.Hmotnost {
-  grid-area: 7 / 7 / 7 / 9;
-}
-.Page-no {
-  grid-area: 7 / 9 / 7 / 13;
-}
-
-/* Row 8 */
-.Obsah {
-  grid-area: 8 / 1 / 8 / 7;
-}
-.Poznamka {
-  grid-area: 8 / 1 / 8 / 13;
-}
-
-/* Row 9 */
-.Precitane {
-  grid-area: 9 / 1 / 9 / 6;
-}
-.Vlastnik {
-  grid-area: 9 / 6 / 9 / 11;
-}
-.Ex-Libris {
-  grid-area: 9 / 11 / 9 / 13;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: black;
-}
-
-/* Row 10 */
-.pic {
-  grid-area: 10 / 1 / 10 / 4;
-}
-.DK {
-  grid-area: 10 / 4 / 10 / 8;
-}
-.GR {
-  grid-area: 10 / 8 / 10 / 13;
-}
-
-/* Tablet layout */
-@media (max-width: $tablet-width) {
-  .container {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    gap: 0.4rem 0.8rem;
-  }
-
-  /* Row 1 */
-  .Nazov {
-    grid-area: 1 / 1 / 1 / 5;
-  }
-  .Podnazov {
-    grid-area: 1 / 5 / 1 / 9;
-  }
-
-  /* Row 2 */
-  .Autor {
-    grid-area: 2 / 1 / 2 / 6;
-  }
-  .ISBN {
-    grid-area: 2 / 6 / 2 / 9;
-  }
-
-  /* Row 3 */
-  .Translator {
-    grid-area: 3 / 1 / 3 / 3;
-  }
-  .Editor {
-    grid-area: 3 / 3 / 3 / 6;
-  }
-  .Ilustrator {
-    grid-area: 3 / 6 / 3 / 9;
-  }
-
-  /* Row 4 */
-  .Name {
-    grid-area: 4 / 1 / 4 / 3;
-  }
-  .No {
-    grid-area: 4 / 3 / 4 / 4;
-  }
-  .NameS {
-    grid-area: 4 / 4 / 4 / 7;
-  }
-  .NoS {
-    grid-area: 4 / 7 / 4 / 9;
-  }
-
-  /* Row 5 */
-  .Vydavatel {
-    grid-area: 5 / 1 / 5 / 4;
-  }
-  .Rok {
-    grid-area: 5 / 4 / 5 / 6;
-  }
-  .Krajina {
-    grid-area: 5 / 6 / 5 / 9;
-  }
-
-  /* Remaining rows adjusted similarly */
-  .Mesto, .Police, .language,
-  .Vyska, .Sirka, .Hrubka, .Hmotnost, .Page-no,
-  .Obsah, .Poznamka,
-  .Precitane, .Vlastnik, .Ex-Libris,
-  .pic, .DK, .GR {
-    /* Adjust grid areas for tablet layout */
-  }
-}
-
-/* Mobile phone layout */
-@media (max-width: $mobile-width) {
-  .form-control {
-    width: 100%;
-  }
-
-  .container {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-
-  /* Each element takes a full row */
-  .Nazov { grid-area: 1 / 1 / 2 / 3 };
-  .Podnazov { grid-area: 2 / 1 / 3 / 3 };
-  .Autor { grid-area: 3 / 1 / 4 / 3 };
-  .ISBN {
-    grid-area: 4 / 1 / 5 / 3;
-    position: relative;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-  }
-  .isbnLookup {
-    right: 0.5rem;
-  }
-  .Translator { grid-area: 5 / 1 / 6 / 3 };
-  .Editor { grid-area: 6 / 1 / 7 / 3 };
-  .Ilustrator { grid-area: 7 / 1 / 8 / 3 };
-  .Name { grid-area: 8 / 1 / 9 / 3 };
-  .No { grid-area: 9 / 1 / 10 / 3 };
-  .NameS { grid-area: 10 / 1 / 11 / 3 };
-  .NoS { grid-area: 11 / 1 / 12 / 3 };
-  .Vydavatel { grid-area: 12 / 1 / 13 / 3 };
-  .Rok { grid-area: 13 / 1 / 14 / 3 };
-  .Krajina { grid-area: 14 / 1 / 15 / 3 };
-  .Mesto { grid-area: 15 / 1 / 16 / 3 };
-  .Police { grid-area: 16 / 1 / 17 / 3 };
-  .language { grid-area: 17 / 1 / 18 / 3 };
-  .Vyska { grid-area: 18 / 1 / 19 / 2 };
-  .Sirka { grid-area: 18 / 2 / 19 / 3 };
-  .Hrubka { grid-area: 19 / 1 / 20 / 2 };
-  .Hmotnost { grid-area: 19 / 2 / 20 / 3 };
-  .Page-no { grid-area: 20 / 1 / 21 / 2 };
-  .Obsah { grid-area: 21 / 1 / 22 / 3 };
-  .Poznamka { grid-area: 22 / 1 / 23 / 3 };
-  .Precitane { grid-area: 23 / 1 / 24 / 3 };
-  .Vlastnik { grid-area: 24 / 1 / 25 / 3 };
-  .Ex-Libris {
-    grid-area: 20 / 2 / 21 / 3;
-    align-self: center;
-    justify-self: center;
-    padding-top: 0.5rem;
-  }
-  .pic { grid-area: 25 / 1 / 26 / 3 };
-  .DK { grid-area: 26 / 1 / 27 / 3 };
-  .GR { grid-area: 27 / 1 / 28 / 3 };
 }
 
 .chip {
@@ -686,58 +284,8 @@ body, html, main, #root {
   }
 }
 
-.addBtnTable {
-  background-color: black;
-  border: none;
-  color: white;
-  position: fixed;
-  right: 1rem;
-  top: 8vh;
-  height: 3rem;
-  width: 3rem;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.7);
-
-    &::after {
-      color: var(--anchor);
-    }
-  }
-
-  &::after {
-    content: '+';
-    font-weight: bold;
-    font-size: 2rem;
-    margin-top: -0.2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-}
-
-.MuiIconButton-root:hover {
-  background-color: transparent !important;
-}
-
 .moveToLeft {
   margin-right: 3rem !important;
-}
-
-//for Multiselect
-.option {
-  &:hover {
-    background-color: var(--anchor) !important;
-  }
-
-  &::selection {
-    background-color: var(--anchor) !important;
-  }
 }
 
 .h6MaterialClone {
@@ -752,17 +300,6 @@ body, html, main, #root {
   display: flex;
   align-items: center;
   padding-left: 16px;
-}
-
-.rowBtns {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  width: 100%;
-
-  .btn {
-    margin-left: 1rem;
-  }
 }
 
 .hiddenId {
@@ -862,16 +399,6 @@ input:invalid {
   outline: 2px dotted red;
 }
 
-.optionListContainer {
-  position: absolute;
-  z-index: 100;
-
-  .optionContainer {
-    position: fixed;
-    background: white !important;
-  }
-}
-
 /* WYSWIG editor */
 .rsw-editor:has(.rsw-ce[contenteditable="false"]) {
   border: none;
@@ -907,6 +434,7 @@ input:invalid {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
   padding: 1rem;
   font-size: 0.75rem;
   line-height: 0.75rem;
@@ -935,6 +463,7 @@ input:invalid {
 
   .dashboardItem {
     height: 20rem;
+    justify-content: unset;
   }
 }
 
@@ -1040,7 +569,7 @@ input:invalid {
   }
 }
 
-
+// this is here, because it is used in both elements
 .header {
   .activateUsers {
     display: flex;
@@ -1054,6 +583,7 @@ input:invalid {
     display: none;
   }
 }
+// ^^^
 
 @media (max-width: $mobile-width) {
   .App {

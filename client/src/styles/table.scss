@@ -83,6 +83,10 @@
     .TSPtitle {
       min-width: 100%;
     }
+
+    .actionsRow button {
+      font-size: 1.5rem !important;
+    }
   }
 }
 
@@ -119,10 +123,6 @@
 
       &autorsFull {
         min-width: 12rem;
-      }
-
-      &actionsRow {
-        width: 8rem;
       }
     }
   }

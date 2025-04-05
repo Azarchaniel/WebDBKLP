@@ -152,13 +152,13 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
 
 	// Main render
 	return (
-		<div className="row tableDetailRow">
-			<div className="w-25">
+		<div className="bookDetailRow">
+			<div>
 				{renderBookCover()}
 				{renderExternalLinks()}
 			</div>
 
-			<div className="w-25">
+			<div>
 				<h1>{data.title}</h1>
 				{data.subtitle && <h4>{data.subtitle}</h4>}
 
