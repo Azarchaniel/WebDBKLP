@@ -3,16 +3,20 @@ import React, {useEffect, useRef, useState} from "react";
 import {IAutor, IBookColumnVisibility} from "../../type";
 import {addAutor, deleteAutor, getAutor, getAutorInfo, getAutors} from "../../API";
 import {toast} from "react-toastify";
-import {stringifyAutors} from "../../utils/utils";
-import {DEFAULT_PAGINATION} from "../../utils/constants";
-import {openConfirmDialog} from "../../components/ConfirmDialog";
-import {isUserLoggedIn} from "../../utils/user";
-import {getAutorTableColumns, ShowHideColumns} from "../../utils/tableColumns";
+import {
+    stringifyAutors,
+    useClickOutside,
+    DEFAULT_PAGINATION,
+    getAutorTableColumns,
+    ShowHideColumns,
+    isUserLoggedIn
+} from "@utils";
+import {openConfirmDialog} from "@components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
 import AutorDetail from "./AutorDetail";
 import {SortingState} from "@tanstack/react-table";
 import Layout from "../../Layout";
-import {useClickOutside} from "../../utils/hooks";
+import "@styles/AutorPage.scss";
 
 export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
@@ -183,15 +187,15 @@ export default function AutorPage() {
                 pagination={pagination}
                 hiddenCols={showColumn}
                 actions={
-                    <div className="row justify-center mb-4 mr-2">
+                    <div className="tableActionsRight">
                         <div className="searchTableWrapper">
-                            {/* reset pagination on search*/}
                             <input
                                 className="form-control"
                                 style={{paddingRight: "2rem"}}
                                 placeholder="Vyhľadaj autora"
                                 value={pagination.search}
                                 onChange={(e) =>
+                                    /* reset pagination on search*/
                                     setPagination(prevState => ({
                                         ...prevState,
                                         page: DEFAULT_PAGINATION.page,

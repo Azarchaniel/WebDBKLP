@@ -27,8 +27,8 @@ const AutorDetail: React.FC<Props> = React.memo(({data}) => {
 
     return (
         <>
-            <div className="row tableDetailRow">
-                <div className="col">
+            <div className="autorDetail">
+                <div>
                     <table className="autorDetailTable">
                         <tbody>
                         <tr>
@@ -64,7 +64,7 @@ const AutorDetail: React.FC<Props> = React.memo(({data}) => {
                         </tbody>
                     </table>
                 </div>
-                <div className="col">
+                <div>
                     {Boolean(books?.length) && <><h5>Knihy</h5>
                         <table className="autorDetailTable">
                             <thead>
