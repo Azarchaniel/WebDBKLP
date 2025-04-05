@@ -13,7 +13,8 @@ import {
     getCachedTimestamp,
     loadFirstPageFromCache,
     saveFirstPageToCache,
-    useClickOutside
+    useClickOutside,
+    isMobile
 } from "@utils";
 import {useReadLocalStorage} from "usehooks-ts";
 import {openConfirmDialog} from "@components/ConfirmDialog";
@@ -37,7 +38,7 @@ export default function BookPage() {
         autorsFull: true,
         editorsFull: false,
         ilustratorsFull: false,
-        translatorsFull: true,
+        translatorsFull: !isMobile(),
         subtitle: false,
         content: false,
         dimensions: false,
@@ -50,14 +51,14 @@ export default function BookPage() {
         weight: false,
         edition: false,
         serie: false,
-        published: true,
-        exLibris: true,
-        readBy: true,
-        note: true,
+        published: !isMobile(),
+        exLibris: !isMobile(),
+        readBy: !isMobile(),
+        note: !isMobile(),
         createdAt: false,
-        updatedAt: true,
-        location: true,
-        ownersFull: true
+        updatedAt: !isMobile(),
+        location: !isMobile(),
+        ownersFull: !isMobile()
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);

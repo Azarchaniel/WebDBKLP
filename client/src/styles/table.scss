@@ -23,29 +23,65 @@
   }
 
   .serverPaginationTable {
-    overflow-x: auto !important;
+    display: block;
+    width: 100%;
 
-    tr {
-      height: auto !important; // Allow rows to grow as needed
+    thead, tbody, tr {
+      display: block;
+      width: 100%;
+      height: unset !important;
     }
 
-    td {
-      white-space: normal !important; // Allow text to wrap
-      word-break: break-word; // Break words to prevent overflow
-      min-height: 4rem; // Maintain minimum height
-      height: auto; // Allow height to grow
-      vertical-align: middle; // Center content vertically
-    }
-
-    .TSP {
-      &exLibris, &height, &width, &depth, &numberOfPages, &createdAt, &countLp, &speed {
-        display: table-cell;
-        text-align: center;
-
-        // Make sure these cells can also wrap
-        white-space: normal;
-        word-break: break-word;
+    .tableHeader {
+      tr {
+        display: flex;
+        flex-wrap: wrap;
       }
+
+      th {
+        display: flex;
+        justify-content: flex-start;
+        flex: 1 1 auto;
+        width: 50% !important;
+        min-width: unset !important;
+        box-sizing: border-box;
+      }
+
+      .TSPtitle {
+        width: 100% !important;
+      }
+    }
+
+    tbody {
+      tr {
+        display: flex;
+        flex-wrap: wrap;
+        border-bottom: 2px solid var(--anchor);
+      }
+
+      td {
+        display: flex;
+        flex-wrap: wrap;
+        flex: 1 1 auto;
+        width: 50%;
+        box-sizing: border-box;
+        border-bottom: 1px solid #eee;
+        min-height: 2rem !important;
+        text-overflow: ellipsis;
+
+        &:not(:first-child)::after {
+          height: 1rem;
+        }
+      }
+    }
+
+    /* Handle expanded rows differently in mobile view */
+    tr[data-expanded="true"] + tr td {
+      padding-left: 1rem;
+    }
+
+    .TSPtitle {
+      min-width: 100%;
     }
   }
 }
@@ -64,8 +100,6 @@
       color: white;
       max-height: 2rem !important;
       padding: 0 0.5rem;
-      white-space: normal; // Allow header text to wrap
-      word-break: break-word; // Break long words if needed
     }
 
     // it's here becuase of Dimensions
@@ -97,10 +131,6 @@
     height: 4rem;
     pointer-events: auto;
 
-    // Change fixed height to min-height to allow wrapping
-    min-height: 4rem;
-    height: auto;
-
     &:hover {
       background-color: var(--anchor);
       box-shadow: inset 1000rem 1em rgba(255, 255, 255, 0.6);
@@ -109,12 +139,9 @@
 
   td {
     border-bottom: 2px solid lightgray;
-    padding: 0.5rem; // Increased padding slightly for better readability
+    padding: 0 0.5rem;
     position: relative;
     pointer-events: auto;
-    white-space: normal; // Allow text to wrap
-    word-break: break-word; // Break long words if needed
-    vertical-align: middle; // Center content vertically
 
     &:not(:first-child)::after {
       //line in the middle of the cell
