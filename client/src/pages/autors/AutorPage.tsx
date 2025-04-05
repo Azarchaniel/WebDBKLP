@@ -9,7 +9,7 @@ import {
     DEFAULT_PAGINATION,
     getAutorTableColumns,
     ShowHideColumns,
-    isUserLoggedIn
+    isUserLoggedIn, isMobile
 } from "@utils";
 import {openConfirmDialog} from "@components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
@@ -33,10 +33,10 @@ export default function AutorPage() {
         control: false,
         firstName: true,
         lastName: true,
-        nationality: true,
-        dateOfBirth: true,
-        dateOfDeath: true,
-        note: true,
+        nationality: !isMobile(),
+        dateOfBirth: !isMobile(),
+        dateOfDeath: !isMobile(),
+        note: !isMobile(),
     });
     const popRef = useRef<HTMLDivElement>(null);
     const exceptRef = useRef<HTMLDivElement>(null);

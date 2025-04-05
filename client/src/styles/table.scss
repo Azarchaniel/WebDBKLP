@@ -75,11 +75,6 @@
       }
     }
 
-    /* Handle expanded rows differently in mobile view */
-    tr[data-expanded="true"] + tr td {
-      padding-left: 1rem;
-    }
-
     .TSPtitle {
       min-width: 100%;
     }
@@ -124,6 +119,10 @@
       &autorsFull {
         min-width: 12rem;
       }
+
+      &actionsRow {
+        width: 5rem;
+      }
     }
   }
 
@@ -160,6 +159,10 @@
     &exLibris, &height, &width, &depth, &numberOfPages, &createdAt, &countLp, &speed {
       display: table-cell;
       text-align: center;
+    }
+
+    &actionsRow {
+      width: 5rem;
     }
   }
 }

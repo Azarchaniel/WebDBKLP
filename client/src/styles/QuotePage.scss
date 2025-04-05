@@ -1,0 +1,149 @@
+@import "variables";
+
+.quote_container {
+  padding: 10px;
+  column-count: 4;
+  column-gap: 10px;
+  width: 100%;
+}
+
+.Quote {
+  display: inline-block;
+  padding: 10px;
+  color: black;
+  border-radius: 6px;
+  font-size: 110%;
+  position: relative;
+  width: 100%;
+  break-inside: avoid;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+}
+
+.Quote .Card--button {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  cursor: pointer;
+}
+
+.Quote .quoteOwner {
+  font-size: 0.85rem;
+  filter: brightness(0.85);
+}
+
+.scrollToTop {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 50%;
+  font-size: 1rem;
+  background-color: black;
+  border: none;
+  position: fixed;
+  right: 1rem;
+  bottom: 2rem;
+  z-index: 2;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+
+    &::after {
+      color: var(--anchor);
+    }
+  }
+
+  &::after {
+    content: "▲";
+    font-size: 1.5rem;
+    color: white;
+    font-weight: bold;
+  }
+}
+
+.addQuote {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 50%;
+  font-size: 1rem;
+  background-color: black;
+  border: none;
+  position: fixed;
+  right: 1rem;
+  top: 8vh;
+  z-index: 2;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+
+    &::after {
+      color: var(--anchor);
+    }
+  }
+
+  &::after {
+    content: '+';
+    font-size: 2rem;
+    position: absolute;
+    margin-top: -1.6rem;
+    margin-left: -0.6rem;
+    color: white;
+    font-weight: bold;
+  }
+}
+
+.quoteBookSearch {
+  margin-left: 10px;
+  width: 20rem;
+}
+
+/* Base form styles */
+form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  width: 100%;
+}
+
+/* Full width items - these are redundant in the 1fr layout but kept for consistency */
+.full-width {
+  grid-column: 1;
+}
+
+/* Special row for fromBook and pageNo with 3:1 ratio */
+.book-page-row {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 5px;
+}
+
+/* Media query for mobile layout */
+@media screen and (max-width: 768px) {
+  /* Book and page fields stack on mobile */
+  .book-page-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive column count */
+@media screen and (max-width: 1200px) {
+  .quote_container {
+    column-count: 3;
+  }
+}
+
+@media screen and (max-width: $tablet-width) {
+  .quote_container {
+    column-count: 2;
+  }
+}
+
+@media screen and (max-width: $mobile-width) {
+  .quote_container {
+    column-count: 1;
+  }
+
+  .quoteBookSearch {
+    width: 95%;
+  }
+}

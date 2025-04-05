@@ -51,47 +51,6 @@ body, html, main, #root {
   margin-right: .5rem;
 }
 
-.quote_container {
-  padding: 10px;
-  column-count: 4;
-  gap: 10px;
-}
-
-.Quote {
-  padding: 10px;
-  color: black;
-  border-radius: 6px;
-  font-size: 110%;
-  position: relative;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  object-fit: cover;
-  break-inside: avoid;
-  margin-bottom: .4rem;
-
-  .Card--button {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    cursor: pointer;
-  }
-
-  .quoteOwner {
-    font-size: 0.85rem;
-    filter: brightness(0.85);
-  }
-}
-
-.LP {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: sienna;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #333333;
-}
-
 .clearInput {
   position: absolute;
   border: none;
@@ -139,38 +98,6 @@ body, html, main, #root {
 
 .hidden {
   visibility: hidden;
-}
-
-.autorDetailTable {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 10px 0;
-  font-size: 14px;
-
-  th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-
-  th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-  }
-
-  tr {
-    &:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    &:hover {
-      background-color: #f1f1f1;
-    }
-  }
-
-  td::after {
-    background-color: transparent !important; /* Remove background color */
-  }
 }
 
 .showHideRow, label, .hideShowCheckbox {
@@ -222,66 +149,6 @@ body, html, main, #root {
 .chip {
   white-space: wrap !important;
   color: white;
-}
-
-.scrollToTop {
-  height: 3rem;
-  width: 3rem;
-  border-radius: 50%;
-  font-size: 1rem;
-  background-color: black;
-  border: none;
-  position: fixed;
-  right: 1rem;
-  bottom: 2rem;
-  z-index: 2;
-  cursor: pointer;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.7);
-
-    &::after {
-      color: var(--anchor);
-    }
-  }
-
-  &::after {
-    content: "▲";
-    font-size: 1.5rem;
-    color: white;
-    font-weight: bold;
-  }
-}
-
-.addQuote {
-  height: 3rem;
-  width: 3rem;
-  border-radius: 50%;
-  font-size: 1rem;
-  background-color: black;
-  border: none;
-  position: fixed;
-  right: 1rem;
-  top: 8vh;
-  z-index: 2;
-
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.7);
-
-    &::after {
-      color: var(--anchor);
-    }
-  }
-
-  &::after {
-    content: '+';
-    font-size: 2rem;
-    position: absolute;
-    margin-top: -1.6rem;
-    margin-left: -0.6rem;
-    color: white;
-    font-weight: bold;
-  }
 }
 
 .moveToLeft {
