@@ -12,9 +12,5 @@
   },
   "keywords": [],
   "author": "Lubos Csonka <csonkalubos@gmail.com>",
-  "license": "ISC",
-  "devDependencies": {
-    "customize-cra": "^1.0.0",
-    "react-app-rewired": "^2.2.1"
-  }
+  "license": "ISC"
 }
