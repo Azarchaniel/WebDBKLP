@@ -14,7 +14,7 @@ import {
     fetchUsers
 } from "@utils";
 import {showError} from "../Modal";
-import {InputField, LazyLoadMultiselect} from "../InputFields";
+import {ArrayInput, InputField, LazyLoadMultiselect} from "../InputFields";
 import {openLoadingBooks} from "../LoadingBooks";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
@@ -474,14 +474,12 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                 />
             </div>
             <div className="Obsah">
-                {/*<ChipInput
-                    className="form-control-important"
-                    disableUnderline
+                <ArrayInput
+                    name="content"
+                    value={formData?.content || []}
+                    onChange={handleInputChange}
                     placeholder="Obsah"
-                    value={formData?.content}
-                    defaultValue={formData?.content}
-                    onChange={(values) => handleInputChange({name: "content", value: values})}
-                />*/}
+                />
             </div>
             <div className="Poznamka">
 				<textarea id='note' placeholder='Poznámka'

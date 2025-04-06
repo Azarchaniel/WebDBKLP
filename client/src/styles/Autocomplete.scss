@@ -9,6 +9,7 @@
   background: white;
   display: flex;
   align-items: center;
+  overflow: auto;
 
   &.error {
     border-color: red;
@@ -21,7 +22,8 @@
     padding: 0;
     width: 100%;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .chip {
@@ -30,6 +32,9 @@
     border-radius: 16px;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    margin: 2px;
+    word-break: break-all;
   }
 
   .chip-remove {
