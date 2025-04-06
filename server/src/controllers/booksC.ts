@@ -487,24 +487,52 @@ const dashboard = {
                             }
                         ],
                         modeHeight: [
+                            {$match: {"dimensions.height": { $ne: null }}},
                             {$group: {_id: "$dimensions.height", modeHeight: {$sum: 1}}},
-                            {$sort: {count: -1}},
-                            {$limit: 1}
+                            {$sort: {modeHeight: -1}},
+                            {$limit: 1},
+                            {
+                                $project: {
+                                    _id: 0,
+                                    modeHeight: "$_id"
+                                }
+                            }
                         ],
                         modeWidth: [
+                            {$match: {"dimensions.width": { $ne: null }}},
                             {$group: {_id: "$dimensions.width", modeWidth: {$sum: 1}}},
-                            {$sort: {count: -1}},
-                            {$limit: 1}
+                            {$sort: {modeWidth: -1}},
+                            {$limit: 1},
+                            {
+                                $project: {
+                                    _id: 0,
+                                    modeWidth: "$_id"
+                                }
+                            }
                         ],
                         modeDepth: [
+                            {$match: {"dimensions.depth": { $ne: null }}},
                             {$group: {_id: "$dimensions.depth", modeDepth: {$sum: 1}}},
-                            {$sort: {count: -1}},
-                            {$limit: 1}
+                            {$sort: {modeDepth: -1}},
+                            {$limit: 1},
+                            {
+                                $project: {
+                                    _id: 0,
+                                    modeDepth: "$_id"
+                                }
+                            }
                         ],
                         modeWeight: [
-                            {$group: {_id: "$dimensions.weight", modeWeight: {$sum: 1}}},
-                            {$sort: {count: -1}},
-                            {$limit: 1}
+                            {$match: {"dimensions.weight": { $ne: null }}},
+                            {$group: {_id: "$dimensions.weight", modeWeight: { $sum: 1 }}},
+                            {$sort: { modeWeight: -1 }},
+                            {$limit: 1},
+                            {
+                                $project: {
+                                    _id: 0,
+                                    modeWeight: "$_id"
+                                }
+                            }
                         ]
                     }
                 },

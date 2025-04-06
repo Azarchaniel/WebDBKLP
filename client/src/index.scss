@@ -302,11 +302,10 @@ input:invalid {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
   font-size: 0.75rem;
   line-height: 0.75rem;
   height: 40vh;
-  overflow-x: scroll;
+  overflow-x: auto;
   overflow-y: auto;
 }
 
@@ -352,7 +351,7 @@ input:invalid {
   display: flex;
   background-color: #f8f9fa;
   border-bottom: 1px solid #ddd;
-  overflow: scroll;
+  overflow: auto;
   overscroll-behavior: contain;
 }
 

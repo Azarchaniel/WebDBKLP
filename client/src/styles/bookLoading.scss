@@ -11,7 +11,7 @@ $delay : $duration*0.16;
 
 @media screen and (max-width: $mobile-width) {
   .bookshelf_wrapper {
-    right: 55% !important;
+    right: 52.5% !important;
   }
 }
 
@@ -30,7 +30,6 @@ $delay : $duration*0.16;
   z-index: 1003;
   position: absolute;
   top: 50vh;
-  right: 50%;
 }
 
 .books_list {
