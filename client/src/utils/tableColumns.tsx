@@ -1,10 +1,9 @@
 import {ColumnDef, createColumnHelper} from "@tanstack/react-table";
-import {IAutor, IBook, ILocation, IPublished, IUser} from "../type";
-import {formatDimension, getBookLocation} from "./utils";
+import {IAutor, IBook, ILangCode, ILocation, IPublished, IUser} from "../type";
+import {formatDimension, getBookLocation, tableHeaderColor} from "@utils";
 import React, {useState} from "react";
-import {tableHeaderColor} from "./constants";
 import {countryCode, langCode} from "./locale";
-import {ShowHideRow} from "../components/books/ShowHideRow";
+import {ShowHideRow} from "@components/books/ShowHideRow";
 
 const columnHelper = createColumnHelper<any>();
 
@@ -52,7 +51,10 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     },
     {
         accessorKey: 'language',
-        header: 'Jazyk'
+        header: 'Jazyk',
+        cell: (info: any) => {
+            return langCode
+                .filter((lang: ILangCode) => ((info.getValue() as string[])?.includes(lang.key))).map(lang => lang.value).join(", ")}
     },
     {
         accessorKey: 'numberOfPages',
