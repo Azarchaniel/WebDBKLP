@@ -255,8 +255,8 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
     }
 
     return (<form>
-        <div className="container">
-            <div className="Nazov">
+        <div className="b-container">
+            <div className="b-Nazov">
                 <InputField
                     value={formData?.title || ""}
                     placeholder='*Názov'
@@ -265,7 +265,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     customerror={getErrorMsg("title")}
                 />
             </div>
-            <div className="Podnazov">
+            <div className="b-Podnazov">
                 <InputField
                     value={formData?.subtitle || ""}
                     placeholder='Podnázov'
@@ -273,7 +273,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                 />
             </div>
-            <div className="Autor">
+            <div className="b-Autor">
                 <LazyLoadMultiselect
                     value={formData?.autor || []}
                     displayValue="fullName"
@@ -284,7 +284,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onNew={(autorString) => createNewAutor(autorString, "autor")}
                 />
             </div>
-            <div className="ISBN">
+            <div className="b-ISBN">
                 <InputField
                     value={formData?.ISBN || ""}
                     placeholder='ISBN'
@@ -304,7 +304,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     />
                 </button>
             </div>
-            <div className="Translator">
+            <div className="b-Translator">
                 <LazyLoadMultiselect
                     value={formData?.translator || []}
                     displayValue="fullName"
@@ -315,7 +315,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onNew={(autorString) => createNewAutor(autorString, "translator")}
                 />
             </div>
-            <div className="Editor">
+            <div className="b-Editor">
                 <LazyLoadMultiselect
                     value={formData?.editor || []}
                     displayValue="fullName"
@@ -326,7 +326,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onNew={(autorString) => createNewAutor(autorString, "editor")}
                 />
             </div>
-            <div className="Ilustrator">
+            <div className="b-Ilustrator">
                 <LazyLoadMultiselect
                     value={formData?.ilustrator || []}
                     displayValue="fullName"
@@ -337,7 +337,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onNew={(autorString) => createNewAutor(autorString, "ilustrator")}
                 />
             </div>
-            <div className="Name">
+            <div className="b-Name">
                 <InputField
                     value={formData?.edition?.title || ""}
                     placeholder='Názov edície'
@@ -345,7 +345,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                 />
             </div>
-            <div className="No">
+            <div className="b-No">
                 <InputField
                     value={formData?.edition?.no || ""}
                     placeholder='Číslo edície'
@@ -353,7 +353,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                 />
             </div>
-            <div className="NameS">
+            <div className="b-NameS">
                 <InputField
                     value={formData?.serie?.title || ""}
                     placeholder='Názov série'
@@ -361,7 +361,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                 />
             </div>
-            <div className="NoS">
+            <div className="b-NoS">
                 <InputField
                     value={formData?.serie?.no || ""}
                     placeholder='Číslo série'
@@ -369,7 +369,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                 />
             </div>
-            <div className="Vydavatel">
+            <div className="b-Vydavatel">
                 <InputField
                     value={formData?.published?.publisher || ""}
                     placeholder='Vydavateľ'
@@ -377,7 +377,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                 />
             </div>
-            <div className="Rok">
+            <div className="b-Rok">
                 <InputField
                     value={formData?.published?.year || ""}
                     placeholder='Rok vydania'
@@ -386,7 +386,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     customerror={getErrorMsg("published.year")}
                 />
             </div>
-            <div className="Krajina">
+            <div className="b-Krajina">
                 <LazyLoadMultiselect
                     selectionLimit={1}
                     value={formData?.published?.country}
@@ -398,7 +398,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                 />
             </div>
 
-            <div className="Mesto">
+            <div className="b-Mesto">
                 <LazyLoadMultiselect
                     selectionLimit={1}
                     value={formData?.location?.city}
@@ -409,7 +409,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     name="location.city"
                 />
             </div>
-            <div className="Police">
+            <div className="b-Police">
                 <InputField
                     value={formData?.location?.shelf || ""}
                     placeholder='Polica'
@@ -417,7 +417,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                 />
             </div>
-            <div className="language">
+            <div className="b-language">
                 <LazyLoadMultiselect
                     value={formData?.language}
                     options={langCode}
@@ -428,7 +428,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                 />
             </div>
 
-            <div className="Vyska">
+            <div className="b-Vyska">
                 <InputField
                     value={formData?.dimensions?.height || ""}
                     placeholder='Výška (cm)'
@@ -437,7 +437,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     customerror={getErrorMsg("dimensions.height")}
                 />
             </div>
-            <div className="Sirka">
+            <div className="b-Sirka">
                 <InputField
                     value={formData?.dimensions?.width || ""}
                     placeholder='Šírka (cm)'
@@ -446,7 +446,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     customerror={getErrorMsg("dimensions.width")}
                 />
             </div>
-            <div className="Hrubka">
+            <div className="b-Hrubka">
                 <InputField
                     value={formData?.dimensions?.depth || ""}
                     placeholder='Hrúbka (cm)'
@@ -455,7 +455,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     customerror={getErrorMsg("dimensions.depth")}
                 />
             </div>
-            <div className="Hmotnost">
+            <div className="b-Hmotnost">
                 <InputField
                     value={formData?.dimensions?.weight || ""}
                     placeholder='Hmotnosť (g)'
@@ -464,7 +464,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     customerror={getErrorMsg("dimensions.weight")}
                 />
             </div>
-            <div className="Page-no">
+            <div className="b-Page-no">
                 <InputField
                     value={formData?.numberOfPages || ""}
                     placeholder='Počet strán'
@@ -473,7 +473,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     customerror={getErrorMsg("numberOfPages")}
                 />
             </div>
-            <div className="Obsah">
+            <div className="b-Obsah">
                 <ArrayInput
                     name="content"
                     value={formData?.content || []}
@@ -481,7 +481,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     placeholder="Obsah"
                 />
             </div>
-            <div className="Poznamka">
+            <div className="b-Poznamka">
 				<textarea id='note' placeholder='Poznámka'
                           className="form-control"
                           name="note"
@@ -491,7 +491,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                           onChange={handleInputChange}
                 />
             </div>
-            <div className="Precitane">
+            <div className="b-Precitane">
                 <LazyLoadMultiselect
                     value={formData?.readBy || []}
                     displayValue="fullName"
@@ -502,7 +502,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                 />
             </div>
 
-            <div className="Vlastnik">
+            <div className="b-Vlastnik">
                 <LazyLoadMultiselect
                     value={formData?.owner || []}
                     displayValue="fullName"
@@ -512,7 +512,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onSearch={fetchUsers}
                 />
             </div>
-            <div className="Ex-Libris">
+            <div className="b-Ex-Libris">
                 <label><input type="checkbox"
                               id="exLibris"
                               className="checkBox"
@@ -521,7 +521,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                               onChange={(e) => handleInputChange({name: "exLibris", value: e.target.checked})}
                 />Ex Libris</label>
             </div>
-            <div className="pic">
+            <div className="b-pic">
                 <InputField
                     value={formData?.picture || ""}
                     placeholder='Obrázok'
@@ -529,7 +529,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                 />
             </div>
-            <div className="DK">
+            <div className="b-DK">
                 <InputField
                     value={formData?.hrefDatabazeKnih || ""}
                     placeholder='URL Databáze knih'
@@ -537,7 +537,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                 />
             </div>
-            <div className="GR">
+            <div className="b-GR">
                 <InputField
                     value={formData?.hrefGoodReads || ""}
                     placeholder='URL GoodReads'

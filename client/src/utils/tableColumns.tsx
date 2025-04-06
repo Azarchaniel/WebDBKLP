@@ -43,6 +43,7 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'content',
         header: 'Obsah',
+        cell: ({cell}: { cell: any }) => cell?.getValue()?.join(", ")
     },
     {
         accessorKey: 'ISBN',

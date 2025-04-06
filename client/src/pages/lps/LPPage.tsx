@@ -15,6 +15,7 @@ import {
 import {openConfirmDialog} from "@components/ConfirmDialog";
 import ServerPaginationTable from "@components/table/TableSP";
 import Layout from "../../Layout";
+import "@styles/LpPage.scss";
 
 export default function LPPage() {
     const [updateLP, setUpdateLP] = useState<ILP>();

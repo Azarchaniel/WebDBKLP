@@ -140,7 +140,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 
     return (
         <form>
-            <div className="grid-item">
+            <div className="a-first-name">
                 <InputField
                     value={formData?.firstName || ""}
                     placeholder='Krstné meno'
@@ -149,7 +149,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                 />
             </div>
 
-            <div className="grid-item">
+            <div className="a-last-name">
                 <InputField
                     value={formData?.lastName || ""}
                     placeholder='*Priezvisko'
@@ -159,7 +159,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                 />
             </div>
 
-            <div className="grid-item date-picker-container">
+            <div className="a-birth-date date-picker-container">
                 <DatePicker
                     className="form-control"
                     id='dateOfBirth'
@@ -188,7 +188,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     </button> : <></>}
             </div>
 
-            <div className="grid-item date-picker-container">
+            <div className="a-death-date date-picker-container">
                 <DatePicker
                     className="form-control"
                     id='dateOfDeath'
@@ -216,7 +216,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     </button> : <></>}
             </div>
 
-            <div className="grid-item">
+            <div className="a-nationality">
                 <LazyLoadMultiselect
                     selectionLimit={1}
                     value={formData?.nationality || []}
@@ -229,7 +229,19 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                 />
             </div>
 
-            <div className="grid-item">
+            <div className="a-role">
+                <LazyLoadMultiselect
+                    options={autorRoles}
+                    displayValue="showValue"
+                    placeholder="Role"
+                    value={formData?.role || []}
+                    name="role"
+                    onChange={handleInputChange}
+                    reset={Boolean(reset)}
+                />
+            </div>
+
+            <div className="a-note">
                 <textarea
                     id='note'
                     placeholder='Poznámka'
@@ -239,18 +251,6 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     rows={1}
                     value={formData?.note || ""}
                     onChange={handleInputChange}
-                />
-            </div>
-
-            <div className="grid-item full-width">
-                <LazyLoadMultiselect
-                    options={autorRoles}
-                    displayValue="showValue"
-                    placeholder="Role"
-                    value={formData?.role || []}
-                    name="role"
-                    onChange={handleInputChange}
-                    reset={Boolean(reset)}
                 />
             </div>
         </form>

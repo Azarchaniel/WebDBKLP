@@ -1,11 +1,10 @@
 import React, {useCallback, useEffect, useState} from "react";
 import "react-datepicker/dist/react-datepicker.css";
-import {countryCode, langCode} from "../../utils/locale";
+import {countryCode, langCode, fetchAutors, formPersonsFullName, getPublishedCountry} from "@utils";
 import {ILangCode, ILP, ValidationError} from "../../type";
 import {showError} from "../Modal";
-import {formPersonsFullName, getPublishedCountry} from "../../utils/utils";
 import {InputField, LazyLoadMultiselect} from "../InputFields";
-import {fetchAutors} from "../../utils/fetch";
+import "@styles/LpPage.scss";
 
 interface BodyProps {
     data: ILP | object;
@@ -106,8 +105,8 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
     }
 
     return (
-        <form>
-            <div className="grid-item">
+        <form className="l-form-grid">
+            <div className="l-title">
                 <InputField
                     value={(formData as ILP)?.title || ""}
                     placeholder='*Názov'
@@ -117,7 +116,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                 />
             </div>
 
-            <div className="grid-item">
+            <div className="l-subtitle">
                 <InputField
                     value={(formData as ILP)?.subtitle || ""}
                     placeholder='Podnázov'
@@ -126,7 +125,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                 />
             </div>
 
-            <div className="grid-item full-width">
+            <div className="l-autor">
                 <LazyLoadMultiselect
                     value={formData?.autor || []}
                     displayValue="fullName"
@@ -137,7 +136,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                 />
             </div>
 
-            <div className="grid-item">
+            <div className="l-speed">
                 <InputField
                     value={(formData as ILP)?.speed || ""}
                     placeholder='Počet otáčok'
@@ -146,7 +145,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                 />
             </div>
 
-            <div className="grid-item">
+            <div className="l-countLp">
                 <InputField
                     value={(formData as ILP)?.countLp || ""}
                     placeholder='Počet platní'
@@ -155,7 +154,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                 />
             </div>
 
-            <div className="grid-item">
+            <div className="l-year">
                 <InputField
                     value={(formData as ILP)?.published?.year || ""}
                     placeholder='Rok vydania'
@@ -164,7 +163,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                 />
             </div>
 
-            <div className="grid-item">
+            <div className="l-country">
                 <LazyLoadMultiselect
                     selectionLimit={1}
                     value={formData?.published?.country}
@@ -181,7 +180,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                 />
             </div>
 
-            <div className="grid-item">
+            <div className="l-publisher">
                 <InputField
                     value={(formData as ILP)?.published?.publisher || ""}
                     placeholder='Vydavateľ'
@@ -190,7 +189,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                 />
             </div>
 
-            <div className="grid-item">
+            <div className="l-language">
                 <LazyLoadMultiselect
                     selectionLimit={1}
                     value={formData?.language || []}
@@ -202,7 +201,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                 />
             </div>
 
-            <div className="grid-item full-width">
+            <div className="l-note">
                 <textarea
                     id='note'
                     placeholder='Poznámka'

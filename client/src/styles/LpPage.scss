@@ -1,26 +1,58 @@
-form {
+@import "variables";
+
+.l-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 5px;
-  width: 100%;
 }
 
-.full-width {
-  grid-column: 1 / span 2;
+.l-title {
+  grid-area: 1 / 1 / 2 / 2;
 }
 
-@media screen and (max-width: 768px) {
+.l-subtitle {
+  grid-area: 1 / 2 / 2 / 3;
+}
+
+.l-autor {
+  grid-area: 2 / 1 / 3 / 3;
+}
+
+.l-speed {
+  grid-area: 3 / 1 / 4 / 2;
+}
+
+.l-countLp {
+  grid-area: 3 / 2 / 4 / 3;
+}
+
+.l-year {
+  grid-area: 4 / 1 / 5 / 2;
+}
+
+.l-country {
+  grid-area: 4 / 2 / 5 / 3;
+}
+
+.l-publisher {
+  grid-area: 5 / 1 / 6 / 2;
+}
+
+.l-language {
+  grid-area: 5 / 2 / 6 / 3;
+}
+
+.l-note {
+  grid-area: 6 / 1 / 7 / 3;
+}
+
+@media screen and (max-width: $mobile-width) {
   form {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
-  /* Reset all items to single column */
-  form > * {
+  form > div {
     grid-column: 1;
-  }
-
-  /* Reset full-width items to match other items */
-  .full-width {
-    grid-column: 1;
+    grid-area: unset !important;
   }
 }

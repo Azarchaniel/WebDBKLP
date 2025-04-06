@@ -58,7 +58,7 @@
 }
 
 /* Base container for AddBook modal */
-.container {
+.b-container {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: 0.5rem 1rem;
@@ -66,18 +66,18 @@
 
 /* Desktop layout (default) */
 /* Row 1 */
-.Nazov {
+.b-Nazov {
   grid-area: 1 / 1 / 1 / 7;
 }
-.Podnazov {
+.b-Podnazov {
   grid-area: 1 / 7 / 1 / 13;
 }
 
 /* Row 2 */
-.Autor {
+.b-Autor {
   grid-area: 2 / 1 / 2 / 10;
 }
-.ISBN {
+.b-ISBN {
   grid-area: 2 / 10 / 2 / 13;
   position: relative;
   display: flex;
@@ -116,85 +116,85 @@
 }
 
 /* Row 3 */
-.Translator {
+.b-Translator {
   grid-area: 3 / 1 / 3 / 5;
 }
-.Editor {
+.b-Editor {
   grid-area: 3 / 5 / 3 / 9;
 }
-.Ilustrator {
+.b-Ilustrator {
   grid-area: 3 / 9 / 3 / 13;
 }
 
 /* Row 4 */
-.Name {
+.b-Name {
   grid-area: 4 / 1 / 4 / 5;
 }
-.No {
+.b-No {
   grid-area: 4 / 5 / 4 / 7;
 }
-.NameS {
+.b-NameS {
   grid-area: 4 / 7 / 4 / 11;
 }
-.NoS {
+.b-NoS {
   grid-area: 4 / 11 / 4 / 13;
 }
 
 /* Row 5 */
-.Vydavatel {
+.b-Vydavatel {
   grid-area: 5 / 1 / 5 / 7;
 }
-.Rok {
+.b-Rok {
   grid-area: 5 / 7 / 5 / 9;
 }
-.Krajina {
+.b-Krajina {
   grid-area: 5 / 9 / 5 / 13;
 }
 
 /* Row 6 */
-.Mesto {
+.b-Mesto {
   grid-area: 6 / 1 / 6 / 5;
 }
-.Police {
+.b-Police {
   grid-area: 6 / 5 / 6 / 9;
 }
-.language {
+.b-language {
   grid-area: 6 / 9 / 6 / 13;
 }
 
 /* Row 7 */
-.Vyska {
+.b-Vyska {
   grid-area: 7 / 1 / 7 / 3;
 }
-.Sirka {
+.b-Sirka {
   grid-area: 7 / 3 / 7 / 5;
 }
-.Hrubka {
+.b-Hrubka {
   grid-area: 7 / 5 / 7 / 7;
 }
-.Hmotnost {
+.b-Hmotnost {
   grid-area: 7 / 7 / 7 / 9;
 }
-.Page-no {
+.b-Page-no {
   grid-area: 7 / 9 / 7 / 13;
 }
 
 /* Row 8 */
-.Obsah {
+.b-Obsah {
   grid-area: 8 / 1 / 8 / 7;
 }
-.Poznamka {
+.b-Poznamka {
   grid-area: 8 / 7 / 8 / 13;
 }
 
 /* Row 9 */
-.Precitane {
+.b-Precitane {
   grid-area: 9 / 1 / 9 / 6;
 }
-.Vlastnik {
+.b-Vlastnik {
   grid-area: 9 / 6 / 9 / 11;
 }
-.Ex-Libris {
+.b-Ex-Libris {
   grid-area: 9 / 11 / 9 / 13;
   display: flex;
   justify-content: center;
@@ -203,81 +203,81 @@
 }
 
 /* Row 10 */
-.pic {
+.b-pic {
   grid-area: 10 / 1 / 10 / 4;
 }
-.DK {
+.b-DK {
   grid-area: 10 / 4 / 10 / 8;
 }
-.GR {
+.b-GR {
   grid-area: 10 / 8 / 10 / 13;
 }
 
 /* Tablet layout */
 @media (max-width: $tablet-width) {
-  .container {
+  .b-container {
     grid-template-columns: repeat(8, minmax(0, 1fr));
     gap: 0.4rem 0.8rem;
   }
 
   /* Row 1 */
-  .Nazov {
+  .b-Nazov {
     grid-area: 1 / 1 / 1 / 5;
   }
-  .Podnazov {
+  .b-Podnazov {
     grid-area: 1 / 5 / 1 / 9;
   }
 
   /* Row 2 */
-  .Autor {
+  .b-Autor {
     grid-area: 2 / 1 / 2 / 6;
   }
-  .ISBN {
+  .b-ISBN {
     grid-area: 2 / 6 / 2 / 9;
   }
 
   /* Row 3 */
-  .Translator {
+  .b-Translator {
     grid-area: 3 / 1 / 3 / 3;
   }
-  .Editor {
+  .b-Editor {
     grid-area: 3 / 3 / 3 / 6;
   }
-  .Ilustrator {
+  .b-Ilustrator {
     grid-area: 3 / 6 / 3 / 9;
   }
 
   /* Row 4 */
-  .Name {
+  .b-Name {
     grid-area: 4 / 1 / 4 / 3;
   }
-  .No {
+  .b-No {
     grid-area: 4 / 3 / 4 / 4;
   }
-  .NameS {
+  .b-NameS {
     grid-area: 4 / 4 / 4 / 7;
   }
-  .NoS {
+  .b-NoS {
     grid-area: 4 / 7 / 4 / 9;
   }
 
   /* Row 5 */
-  .Vydavatel {
+  .b-Vydavatel {
     grid-area: 5 / 1 / 5 / 4;
   }
-  .Rok {
+  .b-Rok {
     grid-area: 5 / 4 / 5 / 6;
   }
-  .Krajina {
+  .b-Krajina {
     grid-area: 5 / 6 / 5 / 9;
   }
 
   /* Remaining rows adjusted similarly */
-  .Mesto, .Police, .language,
-  .Vyska, .Sirka, .Hrubka, .Hmotnost, .Page-no,
-  .Obsah, .Poznamka,
-  .Precitane, .Vlastnik, .Ex-Libris,
-  .pic, .DK, .GR {
+  .b-Mesto, .b-Police, .b-language,
+  .b-Vyska, .b-Sirka, .b-Hrubka, .b-Hmotnost, .b-Page-no,
+  .b-Obsah, .b-Poznamka,
+  .b-Precitane, .b-Vlastnik, .b-Ex-Libris,
+  .b-pic, .b-DK, .b-GR {
     /* Adjust grid areas for tablet layout */
   }
 }
@@ -297,54 +297,54 @@
     width: 100%;
   }
 
-  .container {
+  .b-container {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
   }
 
   /* Each element takes a full row */
-  .Nazov { grid-area: 1 / 1 / 2 / 3 };
-  .Podnazov { grid-area: 2 / 1 / 3 / 3 };
-  .Autor { grid-area: 3 / 1 / 4 / 3 };
-  .ISBN {
+  .b-Nazov { grid-area: 1 / 1 / 2 / 3 };
+  .b-Podnazov { grid-area: 2 / 1 / 3 / 3 };
+  .b-Autor { grid-area: 3 / 1 / 4 / 3 };
+  .b-ISBN {
     grid-area: 4 / 1 / 5 / 3;
     position: relative;
     display: flex;
     justify-content: flex-start;
     align-items: center;
   }
-  .isbnLookup {
+  .b-isbnLookup {
     right: 0.5rem;
   }
-  .Translator { grid-area: 5 / 1 / 6 / 3 };
-  .Editor { grid-area: 6 / 1 / 7 / 3 };
-  .Ilustrator { grid-area: 7 / 1 / 8 / 3 };
-  .Name { grid-area: 8 / 1 / 9 / 3 };
-  .No { grid-area: 9 / 1 / 10 / 3 };
-  .NameS { grid-area: 10 / 1 / 11 / 3 };
-  .NoS { grid-area: 11 / 1 / 12 / 3 };
-  .Vydavatel { grid-area: 12 / 1 / 13 / 3 };
-  .Rok { grid-area: 13 / 1 / 14 / 3 };
-  .Krajina { grid-area: 14 / 1 / 15 / 3 };
-  .Mesto { grid-area: 15 / 1 / 16 / 3 };
-  .Police { grid-area: 16 / 1 / 17 / 3 };
-  .language { grid-area: 17 / 1 / 18 / 3 };
-  .Vyska { grid-area: 18 / 1 / 19 / 2 };
-  .Sirka { grid-area: 18 / 2 / 19 / 3 };
-  .Hrubka { grid-area: 19 / 1 / 20 / 2 };
-  .Hmotnost { grid-area: 19 / 2 / 20 / 3 };
-  .Page-no { grid-area: 20 / 1 / 21 / 2 };
-  .Obsah { grid-area: 21 / 1 / 22 / 3 };
-  .Poznamka { grid-area: 22 / 1 / 23 / 3 };
-  .Precitane { grid-area: 23 / 1 / 24 / 3 };
-  .Vlastnik { grid-area: 24 / 1 / 25 / 3 };
-  .Ex-Libris {
+  .b-Translator { grid-area: 5 / 1 / 6 / 3 };
+  .b-Editor { grid-area: 6 / 1 / 7 / 3 };
+  .b-Ilustrator { grid-area: 7 / 1 / 8 / 3 };
+  .b-Name { grid-area: 8 / 1 / 9 / 3 };
+  .b-No { grid-area: 9 / 1 / 10 / 3 };
+  .b-NameS { grid-area: 10 / 1 / 11 / 3 };
+  .b-NoS { grid-area: 11 / 1 / 12 / 3 };
+  .b-Vydavatel { grid-area: 12 / 1 / 13 / 3 };
+  .b-Rok { grid-area: 13 / 1 / 14 / 3 };
+  .b-Krajina { grid-area: 14 / 1 / 15 / 3 };
+  .b-Mesto { grid-area: 15 / 1 / 16 / 3 };
+  .b-Police { grid-area: 16 / 1 / 17 / 3 };
+  .b-language { grid-area: 17 / 1 / 18 / 3 };
+  .b-Vyska { grid-area: 18 / 1 / 19 / 2 };
+  .b-Sirka { grid-area: 18 / 2 / 19 / 3 };
+  .b-Hrubka { grid-area: 19 / 1 / 20 / 2 };
+  .b-Hmotnost { grid-area: 19 / 2 / 20 / 3 };
+  .b-Page-no { grid-area: 20 / 1 / 21 / 2 };
+  .b-Obsah { grid-area: 21 / 1 / 22 / 3 };
+  .b-Poznamka { grid-area: 22 / 1 / 23 / 3 };
+  .b-Precitane { grid-area: 23 / 1 / 24 / 3 };
+  .b-Vlastnik { grid-area: 24 / 1 / 25 / 3 };
+  .b-Ex-Libris {
     grid-area: 20 / 2 / 21 / 3;
     align-self: center;
     justify-self: center;
     padding-top: 0.5rem;
   }
-  .pic { grid-area: 25 / 1 / 26 / 3 };
-  .DK { grid-area: 26 / 1 / 27 / 3 };
-  .GR { grid-area: 27 / 1 / 28 / 3 };
+  .b-pic { grid-area: 25 / 1 / 26 / 3 };
+  .b-DK { grid-area: 26 / 1 / 27 / 3 };
+  .b-GR { grid-area: 27 / 1 / 28 / 3 };
 }
