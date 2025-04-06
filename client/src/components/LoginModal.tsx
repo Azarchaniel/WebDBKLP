@@ -44,7 +44,8 @@ const LoginModal: React.FC = () => {
         loginUser(form)
             .then(_ => {
                 setShowModal(false);
-                window.location.replace("/"); //replace instead of navigate, so there is refresh
+                //window.location.replace("/"); //replace instead of navigate, so there is refresh
+                toast.success("Prihlásenie úspešné!")
             })
             .catch(err => {
                 console.error(err.message);

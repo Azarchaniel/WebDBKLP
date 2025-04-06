@@ -243,7 +243,7 @@ interface AutocompleteInputProps {
     customerror?: boolean;
     onSearch?: (query: string, page: number, ids?: string[]) => Promise<Option[]>; // Now optional
     reset?: boolean;
-    createNew?: (query: string) => void;
+    onNew?: (query: string) => void;
     options?: Option[]; // New optional prop for finite data
 }
 
@@ -260,7 +260,7 @@ interface AutocompleteInputProps {
  *                                 onSearch={handleSearch}
  *                                 hasMore={hasMore}
  *                                 loading={acLoading}
- *                                 createNew={(neww) => console.log("creating new item", neww)}
+ *                                 onNew={(neww) => console.log("creating new item", neww)}
  *                             />
  */
 
@@ -276,7 +276,7 @@ export const LazyLoadMultiselect = React.memo(({
                                                    customerror,
                                                    onSearch,
                                                    reset,
-                                                   createNew,
+                                                   onNew,
                                                    options = [], // Default to empty array if not provided
                                                }: AutocompleteInputProps) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -429,13 +429,13 @@ export const LazyLoadMultiselect = React.memo(({
     }, [inputValue, debouncedSearch]);
 
     const handleCreateNew = useCallback(() => {
-        if (createNew && searchQuery) {
-            createNew(searchQuery);
+        if (onNew && searchQuery) {
+            onNew(searchQuery);
             setIsOpen(false);
             setInputValue("");
             setSearchQuery("");
         }
-    }, [createNew, searchQuery]);
+    }, [onNew, searchQuery]);
 
     const adjustDropdownPosition = useCallback(() => {
         if (menuRef.current && wrapperRef.current) {
@@ -533,16 +533,17 @@ export const LazyLoadMultiselect = React.memo(({
                     className={`autocomplete-menu ${dropdownPosition === 'top' ? 'top' : ''}`}
                     style={{...dropdownStyle, position: "fixed"}}
                 >
-                    {filteredOptionsToDisplay.length === 0 && !loadingStatus && searchQuery.length > 0 ? (
-                        <>
-                            <div className="autocomplete-item empty">{emptyRecordMsg}</div>
-                            {createNew && (
-                                <div className="autocomplete-item create-new" onClick={handleCreateNew}>
-                                    Vytvoriť "{searchQuery}"
-                                </div>
-                            )}
-                        </>
-                    ) : (
+                    {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && (
+                        <div className="autocomplete-item empty">
+                            {emptyRecordMsg}
+                        </div>
+                    )}
+                    {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && onNew && (
+                        <div className="autocomplete-item create-new" onClick={handleCreateNew} title="`Meno Priezvisko` alebo `Priezvisko, Meno`">
+                            Vytvoriť "{searchQuery}"
+                        </div>
+                    )}
+                    {filteredOptionsToDisplay.length > 0 && (
                         <>
                             {filteredOptionsToDisplay.map((option, index) => (
                                 <div
