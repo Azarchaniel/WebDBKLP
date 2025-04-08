@@ -35,6 +35,11 @@
       "@utils": ["utils"],
       "@utils/*": ["utils/*"]
     },
+    "types": [
+      "node",
+      "../node_modules/@types",
+      "./src/type.d.ts"
+    ]
   },
   "include": [
     "src/**/*",

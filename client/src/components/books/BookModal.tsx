@@ -18,6 +18,7 @@ import {ArrayInput, InputField, LazyLoadMultiselect} from "../InputFields";
 import {openLoadingBooks} from "../LoadingBooks";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
+import BarcodeScannerButton from "@components/BarcodeScanner";
 
 interface BodyProps {
     data: IBook | object;
@@ -293,6 +294,10 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                         handleInputChange(input);
                     }}
                     customerror={getErrorMsg("ISBN")}
+                />
+                <BarcodeScannerButton
+                    onBarcodeDetected={(code) => setFormData({...formData, ISBN: code})}
+                    onError={(error) => console.error(error)}
                 />
                 <button
                     className="isbnLookup"

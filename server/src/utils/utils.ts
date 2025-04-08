@@ -194,6 +194,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         const yearOfPublish = await getContentFromElement(page, "span[itemprop='datePublished']");
         const publisher = await getContentFromElement(page, "span[itemprop='publisher']");
         const noPages = await getContentFromElement(page, "span[itemprop='numberOfPages']");
+        const isbnFound = await getContentFromElement(page, "span[itemprop='isbn']");
         const language = await getContentFromElement(page, "span[itemprop='language']");
         const serieTitle = await getContentFromElement(page, "a[class='odright_pet']");
         const serieNo = getNumberFromString(await getContentFromElement(page, "span[class='odright_pet']"));
@@ -215,6 +216,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
                 country: [mapDBKlanguageToLangCode(language)],
             },
             numberOfPages: noPages,
+            ISBN: isbnFound,
             language: [mapDBKlanguageToLangCode(language)],
             serie: {
                 title: serieTitle,
@@ -258,6 +260,7 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
                 year: bookFetched.publication_year[0],
                 country: [mapGRlanguageToCode(bookFetched.country_code[0])],
             },
+            ISBN: bookFetched.isbn13 ?? bookFetched.isbn,
             numberOfPages: bookFetched.num_pages[0],
             language: [mapGRlanguageToCode(bookFetched.language_code[0])],
             hrefGoodReads: bookFetched.url[0],
@@ -297,7 +300,9 @@ export const webScrapper = async (isbn: string): Promise<any> => {
     }
 
     //TODO: if grBook is different than dkBook, send warning or do something
-    const mergedBook = {...grBook, ...dkBook, ISBN: originalIsbn}; //prefer DBK, so it is overwriting
+    const mergedBook = {...grBook, ...dkBook}; //prefer DBK, so it is overwriting
+
+    mergedBook.ISBN =  mergedBook?.ISBN?.includes("-") ? mergedBook.ISBN : originalIsbn;
 
     const finalBook = {
         ...mergedBook,
