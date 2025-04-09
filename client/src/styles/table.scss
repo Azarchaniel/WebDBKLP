@@ -1,6 +1,6 @@
 @import "variables";
 
-@media (max-width: $mobile-width) {
+@media screen and (width <= $mobile-width) {
   .headerTitleAction {
     position: relative;
     flex-direction: column !important;
@@ -25,6 +25,7 @@
   .serverPaginationTable {
     display: block;
     width: 100%;
+    margin-bottom: 6rem;
 
     thead, tbody, tr {
       display: block;
@@ -81,6 +82,30 @@
 
     .actionsRow button {
       font-size: 1.5rem !important;
+    }
+  }
+
+  .tableNavigationRow {
+    flex-direction: column !important;
+    height: 6rem !important;
+    justify-content: center;
+    align-items: center;
+    padding: 0 !important;
+
+    .pageControl {
+      margin-bottom: 1rem;
+    }
+
+    .otherTableControl {
+      margin-bottom: 1rem;
+
+      * {
+        margin-right: 1rem !important;
+      }
+
+      .pageSelectorLabel {
+        display: none !important;
+      }
     }
   }
 }
@@ -199,10 +224,10 @@
 
 .tableNavigationRow {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: flex-end;
   height: 3rem;
-  flex-direction: row;
   color: black;
   background: var(--background);
   position: fixed;
@@ -217,6 +242,24 @@
     margin-right: 1rem;
     padding: 0;
     text-align: center;
+  }
+
+  .pageControl {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .otherTableControl {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    span {
+      margin-right: 1rem;
+    }
+    select {
+      margin-right: 2rem;
+    }
   }
 }
 

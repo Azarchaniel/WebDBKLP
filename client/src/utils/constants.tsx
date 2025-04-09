@@ -2,12 +2,6 @@ import { SortingState} from "@tanstack/react-table";
 
 export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
-export const multiselectStyle = {
-    inputField: {marginLeft: "0.5rem"},
-    chips: {background: "#00ADB5"},
-    option: {color: "black"},
-};
-
 export const cities = [{value: "spisska", showValue: "Spišská"},
     {value: "bruchotin", showValue: "Břuchotín"}
 ];

@@ -451,7 +451,7 @@ input:invalid {
 }
 // ^^^
 
-@media (max-width: $mobile-width) {
+@media screen and (width <= $mobile-width) {
   .App {
     margin: 3rem 3rem 0 0;
   }

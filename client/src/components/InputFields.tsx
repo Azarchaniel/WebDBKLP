@@ -503,15 +503,18 @@ export const LazyLoadMultiselect = React.memo(({
             {/* TODO: show error */}
             <div className="chip-container">
                 {Array.isArray(selectedValues) && selectedValues.length > 0 && selectedValues.map((item, index) => (
-                    <div key={index} className="chip">
-                        {item[displayValue]}
-                        <span
-                            className="chip-remove"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemove(item);
-                            }}
-                        >
+                    <div
+                        key={index}
+                        className="chip"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemove(item);
+                        }}
+                    >
+                        <span>
+                            {item[displayValue]}
+                        </span>
+                        <span className="chip-remove">
                             ×
                         </span>
                     </div>

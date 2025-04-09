@@ -32,7 +32,10 @@ export const parseSorting = (sorting: string | SortParam[] | undefined): { [key:
 
     const sortOptions: { [key: string]: 1 | -1 } = {};
     if (sortParams.length > 0) {
+        const dimensions = ["height", "width", "depth", "weight"];
+
         sortParams.forEach((param) => {
+            if (dimensions.includes(param.id)) param.id = "dimensions." + param.id;
             sortOptions[param.id] = param.desc === "true" ? -1 : 1;
         });
     }

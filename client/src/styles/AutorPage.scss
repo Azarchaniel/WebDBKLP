@@ -104,7 +104,17 @@ form {
   cursor: pointer;
 }
 
-@media screen and (max-width: $mobile-width) {
+@media screen and (width <= $mobile-width) {
+  .autorDetail {
+    flex-direction: column;
+    div {
+      width: 100%;
+      &:first-child {
+        margin-right: 0;
+      }
+    }
+  }
+
   form {
     grid-template-columns: 1fr; /* Single column on mobile */
   }

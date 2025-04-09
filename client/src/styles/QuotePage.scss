@@ -146,4 +146,8 @@ form {
   .quoteBookSearch {
     width: 95%;
   }
+
+  .quote_container {
+    margin-bottom: 4rem; // so scrollToTop is not covering Quote btns
+  }
 }

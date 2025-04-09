@@ -31,9 +31,9 @@
     border-radius: 16px;
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
+    white-space: wrap !important;
     margin: 2px;
-    word-break: break-all;
+    //word-break: break-all;
   }
 
   .chip-remove {

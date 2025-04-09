@@ -128,6 +128,10 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
             <span className="falseMark"/>),
     },
     {
+        accessorKey: 'ownersFull',
+        header: 'Majiteľ',
+    },
+    {
         accessorKey: 'readBy',
         header: 'Prečítané',
         cell: ({cell}: { cell: any }) => {
@@ -165,10 +169,6 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
         accessorKey: 'location',
         header: 'Umiestnenie',
         cell: ({cell}: { cell: any }) => getBookLocation(cell.getValue() as unknown as ILocation),
-    },
-    {
-        accessorKey: 'ownersFull',
-        header: 'Majiteľ',
     },
     {
         //TEMP

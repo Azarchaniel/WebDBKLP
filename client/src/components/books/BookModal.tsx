@@ -511,7 +511,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                 <LazyLoadMultiselect
                     value={formData?.owner || []}
                     displayValue="fullName"
-                    placeholder="Vlastník"
+                    placeholder="Majiteľ"
                     onChange={handleInputChange}
                     name="owner"
                     onSearch={fetchUsers}

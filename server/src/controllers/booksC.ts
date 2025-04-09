@@ -101,7 +101,6 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             additionalQuery
         );
 
-
         res.status(200).json({books: data, count});
     } catch (error) {
         console.error("Error fetching books:", error);

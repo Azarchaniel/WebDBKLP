@@ -379,7 +379,7 @@
 }
 
 /* Mobile phone layout */
-@media (max-width: $mobile-width) {
+@media screen and (width <= $mobile-width) {
   .bookDetailRow {
     flex-direction: column;
 
