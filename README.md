@@ -11,15 +11,14 @@ cd ./client; npx run start
 - [ ] lagging in autors
 - [X] pagination in Select
 - [X] cache first page of books
-- [ ] responsivity
+- [X] responsivity
 - [ ] divide CSS into chunks based on page
 - [ ] better granulating - what is possible, move to components
 - [ ] in BookTable, when clicking on property, filter the value of property
-- [ ] lazy loading quotes https://medium.com/@iamusamasattar/how-to-implement-scroll-pagination-in-mern-application-f253f170754f
 - [X] rework Autocomplete - custom - if there is no item found, parse the string and create item
 - [ ] (in far future) localization 
 - [ ] allow user to add tags - "fantasy", "read2012"
-- [ ] connect to devices camera and read the bar code to get ISBN
+- [X] connect to devices camera and read the bar code to get ISBN
 - [ ] allow to pick search column and filtering - send as a JSON to BE
 
 ### Known problems and how to fix it
