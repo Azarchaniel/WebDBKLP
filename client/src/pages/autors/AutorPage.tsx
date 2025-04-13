@@ -202,12 +202,14 @@ export default function AutorPage() {
                                         search: e.target.value
                                     }))}
                             />
-                            <button onClick={() => setPagination(prevState => ({
-                                ...prevState,
-                                page: DEFAULT_PAGINATION.page,
-                                search: ""
-                            }))}>✖
-                            </button>
+                            <div className="searchBtns">
+                                <button onClick={() => setPagination(prevState => ({
+                                    ...prevState,
+                                    page: DEFAULT_PAGINATION.page,
+                                    search: ""
+                                }))}>✖
+                                </button>
+                            </div>
                         </div>
                         <i
                             ref={exceptRef}

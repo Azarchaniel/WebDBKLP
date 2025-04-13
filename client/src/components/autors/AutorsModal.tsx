@@ -3,7 +3,7 @@ import DatePicker, {registerLocale} from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {countryCode, autorRoles} from "@utils";
 import {IAutor, ILangCode, ValidationError} from "../../type";
-import {InputField, LazyLoadMultiselect} from "../InputFields";
+import {InputField, LazyLoadMultiselect} from "@components/inputs";
 import {showError} from "../Modal";
 import {sk} from "date-fns/locale/sk";
 

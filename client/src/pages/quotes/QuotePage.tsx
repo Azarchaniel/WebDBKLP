@@ -8,7 +8,7 @@ import {generateColors, getRandomShade, ScrollToTopBtn, isUserLoggedIn, fetchQuo
 import {LoadingBooks} from "@components/LoadingBooks";
 import {useReadLocalStorage} from "usehooks-ts";
 import {openConfirmDialog} from "@components/ConfirmDialog";
-import {LazyLoadMultiselect} from "@components/InputFields";
+import {LazyLoadMultiselect} from "@components/inputs";
 import Layout from "../../Layout";
 import "@styles/QuotePage.scss";
 

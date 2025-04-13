@@ -69,6 +69,7 @@
         border-bottom: 1px solid #eee;
         min-height: 2rem !important;
         text-overflow: ellipsis;
+        position: relative;
 
         &:not(:first-child)::after {
           height: 1rem;
@@ -302,28 +303,37 @@ button:focus {
 }
 
 .searchTableWrapper {
-  input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  .searchBookInput {
+    width: 100%;
     border-radius: 4px;
-    min-height: 22px;
-    padding: 5px;
+    padding: 5px 5rem 5px 10px; // space for buttons
     box-shadow: none;
   }
 
-  display: flex;
-  align-items: center;
-
-  position: relative;
-
-  button {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
+  .searchBtns {
     position: absolute;
     right: 0.5rem;
-    color: black;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 0.3rem;
 
-    &:hover {
-      color: var(--anchor);
+    button,
+    .isbnScanner {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      color: black;
+      right: 1.5rem;
+
+      &:hover {
+        color: var(--anchor);
+      }
     }
   }
 }

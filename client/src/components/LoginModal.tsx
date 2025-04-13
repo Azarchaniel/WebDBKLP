@@ -1,8 +1,8 @@
-import React, {ChangeEvent, useEffect, useState} from "react";
+import React, {ChangeEvent, useState} from "react";
 import {Modal, showError} from "./Modal";
 import {toast} from "react-toastify";
-import {isUserLoggedIn, loginUser, logoutUser} from "../utils/user";
-import {CustomPasswordField, InputField} from "./InputFields";
+import {isUserLoggedIn, loginUser, logoutUser} from "@utils";
+import {CustomPasswordField, InputField} from "@components/inputs";
 import {useLocalStorage} from "usehooks-ts";
 import {IUser} from "../type";
 

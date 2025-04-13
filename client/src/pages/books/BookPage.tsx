@@ -22,6 +22,7 @@ import ServerPaginationTable from "@components/table/TableSP";
 import BookDetail from "./BookDetail";
 import Layout from "../../Layout";
 import "@styles/BookPage.scss";
+import BarcodeScannerButton from "@components/BarcodeScanner";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
@@ -285,22 +286,40 @@ export default function BookPage() {
                         <div className="searchTableWrapper">
                             <input
                                 placeholder="Vyhľadaj knihu"
-                                style={{paddingRight: "2rem"}}
-                                className="form-control"
+                                className="form-control searchBookInput"
                                 value={pagination.search}
                                 onChange={(e) =>
-                                    setPagination(prevState => ({
+                                    setPagination((prevState) => ({
                                         ...prevState,
                                         page: DEFAULT_PAGINATION.page,
-                                        search: e.target.value
-                                    }))}
+                                        search: e.target.value,
+                                    }))
+                                }
                             />
-                            <button key="clear-search" onClick={() => setPagination(prevState => ({
-                                ...prevState,
-                                page: DEFAULT_PAGINATION.page,
-                                search: ""
-                            }))}>✖
-                            </button>
+                            <div className="searchBtns">
+                                <BarcodeScannerButton
+                                    onBarcodeDetected={(code) =>
+                                        setPagination((prevState) => ({
+                                            ...prevState,
+                                            page: DEFAULT_PAGINATION.page,
+                                            search: code,
+                                        }))
+                                    }
+                                    onError={(error) => console.error(error)}
+                                />
+                                <button
+                                    key="clear-search"
+                                    onClick={() =>
+                                        setPagination((prevState) => ({
+                                            ...prevState,
+                                            page: DEFAULT_PAGINATION.page,
+                                            search: "",
+                                        }))
+                                    }
+                                >
+                                    ✖
+                                </button>
+                            </div>
                         </div>
                         <i
                             ref={exceptRef}

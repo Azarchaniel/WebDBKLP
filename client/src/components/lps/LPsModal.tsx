@@ -3,7 +3,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import {countryCode, langCode, fetchAutors, formPersonsFullName, getPublishedCountry} from "@utils";
 import {ILangCode, ILP, ValidationError} from "../../type";
 import {showError} from "../Modal";
-import {InputField, LazyLoadMultiselect} from "../InputFields";
+import {InputField, LazyLoadMultiselect} from "@components/inputs";
 import "@styles/LpPage.scss";
 
 interface BodyProps {

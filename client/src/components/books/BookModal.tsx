@@ -14,7 +14,7 @@ import {
     fetchUsers
 } from "@utils";
 import {showError} from "../Modal";
-import {ArrayInput, InputField, LazyLoadMultiselect} from "../InputFields";
+import {ArrayInput, InputField, LazyLoadMultiselect} from "@components/inputs";
 import {openLoadingBooks} from "../LoadingBooks";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
