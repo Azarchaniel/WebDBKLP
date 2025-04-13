@@ -4,7 +4,7 @@ import "../styles/sidebar.scss";
 import {ISideMenuItems} from "../type";
 import {Link, useLocation} from "react-router-dom";
 import {ActivateUserList} from "./ActivateUserList";
-import {useClickOutside} from "@utils";
+import {useClickOutside} from "@hooks";
 
 interface HamburgerToXProps {
     onClick: () => void;

@@ -13,7 +13,6 @@ import {
     getCachedTimestamp,
     loadFirstPageFromCache,
     saveFirstPageToCache,
-    useClickOutside,
     isMobile
 } from "@utils";
 import {useReadLocalStorage} from "usehooks-ts";
@@ -23,6 +22,7 @@ import BookDetail from "./BookDetail";
 import Layout from "../../Layout";
 import "@styles/BookPage.scss";
 import BarcodeScannerButton from "@components/BarcodeScanner";
+import {useClickOutside} from "@hooks";
 
 export default function BookPage() {
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);

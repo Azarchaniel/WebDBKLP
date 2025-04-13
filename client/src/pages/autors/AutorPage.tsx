@@ -5,7 +5,6 @@ import {addAutor, deleteAutor, getAutor, getAutorInfo, getAutors} from "../../AP
 import {toast} from "react-toastify";
 import {
     stringifyAutors,
-    useClickOutside,
     DEFAULT_PAGINATION,
     getAutorTableColumns,
     ShowHideColumns,
@@ -16,6 +15,7 @@ import ServerPaginationTable from "../../components/table/TableSP";
 import AutorDetail from "./AutorDetail";
 import {SortingState} from "@tanstack/react-table";
 import Layout from "../../Layout";
+import {useClickOutside} from "@hooks";
 import "@styles/AutorPage.scss";
 
 export default function AutorPage() {
@@ -49,20 +49,35 @@ export default function AutorPage() {
     }, exceptRef);
 
     useEffect(() => {
-        fetchAutors();
-    }, [])
+        let currentTimeoutId: NodeJS.Timeout | null = null;
 
-    useEffect(() => {
-        if (timeoutId) clearTimeout(timeoutId);
+        // Check if there's a non-empty search term (trimming whitespace)
+        if (pagination.search && pagination.search.trim() !== "") {
+            // --- Debounce Logic for Search ---
+            // Set a timeout to fetch after 1 second
+            currentTimeoutId = setTimeout(() => {
+                fetchAutors();
+            }, 1000);
 
-        const newTimeoutId = setTimeout(() => {
+            // Store the ID of this *new* timeout in state.
+            setTimeoutId(currentTimeoutId);
+
+        } else {
+            // --- Immediate Fetch Logic (No Search Term) ---
+            // If a timeout was set from a *previous* state (where search was active), clear it now.
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                setTimeoutId(null); // Clear the timeout ID from state
+            }
+            // Fetch immediately since there's no search term to debounce
             fetchAutors();
-        }, 1000); // Wait 1s before making the request
+        }
 
-        setTimeoutId(newTimeoutId);
-        // Cleanup function to clear timeout if component unmounts or pagination changes again
         return () => {
-            if (newTimeoutId) clearTimeout(newTimeoutId);
+            // If a timeout was created *in this specific effect run*, clear it.
+            if (currentTimeoutId) {
+                clearTimeout(currentTimeoutId);
+            }
         };
     }, [pagination]);
 

@@ -29,15 +29,15 @@ export const fetchAutors =
     };
 
 export const fetchUsers =
-    async (_query: string, page: number) => {
+    async (_query: string) => {
         try {
-            if (page > 1) return [];
-            const response = await getUsers();
-            const users = response.data.users.map((user: IUser) => ({
+            const users = JSON.parse(localStorage.getItem("cachedUsers") ?? "");
+            if (!users) return [];
+
+            return users.map((user: IUser) => ({
                 _id: user._id,
                 fullName: formPersonsFullName(user),
             }));
-            return users;
         } catch (error) {
             console.error('Error fetching users:', error);
             return [];

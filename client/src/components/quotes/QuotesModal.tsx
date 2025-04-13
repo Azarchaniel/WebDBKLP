@@ -2,9 +2,8 @@ import {IQuote, ValidationError} from "../../type";
 import React, {useCallback, useEffect, useState} from "react";
 import {showError} from "../Modal";
 import {InputField, LazyLoadMultiselect} from "@components/inputs";
-import {formPersonsFullName} from "../../utils/utils";
 import {Wysiwyg} from "../Wysiwyg";
-import {fetchBooks, fetchUsers} from "../../utils/fetch";
+import {fetchBooks, fetchUsers, formPersonsFullName} from "@utils";
 
 interface BodyProps {
     data: IQuote | object;

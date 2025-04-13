@@ -102,11 +102,6 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         setFormData(toBeModified);
     }, []);
 
-    useEffect(() => {
-        fetchUsers("", 1);
-    }, []);
-
-
     //error handling
     useEffect(() => {
         //if there is no filled field, its disabled

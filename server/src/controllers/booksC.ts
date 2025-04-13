@@ -262,7 +262,7 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
         const newBook: IBook = (await bookToSave.save()).toObject();
 
         const allBooks = await Book
-            .find()
+            .find(optionFetchAllExceptDeleted)
             .populate(populateOptionsBook)
             .exec();
 
@@ -287,7 +287,7 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
         )
 
         const allBooks = await Book
-            .find()
+            .find(optionFetchAllExceptDeleted)
             .populate(populateOptionsBook)
             .exec();
 
@@ -315,7 +315,7 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
             }
         )
         const allBooks = await Book
-            .find()
+            .find(optionFetchAllExceptDeleted)
             .populate(populateOptionsBook)
             .exec();
 

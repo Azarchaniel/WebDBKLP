@@ -33,7 +33,8 @@
       "@components/*": ["components/*"],
       "@components": ["components"],
       "@utils": ["utils"],
-      "@utils/*": ["utils/*"]
+      "@utils/*": ["utils/*"],
+      "@hooks": ["utils/hooks/index.ts"]
     },
     "types": [
       "node",

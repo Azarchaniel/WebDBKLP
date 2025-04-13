@@ -9,12 +9,12 @@ import {
     DEFAULT_PAGINATION,
     isUserLoggedIn,
     getLPTableColumns,
-    ShowHideColumns,
-    useClickOutside
+    ShowHideColumns
 } from "@utils";
 import {openConfirmDialog} from "@components/ConfirmDialog";
 import ServerPaginationTable from "@components/table/TableSP";
 import Layout from "../../Layout";
+import {useClickOutside} from "@hooks";
 import "@styles/LpPage.scss";
 
 export default function LPPage() {

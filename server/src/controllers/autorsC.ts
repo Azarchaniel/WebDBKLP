@@ -5,6 +5,7 @@ import Book from "../models/book";
 import {Types} from "mongoose";
 import {fetchDataWithPagination} from "../utils/queryUtils";
 import Lp from "../models/lp";
+import {optionFetchAllExceptDeleted} from "../utils/constants";
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -102,7 +103,7 @@ const addAutor = async (req: Request, res: Response): Promise<void> => {
         });
 
         const newAutor: IAutor = await autor.save()
-        const allAutors: IAutor[] = await Autor.find()
+        const allAutors: IAutor[] = await Autor.find(optionFetchAllExceptDeleted)
 
         res.status(201).json({message: 'Autor added', autor: newAutor, autors: allAutors})
     } catch (error) {
@@ -130,7 +131,7 @@ const updateAutor = async (req: Request, res: Response): Promise<void> => {
                 role: body.role?.map((val: { value: string, showValue: string }) => val.value),
             }
         )
-        const allAutors: IAutor[] = await Autor.find()
+        const allAutors: IAutor[] = await Autor.find(optionFetchAllExceptDeleted);
         res.status(201).json({
             message: 'Autor updated',
             autor: updateAutor,
@@ -155,7 +156,7 @@ const deleteAutor = async (req: Request, res: Response): Promise<void> => {
                 deletedAt: new Date()
             }
         )
-        const allAutors: IAutor[] = await Autor.find()
+        const allAutors: IAutor[] = await Autor.find(optionFetchAllExceptDeleted)
         res.status(200).json({
             message: 'Autor deleted',
             autor: deletedAutor,
