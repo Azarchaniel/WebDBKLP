@@ -7,17 +7,17 @@ import {
     isMobile,
     stringifyAutors,
     DEFAULT_PAGINATION,
-    isUserLoggedIn,
     getLPTableColumns,
     ShowHideColumns
 } from "@utils";
 import {openConfirmDialog} from "@components/ConfirmDialog";
 import ServerPaginationTable from "@components/table/TableSP";
-import Layout from "../../Layout";
 import {useClickOutside} from "@hooks";
 import "@styles/LpPage.scss";
+import {useAuth} from "@utils/context";
 
 export default function LPPage() {
+    const {isLoggedIn, currentUser} = useAuth();
     const [updateLP, setUpdateLP] = useState<ILP>();
     const [LPs, setLPs] = useState<ILP[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
@@ -47,7 +47,7 @@ export default function LPPage() {
 
     useEffect(() => {
         fetchLPs();
-    }, [])
+    }, [currentUser])
 
     useEffect(() => {
         if (timeoutId) clearTimeout(timeoutId);
@@ -146,8 +146,8 @@ export default function LPPage() {
     };
 
     return (
-        <Layout>
-            {isUserLoggedIn() && <AddLP saveLp={handleSaveLP} onClose={() => setUpdateLP(undefined)}/>}
+        <>
+            {isLoggedIn && <AddLP saveLp={handleSaveLP} onClose={() => setUpdateLP(undefined)}/>}
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
                 <ShowHideColumns columns={getLPTableColumns()} shown={showColumn} setShown={setShowColumn}/>
             </div>
@@ -196,7 +196,7 @@ export default function LPPage() {
                     </div>
                 }
                 rowActions={(_id) => (
-                    isUserLoggedIn() ? <div className="actionsRow" style={{pointerEvents: "auto"}}>
+                    isLoggedIn ? <div className="actionsRow" style={{pointerEvents: "auto"}}>
                         <button
                             title="¨Vymazať"
                             onClick={() => handleDeleteLP(_id)}
@@ -217,6 +217,6 @@ export default function LPPage() {
                     onClose={() => setUpdateLP(undefined)}
                     saveResultSuccess={saveLpSuccess}
                 />}
-        </Layout>
+        </>
     )
 }

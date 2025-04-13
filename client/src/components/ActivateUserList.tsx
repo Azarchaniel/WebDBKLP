@@ -1,46 +1,38 @@
 import React from "react";
-import {IUser} from "../type";
-import {useLocalStorage} from "usehooks-ts";
+import { IUser } from "../type";
+import { useLocalStorage } from "usehooks-ts";
 
 export const ActivateUserList: React.FC = () => {
-    const [ownersString] = useLocalStorage("cachedUsers", "[]")
-    const [activeOwners, setActiveOwners] = useLocalStorage("activeUsers", [] as string[]);
+    const [owners] = useLocalStorage<IUser[]>("cachedUsers", []);
+    const [activeOwners, setActiveOwners] = useLocalStorage<string[]>("activeUsers", []);
 
     const activateUsers = (id: string) => {
         if (activeOwners.includes(id)) {
-            setActiveOwners((prevValue: string[]) => prevValue.filter((aoId: string) => aoId !== id));
+            setActiveOwners((prevValue) => prevValue.filter((aoId) => aoId !== id));
         } else {
-            setActiveOwners((prevValue: string[]) => [...prevValue, id]);
+            setActiveOwners((prevValue) => [...prevValue, id]);
         }
-    }
+    };
 
-    let owners: IUser[] = []; // Default to an empty array
-    try {
-        // Attempt to parse the string from localStorage (or the default '[]')
-        // If data is already Object/Array, stringify it
-        const parsedData = JSON.parse(JSON.stringify(ownersString));
-
-        if (Array.isArray(parsedData)) {
-            owners = parsedData;
-        } else {
-            console.warn('Parsed data from "cachedUsers" is not an array:', parsedData);
-        }
-    } catch (error) {
-        console.error('Failed to parse "cachedUsers" from localStorage:', error);
-        console.error('Invalid data was:', ownersString);
+    if (!Array.isArray(owners)) {
+        console.error('"cachedUsers" from localStorage was not parsed as an array. Value received:', owners);
+        return <div className="activateUsers error">Error loading user list.</div>;
     }
 
     return (
         <div className="activateUsers">
-            {owners.map((owner: IUser) =>
-                <span
-                    className={activeOwners.includes(owner._id) ? "activeUser customLink" : "customLink"}
-                    onClick={() => activateUsers(owner._id)}
-                    key={owner._id}
-                >
-                    {owner.firstName}
-                </span>
-            )}
+            {owners.map((owner: IUser) => (
+                owner?._id ? (
+                    <span
+                        className={activeOwners.includes(owner._id) ? "activeUser customLink" : "customLink"}
+                        onClick={() => activateUsers(owner._id)}
+                        key={owner._id}
+                    >
+                        {owner.firstName}
+                    </span>
+                ) : null
+            ))}
+            {owners.length === 0 && <span style={{ color: "lightgrey", fontStyle: "italic" }}>Žiadny užívatelia nenájdení.</span>}
         </div>
-    )
-}
+    );
+};

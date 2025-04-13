@@ -44,6 +44,7 @@ export const loginUser = async (loginForm: {
             localStorage.setItem('token', token);
             localStorage.setItem('refreshToken', refreshToken);
             localStorage.setItem('user', JSON.stringify(user));
+            return user;
         } else {
             throw new Error('Unexpected response');
         }
@@ -53,9 +54,7 @@ export const loginUser = async (loginForm: {
 }
 
 export const logoutUser = async () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    localStorage.clear(); //clean all data
     await clearCache(); //clear IndexDB - cached Books data
     window.location.replace("/");
 }
