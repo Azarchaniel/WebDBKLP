@@ -4,13 +4,13 @@ import QuoteItem from "./QuoteItem";
 import React, {useEffect, useState} from "react";
 import {addQuote, deleteQuote, getQuotes} from "../../API";
 import {toast} from "react-toastify";
-import {generateColors, getRandomShade, ScrollToTopBtn, isUserLoggedIn, fetchQuotedBooks} from "@utils";
+import {generateColors, getRandomShade, ScrollToTopBtn, fetchQuotedBooks} from "@utils";
 import {LoadingBooks} from "@components/LoadingBooks";
 import {useReadLocalStorage} from "usehooks-ts";
 import {openConfirmDialog} from "@components/ConfirmDialog";
 import {LazyLoadMultiselect} from "@components/inputs";
-import Layout from "../../Layout";
 import "@styles/QuotePage.scss";
+import {useAuth} from "@utils/context";
 
 interface QuoteGroup {
     bookId: string;
@@ -19,6 +19,7 @@ interface QuoteGroup {
 }
 
 export default function QuotePage() {
+    const {isLoggedIn, currentUser} = useAuth();
     const [books, setBooks] = useState<IBook[]>([]);
     const [booksToFilter, setBooksToFilter] = useState<IBook[]>([]);
     const [filteredQuotes, setFilteredQuotes] = useState<IQuote[]>([]);
@@ -30,7 +31,7 @@ export default function QuotePage() {
 
     useEffect(() => {
         fetchQuotes();
-    }, [activeUser]);
+    }, [activeUser, currentUser]);
 
     useEffect(() => {
         groupQuotesByBook();
@@ -120,8 +121,8 @@ export default function QuotePage() {
     }
 
     return (
-        <Layout>
-            {isUserLoggedIn() && <AddQuote saveQuote={handleSaveQuote} onClose={() => {
+        <>
+            {isLoggedIn && <AddQuote saveQuote={handleSaveQuote} onClose={() => {
             }} saveResultSuccess={saveAutorSuccess}/>}
             <div>
                 {loading ? <LoadingBooks/> : <></>}
@@ -161,6 +162,6 @@ export default function QuotePage() {
                 )}
             </div>
             <ScrollToTopBtn scrollToTop={scrollToTopOfPage}/>
-        </Layout>
+        </>
     )
 }

@@ -7,7 +7,6 @@ import {
     DEFAULT_PAGINATION,
     stringifyAutors,
     stringifyUsers,
-    isUserLoggedIn,
     getBookTableColumns,
     ShowHideColumns,
     getCachedTimestamp,
@@ -19,12 +18,13 @@ import {useReadLocalStorage} from "usehooks-ts";
 import {openConfirmDialog} from "@components/ConfirmDialog";
 import ServerPaginationTable from "@components/table/TableSP";
 import BookDetail from "./BookDetail";
-import Layout from "../../Layout";
 import "@styles/BookPage.scss";
 import BarcodeScannerButton from "@components/BarcodeScanner";
 import {useClickOutside} from "@hooks";
+import {useAuth} from "@utils/context";
 
 export default function BookPage() {
+    const {currentUser, isLoading: isAuthLoading, isLoggedIn} = useAuth();
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
     const [pagination, setPagination] = useState({
         page: DEFAULT_PAGINATION.page,
@@ -81,11 +81,6 @@ export default function BookPage() {
         return JSON.stringify(pagination) === JSON.stringify(DEFAULT_PAGINATION);
     }
 
-    //fetch books on page init
-    useEffect(() => {
-        fetchBooks();
-    }, [])
-
     //fetch books when changed user
     useEffect(() => {
         // Clear any existing timeout when pagination changes
@@ -121,7 +116,7 @@ export default function BookPage() {
             const {status} = await checkBooksUpdated(await getCachedTimestamp());
 
             // For first page only with default pagination and no new books, try to load from cache first
-            if (checkIfFirstPage() && activeUsers?.length === 0 && status === 204) {
+            if (checkIfFirstPage() && (activeUsers?.length === 0 || !activeUsers) && status === 204) {
                 const cachedData = await loadFirstPageFromCache();
 
                 if (cachedData) {
@@ -134,7 +129,6 @@ export default function BookPage() {
                 }
             }
 
-            // Always fetch fresh data from API
             getBooks({...pagination, activeUsers})
                 .then(({data: {books, count}}: IBook[] | any) => {
                     setCountAll(count);
@@ -143,7 +137,7 @@ export default function BookPage() {
                     setClonedBooks(processedBooks);
 
                     // If this is first page without search, update the cache
-                    if (checkIfFirstPage() && activeUsers?.length === 0) {
+                    if (checkIfFirstPage() && (activeUsers?.length === 0 || !activeUsers)) {
                         saveFirstPageToCache(books, count, pagination);
                     }
                 })
@@ -176,7 +170,7 @@ export default function BookPage() {
         return () => {
             if (newTimeoutId) clearTimeout(newTimeoutId);
         };
-    }, [pagination]);
+    }, [pagination, currentUser, isAuthLoading]);
 
     const [wasCheckedLoading, setWasCheckedLoading] = useState<boolean>(false); //TEMP
     const handleSaveBook = (formData: IBook, wasCheckedBox?: boolean): void => {
@@ -258,8 +252,8 @@ export default function BookPage() {
     };
 
     return (
-        <Layout>
-            {isUserLoggedIn() && <AddBook
+        <>
+            {isLoggedIn && <AddBook
                 saveBook={handleSaveBook}
                 onClose={() => setUpdateBook(undefined)}
                 saveResultSuccess={saveBookSuccess}
@@ -330,7 +324,7 @@ export default function BookPage() {
                     </div>
                 }
                 rowActions={(_id, expandRow) => (
-                    isUserLoggedIn() ? <div key={_id} className="actionsRow" style={{pointerEvents: "auto"}}>
+                    isLoggedIn ? <div key={_id} className="actionsRow" style={{pointerEvents: "auto"}}>
                         {/* TEMPORARY input*/}
                         <input
                             key={`checkbox-${_id}`}
@@ -372,6 +366,6 @@ export default function BookPage() {
                     onClose={() => setUpdateBook(undefined)}
                     saveResultSuccess={saveBookSuccess}
                 />}
-        </Layout>
+        </>
     );
 }

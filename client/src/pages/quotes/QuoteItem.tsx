@@ -1,9 +1,9 @@
 import React, {useState} from "react";
 import {IQuote} from "../../type";
 import AddQuote from "./AddQuote";
-import {formPersonsFullName, stringifyUsers} from "../../utils/utils";
-import {Wysiwyg} from "../../components/Wysiwyg";
-import {isUserLoggedIn} from "../../utils/user";
+import {formPersonsFullName, stringifyUsers} from "@utils";
+import {Wysiwyg} from "@components/Wysiwyg";
+import {useAuth} from "@utils/context";
 
 interface QuoteProps {
     quote: IQuote;
@@ -13,6 +13,7 @@ interface QuoteProps {
 }
 
 const Quote: React.FC<QuoteProps> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {
+    const {isLoggedIn} = useAuth();
     const [isEditing, setIsEditing] = useState<boolean>(false);
 
     const makeImgClickable = (text: string): string => {
@@ -100,7 +101,7 @@ const Quote: React.FC<QuoteProps> = ({quote, bcgrClr, deleteQuote, saveQuote}) =
                 )}
             </div>
 
-            {isUserLoggedIn() && (
+            {isLoggedIn && (
                 <div className="Card--button">
                     <i className="fas fa-pen" onClick={handleEdit}/>
                     &nbsp;&nbsp;&nbsp;

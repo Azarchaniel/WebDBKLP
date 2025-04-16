@@ -8,17 +8,18 @@ import {
     DEFAULT_PAGINATION,
     getAutorTableColumns,
     ShowHideColumns,
-    isUserLoggedIn, isMobile
+    isMobile
 } from "@utils";
 import {openConfirmDialog} from "@components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
 import AutorDetail from "./AutorDetail";
 import {SortingState} from "@tanstack/react-table";
-import Layout from "../../Layout";
 import {useClickOutside} from "@hooks";
 import "@styles/AutorPage.scss";
+import {useAuth} from "@utils/context";
 
 export default function AutorPage() {
+    const {isLoggedIn, currentUser} = useAuth();
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
@@ -79,7 +80,7 @@ export default function AutorPage() {
                 clearTimeout(currentTimeoutId);
             }
         };
-    }, [pagination]);
+    }, [pagination, currentUser]);
 
     // ### AUTORS ###
     const fetchAutors = (): void => {
@@ -185,8 +186,8 @@ export default function AutorPage() {
     };
 
     return (
-        <Layout>
-            {isUserLoggedIn() && <AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>}
+        <>
+            {isLoggedIn && <AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>}
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
                 <ShowHideColumns columns={getAutorTableColumns()} shown={showColumn} setShown={setShowColumn}/>
             </div>
@@ -235,7 +236,7 @@ export default function AutorPage() {
                     </div>
                 }
                 rowActions={(_id, expandRow) => (
-                    isUserLoggedIn() ? <div className="actionsRow" style={{pointerEvents: "auto"}}>
+                    isLoggedIn ? <div className="actionsRow" style={{pointerEvents: "auto"}}>
                         <button
                             title="¨Vymazať"
                             onClick={() => handleDeleteAutor(_id)}
@@ -262,6 +263,6 @@ export default function AutorPage() {
                     onClose={() => setUpdateAutor(undefined)}
                     saveResultSuccess={saveAutorSuccess}
                 />}
-        </Layout>
+        </>
     )
 }

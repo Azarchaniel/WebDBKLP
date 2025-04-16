@@ -1,19 +1,19 @@
 import React, {ChangeEvent, useState} from "react";
 import {Modal, showError} from "./Modal";
 import {toast} from "react-toastify";
-import {isUserLoggedIn, loginUser, logoutUser} from "@utils";
+import {loginUser, logoutUser} from "@utils";
 import {CustomPasswordField, InputField} from "@components/inputs";
-import {useLocalStorage} from "usehooks-ts";
+import {useAuth} from "@utils/context";
 import {IUser} from "../type";
 
 const LoginModal: React.FC = () => {
+    const { login, isLoggedIn, currentUser } = useAuth();
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState({
         email: "",
         password: ""
     });
     const [error, setError] = useState("Zadaj užívateľský email!");
-    const [loggedUser] = useLocalStorage("user", {} as IUser);
 
     const getErrMsg = (form: any) => {
         const {email, password} = form;
@@ -42,9 +42,9 @@ const LoginModal: React.FC = () => {
 
     const sendLogin = async () => {
         loginUser(form)
-            .then(_ => {
+            .then((user: IUser | undefined) => {
                 setShowModal(false);
-                //window.location.replace("/"); //replace instead of navigate, so there is refresh
+                login(user!);
                 toast.success("Prihlásenie úspešné!")
             })
             .catch(err => {
@@ -61,14 +61,14 @@ const LoginModal: React.FC = () => {
     return (
         <>
             <div
-                className={`${isUserLoggedIn() ? "loggedIn" : ""} customLink loginBtn`}
+                className={`${isLoggedIn ? "loggedIn" : ""} customLink loginBtn`}
                 onClick={() => setShowModal(true)}
-                title={isUserLoggedIn() ? "Odhlásiť sa" : "Prihlásiť sa"}
+                title={isLoggedIn ? "Odhlásiť sa" : "Prihlásiť sa"}
             >
-                {isUserLoggedIn() ? loggedUser.firstName : ""}
+                {isLoggedIn ? currentUser?.firstName : ""}
                 <i className="fa fa-user-circle" />
             </div>
-            {showModal && !isUserLoggedIn() &&
+            {showModal && !isLoggedIn &&
                 <Modal
                     customKey="login"
                     title="Prihlásenie"
@@ -115,7 +115,7 @@ const LoginModal: React.FC = () => {
                     overrideStyle={{width: "30rem"}}
                 />
             }
-            {showModal && isUserLoggedIn() &&
+            {showModal && isLoggedIn &&
                 <Modal
                     customKey="logout"
                     title="Odhlásenie"
