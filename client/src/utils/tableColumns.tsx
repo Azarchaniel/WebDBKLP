@@ -5,6 +5,12 @@ import React, {useState} from "react";
 import {countryCode, langCode} from "./locale";
 import {ShowHideRow} from "@components/books/ShowHideRow";
 
+const createDateElement = (value: Date): React.ReactElement => {
+    const date = new Date(value).toLocaleDateString("cs-CZ");
+    const time = new Date(value).toLocaleTimeString("cs-CZ");
+    return <span title={time} style={{pointerEvents: "auto"}}>{date}</span>
+}
+
 const columnHelper = createColumnHelper<any>();
 
 // BOOKS
@@ -55,7 +61,8 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
         header: 'Jazyk',
         cell: (info: any) => {
             return langCode
-                .filter((lang: ILangCode) => ((info.getValue() as string[])?.includes(lang.key))).map(lang => lang.value).join(", ")}
+                .filter((lang: ILangCode) => ((info.getValue() as string[])?.includes(lang.key))).map(lang => lang.value).join(", ")
+        }
     },
     {
         accessorKey: 'numberOfPages',
@@ -140,35 +147,25 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
         },
     },
     {
+        accessorKey: 'location',
+        header: 'Umiestnenie',
+        cell: ({cell}: { cell: any }) => getBookLocation(cell.getValue() as unknown as ILocation),
+    },
+    {
         accessorKey: 'note',
         header: 'Poznámka'
     },
     {
         accessorKey: 'createdAt',
         header: 'Dátum pridania',
-        cell: ({cell}: { cell: any }) => {
-            const value = cell.getValue() as unknown as string;
-            const date = new Date(value).toLocaleDateString("cs-CZ");
-            const time = new Date(value).toLocaleTimeString("cs-CZ");
-            return <span title={time} style={{pointerEvents: "auto"}}>{date}</span>
-        },
+        cell: ({cell}: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
         sortingFn: "datetime"
     },
     {
         accessorKey: 'updatedAt',
         header: 'Dátum úpravy',
-        cell: ({cell}: { cell: any }) => {
-            const value = cell.getValue() as unknown as string;
-            const date = new Date(value).toLocaleDateString("cs-CZ");
-            const time = new Date(value).toLocaleTimeString("cs-CZ");
-            return <span title={time} style={{pointerEvents: "auto"}}>{date}</span>
-        },
+        cell: ({cell}: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
         sortingFn: "datetime"
-    },
-    {
-        accessorKey: 'location',
-        header: 'Umiestnenie',
-        cell: ({cell}: { cell: any }) => getBookLocation(cell.getValue() as unknown as ILocation),
     },
     {
         //TEMP
@@ -214,7 +211,19 @@ export const getAutorTableColumns = (): ColumnDef<IAutor, any>[] => [
     {
         accessorKey: 'note',
         header: 'Poznámka'
-    }
+    },
+    {
+        accessorKey: 'createdAt',
+        header: 'Dátum pridania',
+        cell: ({cell}: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        sortingFn: "datetime"
+    },
+    {
+        accessorKey: 'updatedAt',
+        header: 'Dátum úpravy',
+        cell: ({cell}: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        sortingFn: "datetime"
+    },
 ];
 
 // LPs

@@ -57,9 +57,9 @@ export default function BookPage() {
         exLibris: !isMobile(),
         readBy: !isMobile(),
         note: !isMobile(),
+        location: !isMobile(),
         createdAt: false,
         updatedAt: !isMobile(),
-        location: !isMobile(),
         ownersFull: !isMobile()
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);

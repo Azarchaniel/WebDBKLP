@@ -38,6 +38,8 @@ export default function AutorPage() {
         dateOfBirth: !isMobile(),
         dateOfDeath: !isMobile(),
         note: !isMobile(),
+        createdAt: false,
+        updatedAt: !isMobile(),
     });
     const popRef = useRef<HTMLDivElement>(null);
     const exceptRef = useRef<HTMLDivElement>(null);

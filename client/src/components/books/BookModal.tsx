@@ -210,10 +210,14 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
             const names = name.split(",");
             firstName = names[1].trim();
             lastName = names[0].trim();
-        } else {
+        } else if (name.includes(" ")) {
             const names = name.split(" ");
             firstName = names[0].trim();
             lastName = names[1].trim();
+        } else {
+            // assume it's only one name
+            firstName = undefined;
+            lastName = name.trim();
         }
 
         addAutor({firstName, lastName, role: [{value: role}]})
