@@ -24,7 +24,7 @@ export interface IBook extends Document {
     location?: ILocation;
     owner?: string;
     createdAt?: Date;
-    updateAt?: Date;
+    updatedAt?: Date;
     deletedAt?: Date;
     readBy: string[];
     picture?: string;

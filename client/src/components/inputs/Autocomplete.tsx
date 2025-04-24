@@ -318,7 +318,7 @@ export const LazyLoadMultiselect = React.memo(({
                     )}
                     {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && onNew && (
                         <div className="autocomplete-item create-new" onClick={handleCreateNew}
-                             title="`Meno Priezvisko` alebo `Priezvisko, Meno`">
+                             title="`Meno Priezvisko` alebo `Priezvisko, Meno` alebo `Priezvisko`">
                             Vytvoriť "{searchQuery}"
                         </div>
                     )}

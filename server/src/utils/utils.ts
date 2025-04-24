@@ -328,6 +328,7 @@ export const formatMongoDbDecimal = (num: unknown) => {
 
 /**
  * Helper to normalize a given field value into a string.
+ * Removes diacritics and non-alphanumeric characters.
  * @param value - The value to normalize. Can be string, array, or object.
  * @returns A promise that resolves to a normalized string.
  */
@@ -344,16 +345,22 @@ async function normalizeFieldValue(value: any): Promise<string> {
                 return typeof item === 'string' ? diacritics.remove(item) : '';
             })
         );
-        return diacritics.remove(normalizedValues.filter(Boolean).join(', ') ?? '');
+        return diacritics
+            .remove(normalizedValues.filter(Boolean).join(', ') ?? '')
+            .replace(/[^a-zA-Z0-9\s]/g, ''); // Remove non-alphanumeric characters
     }
 
     if (typeof value === 'object') {
         const { title, publisher }: any = value;
-        return diacritics.remove(title ?? publisher ?? '');
+        return diacritics
+            .remove(title ?? publisher ?? '')
+            .replace(/[^a-zA-Z0-9\s]/g, ''); // Remove non-alphanumeric characters
     }
 
     // For single string values
-    return diacritics.remove(value ?? '');
+    return diacritics
+        .remove(value ?? '')
+        .replace(/[^a-zA-Z0-9\s]/g, ''); // Remove non-alphanumeric characters
 }
 
 /**

@@ -154,9 +154,10 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
         };
 
         // Add search condition if a search term is provided
+        // Remove diacritics and special chars from the search term before performing the search
         if (search) {
             query.$or = [
-                { "title": {$regex: diacritics.remove(search as string).replace(/-/g, ""), $options: "i"}}
+                { "title": {$regex: diacritics.remove(search as string).replace(/[^a-zA-Z0-9\s]/g, ''), $options: "i"}}
             ];
         }
 

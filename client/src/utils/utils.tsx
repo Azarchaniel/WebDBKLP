@@ -51,6 +51,16 @@ export const stringifyUsers = (data: IUser[], withSurname: boolean) => {
 	return names;
 }
 
+export const getFullName = (person: { firstName?: string; lastName?: string }): string => {
+	if (!person) return "";
+	const { firstName, lastName } = person;
+
+	if (firstName && lastName) {
+		return `${lastName}, ${firstName}`;
+	}
+	return firstName || lastName || "";
+};
+
 export const formPersonsFullName = <T extends { firstName?: string; lastName?: string }>(
 	person: T | T[] | undefined
 ): string | T[] | undefined => {
@@ -59,10 +69,10 @@ export const formPersonsFullName = <T extends { firstName?: string; lastName?: s
 	if (Array.isArray(person)) {
 		return person.map(p => ({
 			...p,
-			fullName: `${p.lastName ?? ""}${p.firstName ? ", " + p.firstName : ""}`,
+			fullName: getFullName(p),
 		}));
 	} else {
-		return `${person.lastName ?? ""}${person.firstName ? ", " + person.firstName : ""}`;
+		return getFullName(person);
 	}
 };
 
