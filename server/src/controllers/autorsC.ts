@@ -5,7 +5,6 @@ import Book from "../models/book";
 import {Types} from "mongoose";
 import {fetchDataWithPagination} from "../utils/queryUtils";
 import Lp from "../models/lp";
-import {optionFetchAllExceptDeleted} from "../utils/constants";
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -103,9 +102,8 @@ const addAutor = async (req: Request, res: Response): Promise<void> => {
         });
 
         const newAutor: IAutor = await autor.save()
-        const allAutors: IAutor[] = await Autor.find(optionFetchAllExceptDeleted)
 
-        res.status(201).json({message: 'Autor added', autor: newAutor, autors: allAutors})
+        res.status(201).json({message: 'Autor added', autor: newAutor})
     } catch (error) {
         console.error("Error adding autor:", error);
         res.status(500).json({error: "Internal server error"});
@@ -131,11 +129,10 @@ const updateAutor = async (req: Request, res: Response): Promise<void> => {
                 role: body.role?.map((val: { value: string, showValue: string }) => val.value),
             }
         )
-        const allAutors: IAutor[] = await Autor.find(optionFetchAllExceptDeleted);
+
         res.status(201).json({
             message: 'Autor updated',
-            autor: updateAutor,
-            autors: allAutors,
+            autor: updateAutor
         })
     } catch (error) {
         console.error("Error updating autor:", error);
@@ -156,11 +153,10 @@ const deleteAutor = async (req: Request, res: Response): Promise<void> => {
                 deletedAt: new Date()
             }
         )
-        const allAutors: IAutor[] = await Autor.find(optionFetchAllExceptDeleted)
+
         res.status(200).json({
             message: 'Autor deleted',
             autor: deletedAutor,
-            autors: allAutors,
         })
     } catch (error) {
         console.error("Error deleting autor:", error);

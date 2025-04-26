@@ -107,7 +107,7 @@ export default function AutorPage() {
 
                 toast.success(`Autor ${autorNames} bol úspešne ${formData._id ? "uložený" : "pridaný"}.`);
                 setSaveAutorSuccess(true)
-                setAutors(data.autors);
+                fetchAutors();
             })
             .catch((err) => {
                 console.trace(err)
@@ -162,12 +162,12 @@ export default function AutorPage() {
                 text: `Naozaj chceš vymazať autora ${autorToDelete?.fullName}?\n${warningText}`,
                 onOk: () => {
                     deleteAutor(_id)
-                        .then(({status, data}) => {
+                        .then(({status}) => {
                             if (status !== 200) {
                                 throw new Error("Error! Autor not deleted")
                             }
                             toast.success(`Autor ${autorToDelete?.fullName} bol úspešne vymazaný.`);
-                            setAutors(data.autors)
+                            fetchAutors();
                         })
                         .catch((err) => {
                             toast.error("Chyba! Autora nemožno vymazať!");
@@ -189,7 +189,7 @@ export default function AutorPage() {
 
     return (
         <>
-            {isLoggedIn && <AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)}/>}
+            {isLoggedIn && <AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)} saveResultSuccess={saveAutorSuccess}/>}
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
                 <ShowHideColumns columns={getAutorTableColumns()} shown={showColumn} setShown={setShowColumn}/>
             </div>
