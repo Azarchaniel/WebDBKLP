@@ -120,6 +120,7 @@ export const getPageByStartingLetter = async (letter: string, pageSize: number, 
 //### BOOK ###
 export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataType>> => {
     try {
+        console.log("API", params?.filters)
         const books: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
             baseUrl + "/books", {
                 params: {
@@ -127,7 +128,8 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
                     pageSize: params?.pageSize ?? 10_000,
                     search: params?.search ?? "",
                     sorting: params?.sorting ?? [{id: "title", desc: false}],
-                    filterUsers: params?.activeUsers
+                    filterUsers: params?.activeUsers,
+                    filters: params?.filters ?? []
                 }
             });
         return books
@@ -226,6 +228,17 @@ export const getInfoAboutBook = async (isbn: string): Promise<any> => {
             `${baseUrl}/get-book-info/${isbn}`
         )
         return bookInfo
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
+export const getUniqueFieldValues = async (): Promise<AxiosResponse> => {
+    try {
+        const uniqueValues: AxiosResponse = await axiosInstance.get(
+            `${baseUrl}/books/get-unique-field-values`
+        )
+        return uniqueValues
     } catch (error: any) {
         throw new Error(error)
     }

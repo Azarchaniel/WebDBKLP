@@ -1,5 +1,14 @@
 import {ColumnDef, createColumnHelper} from "@tanstack/react-table";
-import {IAutor, IBook, ILangCode, ILocation, IPublished, IUser} from "../type";
+import {
+    IAutor,
+    IBook,
+    IBookColumnVisibility,
+    ILangCode,
+    ILocation,
+    IPublished,
+    IUniqueFilterValues,
+    IUser
+} from "../type";
 import {formatDimension, getBookLocation, tableHeaderColor} from "@utils";
 import React, {useState} from "react";
 import {countryCode, langCode} from "./locale";
@@ -336,4 +345,42 @@ export const ShowHideColumns = <T, >({columns, shown, setShown}: ShowHideColumns
             {getColumnsForHidden()}
         </>
     );
+};
+
+
+export const mapColumnVisibilityToFilterValues = (visibility: IBookColumnVisibility): Partial<IUniqueFilterValues> => {
+    const mapping: Record<keyof IBookColumnVisibility, keyof IUniqueFilterValues> = {
+        autorsFull: "autor",
+        editorsFull: "editor",
+        translatorsFull: "translator",
+        ilustratorsFull: "ilustrator",
+        title: "title",
+        subtitle: "subtitle",
+        content: "content",
+        ISBN: "ISBN",
+        language: "language",
+        numberOfPages: "numberOfPages",
+        height: "dimensions.height",
+        width: "dimensions.width",
+        depth: "dimensions.depth",
+        weight: "dimensions.weight",
+        edition: "edition.title",
+        serie: "serie.title",
+        published: "published.publisher",
+        exLibris: "exLibris",
+        ownersFull: "owner",
+        readBy: "readBy",
+        note: "note",
+        location: "location.city"
+    };
+
+    return Object.entries(visibility)
+        .filter(([key, value]) => value && mapping[key as keyof IBookColumnVisibility])
+        .reduce((acc, [key]) => {
+            const filterKey = mapping[key as keyof IBookColumnVisibility];
+            if (filterKey) {
+                acc[filterKey] = [];
+            }
+            return acc;
+        }, {} as Partial<IUniqueFilterValues>);
 };

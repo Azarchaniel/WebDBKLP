@@ -1,5 +1,7 @@
 import React, {ChangeEvent, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState} from "react";
 
+type OptionValue = string | { [key: string]: any };
+
 interface Option {
     [key: string]: any;
 }
@@ -7,25 +9,25 @@ interface Option {
 type LoadingStatus = "idle" | "loading" | "hasMore" | "noMore";
 
 interface AutocompleteInputProps {
-    value: Option[];
-    displayValue: string;
+    value: OptionValue[];
+    displayValue?: string; // Now optional since it's not needed for string arrays
     placeholder?: string;
-    onChange: (data: { name: string; value: Option[] }) => void;
+    onChange: (data: { name: string; value: OptionValue[] }) => void;
     name: string;
     id?: string;
     selectionLimit?: number;
     emptyRecordMsg?: string;
     customerror?: boolean;
-    onSearch?: (query: string, page: number, ids?: string[]) => Promise<Option[]>; // Now optional
+    onSearch?: (query: string, page: number, ids?: string[]) => Promise<OptionValue[]>;
     reset?: boolean;
     onNew?: (query: string) => void;
-    options?: Option[]; // New optional prop for finite data
+    options?: OptionValue[]; // Can be string[] or Option[]
 }
 
 /**
  ** AUTOCOMPLETE/MULTISELECT component
  *
- * Usage:
+ * Usage with objects:
  *                             <LazyLoadMultiselect
  *                                 value={selectedBooks}
  *                                 displayValue="title"
@@ -33,15 +35,22 @@ interface AutocompleteInputProps {
  *                                 onChange={handleBookChange}
  *                                 name="books"
  *                                 onSearch={handleSearch}
- *                                 hasMore={hasMore}
- *                                 loading={acLoading}
  *                                 onNew={(neww) => console.log("creating new item", neww)}
+ *                             />
+ *
+ * Usage with strings:
+ *                             <LazyLoadMultiselect
+ *                                 value={selectedTags}
+ *                                 placeholder="Vyhľadaj tag..."
+ *                                 onChange={handleTagChange}
+ *                                 name="tags"
+ *                                 options={availableTags}
  *                             />
  */
 
 export const LazyLoadMultiselect = React.memo(({
                                                    value,
-                                                   displayValue,
+                                                   displayValue = "name", // Default to "name" if not provided
                                                    placeholder = "Vyhľadaj...",
                                                    onChange,
                                                    name,
@@ -56,16 +65,43 @@ export const LazyLoadMultiselect = React.memo(({
                                                }: AutocompleteInputProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedValues, setSelectedValues] = useState<Option[]>(value || []);
+    const [selectedValues, setSelectedValues] = useState<OptionValue[]>(value || []);
     const [inputValue, setInputValue] = useState('');
-    const [filteredOptions, setFilteredOptions] = useState<Option[]>([]);
+    const [filteredOptions, setFilteredOptions] = useState<OptionValue[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-    const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>("idle"); // New combined state
+    const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>("idle");
     const menuRef = useRef<HTMLDivElement>(null);
     const [dropdownPosition, setDropdownPosition] = useState<'top' | 'bottom'>('bottom');
     const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+
+
+    useEffect(() => {
+        if (options.some(option => typeof option === 'object' && option !== null && !(displayValue in option))) {
+            throw new Error("`displayValue` is required in every object in the `options` array.");
+        }
+    }, [options, displayValue]);
+
+    // Helper function to get display text for an option (string or object)
+    const getDisplayText = useCallback((option: OptionValue): string => {
+        if (typeof option === 'string') {
+            return option;
+        } else {
+            return option[displayValue];
+        }
+    }, [displayValue]);
+
+    // Helper function to compare options for equality
+    const areOptionsEqual = useCallback((option1: OptionValue, option2: OptionValue): boolean => {
+        if (typeof option1 === 'string' && typeof option2 === 'string') {
+            return option1 === option2;
+        } else if (typeof option1 === 'object' && option1 !== null &&
+            typeof option2 === 'object' && option2 !== null) {
+            return option1[displayValue] === option2[displayValue];
+        }
+        return false;
+    }, [displayValue]);
 
     // Handle reset
     useEffect(() => {
@@ -109,15 +145,15 @@ export const LazyLoadMultiselect = React.memo(({
         };
     }, []);
 
-    const handleSelect = useCallback((option: Option) => {
+    const handleSelect = useCallback((option: OptionValue) => {
         let newSelectedValues;
 
         if (selectionLimit && selectedValues.length >= selectionLimit) {
             return;
         }
 
-        if (selectedValues.some(item => item[displayValue] === option[displayValue])) {
-            newSelectedValues = selectedValues.filter(item => item[displayValue] !== option[displayValue]);
+        if (selectedValues.some(item => areOptionsEqual(item, option))) {
+            newSelectedValues = selectedValues.filter(item => !areOptionsEqual(item, option));
         } else {
             newSelectedValues = [...selectedValues, option];
         }
@@ -130,14 +166,14 @@ export const LazyLoadMultiselect = React.memo(({
         setCurrentPage(1);
         setIsOpen(false);
         if (inputRef.current) inputRef.current.focus();
-    }, [selectedValues, displayValue, onChange, name, selectionLimit]);
+    }, [selectedValues, onChange, name, selectionLimit, areOptionsEqual]);
 
-    const handleRemove = useCallback((option: Option) => {
-        const newSelectedValues = selectedValues.filter(item => item[displayValue] !== option[displayValue]);
+    const handleRemove = useCallback((option: OptionValue) => {
+        const newSelectedValues = selectedValues.filter(item => !areOptionsEqual(item, option));
         setSelectedValues(newSelectedValues);
         onChange({name, value: newSelectedValues});
         if (inputRef.current) inputRef.current.focus();
-    }, [selectedValues, displayValue, onChange, name]);
+    }, [selectedValues, onChange, name, areOptionsEqual]);
 
     const debouncedSearch = useCallback(
         debounce(async (query: string, page: number) => {
@@ -154,14 +190,15 @@ export const LazyLoadMultiselect = React.memo(({
                 setLoadingStatus(newOptions.length > 0 ? "hasMore" : "noMore"); // Check if there are more items
             } else {
                 // Client-side filtering
-                const filtered = options.filter(option =>
-                    option[displayValue].toLowerCase().includes(query.toLowerCase())
-                );
+                const filtered = options.filter(option => {
+                    const text = getDisplayText(option)?.toLowerCase();
+                    return text?.includes(query?.toLowerCase());
+                });
                 setFilteredOptions(filtered);
                 setLoadingStatus("noMore"); // No more items to load
             }
         }, 300),
-        [onSearch, options, displayValue]
+        [onSearch, options, getDisplayText]
     );
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -191,9 +228,9 @@ export const LazyLoadMultiselect = React.memo(({
 
     const filteredOptionsToDisplay = useMemo(() => {
         return filteredOptions.filter(option =>
-            !selectedValues.some(selected => selected[displayValue] === option[displayValue])
+            !selectedValues.some(selected => areOptionsEqual(selected, option))
         );
-    }, [filteredOptions, selectedValues, displayValue]);
+    }, [filteredOptions, selectedValues, areOptionsEqual]);
 
     const handleInputClick = useCallback(() => {
         setIsOpen(true);
@@ -275,7 +312,6 @@ export const LazyLoadMultiselect = React.memo(({
             id={id}
             className={`chip-multiselect ${customerror ? 'error' : ''}`}
         >
-            {/* TODO: show error */}
             <div className="chip-container">
                 {Array.isArray(selectedValues) && selectedValues.length > 0 && selectedValues.map((item, index) => (
                     <div
@@ -287,7 +323,7 @@ export const LazyLoadMultiselect = React.memo(({
                         }}
                     >
                         <span>
-                            {item[displayValue]}
+                            {getDisplayText(item)}
                         </span>
                         <span className="chip-remove">
                             ×
@@ -330,7 +366,7 @@ export const LazyLoadMultiselect = React.memo(({
                                     className={`autocomplete-item ${selectionLimit && selectedValues?.length >= selectionLimit ? 'disabled' : ''}`}
                                     onClick={() => handleSelect(option)}
                                 >
-                                    {option[displayValue]}
+                                    {getDisplayText(option)}
                                 </div>
                             ))}
                             {loadingStatus === "loading" && (

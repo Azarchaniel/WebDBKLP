@@ -17,6 +17,7 @@ type PropsMT = {
     pageChange: (page: number) => void;
     pageSizeChange: (pageSize: number) => void;
     sortingChange: (sorting: SortingState) => void;
+    filteringChange?: (filters: any[]) => void; // New prop for handling filtering changes
     totalCount: number;
     actions?: ReactElement;
     rowActions?: (_id: string, expandRow: () => void) => ReactElement;
@@ -42,6 +43,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
          pageChange,
          pageSizeChange,
          sortingChange,
+         filteringChange, // New prop
          totalCount,
          loading = false,
          pagination = {page: 1, pageSize: 50, sorting: [{id: "", desc: true}]},
@@ -52,6 +54,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
         const [currentPageSize, setCurrentPageSize] = useState(pagination.pageSize);
         const [sorting, setSorting] = React.useState<SortingState>(pagination.sorting)
         const [expanded, setExpanded] = useState<ExpandedState>({});
+        const [filtering, setFiltering] = useState([]);
 
         const maxPage = Math.ceil(totalCount / currentPageSize);
 
@@ -74,6 +77,10 @@ const ServerPaginationTable: React.FC<PropsMT> =
             pageSizeChange(currentPageSize);
         }, [currentPageSize]);
 
+        useEffect(() => {
+            if (filteringChange) filteringChange(filtering);
+        }, [filtering]);
+
         const table = useReactTable({
             data,
             columns,
@@ -85,15 +92,18 @@ const ServerPaginationTable: React.FC<PropsMT> =
                     pageSize: currentPageSize,
                 },
                 sorting,
-                expanded: expanded
+                expanded: expanded,
+                columnFilters: filtering
             },
             getCoreRowModel: getCoreRowModel(),
             getPaginationRowModel: getPaginationRowModel(),
             manualPagination: true,
             onSortingChange: setSorting,
             onExpandedChange: setExpanded,
+            onColumnFiltersChange: (val: any) => setFiltering(val), // Update filtering state
             getRowCanExpand: () => true, //all rows can expand
             getExpandedRowModel: getExpandedRowModel(),
+            manualFiltering: true
         });
 
         return (
@@ -145,6 +155,17 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                                                      style={{fontSize: "24px"}}></i>,
                                                         }[header.column.getIsSorted() as string] ?? null}
                                                     </div>
+                                                )}
+                                                {header.column.getCanFilter() && (
+                                                    // Check what column are you in and then decide, what filter to show
+                                                    <input
+                                                        type="text"
+                                                        value={(header.column.getFilterValue() as string) || ''}
+                                                        onChange={(e) =>
+                                                            header.column.setFilterValue(e.target.value)
+                                                        }
+                                                        placeholder={`Filter ${header.column.id}`}
+                                                    />
                                                 )}
                                             </th>
                                         ))}

@@ -14,6 +14,7 @@ interface PaginationOptions {
     filterUsers?: string[];
     dataFrom?: string;
     searchFields?: string[];
+    filters?: { id: string; value: string }[];
 }
 
 /**
@@ -77,6 +78,24 @@ export const buildSearchQuery = (search: string, searchFields: string[]): Record
 };
 
 /**
+ * Builds the filter query for MongoDB.
+ *
+ * @param {Array<{id: string, value: string}>} filters - The filters to apply.
+ * @returns {Record<string, any>} - The MongoDB filter query.
+ */
+const buildFilterQuery = (filters: { id: string; value: string }[]): Record<string, any> => {
+    if (!filters || filters.length === 0) return {};
+
+    const filterQuery: Record<string, any> = {};
+    filters.forEach(({ id, value }) => {
+        filterQuery[id] = { $regex: diacritics.remove(value).replace(/-/g, ""), $options: "i" };
+    });
+
+    console.log("filterQuery", filterQuery);
+    return filterQuery;
+};
+
+/**
  * Builds the default query for deletedAt.
  *
  * @returns {Record<string, any>} - The MongoDB default query.
@@ -90,16 +109,6 @@ export const buildDefaultQuery = (): Record<string, any> => {
  *
  * @param {any} model - The Mongoose model.
  * @param {PaginationOptions} options - The pagination options.
- * @param {string[]} searchFields - The fields to search in.
- * @param {PipelineStage[]} lookupStages - The lookup stages for the aggregation pipeline.
- * @param {Record<string, any>} additionalQuery - Additional query parameters.
- * @returns {Promise<{data: any[], count: number, latestUpdate?: Date | undefined}>} - The data, count, and latest update.
- */
-/**
- * Builds the aggregation pipeline for fetching data with pagination, sorting, and searching.
- *
- * @param {any} model - The Mongoose model.
- * @param {PaginationOptions} options - The pagination options.
  * @param {PipelineStage[]} lookupStages - The lookup stages for the aggregation pipeline.
  * @param {Record<string, any>} additionalQuery - Additional query parameters.
  * @returns {Promise<{data: any[], count: number, latestUpdate?: Date | undefined}>} - The data, count, and latest update.
@@ -108,9 +117,9 @@ export const fetchDataWithPagination = async (
     model: any,
     options: PaginationOptions,
     lookupStages: PipelineStage[] = [],
-    additionalQuery: Record<string, any> = {}
+    additionalQuery: Record<string, any> = {},
 ): Promise<{ data: any[], count: number, latestUpdate?: Date | undefined }> => {
-    const {page = "1", pageSize = "10_000", search = "", sorting, dataFrom, searchFields = []} = options;
+    const {page = "1", pageSize = "10_000", search = "", sorting, dataFrom, searchFields = [], filters = []} = options;
 
     const latestUpdate: { updatedAt: Date | undefined } = await model.findOne().sort({ updatedAt: -1 }).select('updatedAt').lean() as unknown as { updatedAt: Date | undefined };
 
@@ -122,12 +131,14 @@ export const fetchDataWithPagination = async (
 
     const sortOptions = parseSorting(sorting);
     const searchQuery = buildSearchQuery(search, searchFields);
+    const filterQuery = buildFilterQuery(filters);
     const defaultQuery = buildDefaultQuery();
     const paginationPipeline = buildPaginationPipeline(parseInt(page as string), parseInt(pageSize as string), sortOptions);
 
     const query = {
         ...defaultQuery,
         ...searchQuery,
+        ...filterQuery,
         ...additionalQuery
     };
 

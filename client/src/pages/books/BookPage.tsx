@@ -1,6 +1,6 @@
 import {IBook, IBookColumnVisibility, IUser} from "../../type";
 import React, {useEffect, useMemo, useRef, useState} from "react";
-import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks} from "../../API";
+import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks, getUniqueFieldValues} from "../../API";
 import {toast} from "react-toastify";
 import AddBook from "./AddBook";
 import {
@@ -30,7 +30,8 @@ export default function BookPage() {
         page: DEFAULT_PAGINATION.page,
         pageSize: DEFAULT_PAGINATION.pageSize,
         search: DEFAULT_PAGINATION.search,
-        sorting: [...DEFAULT_PAGINATION.sorting]
+        sorting: [...DEFAULT_PAGINATION.sorting],
+        filters: DEFAULT_PAGINATION.filters
     });
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
@@ -64,7 +65,9 @@ export default function BookPage() {
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+    const [filterTimeoutId, setFilterTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const [controller, setController] = useState<AbortController | null>(null);
+
     const activeUsers: IUser[] | null = useReadLocalStorage("activeUsers");
     const memoizedActiveUsers = useMemo(() => activeUsers, [JSON.stringify(activeUsers)]);
     const popRef = useRef<HTMLDivElement>(null);
@@ -272,6 +275,15 @@ export default function BookPage() {
                 sortingChange={(sorting) => {
                     if (sorting.length === 0) sorting = DEFAULT_PAGINATION.sorting;
                     setPagination(prevState => ({...prevState, sorting: sorting}))
+                }}
+                filteringChange={(filters) => {
+                    if (filterTimeoutId) clearTimeout(filterTimeoutId);
+
+                    const newTimeoutId = setTimeout(() => {
+                        setPagination(prevState => ({...prevState, page: DEFAULT_PAGINATION.page, filters: filters}));
+                    }, 1000); // Wait 1s before applying the filters
+
+                    setFilterTimeoutId(newTimeoutId);
                 }}
                 totalCount={countAll}
                 loading={loading}
