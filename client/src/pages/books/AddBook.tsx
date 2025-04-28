@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {IBook, ValidationError} from "../../type";
-import {Modal} from "../../components/Modal";
-import {BooksModalBody, BooksModalButtons} from "../../components/books/BookModal";
+import {Modal} from "@components/Modal";
+import {BooksModalBody, BooksModalButtons} from "@components/books/BookModal";
 
 type Props = {
     saveBook: (formData: IBook | any) => void;
@@ -53,6 +53,7 @@ const AddBook: React.FC<Props> = ({saveBook, book, onClose, saveResultSuccess}: 
 							setOutline({outline: "none"});
 						}}
                 		error={error}
+						saveResultSuccess={saveResultSuccess}
                 	/>}
 					overrideStyle={outline}
                 />

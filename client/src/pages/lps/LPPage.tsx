@@ -76,6 +76,7 @@ export default function LPPage() {
     }
 
     const handleSaveLP = (formData: ILP): void => {
+        setSaveLpSuccess(undefined);
         addLP(formData)
             .then(({status, data}) => {
                 if (status !== 201) {
@@ -83,17 +84,17 @@ export default function LPPage() {
                     throw new Error("LP sa nepodarilo pridať!")
                 }
                 toast.success(`LP ${data.lp?.title} bolo úspešne ${formData._id ? "uložené" : "pridané"}.`);
+                setSaveLpSuccess(true);
                 setLPs(stringifyAutors(data.lps));
             })
             .catch((err) => {
+                setSaveLpSuccess(false);
                 toast.error("LP sa nepodarilo pridať!");
                 console.trace(err);
             })
     }
 
     const handleUpdateLp = (_id: string): any => {
-        setSaveLpSuccess(undefined);
-
         const lpToUpdate = LPs.find((lp: ILP) => lp._id === _id);
 
         if (lpToUpdate) {
@@ -102,8 +103,12 @@ export default function LPPage() {
             getLP(_id)
                 .then(({data}) => {
                     setUpdateLP(data.lp);
+                    setSaveLpSuccess(true);
                 })
-                .catch((err) => console.trace(err))
+                .catch((err) => {
+                    console.trace(err);
+                    setSaveLpSuccess(true);
+                })
         }
     }
 
@@ -147,7 +152,7 @@ export default function LPPage() {
 
     return (
         <>
-            {isLoggedIn && <AddLP saveLp={handleSaveLP} onClose={() => setUpdateLP(undefined)}/>}
+            {isLoggedIn && <AddLP saveLp={handleSaveLP} onClose={() => setUpdateLP(undefined)} saveResultSuccess={saveLpSuccess}/>}
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
                 <ShowHideColumns columns={getLPTableColumns()} shown={showColumn} setShown={setShowColumn}/>
             </div>

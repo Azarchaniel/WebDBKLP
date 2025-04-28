@@ -10,9 +10,10 @@ interface QuoteProps {
     bcgrClr: string;
     deleteQuote: (_id: string) => void;
     saveQuote: (formData: IQuote) => void;
+    saveResultSuccess?: boolean;
 }
 
-const Quote: React.FC<QuoteProps> = ({quote, bcgrClr, deleteQuote, saveQuote}) => {
+const Quote: React.FC<QuoteProps> = ({quote, bcgrClr, deleteQuote, saveQuote, saveResultSuccess}) => {
     const {isLoggedIn} = useAuth();
     const [isEditing, setIsEditing] = useState<boolean>(false);
 
@@ -118,6 +119,7 @@ const Quote: React.FC<QuoteProps> = ({quote, bcgrClr, deleteQuote, saveQuote}) =
                     saveQuote={saveQuote}
                     quote={quote}
                     onClose={handleCloseEdit}
+                    saveResultSuccess={saveResultSuccess}
                 />
             )}
         </div>

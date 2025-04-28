@@ -26,7 +26,7 @@ export default function QuotePage() {
     const [countAll, setCountAll] = useState<number>(0);
     const activeUser = useReadLocalStorage("activeUsers") as string[];
     const [loading, setLoading] = useState(true);
-    const [saveAutorSuccess, setSaveAutorSuccess] = useState<boolean | undefined>(undefined);
+    const [saveQuoteSuccess, setSaveQuoteSuccess] = useState<boolean | undefined>(undefined);
     const [quoteGroups, setQuoteGroups] = useState<QuoteGroup[]>([]);
 
     useEffect(() => {
@@ -79,18 +79,19 @@ export default function QuotePage() {
     }
 
     const handleSaveQuote = (formData: IQuote): void => {
+        setSaveQuoteSuccess(undefined);
         addQuote(formData)
             .then(({status}) => {
                 if (status !== 201) {
                     throw new Error("Citát sa nepodarilo pridať!")
                 }
-                toast.success("Citát bol úspešne pridaný.");
-                setSaveAutorSuccess(true);
+                toast.success(`Citát bol úspešne ${formData._id ? 'upravený' : 'pridaný.'}`);
+                setSaveQuoteSuccess(true);
             })
             .catch((err) => {
-                toast.error("Citát sa nepodarilo pridať!");
+                toast.error(`Citát sa nepodarilo ${formData._id ? 'upraviť' : 'pridať.'}!`);
                 console.trace(err);
-                setSaveAutorSuccess(false);
+                setSaveQuoteSuccess(false);
             })
     }
 
@@ -122,8 +123,11 @@ export default function QuotePage() {
 
     return (
         <>
-            {isLoggedIn && <AddQuote saveQuote={handleSaveQuote} onClose={() => {
-            }} saveResultSuccess={saveAutorSuccess}/>}
+            {isLoggedIn && <AddQuote
+                saveQuote={handleSaveQuote}
+                onClose={() => {}}
+                saveResultSuccess={saveQuoteSuccess}/>
+            }
             <div>
                 {loading ? <LoadingBooks/> : <></>}
             </div>

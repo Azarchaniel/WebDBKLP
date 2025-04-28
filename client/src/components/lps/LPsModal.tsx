@@ -5,6 +5,7 @@ import {ILangCode, ILP, ValidationError} from "../../type";
 import {showError} from "../Modal";
 import {InputField, LazyLoadMultiselect} from "@components/inputs";
 import "@styles/LpPage.scss";
+import LoadingSpinner from "@components/LoadingSpinner";
 
 interface BodyProps {
     data: ILP | object;
@@ -17,6 +18,7 @@ interface ButtonsProps {
     saveLP: () => void;
     cleanFields: () => void;
     error?: ValidationError[] | undefined;
+    saveResultSuccess?: boolean;
 }
 
 export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
@@ -217,7 +219,18 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
     );
 }
 
-export const LPsModalButtons: React.FC<ButtonsProps> = ({saveLP, cleanFields, error}: ButtonsProps) => {
+export const LPsModalButtons: React.FC<ButtonsProps> = ({saveLP, cleanFields, error, saveResultSuccess}: ButtonsProps) => {
+    const [loadingResult, setLoadingResult] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (saveResultSuccess !== undefined && loadingResult) setLoadingResult(false);
+    }, [saveResultSuccess]);
+
+    const saveLpHandler = useCallback(() => {
+        setLoadingResult(true);
+        saveLP();
+    }, [saveLP]);
+
     return (
         <div className="column">
             <div>{showError(error)}</div>
@@ -227,9 +240,10 @@ export const LPsModalButtons: React.FC<ButtonsProps> = ({saveLP, cleanFields, er
                         onClick={cleanFields}>Vymazať polia
                 </button>
                 <button type="submit"
-                        disabled={Boolean(error?.length)}
-                        onClick={saveLP}
-                        className="btn btn-success">Uložiť LP
+                        disabled={Boolean(error?.length) || loadingResult}
+                        onClick={saveLpHandler}
+                        className="btn btn-success">
+                    {loadingResult ? <LoadingSpinner color="white" size={50} marginTop={1}/> : "Uložiť"}
                 </button>
             </div>
         </div>

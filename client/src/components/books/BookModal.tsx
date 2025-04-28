@@ -19,6 +19,7 @@ import {openLoadingBooks} from "../LoadingBooks";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
 import BarcodeScannerButton from "@components/BarcodeScanner";
+import LoadingSpinner from "@components/LoadingSpinner";
 
 interface BodyProps {
     data: IBook | object;
@@ -31,6 +32,7 @@ interface ButtonsProps {
     saveBook: () => void;
     cleanFields: () => void;
     error?: ValidationError[] | undefined;
+    saveResultSuccess?: boolean;
 }
 
 export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
@@ -553,7 +555,20 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
     </form>)
 }
 
-export const BooksModalButtons: React.FC<ButtonsProps> = ({saveBook, cleanFields, error}) => {
+export const BooksModalButtons: React.FC<ButtonsProps> = ({saveBook, cleanFields, error, saveResultSuccess}) => {
+    const [loadingResult, setLoadingResult] = useState<boolean | undefined>(false);
+
+    useEffect(() => {
+        if (saveResultSuccess !== undefined && loadingResult) {
+            setLoadingResult(false);
+        }
+    }, [saveResultSuccess, loadingResult]);
+
+    const saveBookHandler = useCallback(() => {
+        setLoadingResult(true);
+        saveBook();
+    }, [saveBook]);
+
     return (
         <div className="column">
             <div>{showError(error)}</div>
@@ -563,9 +578,10 @@ export const BooksModalButtons: React.FC<ButtonsProps> = ({saveBook, cleanFields
                         onClick={cleanFields}>Vymazať polia
                 </button>
                 <button type="submit"
-                        disabled={Boolean(error?.length)}
-                        onClick={saveBook}
-                        className="btn btn-success">Uložiť knihu
+                        disabled={Boolean(error?.length) || loadingResult}
+                        onClick={saveBookHandler}
+                        className="btn btn-success">
+                    {loadingResult ? <LoadingSpinner color="white" size={50} marginTop={1}/> : "Uložiť"}
                 </button>
             </div>
         </div>

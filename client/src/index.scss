@@ -36,6 +36,12 @@ body, html, main, #root {
   flex-direction: column;
 }
 
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .Card {
   display: flex;
   justify-content: space-between;

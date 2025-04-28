@@ -1,8 +1,8 @@
 import "react-datepicker/dist/react-datepicker.css";
 import React, {useEffect, useState} from "react";
 import {IAutor, ValidationError} from "../../type";
-import {Modal} from "../../components/Modal";
-import {AutorsModalBody, AutorsModalButtons} from "../../components/autors/AutorsModal";
+import {Modal} from "@components/Modal";
+import {AutorsModalBody, AutorsModalButtons} from "@components/autors/AutorsModal";
 
 interface Props {
     saveAutor: (formData: IAutor) => void;
@@ -57,6 +57,7 @@ const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose, saveResultSuccess
 							setOutline({outline: "none"});
 						}}
                 		error={error}
+						saveResultSuccess={saveResultSuccess}
                 	/>}
 					overrideStyle={outline}
                 />

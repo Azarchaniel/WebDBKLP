@@ -6,6 +6,7 @@ import {IAutor, ILangCode, ValidationError} from "../../type";
 import {InputField, LazyLoadMultiselect} from "@components/inputs";
 import {showError} from "../Modal";
 import {sk} from "date-fns/locale/sk";
+import LoadingSpinner from "@components/LoadingSpinner";
 
 registerLocale('sk', sk)
 
@@ -20,6 +21,7 @@ interface ButtonsProps {
     saveAutor: () => void;
     cleanFields: () => void;
     error?: ValidationError[] | undefined;
+    saveResultSuccess?: boolean;
 }
 
 export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
@@ -257,7 +259,18 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
     )
 }
 
-export const AutorsModalButtons = ({saveAutor, cleanFields, error}: ButtonsProps) => {
+export const AutorsModalButtons = ({saveAutor, cleanFields, error, saveResultSuccess}: ButtonsProps) => {
+    const [loadingResult, setLoadingResult] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (saveResultSuccess !== undefined && loadingResult) setLoadingResult(false);
+    }, [saveResultSuccess]);
+
+    const saveAutorHandler = useCallback(() => {
+        setLoadingResult(true);
+        saveAutor();
+    }, [saveAutor]);
+
     return (
         <div className="column">
             <div>{showError(error)}</div>
@@ -267,9 +280,10 @@ export const AutorsModalButtons = ({saveAutor, cleanFields, error}: ButtonsProps
                         onClick={cleanFields}>Vymazať polia
                 </button>
                 <button type="submit"
-                        disabled={Boolean(error?.length)}
-                        onClick={saveAutor}
-                        className="btn btn-success">Uložiť autora
+                        disabled={Boolean(error?.length) || loadingResult}
+                        onClick={saveAutorHandler}
+                        className="btn btn-success">
+                    {loadingResult ? <LoadingSpinner color="white" size={50} marginTop={1}/> : "Uložiť"}
                 </button>
             </div>
         </div>

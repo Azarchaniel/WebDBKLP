@@ -1,0 +1,77 @@
+.book-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  margin-top: var(--spinner-margin-top, 0);
+}
+
+.cover-left, .cover-right {
+  width: calc(var(--spinner-size) * 0.4);
+  height: calc(var(--spinner-size) * 0.03);
+  background-color: var(--spinner-color, white);
+}
+
+.spine {
+  width: calc(var(--spinner-size) * 0.2);
+  height: calc(var(--spinner-size) * 0.05);
+  background-color: var(--spinner-color, white);
+  border-radius: 0 0 calc(var(--spinner-size) * 2) calc(var(--spinner-size) * 2);
+}
+
+.page {
+  width: calc(var(--spinner-size) * 0.4);
+  height: calc(var(--spinner-size) * 0.02);
+  background-color: var(--spinner-color, white);
+  position: absolute;
+}
+
+.page-left {
+  left: 0;
+}
+
+.page-right {
+  left: calc(var(--spinner-size) * 0.6);
+}
+
+.page-one {
+  top: calc(var(--spinner-size) * -0.04);
+}
+
+.page-two {
+  top: calc(var(--spinner-size) * -0.08);
+}
+
+.page-three {
+  top: calc(var(--spinner-size) * -0.12);
+}
+
+.page-two.page-left {
+  margin-left: calc(var(--spinner-size) * 0.04);
+}
+
+.page-three.page-left {
+  margin-left: calc(var(--spinner-size) * 0.06);
+}
+
+.page-two.page-right {
+  margin-left: calc(var(--spinner-size) * -0.04);
+}
+
+.page-three.page-right {
+  margin-left: calc(var(--spinner-size) * -0.06);
+}
+
+.page-three.page-right.animated {
+  margin-left: calc(var(--spinner-size) * -0.06);
+  transform-origin: calc(var(--spinner-size) * -0.05) 50%;
+  animation: page-turn 1.3s ease-in-out infinite;
+}
+
+@keyframes page-turn {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-180deg);
+  }
+}

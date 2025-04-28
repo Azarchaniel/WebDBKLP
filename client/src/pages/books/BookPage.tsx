@@ -176,6 +176,8 @@ export default function BookPage() {
     const handleSaveBook = (formData: IBook, wasCheckedBox?: boolean): void => {
         if (wasCheckedBox) setWasCheckedLoading(true); //TEMP
 
+        setSaveBookSuccess(undefined);
+
         addBook(formData)
             .then(({status, data}) => {
                 if (status !== 200) {

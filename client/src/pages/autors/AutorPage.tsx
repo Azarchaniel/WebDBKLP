@@ -97,6 +97,7 @@ export default function AutorPage() {
     }
 
     const handleSaveAutor = (formData: IAutor): void => {
+        setSaveAutorSuccess(undefined);
         addAutor(formData)
             .then(({status, data}) => {
                 if (status !== 201) {

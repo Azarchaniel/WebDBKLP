@@ -16,6 +16,7 @@ interface ButtonsProps {
     saveQuote: () => void;
     cleanFields: () => void;
     error?: ValidationError[] | undefined;
+    saveResultSuccess?: boolean;
 }
 
 export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
@@ -171,7 +172,20 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
     </form>)
 }
 
-export const QuotesModalButtons = ({saveQuote, cleanFields, error}: ButtonsProps) => {
+export const QuotesModalButtons = ({saveQuote, cleanFields, error, saveResultSuccess}: ButtonsProps) => {
+    const [loadingResult, setLoadingResult] = useState<boolean | undefined>(false);
+
+    useEffect(() => {
+        if (saveResultSuccess !== undefined && loadingResult) {
+            setLoadingResult(false);
+        }
+    }, [saveResultSuccess, loadingResult]);
+
+    const saveQuoteHandler = useCallback(() => {
+        setLoadingResult(true);
+        saveQuote();
+    }, [saveQuote]);
+
     return (<div className="column">
         <div>{showError(error)}</div>
 
@@ -181,7 +195,7 @@ export const QuotesModalButtons = ({saveQuote, cleanFields, error}: ButtonsProps
             </button>
             <button type="submit"
                     disabled={Boolean(error?.length)}
-                    onClick={saveQuote}
+                    onClick={saveQuoteHandler}
                     className="btn btn-success">Uložiť citát
             </button>
         </div>

@@ -1,7 +1,7 @@
 import {ILP, ValidationError} from "../../type";
 import React, {useEffect, useState} from "react";
-import {Modal} from "../../components/Modal";
-import {LPsModalBody, LPsModalButtons} from "../../components/lps/LPsModal";
+import {Modal} from "@components/Modal";
+import {LPsModalBody, LPsModalButtons} from "@components/lps/LPsModal";
 
 type Props = {
     saveLp: (formData: ILP | any) => void;
@@ -57,6 +57,7 @@ const AddLp: React.FC<Props> = ({saveLp, lp, onClose, saveResultSuccess}: Props)
 							setOutline({outline: "none"});
 						}}
                 		error={error}
+						saveResultSuccess={saveResultSuccess}
                 	/>}
 					overrideStyle={outline}
                 />
