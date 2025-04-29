@@ -8,7 +8,7 @@ cd ./server; npm run start
 cd ./client; npx run start
 
 ### TODO
-- [ ] lagging in autors
+- [X] lagging in autors
 - [X] pagination in Select
 - [X] cache first page of books
 - [X] responsivity
