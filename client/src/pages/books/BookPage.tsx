@@ -1,6 +1,6 @@
-import {IBook, IBookColumnVisibility, IUser} from "../../type";
-import React, {useEffect, useMemo, useRef, useState} from "react";
-import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks, getUniqueFieldValues} from "../../API";
+import {IBook, IBookColumnVisibility} from "../../type";
+import React, {useEffect, useRef, useState} from "react";
+import {addBook, checkBooksUpdated, deleteBook, getBook, getBooks} from "../../API";
 import {toast} from "react-toastify";
 import AddBook from "./AddBook";
 import {
@@ -14,7 +14,6 @@ import {
     saveFirstPageToCache,
     isMobile
 } from "@utils";
-import {useReadLocalStorage} from "usehooks-ts";
 import {openConfirmDialog} from "@components/ConfirmDialog";
 import ServerPaginationTable from "@components/table/TableSP";
 import BookDetail from "./BookDetail";
@@ -68,8 +67,6 @@ export default function BookPage() {
     const [filterTimeoutId, setFilterTimeoutId] = useState<NodeJS.Timeout | null>(null);
     const [controller, setController] = useState<AbortController | null>(null);
 
-    const activeUsers: IUser[] | null = useReadLocalStorage("activeUsers");
-    const memoizedActiveUsers = useMemo(() => activeUsers, [JSON.stringify(activeUsers)]);
     const popRef = useRef<HTMLDivElement>(null);
     const exceptRef = useRef<HTMLDivElement>(null);
 
@@ -83,24 +80,6 @@ export default function BookPage() {
     const checkIfFirstPage = () => {
         return JSON.stringify(pagination) === JSON.stringify(DEFAULT_PAGINATION);
     }
-
-    //fetch books when changed user
-    useEffect(() => {
-        // Clear any existing timeout when pagination changes
-        if (timeoutId) clearTimeout(timeoutId);
-
-        // Set a new timeout for debounced fetching
-        const newTimeoutId = setTimeout(() => {
-            fetchBooks();
-        }, 1000); // Wait 1s before making the request
-
-        setTimeoutId(newTimeoutId);
-
-        // Cleanup function to clear timeout if component unmounts or pagination changes again
-        return () => {
-            if (newTimeoutId) clearTimeout(newTimeoutId);
-        };
-    }, [memoizedActiveUsers]);
 
     // ### BOOKS ###
     const fetchBooks = async (): Promise<void> => {
@@ -119,7 +98,7 @@ export default function BookPage() {
             const {status} = await checkBooksUpdated(await getCachedTimestamp());
 
             // For first page only with default pagination and no new books, try to load from cache first
-            if (checkIfFirstPage() && (activeUsers?.length === 0 || !activeUsers) && status === 204) {
+            if (checkIfFirstPage() && status === 204) {
                 const cachedData = await loadFirstPageFromCache();
 
                 if (cachedData) {
@@ -132,7 +111,7 @@ export default function BookPage() {
                 }
             }
 
-            getBooks({...pagination, activeUsers})
+            getBooks({...pagination})
                 .then(({data: {books, count}}: IBook[] | any) => {
                     setCountAll(count);
                     const processedBooks = stringifyAutors(books);
@@ -140,7 +119,7 @@ export default function BookPage() {
                     setClonedBooks(processedBooks);
 
                     // If this is first page without search, update the cache
-                    if (checkIfFirstPage() && (activeUsers?.length === 0 || !activeUsers)) {
+                    if (checkIfFirstPage()) {
                         saveFirstPageToCache(books, count, pagination);
                     }
                 })

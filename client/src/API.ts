@@ -120,7 +120,6 @@ export const getPageByStartingLetter = async (letter: string, pageSize: number, 
 //### BOOK ###
 export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataType>> => {
     try {
-        console.log("API", params?.filters)
         const books: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
             baseUrl + "/books", {
                 params: {

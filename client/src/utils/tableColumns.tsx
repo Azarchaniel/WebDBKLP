@@ -347,8 +347,12 @@ export const ShowHideColumns = <T, >({columns, shown, setShown}: ShowHideColumns
     );
 };
 
+const selectFields = ['autor', 'editor', 'translator', 'ilustrator', 'owner', 'readBy', "language"];
+const inputFields = ["title", "subtitle", "content", "edition.no", "edition.title", "serie.no", "serie.title", "ISBN", "note", "published.publisher", "published.country", "location.city", "location.shelf"];
+const numberFields = ["dimensions.height", "dimensions.width", "dimensions.depth", "dimensions.weight", "numberOfPages", "published.year"];
+const checkboxFields = ["exLibris"];
 
-export const mapColumnVisibilityToFilterValues = (visibility: IBookColumnVisibility): Partial<IUniqueFilterValues> => {
+export const mapColumnName = (columnName: string): string => {
     const mapping: Record<keyof IBookColumnVisibility, keyof IUniqueFilterValues> = {
         autorsFull: "autor",
         editorsFull: "editor",
@@ -374,13 +378,20 @@ export const mapColumnVisibilityToFilterValues = (visibility: IBookColumnVisibil
         location: "location.city"
     };
 
-    return Object.entries(visibility)
-        .filter(([key, value]) => value && mapping[key as keyof IBookColumnVisibility])
-        .reduce((acc, [key]) => {
-            const filterKey = mapping[key as keyof IBookColumnVisibility];
-            if (filterKey) {
-                acc[filterKey] = [];
-            }
-            return acc;
-        }, {} as Partial<IUniqueFilterValues>);
+    return mapping[columnName];
+}
+
+export const mapBookColumnsToFilterTypes = (columnName: string): string => {
+
+    if (selectFields.includes(mapColumnName(columnName))) {
+        return "select";
+    } else if (inputFields.includes(mapColumnName(columnName))) {
+        return "input";
+    } else if (numberFields.includes(mapColumnName(columnName))) {
+        return "number";
+    } else if (checkboxFields.includes(mapColumnName(columnName))) {
+        return "checkbox";
+    } else {
+        return "";
+    }
 };

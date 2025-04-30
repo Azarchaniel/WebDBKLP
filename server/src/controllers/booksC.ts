@@ -162,7 +162,7 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
         // Remove diacritics and special chars from the search term before performing the search
         if (search) {
             query.$or = [
-                { "title": {$regex: diacritics.remove(search as string).replace(/[^a-zA-Z0-9\s]/g, ''), $options: "i"}}
+                { "title": {$regex: diacritics.remove(search as string)?.replace(/[^a-zA-Z0-9\s]/g, ''), $options: "i"}}
             ];
         }
 
@@ -376,7 +376,10 @@ const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> =>
             'deletedAt',
             'createdAt',
             'updatedAt',
-            'wasChecked'
+            'wasChecked',
+            'dimensions',
+            'numberOfPages',
+            'published.year'
         ];
 
         // Reference fields mapping
@@ -453,7 +456,7 @@ const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> =>
             const isReference = !!refInfo;
 
             // Use a safe key for the facet stage (replace dots with underscores for MongoDB)
-            const facetKey = fieldName.replace(/\./g, '_');
+            const facetKey = fieldName?.replace(/\./g, '_');
 
             // Build the pipeline
             let fieldPipeline: any[] = [];
@@ -536,7 +539,7 @@ const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> =>
 
             for (const key in facetResult) {
                 // Convert the facet key back to the original field name (with dots)
-                const originalFieldName = key.replace(/_/g, '.');
+                const originalFieldName = key?.replace(/_/g, '.');
                 const isRef = !!referenceFields[originalFieldName];
 
                 uniqueValues[originalFieldName] = facetResult[key]

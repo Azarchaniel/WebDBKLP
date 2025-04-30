@@ -202,6 +202,17 @@
   color: black;
   height: 2rem;
   margin-bottom: 1rem;
+
+  .filtersBtn {
+    margin-left: 2rem;
+    border: transparent;
+    padding: 0;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--anchor);
+    }
+  }
 }
 
 .tableActionsRight {

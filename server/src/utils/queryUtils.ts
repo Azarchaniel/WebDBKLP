@@ -1,4 +1,4 @@
-import {PipelineStage} from "mongoose";
+import {PipelineStage, Types} from "mongoose";
 import diacritics from "diacritics";
 
 interface SortParam {
@@ -72,10 +72,13 @@ export const buildSearchQuery = (search: string, searchFields: string[]): Record
 
     return {
         $or: searchFields.map(field => ({
-            [`normalizedSearchField.${field}`]: {$regex: diacritics.remove(search).replace(/-/g, ""), $options: "i"}
+            [`normalizedSearchField.${field}`]: {$regex: diacritics.remove(search ?? "")?.replace(/-/g, ""), $options: "i"}
         }))
     };
 };
+
+
+const isMongoId = (value: string): boolean => /^[a-f\d]{24}$/i.test(value);
 
 /**
  * Builds the filter query for MongoDB.
@@ -83,15 +86,34 @@ export const buildSearchQuery = (search: string, searchFields: string[]): Record
  * @param {Array<{id: string, value: string}>} filters - The filters to apply.
  * @returns {Record<string, any>} - The MongoDB filter query.
  */
-const buildFilterQuery = (filters: { id: string; value: string }[]): Record<string, any> => {
+const buildFilterQuery = (filters: { id: string; value: string | string[] }[]): Record<string, any> => {
     if (!filters || filters.length === 0) return {};
 
+    console.log("Filters", filters);
     const filterQuery: Record<string, any> = {};
     filters.forEach(({ id, value }) => {
-        filterQuery[id] = { $regex: diacritics.remove(value).replace(/-/g, ""), $options: "i" };
+        if (id === "exLibris") {
+            if (value === "Y") filterQuery[id] = true;
+            else if (value === "N") filterQuery[id] = false;
+        } else if (value && Array.isArray(value)) {
+            const nonEmptyValues = value.filter(v => v?.trim() !== ""); // Ensure v is a string and not empty
+            if (nonEmptyValues.length > 0) {
+                filterQuery[id] = {
+                    $in: nonEmptyValues.map(v => {
+                        const strValue = v || ""; // Ensure value is a string
+                        return isMongoId(strValue) ? new Types.ObjectId(strValue) : diacritics.remove(String(strValue)).replace(/-/g, "");
+                    })
+                };
+            }
+        } else if (value && value?.trim() !== "") { // Ensure value is a string and not empty
+            const strValue = value || ""; // Ensure value is a string
+            filterQuery[id] = isMongoId(strValue)
+                ? new Types.ObjectId(strValue)
+                : { $regex: diacritics.remove(String(strValue)).replace(/-/g, ""), $options: "i" };
+        }
     });
 
-    console.log("filterQuery", filterQuery);
+    console.log(filterQuery);
     return filterQuery;
 };
 
