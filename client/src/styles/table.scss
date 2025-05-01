@@ -5,6 +5,10 @@
     position: relative;
     flex-direction: column !important;
     padding-bottom: 5rem;
+
+    .filtersBtn {
+      margin-left: 1.2rem !important;
+    }
   }
 
   .tableActionsRight {
@@ -46,6 +50,7 @@
         width: 50% !important;
         min-width: unset !important;
         box-sizing: border-box;
+        height: unset !important;
       }
 
       .TSPtitle {
@@ -111,9 +116,27 @@
   }
 }
 
+
+/* General styles for the table */
+
+.no-data {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 5rem;
+  font-size: 1.25rem;
+  width: 100%;
+  color: black;
+}
+
 .serverPaginationTable {
   color: black;
   width: 100%;
+
+  th[colspan]:not([colspan="1"]):not([colspan="2"]),
+  th:empty {
+    height: 1rem !important;
+  }
 
   .tableHeader {
     border-top-left-radius: 1rem;
@@ -123,14 +146,27 @@
       border: 1px solid var(--anchor);
       background-color: var(--anchor);
       color: white;
-      max-height: 2rem !important;
       padding: 0 0.5rem;
+      height: 4rem;
     }
 
     // it's here becuase of Dimensions
     th[colspan]:not([colspan="1"]) { // select element that has colspan and it is not 1
       vertical-align: middle;
       text-align: center;
+      height: 1rem !important;
+    }
+
+    th:empty,
+    th[colspan]:not([colspan="1"]) {
+      height: 1rem !important;
+      position: relative;
+      div {
+        position: absolute;
+        top: 1.25rem;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
     }
 
     .TSP {
@@ -153,7 +189,6 @@
   }
 
   tr {
-    height: 4rem;
     pointer-events: auto;
 
     &:hover {
@@ -163,6 +198,7 @@
   }
 
   td {
+    height: 4rem;
     border-bottom: 2px solid lightgray;
     padding: 0 0.5rem;
     position: relative;
@@ -193,7 +229,6 @@
   }
 }
 
-/* Rest of your CSS remains unchanged */
 .headerTitleAction {
   display: flex;
   flex-direction: row;
@@ -261,6 +296,7 @@
     flex-direction: row;
     align-items: center;
   }
+
   .otherTableControl {
     display: flex;
     flex-direction: row;
@@ -269,6 +305,7 @@
     span {
       margin-right: 1rem;
     }
+
     select {
       margin-right: 2rem;
     }

@@ -60,6 +60,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
         const [filtering, setFiltering] = useState([]);
         const [dataForFilterInputs, setDataForFilterInputs] = useState(null);
         const [showFilters, setShowFilters] = useState(false);
+        const [numberFilterStates, setNumberFilterStates] = useState<Record<string, {value: string, operator: string}>>({});
 
         const maxPage = Math.ceil(totalCount / currentPageSize);
 
@@ -167,14 +168,12 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                     }
                                 });
                             }}
-                            placeholder={`Vyhľadaj...`}
                         />
                     );
                 case "select":
                     return (
                         <LazyLoadMultiselect
                             value={(filtering as any[]).find((f) => f.id === columnName)?.value || ''}
-                            placeholder="Vyhľadaj..."
                             onChange={(e) => {
                                 const value = e.value;
                                 setFiltering((prev: any) => {
@@ -195,6 +194,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                             name={columnName}
                             displayValue="name"
                             options={dataForFilterInputs?.[mapColumnName(columnName)] || []}
+                            placeholder={""}
                         />
 
                     )
@@ -232,25 +232,68 @@ const ServerPaginationTable: React.FC<PropsMT> =
                     const numValue = numFilter?.value || '';
                     const numOperator = numFilter?.operator || '=';
 
+                    const currentNumFilter = numberFilterStates[columnName] || {value: numValue, operator: numOperator};
+
+                    const handleOperatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+                        const operator = e.target.value;
+                        const value = currentNumFilter.value;
+
+                        // Update local state
+                        setNumberFilterStates(prev => ({
+                            ...prev,
+                            [columnName]: {value, operator}
+                        }));
+
+                        // Only update filter if both are set
+                        if (value) {
+                            setFiltering((prev: any) => {
+                                const existingFilter = prev.find((f: any) => f.id === columnName);
+                                if (existingFilter) {
+                                    return prev.map((f: any) =>
+                                        f.id === columnName ? {...f, value, operator} : f
+                                    );
+                                } else {
+                                    return [...prev, {id: columnName, value, operator}];
+                                }
+                            });
+                        }
+                    };
+
+                    const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                        const value = e.target.value;
+                        const operator = currentNumFilter.operator;
+
+                        // Update local state
+                        setNumberFilterStates(prev => ({
+                            ...prev,
+                            [columnName]: {value, operator}
+                        }));
+
+                        // Handle filter update based on value
+                        if (value === '') {
+                            setFiltering((prev: any) => prev.filter((f: any) => f.id !== columnName));
+                        } else if (operator) {
+                            setFiltering((prev: any) => {
+                                const existingFilter = prev.find((f: any) => f.id === columnName);
+                                if (existingFilter) {
+                                    return prev.map((f: any) =>
+                                        f.id === columnName ? {...f, value, operator} : f
+                                    );
+                                } else {
+                                    return [...prev, {id: columnName, value, operator}];
+                                }
+                            });
+                        }
+                    };
+
                     return (
-                        <div className="number-filter">
+                        <div className="d-flex number-filter">
                             <select
                                 className="form-control operator-select"
-                                value={numOperator}
-                                onChange={(e) => {
-                                    const operator = e.target.value;
-                                    setFiltering((prev: any) => {
-                                        const existingFilter = prev.find((f: any) => f.id === columnName);
-                                        if (existingFilter) {
-                                            return prev.map((f: any) =>
-                                                f.id === columnName ? {...f, operator} : f
-                                            );
-                                        } else {
-                                            return [...prev, {id: columnName, value: '', operator}];
-                                        }
-                                    });
-                                }}
+                                value={currentNumFilter.operator}
+                                onChange={handleOperatorChange}
                                 style={{width: "40px", flex: "0 0 auto", padding: "0 4px"}}
+                                title="Zvoľte operátor porovnania"
                             >
                                 <option value="=" title="má rovnako">=</option>
                                 <option value="<" title="má menej než">{"<"}</option>
@@ -259,24 +302,8 @@ const ServerPaginationTable: React.FC<PropsMT> =
                             <input
                                 className="form-control"
                                 type="number"
-                                value={numValue}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    setFiltering((prev: any) => {
-                                        const existingFilter = prev.find((f: any) => f.id === columnName);
-                                        if (existingFilter) {
-                                            if (value === '') {
-                                                return prev.filter((f: any) => f.id !== columnName);
-                                            } else {
-                                                return prev.map((f: any) =>
-                                                    f.id === columnName ? {...f, value} : f
-                                                );
-                                            }
-                                        } else {
-                                            return [...prev, {id: columnName, value, operator: '='}];
-                                        }
-                                    });
-                                }}
+                                value={currentNumFilter.value}
+                                onChange={handleValueChange}
                                 placeholder="Vyhľadaj..."
                                 style={{flex: "1 1 auto"}}
                             />
@@ -398,33 +425,38 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                 </thead>
 
                                 <tbody style={{pointerEvents: "none"}}>
-                                {table.getRowModel().rows.map((row) => (
-                                    <React.Fragment key={row.original._id}>
-                                        <tr key={row.id}>
-                                            {row.getVisibleCells().map((cell) => (
-                                                <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
-                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                </td>
-                                            ))}
-                                            {rowActions &&
-                                                <td key={`${row.id}-actions`} className="TSPactionsRow">
-                                                    {rowActions(row.original._id, () => row.toggleExpanded())}
-                                                </td>
-                                            }
-                                        </tr>
-                                        {row.getIsExpanded() && (
-                                            <tr key={`${row.id}-expanded`} style={{pointerEvents: "none"}}>
-                                                {/* +1 is because of Actions column */}
-                                                <td colSpan={row.getAllCells().length + 1}
-                                                    style={{pointerEvents: "none"}}>
-                                                    {expandedElement && expandedElement(row.original)}
-                                                </td>
+                                    {table.getRowModel().rows.map((row) => (
+                                        <React.Fragment key={row.original._id}>
+                                            <tr key={row.id}>
+                                                {row.getVisibleCells().map((cell) => (
+                                                    <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
+                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                    </td>
+                                                ))}
+                                                {rowActions &&
+                                                    <td key={`${row.id}-actions`} className="TSPactionsRow">
+                                                        {rowActions(row.original._id, () => row.toggleExpanded())}
+                                                    </td>
+                                                }
                                             </tr>
-                                        )}
-                                    </React.Fragment>
-                                ))}
+                                            {row.getIsExpanded() && (
+                                                <tr key={`${row.id}-expanded`} style={{pointerEvents: "none"}}>
+                                                    {/* +1 is because of Actions column */}
+                                                    <td colSpan={row.getAllCells().length + 1}
+                                                        style={{pointerEvents: "none"}}>
+                                                        {expandedElement && expandedElement(row.original)}
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))}
                                 </tbody>
                             </table>
+                            {data.length === 0 && (
+                                <div className="no-data">
+                                    Žiadne dáta
+                                </div>
+                            )}
                             <Pagination
                                 key={`pagination-${currentPage}-${currentPageSize}`}
                                 currentPage={currentPage}

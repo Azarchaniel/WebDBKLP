@@ -341,23 +341,29 @@ export const LazyLoadMultiselect = React.memo(({
                     onClick={handleInputClick}
                 />
             </div>
+            <div className="chip-dropdown-indicator" onClick={handleInputClick}>
+                <i className={`fa fa-chevron-${isOpen ? 'up' : 'down'}`}></i>
+            </div>
             {isOpen && (
                 <div
                     ref={menuRef}
                     className={`autocomplete-menu ${dropdownPosition === 'top' ? 'top' : ''}`}
                     style={{...dropdownStyle, position: "fixed"}}
                 >
+                    {/* no data */}
                     {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && (
                         <div className="autocomplete-item empty">
                             {emptyRecordMsg}
                         </div>
                     )}
+                    {/* create new */}
                     {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && onNew && (
                         <div className="autocomplete-item create-new" onClick={handleCreateNew}
                              title="`Meno Priezvisko` alebo `Priezvisko, Meno` alebo `Priezvisko`">
                             Vytvoriť "{searchQuery}"
                         </div>
                     )}
+                    {/* data and loading more */}
                     {filteredOptionsToDisplay.length > 0 && (
                         <>
                             {filteredOptionsToDisplay.map((option, index) => (

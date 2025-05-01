@@ -119,7 +119,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
 
     return (
         <>
-            <button onClick={toggleScanning} type="button" className="isbnScanner" title="Scan ISBN">
+            <button onClick={toggleScanning} type="button" className="isbnScanner" title="Naskenuj ISBN">
                 <FontAwesomeIcon icon={faBarcode}/>
             </button>
             {isScanning && (
