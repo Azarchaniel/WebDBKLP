@@ -175,7 +175,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                     onChange={(data) => {
                         setFormData({
                             ...formData,
-                            "published.country": data.value.map(v => v.key)
+                            "published.country": data.value.map(v => (v as any).key)
                         })
                     }}
                     name="published.country"

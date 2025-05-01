@@ -1,5 +1,12 @@
 @import "variables";
 
+.filtersBtn {
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .addBtnTable {
   background-color: black;
   border: none;

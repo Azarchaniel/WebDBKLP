@@ -42,6 +42,7 @@ interface IPagination {
     pageSize: number;
     sorting: SortingState;
     search?: string;
+    filters?: {id: string, value: string}[];
 }
 
 export const DEFAULT_PAGINATION: IPagination = Object.freeze({
@@ -51,7 +52,8 @@ export const DEFAULT_PAGINATION: IPagination = Object.freeze({
     sorting: [{
         id: "title",
         desc: false
-    }] as SortingState
+    }] as SortingState,
+    filters: []
 });
 
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];

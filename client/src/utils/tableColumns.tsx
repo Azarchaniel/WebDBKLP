@@ -1,5 +1,14 @@
 import {ColumnDef, createColumnHelper} from "@tanstack/react-table";
-import {IAutor, IBook, ILangCode, ILocation, IPublished, IUser} from "../type";
+import {
+    IAutor,
+    IBook,
+    IBookColumnVisibility,
+    ILangCode,
+    ILocation,
+    IPublished,
+    IUniqueFilterValues,
+    IUser
+} from "../type";
 import {formatDimension, getBookLocation, tableHeaderColor} from "@utils";
 import React, {useState} from "react";
 import {countryCode, langCode} from "./locale";
@@ -336,4 +345,53 @@ export const ShowHideColumns = <T, >({columns, shown, setShown}: ShowHideColumns
             {getColumnsForHidden()}
         </>
     );
+};
+
+const selectFields = ['autor', 'editor', 'translator', 'ilustrator', 'owner', 'readBy', "language"];
+const inputFields = ["title", "subtitle", "content", "edition.no", "edition.title", "serie.no", "serie.title", "ISBN", "note", "published.publisher", "published.country", "location.city", "location.shelf"];
+const numberFields = ["dimensions.height", "dimensions.width", "dimensions.depth", "dimensions.weight", "numberOfPages", "published.year"];
+const checkboxFields = ["exLibris"];
+
+export const mapColumnName = (columnName: string): string => {
+    const mapping: Record<keyof IBookColumnVisibility, keyof IUniqueFilterValues> = {
+        autorsFull: "autor",
+        editorsFull: "editor",
+        translatorsFull: "translator",
+        ilustratorsFull: "ilustrator",
+        title: "title",
+        subtitle: "subtitle",
+        content: "content",
+        ISBN: "ISBN",
+        language: "language",
+        numberOfPages: "numberOfPages",
+        height: "dimensions.height",
+        width: "dimensions.width",
+        depth: "dimensions.depth",
+        weight: "dimensions.weight",
+        edition: "edition.title",
+        serie: "serie.title",
+        published: "published.publisher",
+        exLibris: "exLibris",
+        ownersFull: "owner",
+        readBy: "readBy",
+        note: "note",
+        location: "location.city"
+    };
+
+    return mapping[columnName];
+}
+
+export const mapBookColumnsToFilterTypes = (columnName: string): string => {
+
+    if (selectFields.includes(mapColumnName(columnName))) {
+        return "select";
+    } else if (inputFields.includes(mapColumnName(columnName))) {
+        return "input";
+    } else if (numberFields.includes(mapColumnName(columnName))) {
+        return "number";
+    } else if (checkboxFields.includes(mapColumnName(columnName))) {
+        return "checkbox";
+    } else {
+        return "";
+    }
 };

@@ -65,7 +65,7 @@ const normalizeBook = (data: any): IBook => {
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {page = "1", pageSize = "10_000", search = "", sorting, filterUsers} = req.query;
+        const {page = "1", pageSize = "10_000", search = "", sorting, filterUsers, filters = []} = req.query;
 
         const searchFields = [
             "autor", "editor", "ilustrator", "translator", "title", "subtitle", "content", "edition", "serie", "note", "published", "ISBN"
@@ -95,7 +95,8 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
                 pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 10_000 : parsedPageSize,
                 search: search as string,
                 sorting: sorting as string,
-                searchFields
+                searchFields,
+                filters: (filters as any)
             },
             lookupStages,
             additionalQuery
@@ -113,7 +114,11 @@ const checkBooksUpdated = async (req: Request, res: Response): Promise<void> => 
         const { dataFrom } = req.query;
 
         // Find the most recently updated book
-        const latestUpdate: {updatedAt: Date | undefined} = await Book.findOne().sort({ updatedAt: -1 }).select('updatedAt').lean() as unknown as {updatedAt: Date | undefined};
+        const latestUpdate: {
+            updatedAt: Date | undefined
+        } = await Book.findOne().sort({updatedAt: -1}).select('updatedAt').lean() as unknown as {
+            updatedAt: Date | undefined
+        };
 
         if (dataFrom && latestUpdate?.updatedAt && !isNaN(Number(dataFrom))) {
             const dataFromNumber = Number(dataFrom);
@@ -157,7 +162,7 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
         // Remove diacritics and special chars from the search term before performing the search
         if (search) {
             query.$or = [
-                { "title": {$regex: diacritics.remove(search as string).replace(/[^a-zA-Z0-9\s]/g, ''), $options: "i"}}
+                { "title": {$regex: diacritics.remove(search as string)?.replace(/[^a-zA-Z0-9\s]/g, ''), $options: "i"}}
             ];
         }
 
@@ -168,8 +173,16 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
         ];
         const paginationPipeline = buildPaginationPipeline(validPage, validPageSize, {title: 1})
 
-        const books = await Book.aggregate([...pipeline, ...paginationPipeline]).collation({ locale: "cs", strength: 2, numericOrdering: true });
-        const count = await Book.aggregate(pipeline).collation({ locale: "cs", strength: 2, numericOrdering: true }).count("count");
+        const books = await Book.aggregate([...pipeline, ...paginationPipeline]).collation({
+            locale: "cs",
+            strength: 2,
+            numericOrdering: true
+        });
+        const count = await Book.aggregate(pipeline).collation({
+            locale: "cs",
+            strength: 2,
+            numericOrdering: true
+        }).count("count");
         const totalCount = count[0]?.count ?? 0;
 
         res.status(200).json({books, count: totalCount});
@@ -181,10 +194,10 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
 
 const getPageByStartingLetter = async (req: Request, res: Response): Promise<void> => {
     try {
-        let { pageSize = "10_000", filterUsers, letter = "", model } = req.query;
+        let {pageSize = "10_000", filterUsers, letter = "", model} = req.query;
 
         if (!letter || letter.length !== 1) {
-            res.status(400).json({ message: "Invalid letter parameter." });
+            res.status(400).json({message: "Invalid letter parameter."});
             return;
         }
 
@@ -205,7 +218,7 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
                 lookupColumn = "title";
                 break;
             default:
-                res.status(400).json({ message: "Invalid model parameter." });
+                res.status(400).json({message: "Invalid model parameter."});
                 return;
         }
 
@@ -347,6 +360,220 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
         throw "Problem at web scrapping: " + err;
     }
 }
+
+const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> => {
+    try {
+        const facetStage: Record<string, any[]> = {};
+
+        // --- Fields to explicitly exclude ---
+        const excludedFields = [
+            '_id',
+            'normalizedSearchField',
+            'picture',
+            'hrefDatabazeKnih',
+            'hrefGoodReads',
+            '__v',
+            'deletedAt',
+            'createdAt',
+            'updatedAt',
+            'wasChecked',
+            'dimensions',
+            'numberOfPages',
+            'published.year'
+        ];
+
+        // Reference fields mapping
+        const referenceFields: Record<string, { modelName: string, collectionName: string }> = {
+            'autor': { modelName: 'Autor', collectionName: Autor.collection.name },
+            'editor': { modelName: 'Autor', collectionName: Autor.collection.name },
+            'translator': { modelName: 'Autor', collectionName: Autor.collection.name },
+            'ilustrator': { modelName: 'Autor', collectionName: Autor.collection.name },
+            'owner': { modelName: 'User', collectionName: User.collection.name },
+            'readBy': { modelName: 'User', collectionName: User.collection.name },
+        };
+
+        // Define nested schema fields based on the provided schema
+        const nestedSchemaFields = [
+            'edition',
+            'serie',
+            'dimensions',
+            'published',
+            'location'
+        ];
+
+        // Track all fields including nested ones to process separately
+        const allFields: string[] = [];
+
+        // First, collect all schema paths including nested ones
+        for (const path in Book.schema.paths) {
+            if (excludedFields.includes(path)) {
+                continue;
+            }
+
+            // Check if this is a top-level field that has a nested schema
+            if (nestedSchemaFields.includes(path)) {
+                // For nested schema fields, get their sub-paths
+                const subSchema = Book.schema.paths[path].schema;
+                if (subSchema) {
+                    // For each sub-path, create a dotted path notation
+                    for (const subPath in subSchema.paths) {
+                        if (subPath !== '_id' && !subPath.startsWith('$')) {
+                            const fullPath = `${path}.${subPath}`;
+                            allFields.push(fullPath);
+                        }
+                    }
+                }
+            } else {
+                // Regular field
+                allFields.push(path);
+            }
+        }
+
+        // Now process each field (including nested ones) to build facet pipelines
+        for (const fieldName of allFields) {
+            // Skip excluded fields
+            if (excludedFields.includes(fieldName)) {
+                continue;
+            }
+
+            // Determine if this is a nested field
+            const isNestedField = fieldName.includes('.');
+
+            // For nested fields, we need to check the parent field's schema
+            let isArrayField = false;
+            if (isNestedField) {
+                const [parentField] = fieldName.split('.');
+                const parentSchema = Book.schema.paths[parentField];
+                isArrayField = parentSchema && parentSchema.instance === 'Array';
+            } else {
+                // For regular fields, check directly
+                const fieldSchema = Book.schema.paths[fieldName];
+                isArrayField = fieldSchema && fieldSchema.instance === 'Array';
+            }
+
+            // Check if this is a reference field
+            const refInfo = referenceFields[fieldName];
+            const isReference = !!refInfo;
+
+            // Use a safe key for the facet stage (replace dots with underscores for MongoDB)
+            const facetKey = fieldName?.replace(/\./g, '_');
+
+            // Build the pipeline
+            let fieldPipeline: any[] = [];
+            let groupTargetField: string;
+            let sortTargetField = '_id';
+
+            // For nested fields, we need to handle them differently
+            if (isNestedField) {
+                // Extract the value using $project first
+                groupTargetField = `$${fieldName}`;
+
+                // Match stage for nested fields
+                const matchStage = {
+                    $match: {
+                        $expr: {
+                            $ne: [{ $ifNull: [`$${fieldName}`, null] }, null]
+                        }
+                    }
+                };
+                fieldPipeline.push(matchStage);
+            } else {
+                groupTargetField = `$${fieldName}`;
+
+                // Match stage for regular fields
+                const matchConditions: any = { [fieldName]: { $exists: true, $ne: null } };
+                const matchStage = { $match: matchConditions };
+
+                // Handle array fields
+                if (isArrayField) {
+                    fieldPipeline.push({ $unwind: `$${fieldName}` });
+                    fieldPipeline.push(matchStage);
+                } else {
+                    fieldPipeline.push(matchStage);
+                }
+            }
+
+            // Handle reference fields with lookup
+            if (isReference && refInfo) {
+                const lookupAsField = `${facetKey}_populated`;
+                groupTargetField = `$${lookupAsField}`;
+                sortTargetField = refInfo.modelName === 'Autor' ? '_id.lastName' : '_id.firstName';
+
+                fieldPipeline.push({
+                    $lookup: {
+                        from: refInfo.collectionName,
+                        localField: fieldName,
+                        foreignField: '_id',
+                        as: lookupAsField
+                    }
+                });
+                fieldPipeline.push({
+                    $unwind: { path: `$${lookupAsField}`, preserveNullAndEmptyArrays: true }
+                });
+                fieldPipeline.push({ $match: { [lookupAsField]: { $ne: null } } });
+            }
+
+            // Grouping stage
+            fieldPipeline.push({ $group: { _id: groupTargetField } });
+
+            // Sorting stage
+            fieldPipeline.push({ $sort: { [sortTargetField]: 1 } });
+
+            // Projection stage
+            fieldPipeline.push({ $project: { _id: 0, value: "$_id" } });
+
+            // Add the pipeline to the facet stage
+            facetStage[facetKey] = fieldPipeline;
+        }
+
+        // Execute the aggregation
+        const results = await Book.aggregate([
+            { $match: { deletedAt: { $eq: null } } },
+            { $facet: facetStage }
+        ]);
+
+        // Process and format the results
+        const uniqueValues: Record<string, any[]> = {};
+        if (results.length > 0) {
+            const facetResult = results[0];
+
+            for (const key in facetResult) {
+                // Convert the facet key back to the original field name (with dots)
+                const originalFieldName = key?.replace(/_/g, '.');
+                const isRef = !!referenceFields[originalFieldName];
+
+                uniqueValues[originalFieldName] = facetResult[key]
+                    .map((item: { value: any }) => {
+                        let value = item.value;
+
+                        // Handle reference fields
+                        if (isRef && typeof value === 'object' && value !== null) {
+                            return {
+                                _id: value._id?.toString(),
+                                name: value.name || `${value.lastName + ", " || ''}${value.firstName || ''}`.trim() || value.title || value._id?.toString()
+                            };
+                        }
+
+                        // Convert MongoDB specific types
+                        if (value instanceof Types.ObjectId) {
+                            return value.toString();
+                        }
+                        if (value instanceof mongoose.Types.Decimal128) {
+                            return value.toString();
+                        }
+
+                        return value;
+                    })
+                    .filter((value: any) => value !== null && value !== undefined);
+            }
+        }
+        res.status(200).json(uniqueValues);
+
+    } catch (error) {
+        console.error("Error fetching unique field values:", error);
+        res.status(500).json({message: "Internal server error"});
+    }
+};
 
 const dashboard = {
     getDimensionsStatistics: async (_: Request, res: Response): Promise<void> => {
@@ -858,4 +1085,16 @@ const dashboard = {
 
 }
 
-export {getAllBooks, addBook, updateBook, deleteBook, getBook, dashboard, getInfoFromISBN, getBooksByIds, checkBooksUpdated, getPageByStartingLetter}
+export {
+    getAllBooks,
+    addBook,
+    updateBook,
+    deleteBook,
+    getBook,
+    dashboard,
+    getInfoFromISBN,
+    getBooksByIds,
+    checkBooksUpdated,
+    getPageByStartingLetter,
+    getUniqueFieldValues
+}

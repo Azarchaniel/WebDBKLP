@@ -3,7 +3,6 @@ import "../styles/font-awesome/css/all.css";
 import "../styles/sidebar.scss";
 import {ISideMenuItems} from "../type";
 import {Link, useLocation} from "react-router-dom";
-import {ActivateUserList} from "./ActivateUserList";
 import {useClickOutside} from "@hooks";
 
 interface HamburgerToXProps {
@@ -84,7 +83,6 @@ const Sidebar = () => {
                         {sidebarOpened && <span>{item.title}</span>}
                     </Link>
                 ))}
-                <ActivateUserList />
             </nav>
         </>
     )
