@@ -52,7 +52,9 @@ export const parseSorting = (sorting: string | SortParam[] | undefined): { [key:
  * @param {object} sortOptions - The MongoDB sort object.
  * @returns {PipelineStage[]} - The pagination pipeline stages.
  */
-export const buildPaginationPipeline = (page: number, pageSize: number, sortOptions: { [key: string]: 1 | -1 }): PipelineStage[] => {
+export const buildPaginationPipeline = (page: number, pageSize: number, sortOptions: {
+    [key: string]: 1 | -1
+}): PipelineStage[] => {
     return [
         {$sort: sortOptions},
         {$skip: (page - 1) * pageSize},
@@ -72,11 +74,26 @@ export const buildSearchQuery = (search: string, searchFields: string[]): Record
 
     return {
         $or: searchFields.map(field => ({
-            [`normalizedSearchField.${field}`]: {$regex: diacritics.remove(search ?? "")?.replace(/-/g, ""), $options: "i"}
+            [`normalizedSearchField.${field}`]: {
+                $regex: diacritics.remove(search ?? "")?.replace(/-/g, ""),
+                $options: "i"
+            }
         }))
     };
 };
 
+const buildFilterCondition = (field: string, value: any, operator?: string): any => {
+    if (!operator || operator === '=') {
+        return {[field]: value};
+    } else if (operator === '<') {
+        return {[field]: {$lt: value}};
+    } else if (operator === '>') {
+        return {[field]: {$gt: value}};
+    }
+
+    // Default case - exact match
+    return {[field]: value};
+};
 
 const isMongoId = (value: string): boolean => /^[a-f\d]{24}$/i.test(value);
 
@@ -86,30 +103,38 @@ const isMongoId = (value: string): boolean => /^[a-f\d]{24}$/i.test(value);
  * @param {Array<{id: string, value: string}>} filters - The filters to apply.
  * @returns {Record<string, any>} - The MongoDB filter query.
  */
-const buildFilterQuery = (filters: { id: string; value: string | string[] }[]): Record<string, any> => {
+const buildFilterQuery = (filters: {
+    id: string;
+    value: string | string[];
+    operator?: string
+}[]): Record<string, any> => {
     if (!filters || filters.length === 0) return {};
 
     console.log("Filters", filters);
     const filterQuery: Record<string, any> = {};
-    filters.forEach(({ id, value }) => {
-        if (id === "exLibris") {
-            if (value === "Y") filterQuery[id] = true;
-            else if (value === "N") filterQuery[id] = false;
-        } else if (value && Array.isArray(value)) {
-            const nonEmptyValues = value.filter(v => v?.trim() !== ""); // Ensure v is a string and not empty
-            if (nonEmptyValues.length > 0) {
-                filterQuery[id] = {
-                    $in: nonEmptyValues.map(v => {
-                        const strValue = v || ""; // Ensure value is a string
-                        return isMongoId(strValue) ? new Types.ObjectId(strValue) : diacritics.remove(String(strValue)).replace(/-/g, "");
-                    })
-                };
+    filters.forEach(({id, value, operator}) => {
+        if (value !== undefined && value !== null && value !== '') {
+            if (id === "exLibris") {
+                filterQuery[id] = value === 'Y';
+            } else if (operator) {
+                Object.assign(filterQuery, buildFilterCondition(id, Number(value), operator));
+            } else if (value && Array.isArray(value)) {
+                // Handle array values (multi-select filters)
+                const nonEmptyValues = value.filter(v => v?.trim() !== "");
+                if (nonEmptyValues.length > 0) {
+                    filterQuery[id] = {
+                        $in: nonEmptyValues.map(v => {
+                            const strValue = v || ""; // Ensure value is a string
+                            return isMongoId(strValue) ? new Types.ObjectId(strValue) : diacritics.remove(String(strValue)).replace(/-/g, "");
+                        })
+                    };
+                }
+            } else if (value && value?.trim() !== "") {
+                const strValue = value || ""; // Ensure value is a string
+                filterQuery[id] = isMongoId(strValue)
+                    ? new Types.ObjectId(strValue)
+                    : {$regex: diacritics.remove(String(strValue)).replace(/-/g, ""), $options: "i"};
             }
-        } else if (value && value?.trim() !== "") { // Ensure value is a string and not empty
-            const strValue = value || ""; // Ensure value is a string
-            filterQuery[id] = isMongoId(strValue)
-                ? new Types.ObjectId(strValue)
-                : { $regex: diacritics.remove(String(strValue)).replace(/-/g, ""), $options: "i" };
         }
     });
 
@@ -143,7 +168,11 @@ export const fetchDataWithPagination = async (
 ): Promise<{ data: any[], count: number, latestUpdate?: Date | undefined }> => {
     const {page = "1", pageSize = "10_000", search = "", sorting, dataFrom, searchFields = [], filters = []} = options;
 
-    const latestUpdate: { updatedAt: Date | undefined } = await model.findOne().sort({ updatedAt: -1 }).select('updatedAt').lean() as unknown as { updatedAt: Date | undefined };
+    const latestUpdate: {
+        updatedAt: Date | undefined
+    } = await model.findOne().sort({updatedAt: -1}).select('updatedAt').lean() as unknown as {
+        updatedAt: Date | undefined
+    };
 
     // Check if dataFrom is provided and if it's more recent than the latest update
     if (dataFrom && latestUpdate?.updatedAt && new Date(dataFrom as string) >= new Date(latestUpdate.updatedAt)) {
@@ -169,7 +198,11 @@ export const fetchDataWithPagination = async (
         ...lookupStages
     ];
 
-    const data = await model.aggregate([...pipeline, ...paginationPipeline]).collation({locale: "cs", strength: 2, numericOrdering: true});
+    const data = await model.aggregate([...pipeline, ...paginationPipeline]).collation({
+        locale: "cs",
+        strength: 2,
+        numericOrdering: true
+    });
     const count = (await model.aggregate(pipeline)).length;
 
     return {data, count, latestUpdate: latestUpdate?.updatedAt};

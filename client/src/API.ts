@@ -45,7 +45,7 @@ axiosInstance.interceptors.request.use(
             }
 
             if (exp - now < 60) {
-                console.warn("Token is about to expire!");
+                //console.warn("Token is about to expire!");
 
                 const response = await axios.post(baseUrl + '/refresh-token', {
                     refreshToken: localStorage.getItem('refreshToken'),

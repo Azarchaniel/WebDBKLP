@@ -85,28 +85,35 @@ const ServerPaginationTable: React.FC<PropsMT> =
         useEffect(() => {
             if (filteringChange) {
                 // Map any object values to just their _id before sending to the parent component
-                const processedFilters = filtering?.map((filter: { id: string, value: string }) => {
+                const processedFilters = filtering?.map((filter: { id: string, value: any, operator?: string }) => {
+                    // Process the value based on its type
+                    let processedFilter = {...filter};
+
                     if (filter.value && typeof filter.value === 'object') {
                         // If value is an array of objects with _id
                         if (Array.isArray(filter.value) && filter.value[0] && (filter.value[0] as any)._id) {
-                            return {
+                            processedFilter = {
                                 ...filter,
                                 value: (filter.value as any[]).map((item: any) => item._id)
                             };
                         }
                         // If value is a single object with _id
                         else if ((filter.value as any)._id) {
-                            return {
+                            processedFilter = {
                                 ...filter,
                                 value: (filter.value as any)._id
                             };
                         }
                     }
-                    return filter;
+
+                    // Map column ID to the backend field name
+                    return {
+                        ...processedFilter,
+                        id: mapColumnName(filter.id)
+                    };
                 });
 
-
-                filteringChange(processedFilters.map(filter => ({...filter, id: mapColumnName(filter.id)})));
+                filteringChange(processedFilters);
             }
         }, [filtering]);
 
@@ -181,7 +188,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                             );
                                         }
                                     } else {
-                                        return [...prev, {id: columnName, value: value.map(v => (v as any)._id)}];
+                                        return [...prev, {id: columnName, value: value}];
                                     }
                                 });
                             }}
@@ -206,11 +213,11 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                             return prev.filter((f: any) => f.id !== columnName);
                                         } else {
                                             return prev.map((f: any) =>
-                                                f.id === columnName ? { ...f, value: value} : f
+                                                f.id === columnName ? {...f, value: value} : f
                                             );
                                         }
                                     } else {
-                                        return [...prev, { id: columnName, value: value}];
+                                        return [...prev, {id: columnName, value: value}];
                                     }
                                 });
                             }}
@@ -219,6 +226,61 @@ const ServerPaginationTable: React.FC<PropsMT> =
                             <option value="Y">Áno</option>
                             <option value="N">Nie</option>
                         </select>
+                    );
+                case "number":
+                    const numFilter = (filtering as any[]).find((f) => f.id === columnName);
+                    const numValue = numFilter?.value || '';
+                    const numOperator = numFilter?.operator || '=';
+
+                    return (
+                        <div className="number-filter">
+                            <select
+                                className="form-control operator-select"
+                                value={numOperator}
+                                onChange={(e) => {
+                                    const operator = e.target.value;
+                                    setFiltering((prev: any) => {
+                                        const existingFilter = prev.find((f: any) => f.id === columnName);
+                                        if (existingFilter) {
+                                            return prev.map((f: any) =>
+                                                f.id === columnName ? {...f, operator} : f
+                                            );
+                                        } else {
+                                            return [...prev, {id: columnName, value: '', operator}];
+                                        }
+                                    });
+                                }}
+                                style={{width: "40px", flex: "0 0 auto", padding: "0 4px"}}
+                            >
+                                <option value="=" title="má rovnako">=</option>
+                                <option value="<" title="má menej než">{"<"}</option>
+                                <option value=">" title="má viac než">{">"}</option>
+                            </select>
+                            <input
+                                className="form-control"
+                                type="number"
+                                value={numValue}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setFiltering((prev: any) => {
+                                        const existingFilter = prev.find((f: any) => f.id === columnName);
+                                        if (existingFilter) {
+                                            if (value === '') {
+                                                return prev.filter((f: any) => f.id !== columnName);
+                                            } else {
+                                                return prev.map((f: any) =>
+                                                    f.id === columnName ? {...f, value} : f
+                                                );
+                                            }
+                                        } else {
+                                            return [...prev, {id: columnName, value, operator: '='}];
+                                        }
+                                    });
+                                }}
+                                placeholder="Vyhľadaj..."
+                                style={{flex: "1 1 auto"}}
+                            />
+                        </div>
                     );
                 default:
                     return null;
@@ -266,7 +328,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                     }
                                 }}
                             >
-                                <i className="fas fa-filter" title="Filtre" />
+                                <i className="fas fa-filter" title="Filtre"/>
                             </button>}
                     </div>
                 </div>
@@ -279,12 +341,12 @@ const ServerPaginationTable: React.FC<PropsMT> =
                         <>
                             <table className="serverPaginationTable">
                                 <thead className="tableHeader">
-                                {table.getHeaderGroups().map((headerGroup) => (
-                                    <>
+                                {table.getHeaderGroups().map((headerGroup, index) => (
+                                    <React.Fragment key={headerGroup.id}>
                                         <tr key={headerGroup.id}>
                                             {headerGroup.headers.map((header) => (
                                                 <th key={`${headerGroup.id}-${header.id}`} colSpan={header.colSpan}
-                                                    className={"TSP" + header.column.id}>
+                                                    className={`TSP${header.column.id} ${showFilters ? "filter-header" : ""}`}>
                                                     {header.isPlaceholder ? null : (
                                                         <div
                                                             className={
@@ -319,20 +381,19 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                             ))}
                                             <th key={`${headerGroup.id}-actions`} className="TSPactionsRow"/>
                                         </tr>
-                                        {showFilters && <tr key={headerGroup.id + "-filter"}>
-                                            <>
+                                        {showFilters && index === table.getHeaderGroups().length - 1 && (
+                                            <tr key={headerGroup.id + "-filter"} className="filter-header">
                                                 {headerGroup.headers.map((header) => (
-
-                                                    <th>{
-                                                        header.column.getCanFilter() && (
+                                                    <th key={`${headerGroup.id}-${header.id}-filter`}>
+                                                        {header.column.getCanFilter() && (
                                                             getInputForColumn(header.column.id)
-                                                        )
-                                                    }</th>)
-                                                )}
-                                                <th></th>
-                                            </>
-                                        </tr>}
-                                    </>
+                                                        )}
+                                                    </th>
+                                                ))}
+                                                <th key={`${headerGroup.id}-actions-filter`}></th>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
                                 ))}
                                 </thead>
 
