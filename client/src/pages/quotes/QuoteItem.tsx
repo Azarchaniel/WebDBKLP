@@ -103,7 +103,7 @@ const Quote: React.FC<QuoteProps> = ({quote, bcgrClr, deleteQuote, saveQuote, sa
             </div>
 
             {isLoggedIn && (
-                <div className="Card--button">
+                <div className="card-btn-wrapper">
                     <i className="fas fa-pen" onClick={handleEdit}/>
                     &nbsp;&nbsp;&nbsp;
                     <i

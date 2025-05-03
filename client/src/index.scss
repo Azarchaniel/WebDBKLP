@@ -108,6 +108,9 @@ body, html, main, #root {
 
 .showHideRow, label, .hideShowCheckbox {
   cursor: pointer;
+  &:hover {
+    color: var(--anchor);
+  }
 }
 
 .hideShowCheckbox {

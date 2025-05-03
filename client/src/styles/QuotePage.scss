@@ -18,18 +18,22 @@
   break-inside: avoid;
   margin-bottom: 10px;
   box-sizing: border-box;
-}
 
-.Quote .Card--button {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  cursor: pointer;
-}
+  .card-btn-wrapper {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    cursor: pointer;
 
-.Quote .quoteOwner {
-  font-size: 0.85rem;
-  filter: brightness(0.85);
+    i:hover {
+      color: var(--anchor);
+    }
+  }
+
+  .quoteOwner {
+    font-size: 0.85rem;
+    filter: brightness(0.85);
+  }
 }
 
 .scrollToTop {

@@ -243,9 +243,11 @@
     border: transparent;
     padding: 0;
     cursor: pointer;
+    background: none;
 
     &:hover {
       color: var(--anchor);
+      background: none;
     }
   }
 }
@@ -267,6 +269,10 @@
     color: var(--anchor);
     cursor: default;
   }
+
+    &:hover {
+        color: var(--anchor);
+    }
 }
 
 .tableNavigationRow {
