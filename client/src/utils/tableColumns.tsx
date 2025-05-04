@@ -7,7 +7,7 @@ import {
     ILocation,
     IPublished,
     IUniqueFilterValues,
-    IUser
+    IUser, TRange
 } from "../type";
 import {formatDimension, getBookLocation, tableHeaderColor} from "@utils";
 import React, {useState} from "react";
@@ -133,7 +133,7 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
         header: 'Vydané',
         cell: ({cell}: { cell: any }) => {
             const published = cell.getValue() as IPublished;
-            return `${published?.publisher} (${published?.year ?? "?"})`;
+            return published ? `${published?.publisher} (${published?.year ?? "?"})` : "";
         },
         sortingFn: "datetime",
     },
@@ -290,6 +290,69 @@ export const getLPTableColumns = (): ColumnDef<any, any>[] => [
             return <span title={time} style={{pointerEvents: "auto"}}>{date}</span>
         },
         sortingFn: "datetime"
+    },
+];
+
+// BOARD GAMES
+export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
+    {
+        accessorKey: 'autorsFull',
+        header: 'Autor',
+    },
+    {
+        accessorKey: 'title',
+        header: 'Názov',
+        cell: (info: any) => (
+            <b>
+                {info.getValue() as unknown as string}
+            </b>
+        ),
+        sortUndefined: "last"
+    },
+    {
+        accessorKey: 'noPlayers',
+        header: 'Počet hráčov',
+        cell: ({cell}: { cell: any }) => {
+            const value = cell.getValue() as TRange;
+            return value ? `${value?.from} - ${value?.to} hráčov` : "";
+        },
+    },
+    {
+        accessorKey: 'playTime',
+        header: 'Čas hrania (min)',
+        cell: ({cell}: { cell: any }) => {
+            const value = cell.getValue() as TRange;
+            return value ? `${value?.from} - ${value?.to} min` : "";
+        },
+    },
+    {
+        accessorKey: 'ageRecommendation',
+        header: 'Odporúčaný vek',
+        cell: ({cell}: { cell: any }) => {
+            const value = cell.getValue() as TRange;
+            return value ? `${value?.from} - ${value?.to}` : "";
+        },
+    },
+    {
+        accessorKey: 'published',
+        header: 'Vydané',
+        cell: ({cell}: { cell: any }) => {
+            const published = cell.getValue() as IPublished;
+            return published ? `${published?.publisher} (${published?.year ?? "?"})` : "";
+        },
+        sortingFn: "datetime",
+    },
+    {
+        accessorKey: 'createdAt',
+        header: 'Dátum pridania',
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        sortingFn: "datetime",
+    },
+    {
+        accessorKey: 'updatedAt',
+        header: 'Dátum úpravy',
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        sortingFn: "datetime",
     },
 ];
 

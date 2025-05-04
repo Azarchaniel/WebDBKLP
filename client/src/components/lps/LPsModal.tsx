@@ -6,6 +6,7 @@ import {showError} from "../Modal";
 import {InputField, LazyLoadMultiselect} from "@components/inputs";
 import "@styles/LpPage.scss";
 import LoadingSpinner from "@components/LoadingSpinner";
+import {createNewAutor, AutorRole} from "@utils/autor";
 
 interface BodyProps {
     data: ILP | object;
@@ -135,6 +136,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                     onChange={handleInputChange}
                     name="autor"
                     onSearch={fetchAutors}
+                    onNew={(autorString) => createNewAutor(autorString, AutorRole.MUSICIAN, setFormData, "autor")}
                 />
             </div>
 

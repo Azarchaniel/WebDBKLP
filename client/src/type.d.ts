@@ -251,3 +251,23 @@ export interface IUniqueFilterValues {
     readBy?: any[];
     fullName?: any[]
 }
+
+export type TRange = {
+    from?: number;
+    to?: number;
+};
+
+export interface IBoardGame {
+    _id: string;
+    title: string;
+    image?: string;
+    noPlayers?: TRange;
+    playTime?: TRange;
+    ageRecommendation?: TRange;
+    published?: TPublished;
+    autor?: string[];
+    picture?: string;
+    url?: string;
+    note?: string;
+    expansions?: IBoardGame[];
+}

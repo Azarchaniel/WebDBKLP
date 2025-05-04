@@ -11,7 +11,15 @@ import {
     getBooksByIds,
     getAllAutorsBooks,
     loginUser,
-    refreshToken, checkBooksUpdated, getPageByStartingLetter, getUniqueFieldValues,
+    refreshToken,
+    checkBooksUpdated,
+    getPageByStartingLetter,
+    getUniqueFieldValues,
+    getBoardGame,
+    getAllBoardGames,
+    addBoardGame,
+    updateBoardGame,
+    deleteBoardGame
 } from '../controllers'
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
@@ -80,5 +88,12 @@ router.get('/get-dimensions-statistics', dashboard.getDimensionsStatistics)
 router.get('/get-language-statistics', dashboard.getLanguageStatistics)
 router.get('/get-size-groups', dashboard.getSizesGroups)
 router.get('/get-read-by', dashboard.getReadBy)
+
+// ### BOARD GAMES ###
+router.get('/boardgames', getAllBoardGames)
+router.get('/boardgame/:id', getBoardGame)
+router.post('/add-boardgame', addBoardGame)
+router.put('/edit-boardgame/:id', updateBoardGame)
+router.post('/delete-boardgame/:id', deleteBoardGame)
 
 export default router;

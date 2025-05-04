@@ -421,6 +421,13 @@ export async function normalizeSearchFields(doc: any, model: string): Promise<Re
                 published: doc.published,
             };
             break;
+        case "boardGame":
+            fieldsToNormalize = {
+                title: doc.title,
+                published: doc.published,
+                autor: doc.autor
+            };
+            break;
         default:
             console.error("Unknown model")
     }
