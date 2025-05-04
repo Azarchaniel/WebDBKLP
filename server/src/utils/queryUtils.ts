@@ -138,7 +138,6 @@ const buildFilterQuery = (filters: {
         }
     });
 
-    console.log(filterQuery);
     return filterQuery;
 };
 

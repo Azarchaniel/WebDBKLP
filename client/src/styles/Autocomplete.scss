@@ -8,7 +8,8 @@
   max-height: 80px;
   background: white;
   display: flex;
-  overflow: auto;
+  flex-wrap: wrap;
+  overflow-y: auto;
 
   &.error {
     border-color: red;
@@ -21,8 +22,6 @@
     padding: 0;
     width: 100%;
     position: relative;
-    overflow-x: hidden;
-    overflow-y: auto;
   }
 
   .chip-dropdown-indicator {
@@ -41,13 +40,12 @@
 
   .chip {
     background-color: var(--anchor);
-    padding: 4px 8px;
+    padding: 2px 8px;
     border-radius: 16px;
     display: flex;
     align-items: center;
-    white-space: wrap !important;
+    white-space: nowrap; // Prevent text from breaking within a chip
     margin: 2px;
-    //word-break: break-all;
   }
 
   .chip-remove {
@@ -129,4 +127,26 @@
       }
     }
   }
+}
+
+.autocomplete-label {
+  position: absolute;
+  top: 20%;
+  left: 1rem;
+  z-index: 10;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: gray;
+  pointer-events: none;
+  transition: all 0.2s ease;
+
+    &.active {
+      top: -0.1rem;
+      left: 0.5rem;
+      line-height: 0;
+      font-size: 11px;
+      opacity: 1;
+      background: white;
+      padding: 0.2rem;
+    }
 }

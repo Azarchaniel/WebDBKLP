@@ -1,0 +1,27 @@
+.from-to-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .from-input,
+    .to-input {
+        width: 4rem;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .dash {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #555;
+    }
+
+    .from-input:focus,
+    .to-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
+    }
+}

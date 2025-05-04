@@ -2,6 +2,7 @@ import React, {useEffect, useRef} from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     customerror?: string;
+    ref?: React.Ref<HTMLInputElement>;
 }
 
 export const InputField = React.memo((props: InputProps) => {
@@ -24,11 +25,15 @@ export const InputField = React.memo((props: InputProps) => {
     }, []);
 
     return (
-        <input
-            {...props}
-            ref={inputRef}
-            className="form-control" autoComplete="off"
-            lang="cs-CZ"
-        />
+        <div className="input-wrapper">
+            <input
+                {...props}
+                placeholder=""
+                ref={inputRef}
+                className="form-control" autoComplete="off"
+                lang="cs-CZ"
+            />
+            <span className="floating-label">{props.placeholder}</span>
+        </div>
     );
 });

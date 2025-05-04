@@ -578,3 +578,71 @@ export const getReadBy = async (): Promise<AxiosResponse> => {
         throw new Error(error)
     }
 }
+
+// ### BOARD GAMES ###
+export const getBoardGames = async (params?: any): Promise<AxiosResponse<any>> => {
+    try {
+        const boardGames: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
+            baseUrl + "/boardgames", {
+                params: {
+                    page: params?.page ?? 1, // API expects 1-based index
+                    pageSize: params?.pageSize ?? 10_000,
+                    search: params?.search ?? "",
+                    sorting: params?.sorting ?? [{id: "title", desc: false}],
+                    filters: params?.filters ?? []
+                }
+            });
+        return boardGames
+    } catch (error: any) {
+        throw new Error(error);
+    }
+}
+
+export const getBoardGame = async (
+    _id: string
+): Promise<AxiosResponse<any>> => {
+    try {
+        const boardGame: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
+            `${baseUrl}/boardgame/${_id}`
+        )
+        return boardGame
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
+export const addBoardGame = async (
+    formData: any
+): Promise<any> => {
+    try {
+        if (!formData._id) {
+            const saveBoardGame: AxiosResponse<any> = await axiosInstance.post(
+                baseUrl + "/add-boardgame",
+                formData
+            )
+            return saveBoardGame
+        } else {
+            const updatedBoardGame: AxiosResponse<any> = await axiosInstance.put(
+                `${baseUrl}/edit-boardgame/${formData._id}`,
+                formData
+            )
+            return updatedBoardGame
+        }
+    } catch (error: any) {
+        console.error(error);
+        throw new Error(error)
+    }
+}
+
+export const deleteBoardGame = async (
+    _id: string
+): Promise<AxiosResponse<ApiBookDataType>> => {
+    try {
+        const deletedBoardGame: AxiosResponse<any> = await axiosInstance.post(
+            `${baseUrl}/delete-boardgame/${_id}`
+        )
+        return deletedBoardGame
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}

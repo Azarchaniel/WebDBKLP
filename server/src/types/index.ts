@@ -7,6 +7,7 @@ export * from './lp';
 export * from './published';
 export * from './location';
 export * from './dimension';
+export * from './boardGame';
 
 export interface IPopulateOptions {
     path: string,

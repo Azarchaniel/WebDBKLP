@@ -108,6 +108,7 @@ body, html, main, #root {
 
 .showHideRow, label, .hideShowCheckbox {
   cursor: pointer;
+
   &:hover {
     color: var(--anchor);
   }
@@ -271,9 +272,40 @@ body, html, main, #root {
   }
 }
 
-input:invalid {
-  outline: 2px dotted red;
+.input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  overflow: visible;
 }
+
+input, textarea {
+  &:focus ~ .floating-label,
+  &:not(:placeholder-shown) ~ .floating-label,
+  & ~ .active {
+    top: -0.2rem;
+    left: 0.5rem;
+    line-height: 11px;
+    font-size: 11px;
+    opacity: 1;
+    background: white;
+    padding: 0 0.2rem;
+  }
+
+  &:invalid {
+    outline: 2px dotted red;
+  }
+}
+
+.floating-label {
+  position: absolute;
+  pointer-events: none;
+  left: 1rem;
+  top: 20%;
+  transition: 0.2s ease all;
+  color: gray;
+}
+
 
 /* WYSWIG editor */
 .rsw-editor:has(.rsw-ce[contenteditable="false"]) {
@@ -458,6 +490,7 @@ input:invalid {
     display: none;
   }
 }
+
 // ^^^
 
 @media screen and (width <= $mobile-width) {

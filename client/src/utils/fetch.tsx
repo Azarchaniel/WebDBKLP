@@ -1,14 +1,14 @@
-import {getAutors, getBooks, getBooksByIds, getUsers} from "../API";
+import {getAutors, getBoardGames, getBooks, getBooksByIds, getUsers} from "../API";
 import {IAutor, IUser} from "../type";
 import {formPersonsFullName} from "./utils";
 
-const addColumnShowName = (books: any[]) => {
-    return books.map((book: any) => ({
-        _id: book._id,
-        showName: `${book.title} 
-                        ${book.autor && book.autor[0] && book.autor[0].firstName ? "/ " + book.autor[0].firstName : ""} 
-                        ${book.autor && book.autor[0] && book.autor[0].lastName ? book.autor[0].lastName : ""} 
-                        ${book.published && book.published?.year ? "/ " + book.published?.year : ""}`
+const addColumnShowName = (items: any[]) => {
+    return items?.map((item: any) => ({
+        _id: item._id,
+        showName: `${item.title} 
+                        ${item.autor && item.autor[0] && item.autor[0].firstName ? "/ " + item.autor[0].firstName : ""} 
+                        ${item.autor && item.autor[0] && item.autor[0].lastName ? item.autor[0].lastName : ""} 
+                        ${item.published && item.published?.year ? "/ " + item.published?.year : ""}`
     }));
 }
 
@@ -63,6 +63,18 @@ export const fetchQuotedBooks =
             if (!ids || ids.length === 0) return [];
             const response = await getBooksByIds({search: query, page, pageSize, ids});
             return addColumnShowName(response.data.books);
+        } catch (error) {
+            console.error('Error fetching books:', error);
+            return [];
+        }
+    };
+
+export const fetchBoardGames =
+    async (query: string, page: number) => {
+        const pageSize = 25;
+        try {
+            const response = await getBoardGames({search: query, page, pageSize});
+            return response.data.boardGames;
         } catch (error) {
             console.error('Error fetching books:', error);
             return [];

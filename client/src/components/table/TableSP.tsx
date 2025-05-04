@@ -39,7 +39,7 @@ type PropsMT = {
 const ServerPaginationTable: React.FC<PropsMT> =
     ({
          title,
-         data,
+         data = [],
          columns,
          actions,
          rowActions,
@@ -425,7 +425,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                 </thead>
 
                                 <tbody style={{pointerEvents: "none"}}>
-                                    {table.getRowModel().rows.map((row) => (
+                                    {table.getRowModel()?.rows?.map((row) => (
                                         <React.Fragment key={row.original._id}>
                                             <tr key={row.id}>
                                                 {row.getVisibleCells().map((cell) => (

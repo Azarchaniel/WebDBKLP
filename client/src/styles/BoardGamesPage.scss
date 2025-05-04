@@ -1,0 +1,110 @@
+@import "variables";
+
+.boardGameDetail {
+  display: flex;
+  flex-direction: row;
+
+  div {
+    width: 50%;
+    &:first-child {
+      margin-right: 2rem;
+    }
+  }
+
+  &:hover {
+    background-color: #f1f1f1;
+  }
+}
+
+/* Base form styles */
+.bg-container {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 5px;
+  width: 100%;
+}
+
+.bg-title {
+  grid-area: 1 / 1 / 1 / 7;
+}
+
+.bg-autor {
+    grid-area: 1 / 7 / 1 / 13;
+}
+
+.bg-publisher {
+  grid-area: 2 / 1 / 2 / 5;
+}
+
+.bg-year-published {
+  grid-area: 2 / 5 / 2 / 9;
+}
+
+.bg-country-published {
+  grid-area: 2 / 9 / 2 / 13;
+}
+
+.bg-no-players {
+  grid-area: 3 / 1 / 3 / 5;
+}
+
+.bg-play-time {
+  grid-area: 3 / 5 / 3 / 9;
+}
+
+.bg-age-recommendation {
+  grid-area: 3 / 9 / 3 / 13;
+}
+
+.bg-picture {
+  grid-area: 4 / 1 / 4 / 7;
+}
+
+.bg-url {
+  grid-area: 4 / 7 / 4 / 13;
+}
+
+.bg-note {
+  grid-area: 5 / 1 / 5 / 7;
+}
+
+.bg-expansions {
+  grid-area: 5 / 7 / 5 / 13;
+}
+
+/* Clear input button styling */
+.clearInput {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+@media screen and (width <= $mobile-width) {
+  .boardGameDetail {
+    flex-direction: column;
+    div {
+      width: 100%;
+      &:first-child {
+        margin-right: 0;
+      }
+    }
+  }
+
+  form {
+    grid-template-columns: 1fr; /* Single column on mobile */
+  }
+
+  /* Make all items span the single column on mobile */
+  form > div {
+    grid-column: 1;
+    grid-area: unset !important; //has to be important, because it's less specific than classes above
+  }
+
+  .react-datepicker-wrapper {
+    width: 100%;
+  }
+}

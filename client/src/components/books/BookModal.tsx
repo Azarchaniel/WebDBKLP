@@ -1,6 +1,6 @@
 import {IBook, ILangCode, ValidationError} from "../../type";
 import React, {useCallback, useEffect, useState} from "react";
-import {addAutor, getInfoAboutBook} from "../../API";
+import {getInfoAboutBook} from "../../API";
 import {toast} from "react-toastify";
 import {
     checkIsbnValidity,
@@ -20,6 +20,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
 import BarcodeScannerButton from "@components/BarcodeScanner";
 import LoadingSpinner from "@components/LoadingSpinner";
+import {createNewAutor, AutorRole} from "@utils/autor";
 
 interface BodyProps {
     data: IBook | object;
@@ -83,9 +84,9 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         const typedData: IBook = data as IBook;
         const toBeModified: IBook = {
             ...data,
-            location: {city: cities.filter(c => c.value === (data as IBook)?.location?.city)},
+            location: {city: cities.filter(c => c.value === typedData?.location?.city)},
             published: {
-                ...(data as IBook).published,
+                ...typedData.published,
                 country: countryCode.filter((country: ILangCode) =>
                     (typedData.published?.country as unknown as string[])?.includes(country.key))
             },
@@ -95,7 +96,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                 depth: formatDimension(typedData.dimensions?.depth),
                 weight: formatDimension(typedData.dimensions?.weight),
             },
-            language: langCode.filter((lang: ILangCode) => ((data as IBook)?.language as unknown as string[])?.includes(lang.key)),
+            language: langCode.filter((lang: ILangCode) => (typedData?.language as unknown as string[])?.includes(lang.key)),
             readBy: formPersonsFullName(typedData.readBy),
             owner: formPersonsFullName(typedData.owner),
             exLibris: typedData.exLibris,
@@ -205,57 +206,6 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         return errors.find(err => err.target === name)?.label || "";
     }
 
-    const createNewAutor = (name: string, role?: string) => {
-        let firstName, lastName;
-
-        if (name.includes(",")) {
-            const names = name.split(",");
-            firstName = names[1].trim();
-            lastName = names[0].trim();
-        } else if (name.includes(" ")) {
-            const names = name.split(" ");
-            firstName = names[0].trim();
-            lastName = names[1].trim();
-        } else {
-            // assume it's only one name
-            firstName = undefined;
-            lastName = name.trim();
-        }
-
-        addAutor({firstName, lastName, role: [{value: role}]})
-            .then(res => {
-                if (res.status === 201 && res.data?.autor?._id) {
-                    toast.success("Autor úspešne vytvorený")
-                    setFormData((prevData: any) => {
-                        // check if "autor" is in formData
-                        const currentRole = role || "autor";
-                        const currentRoleData = prevData[currentRole];
-
-                        console.log(currentRole, currentRoleData);
-
-                        // Check if currentRole exists in prevData
-                        if (!prevData.hasOwnProperty(currentRole)) {
-                            return {
-                                ...prevData,
-                                [currentRole]: [res.data?.autor]
-                            };
-                        }
-
-                        return {
-                            ...prevData,
-                            [currentRole]: [...(currentRoleData ?? []), res.data?.autor]
-                        };
-                    });
-                } else {
-                    throw Error();
-                }
-            })
-            .catch(err => {
-                toast.error("Autora sa nepodarilo vytvori!")
-                console.error(err)
-            });
-    }
-
     return (<form>
         <div className="b-container">
             <div className="b-Nazov">
@@ -283,7 +233,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                     name="autor"
                     onSearch={fetchAutors}
-                    onNew={(autorString) => createNewAutor(autorString, "autor")}
+                    onNew={(autorString) => createNewAutor(autorString, AutorRole.AUTOR, setFormData)}
                 />
             </div>
             <div className="b-ISBN">
@@ -318,7 +268,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                     name="translator"
                     onSearch={fetchAutors}
-                    onNew={(autorString) => createNewAutor(autorString, "translator")}
+                    onNew={(autorString) => createNewAutor(autorString, AutorRole.TRANSLATOR, setFormData)}
                 />
             </div>
             <div className="b-Editor">
@@ -329,7 +279,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                     name="editor"
                     onSearch={fetchAutors}
-                    onNew={(autorString) => createNewAutor(autorString, "editor")}
+                    onNew={(autorString) => createNewAutor(autorString, AutorRole.EDITOR, setFormData)}
                 />
             </div>
             <div className="b-Ilustrator">
@@ -340,7 +290,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     onChange={handleInputChange}
                     name="ilustrator"
                     onSearch={fetchAutors}
-                    onNew={(autorString) => createNewAutor(autorString, "ilustrator")}
+                    onNew={(autorString) => createNewAutor(autorString, AutorRole.ILUSTRATOR, setFormData)}
                 />
             </div>
             <div className="b-Name">

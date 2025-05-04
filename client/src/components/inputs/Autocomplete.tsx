@@ -75,7 +75,15 @@ export const LazyLoadMultiselect = React.memo(({
     const menuRef = useRef<HTMLDivElement>(null);
     const [dropdownPosition, setDropdownPosition] = useState<'top' | 'bottom'>('bottom');
     const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+    const [isInputFocused, setIsInputFocused] = useState(false); // Track input focus
 
+    const handleInputFocus = useCallback(() => {
+        setIsInputFocused(true);
+    }, []);
+
+    const handleInputBlur = useCallback(() => {
+        setIsInputFocused(false);
+    }, []);
 
     useEffect(() => {
         if (options.some(option => typeof option === 'object' && option !== null && !(displayValue in option))) {
@@ -307,81 +315,94 @@ export const LazyLoadMultiselect = React.memo(({
     }, [isOpen, handleScroll]);
 
     return (
-        <div
-            ref={wrapperRef}
-            id={id}
-            className={`chip-multiselect ${customerror ? 'error' : ''}`}
-        >
-            <div className="chip-container">
-                {Array.isArray(selectedValues) && selectedValues.length > 0 && selectedValues.map((item, index) => (
-                    <div
-                        key={index}
-                        className="chip"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemove(item);
-                        }}
-                    >
-                        <span>
-                            {getDisplayText(item)}
-                        </span>
-                        <span className="chip-remove">
-                            ×
-                        </span>
+        <div style={{position: "relative"}}>
+            <span
+                className={`autocomplete-label ${
+                    inputValue || selectedValues.length > 0 || isInputFocused ? "active" : ""
+                }`}
+            >
+                {placeholder}
+            </span>
+            <div
+                ref={wrapperRef}
+                id={id}
+                className={`chip-multiselect ${customerror ? 'error' : ''}`}
+            >
+                <div className="input-wrapper">
+                    <div className="chip-container">
+                        {Array.isArray(selectedValues) && selectedValues.length > 0 && selectedValues.map((item, index) => (
+                            <div
+                                key={index}
+                                className="chip"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemove(item);
+                                }}
+                            >
+                            <span>
+                                {getDisplayText(item)}
+                            </span>
+                                <span className="chip-remove">
+                                ×
+                            </span>
+                            </div>
+                        ))}
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={inputValue}
+                            onChange={handleInputChange}
+                            onKeyDown={handleKeyDown}
+                            onFocus={handleInputFocus}
+                            onBlur={handleInputBlur}
+                            placeholder=""
+                            className="chip-input"
+                            onClick={handleInputClick}
+                        />
                     </div>
-                ))}
-                <input
-                    ref={inputRef}
-                    type="text"
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    onKeyDown={handleKeyDown}
-                    placeholder={selectedValues.length === 0 ? placeholder : ''}
-                    className="chip-input"
-                    onClick={handleInputClick}
-                />
-            </div>
-            <div className="chip-dropdown-indicator" onClick={handleInputClick}>
-                <i className={`fa fa-chevron-${isOpen ? 'up' : 'down'}`}></i>
-            </div>
-            {isOpen && (
-                <div
-                    ref={menuRef}
-                    className={`autocomplete-menu ${dropdownPosition === 'top' ? 'top' : ''}`}
-                    style={{...dropdownStyle, position: "fixed"}}
-                >
-                    {/* no data */}
-                    {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && (
-                        <div className="autocomplete-item empty">
-                            {emptyRecordMsg}
-                        </div>
-                    )}
-                    {/* create new */}
-                    {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && onNew && (
-                        <div className="autocomplete-item create-new" onClick={handleCreateNew}
-                             title="`Meno Priezvisko` alebo `Priezvisko, Meno` alebo `Priezvisko`">
-                            Vytvoriť "{searchQuery}"
-                        </div>
-                    )}
-                    {/* data and loading more */}
-                    {filteredOptionsToDisplay.length > 0 && (
-                        <>
-                            {filteredOptionsToDisplay.map((option, index) => (
-                                <div
-                                    key={index}
-                                    className={`autocomplete-item ${selectionLimit && selectedValues?.length >= selectionLimit ? 'disabled' : ''}`}
-                                    onClick={() => handleSelect(option)}
-                                >
-                                    {getDisplayText(option)}
-                                </div>
-                            ))}
-                            {loadingStatus === "loading" && (
-                                <div className="autocomplete-item loading">Načítava sa...</div>
-                            )}
-                        </>
-                    )}
+                    <div className="chip-dropdown-indicator" onClick={handleInputClick}>
+                        <i className={`fa fa-chevron-${isOpen ? 'up' : 'down'}`}></i>
+                    </div>
                 </div>
-            )}
+                {isOpen && (
+                    <div
+                        ref={menuRef}
+                        className={`autocomplete-menu ${dropdownPosition === 'top' ? 'top' : ''}`}
+                        style={{...dropdownStyle, position: "fixed"}}
+                    >
+                        {/* no data */}
+                        {filteredOptionsToDisplay.length === 0 && (
+                            <div className="autocomplete-item empty">
+                                {emptyRecordMsg}
+                            </div>
+                        )}
+                        {/* create new */}
+                        {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && onNew && (
+                            <div className="autocomplete-item create-new" onClick={handleCreateNew}
+                                 title="`Meno Priezvisko` alebo `Priezvisko, Meno` alebo `Priezvisko`">
+                                Vytvoriť "{searchQuery}"
+                            </div>
+                        )}
+                        {/* data and loading more */}
+                        {filteredOptionsToDisplay.length > 0 && (
+                            <>
+                                {filteredOptionsToDisplay.map((option, index) => (
+                                    <div
+                                        key={index}
+                                        className={`autocomplete-item ${selectionLimit && selectedValues?.length >= selectionLimit ? 'disabled' : ''}`}
+                                        onClick={() => handleSelect(option)}
+                                    >
+                                        {getDisplayText(option)}
+                                    </div>
+                                ))}
+                                {loadingStatus === "loading" && (
+                                    <div className="autocomplete-item loading">Načítava sa...</div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 });
