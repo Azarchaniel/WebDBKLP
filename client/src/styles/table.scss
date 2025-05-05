@@ -214,6 +214,10 @@
       &autorsFull {
         min-width: 12rem;
       }
+
+      &actionsRow {
+        width: 1rem;
+      }
     }
   }
 
@@ -457,6 +461,11 @@ button:focus {
 
 .number-filter {
   display: flex;
+}
+
+.actions-animated-td {
+  overflow: visible;
+  transition: min-width 0.3s cubic-bezier(0.4,0,0.2,1), max-width 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
 .actions-animated-td {
