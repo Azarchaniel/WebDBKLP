@@ -17,6 +17,7 @@ import {SortingState} from "@tanstack/react-table";
 import {useClickOutside} from "@hooks";
 import "@styles/AutorPage.scss";
 import {useAuth} from "@utils/context";
+import {InputField} from "@components/inputs";
 
 export default function AutorPage() {
     const {isLoggedIn, currentUser} = useAuth();
@@ -208,7 +209,7 @@ export default function AutorPage() {
                 actions={
                     <div className="tableActionsRight">
                         <div className="searchTableWrapper">
-                            <input
+                            <InputField
                                 className="form-control"
                                 style={{paddingRight: "2rem"}}
                                 placeholder="Vyhľadaj autora"

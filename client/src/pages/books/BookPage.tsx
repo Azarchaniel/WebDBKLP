@@ -21,6 +21,7 @@ import "@styles/BookPage.scss";
 import BarcodeScannerButton from "@components/BarcodeScanner";
 import {useClickOutside} from "@hooks";
 import {useAuth} from "@utils/context";
+import {InputField} from "@components/inputs";
 
 export default function BookPage() {
     const {currentUser, isLoading: isAuthLoading, isLoggedIn} = useAuth();
@@ -271,7 +272,7 @@ export default function BookPage() {
                 actions={
                     <div key="actions" className="tableActionsRight">
                         <div className="searchTableWrapper">
-                            <input
+                            <InputField
                                 placeholder="Vyhľadaj knihu"
                                 className="form-control searchBookInput"
                                 value={pagination.search}

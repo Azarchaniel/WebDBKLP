@@ -8,6 +8,7 @@ import React, {
     useState,
 } from "react";
 import "@styles/Autocomplete.scss";
+import {InputField} from "@components/inputs/Input";
 
 
 
@@ -79,7 +80,7 @@ export const ArrayInput: React.FC<ArrayInputProps> = React.memo(({
                         </span>
                     </div>
                 ))}
-                <input
+                <InputField
                     name={name}
                     ref={inputRef}
                     type="text"

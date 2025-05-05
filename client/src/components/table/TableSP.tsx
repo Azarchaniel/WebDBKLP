@@ -11,7 +11,7 @@ import Pagination from "./Pagination";
 import "@styles/table.scss";
 import {getUniqueFieldValues} from "../../API";
 import {isMobile, mapBookColumnsToFilterTypes, mapColumnName} from "@utils";
-import {LazyLoadMultiselect} from "@components/inputs";
+import {InputField, LazyLoadMultiselect} from "@components/inputs";
 
 type PropsMT = {
     title: string;
@@ -146,7 +146,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
             switch (mapBookColumnsToFilterTypes(columnName)) {
                 case "input":
                     return (
-                        <input
+                        <InputField
                             className="form-control"
                             type="text"
                             value={(filtering as any[]).find((f) => f.id === columnName)?.value || ''}
@@ -299,12 +299,11 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                 <option value="<" title="má menej než">{"<"}</option>
                                 <option value=">" title="má viac než">{">"}</option>
                             </select>
-                            <input
+                            <InputField
                                 className="form-control"
                                 type="number"
                                 value={currentNumFilter.value}
                                 onChange={handleValueChange}
-                                placeholder="Vyhľadaj..."
                                 style={{flex: "1 1 auto"}}
                             />
                         </div>

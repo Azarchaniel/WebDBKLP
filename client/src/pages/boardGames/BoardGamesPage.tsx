@@ -15,6 +15,7 @@ import { useClickOutside } from "@hooks";
 import { useAuth } from "@utils/context";
 import AddBoardGame from "./AddBoardGame";
 import "@styles/BoardGamesPage.scss";
+import {InputField} from "@components/inputs";
 
 export default function BoardGamesPage() {
     const { isLoggedIn } = useAuth();
@@ -146,7 +147,7 @@ export default function BoardGamesPage() {
                 actions={
                     <div className="tableActionsRight">
                         <div className="searchTableWrapper">
-                            <input
+                            <InputField
                                 className="form-control"
                                 style={{ paddingRight: "2rem" }}
                                 placeholder="Vyhľadaj hru"

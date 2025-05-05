@@ -15,6 +15,7 @@ import ServerPaginationTable from "@components/table/TableSP";
 import {useClickOutside} from "@hooks";
 import "@styles/LpPage.scss";
 import {useAuth} from "@utils/context";
+import {InputField} from "@components/inputs";
 
 export default function LPPage() {
     const {isLoggedIn, currentUser} = useAuth();
@@ -171,7 +172,7 @@ export default function LPPage() {
                     <div className="tableActionsRight">
                         <div className="searchTableWrapper">
                             {/* reset pagination on search*/}
-                            <input
+                            <InputField
                                 className="form-control"
                                 style={{paddingRight: "2rem"}}
                                 placeholder="Vyhľadaj LP"
