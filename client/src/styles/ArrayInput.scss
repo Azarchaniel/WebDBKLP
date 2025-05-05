@@ -1,0 +1,41 @@
+@import "variables";
+
+.array-input-wrapper {
+  position: relative;
+
+  .form-control:focus {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .array-floating-label {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    transition: 0.2s;
+    background-color: white;
+    color: gray;
+    padding: 0 0.2rem;
+
+    &.float {
+      top: 0.2rem;
+      left: 1rem;
+      transform: none;
+      background: white;
+      font-size: 11px;
+      line-height: 11px;
+    }
+  }
+
+  .chip-input:focus + .array-floating-label,
+  .array-floating-label.float {
+    top: -0.3rem;
+    left: 0.7rem;
+    transform: none;
+    background: white;
+    font-size: 11px;
+    line-height: 11px;
+  }
+}

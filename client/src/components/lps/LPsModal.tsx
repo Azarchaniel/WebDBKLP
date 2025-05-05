@@ -7,6 +7,7 @@ import {InputField, LazyLoadMultiselect} from "@components/inputs";
 import "@styles/LpPage.scss";
 import LoadingSpinner from "@components/LoadingSpinner";
 import {createNewAutor, AutorRole} from "@utils/autor";
+import TextArea from "@components/inputs/TextArea";
 
 interface BodyProps {
     data: ILP | object;
@@ -206,7 +207,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
             </div>
 
             <div className="l-note">
-                <textarea
+                <TextArea
                     id='note'
                     placeholder='Poznámka'
                     className="form-control"

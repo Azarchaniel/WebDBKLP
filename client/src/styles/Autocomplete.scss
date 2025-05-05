@@ -1,3 +1,5 @@
+@import "variables";
+
 .chip-multiselect {
   position: relative;
   width: 100%;
@@ -10,6 +12,12 @@
   display: flex;
   flex-wrap: wrap;
   overflow-y: auto;
+
+  &:focus-within {
+    border: 2px solid var(--anchor) !important;
+    box-shadow: none !important;
+    outline: none;
+  }
 
   &.error {
     border-color: red;

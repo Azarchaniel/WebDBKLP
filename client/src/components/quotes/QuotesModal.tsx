@@ -4,6 +4,7 @@ import {showError} from "../Modal";
 import {InputField, LazyLoadMultiselect} from "@components/inputs";
 import {Wysiwyg} from "../Wysiwyg";
 import {fetchBooks, fetchUsers, formPersonsFullName} from "@utils";
+import TextArea from "@components/inputs/TextArea";
 
 interface BodyProps {
     data: IQuote | object;
@@ -158,7 +159,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
 
         {/* Note field - full width */}
         <div className="full-width">
-            <textarea
+            <TextArea
                 id='note'
                 placeholder='Poznámka'
                 className="form-control"

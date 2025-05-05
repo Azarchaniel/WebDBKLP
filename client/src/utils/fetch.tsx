@@ -31,10 +31,9 @@ export const fetchAutors =
 export const fetchUsers =
     async (_query: string) => {
         try {
-            const users = JSON.parse(localStorage.getItem("cachedUsers") ?? "");
-            if (!users) return [];
+            const response = await getUsers();
 
-            return users.map((user: IUser) => ({
+            return response.data.users.map((user: IUser) => ({
                 _id: user._id,
                 fullName: formPersonsFullName(user),
             }));

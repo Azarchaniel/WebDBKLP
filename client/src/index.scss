@@ -526,3 +526,8 @@ input, textarea {
     }
   }
 }
+
+.form-control:focus {
+    box-shadow: none !important;
+    border: 2px solid var(--anchor) !important;
+}

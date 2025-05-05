@@ -21,6 +21,7 @@ import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
 import BarcodeScannerButton from "@components/BarcodeScanner";
 import LoadingSpinner from "@components/LoadingSpinner";
 import {createNewAutor, AutorRole} from "@utils/autor";
+import TextArea from "@components/inputs/TextArea";
 
 interface BodyProps {
     data: IBook | object;
@@ -438,7 +439,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                 />
             </div>
             <div className="b-Poznamka">
-				<textarea id='note' placeholder='Poznámka'
+				<TextArea id='note' placeholder='Poznámka'
                           className="form-control"
                           name="note"
                           autoComplete="off"

@@ -1,50 +1,32 @@
-import React, { useEffect, useRef } from 'react';
+import React, {useEffect, useRef} from 'react';
 
-interface TextAreaProps {
-    value: string;
-    placeholder?: string;
-    name: string;
-    rows?: number;
-    onChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     customerror?: string;
-    disabled?: boolean;
 }
 
-const TextArea: React.FC<TextAreaProps> = ({
-                                               value,
-                                               placeholder,
-                                               name,
-                                               rows = 1,
-                                               onChange,
-                                               customerror,
-                                               disabled = false,
-                                           }) => {
+const TextArea: React.FC<TextAreaProps> = (props: TextAreaProps) => {
     const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
     useEffect(() => {
-        if (customerror && textAreaRef.current) {
-            textAreaRef.current.setCustomValidity(customerror);
+        if (props.customerror && textAreaRef.current) {
+            textAreaRef.current.setCustomValidity(props.customerror);
             textAreaRef.current.reportValidity();
         } else if (textAreaRef.current) {
             textAreaRef.current.setCustomValidity('');
             textAreaRef.current.reportValidity();
         }
-    }, [customerror]);
+    }, [props.customerror]);
 
     return (
         <div className="input-wrapper">
             <textarea
-                className={`form-control ${customerror ? 'is-invalid' : ''}`}
-                value={value}
+                {...props}
                 placeholder=""
-                name={name}
-                rows={rows}
-                onChange={onChange}
-                disabled={disabled}
+                className={`form-control ${props.customerror ? 'is-invalid' : ''}`}
                 ref={textAreaRef}
             />
-            <span className="floating-label">{placeholder}</span>
-            {customerror && <div className="invalid-feedback">{customerror}</div>}
+            <span className="floating-label">{props.placeholder}</span>
+            {props.customerror && <div className="invalid-feedback">{props.customerror}</div>}
         </div>
     );
 };

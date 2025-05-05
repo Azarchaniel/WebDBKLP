@@ -7,6 +7,7 @@ import {InputField, LazyLoadMultiselect} from "@components/inputs";
 import {showError} from "../Modal";
 import {sk} from "date-fns/locale/sk";
 import LoadingSpinner from "@components/LoadingSpinner";
+import TextArea from "@components/inputs/TextArea";
 
 registerLocale('sk', sk)
 
@@ -244,7 +245,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
             </div>
 
             <div className="a-note">
-                <textarea
+                <TextArea
                     id='note'
                     placeholder='Poznámka'
                     className="form-control"
