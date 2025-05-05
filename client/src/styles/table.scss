@@ -1,6 +1,15 @@
 @import "variables";
 
 @media screen and (width <= $mobile-width) {
+  .expanded-mobile-row {
+    width: 100%;
+    background: var(--background);
+    border-bottom: 2px solid var(--anchor);
+    padding: 1rem;
+    box-sizing: border-box;
+    display: block;
+  }
+
   .headerTitleAction {
     position: relative;
     flex-direction: column !important;
@@ -114,6 +123,30 @@
       }
     }
   }
+
+  .actions-animated-td {
+    min-width: 3rem !important;
+    max-width: 20rem !important;
+
+    .actions-content {
+      width: 0 !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      padding: 0.5rem 0 !important;
+      right: -4rem !important;
+    }
+
+    &:focus-within {
+      min-width: 12rem !important;
+
+      .actions-content {
+        width: 10rem !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        padding: 0.5rem 1rem !important;
+      }
+    }
+  }
 }
 
 
@@ -181,10 +214,6 @@
       &autorsFull {
         min-width: 12rem;
       }
-
-      &actionsRow {
-        width: 5rem;
-      }
     }
   }
 
@@ -221,10 +250,6 @@
     &exLibris, &height, &width, &depth, &numberOfPages, &createdAt, &updatedAt, &countLp, &speed, &dateOfBirth, &dateOfDeath {
       display: table-cell;
       text-align: center;
-    }
-
-    &actionsRow {
-      width: 5rem;
     }
   }
 }
@@ -411,8 +436,6 @@ button:focus {
 }
 
 .actionsRow {
-  width: 5rem;
-  margin-left: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -434,5 +457,53 @@ button:focus {
 
 .number-filter {
   display: flex;
+}
 
+.actions-animated-td {
+  overflow: visible;
+  transition: min-width 0.3s cubic-bezier(0.4,0,0.2,1), max-width 0.3s cubic-bezier(0.4,0,0.2,1);
+
+  .actions-ellipsis {
+    font-size: 2rem;
+    cursor: pointer;
+    display: inline-block;
+    vertical-align: middle;
+    color: #888;
+    transition: color 0.2s;
+    z-index: 2;
+    position: relative;
+  }
+
+  .actions-content {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 0;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    background: var(--background); // Use your table's background variable or color
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border-radius: 4px 0 0 4px;
+    padding: 0.5rem 0;
+    transition: width 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+    z-index: 3;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  &:hover,
+  &:focus-within {
+    .actions-content {
+      width: 7rem;
+      opacity: 1;
+      pointer-events: auto;
+      padding: 0.5rem 1rem;
+    }
+    .actions-ellipsis {
+      color: #333;
+    }
+  }
 }

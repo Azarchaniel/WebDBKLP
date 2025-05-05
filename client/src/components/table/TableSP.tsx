@@ -10,7 +10,7 @@ import {LoadingBooks} from "../LoadingBooks";
 import Pagination from "./Pagination";
 import "@styles/table.scss";
 import {getUniqueFieldValues} from "../../API";
-import {mapBookColumnsToFilterTypes, mapColumnName} from "@utils";
+import {isMobile, mapBookColumnsToFilterTypes, mapColumnName} from "@utils";
 import {LazyLoadMultiselect} from "@components/inputs";
 
 type PropsMT = {
@@ -434,19 +434,30 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                                     </td>
                                                 ))}
                                                 {rowActions &&
-                                                    <td key={`${row.id}-actions`} className="TSPactionsRow">
-                                                        {rowActions(row.original._id, () => row.toggleExpanded())}
+                                                    <td
+                                                        key={`${row.id}-actions`}
+                                                        className="TSPactionsRow actions-animated-td"
+                                                        tabIndex={0}
+                                                    >
+                                                        <span className="actions-ellipsis">&#x2807;</span>
+                                                        <span className="actions-content">
+        {rowActions && rowActions(row.original._id, () => row.toggleExpanded())}
+    </span>
                                                     </td>
                                                 }
                                             </tr>
                                             {row.getIsExpanded() && (
-                                                <tr key={`${row.id}-expanded`} style={{pointerEvents: "none"}}>
-                                                    {/* +1 is because of Actions column */}
-                                                    <td colSpan={row.getAllCells().length + 1}
-                                                        style={{pointerEvents: "none"}}>
-                                                        {expandedElement && expandedElement(row.original)}
-                                                    </td>
-                                                </tr>
+                                            isMobile() ? (
+                                            <div className="expanded-mobile-row" key={`${row.id}-expanded-mobile`}>
+                                                {expandedElement && expandedElement(row.original)}
+                                            </div>
+                                            ) : (
+                                            <tr key={`${row.id}-expanded`}>
+                                                <td colSpan={row.getAllCells().length + 1}>
+                                                    {expandedElement && expandedElement(row.original)}
+                                                </td>
+                                            </tr>
+                                            )
                                             )}
                                         </React.Fragment>
                                     ))}
