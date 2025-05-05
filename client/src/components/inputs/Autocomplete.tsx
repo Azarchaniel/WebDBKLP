@@ -316,13 +316,13 @@ export const LazyLoadMultiselect = React.memo(({
 
     return (
         <div style={{position: "relative"}}>
-            <span
+            {placeholder && <span
                 className={`autocomplete-label ${
                     inputValue || selectedValues.length > 0 || isInputFocused ? "active" : ""
                 }`}
             >
                 {placeholder}
-            </span>
+            </span>}
             <div
                 ref={wrapperRef}
                 id={id}

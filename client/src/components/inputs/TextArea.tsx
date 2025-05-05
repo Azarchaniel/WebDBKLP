@@ -25,7 +25,7 @@ const TextArea: React.FC<TextAreaProps> = (props: TextAreaProps) => {
                 className={`form-control ${props.customerror ? 'is-invalid' : ''}`}
                 ref={textAreaRef}
             />
-            <span className="floating-label">{props.placeholder}</span>
+            {props.placeholder && <span className="floating-label">{props.placeholder}</span>}
             {props.customerror && <div className="invalid-feedback">{props.customerror}</div>}
         </div>
     );

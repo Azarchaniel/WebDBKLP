@@ -92,7 +92,7 @@ export const ArrayInput: React.FC<ArrayInputProps> = React.memo(({
                     />
                 </div>
             </div>
-            <span className={`array-floating-label${shouldFloat ? " float" : ""}`}>{placeholder}</span>
+            {placeholder && <span className={`array-floating-label${shouldFloat ? " float" : ""}`}>{placeholder}</span>}
         </div>
     );
 });

@@ -33,7 +33,7 @@ export const InputField = React.memo((props: InputProps) => {
                 className="form-control" autoComplete="off"
                 lang="cs-CZ"
             />
-            <span className="floating-label">{props.placeholder}</span>
+            {props.placeholder && <span className="floating-label">{props.placeholder}</span>}
         </div>
     );
 });
