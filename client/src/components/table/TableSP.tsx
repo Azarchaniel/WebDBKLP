@@ -342,7 +342,7 @@ const ServerPaginationTable: React.FC<PropsMT> =
             <div className="p-4">
                 <div className="headerTitleAction">
                     <h4 className="ml-4 mb-3" style={{color: "black"}}>{title}</h4>
-                    <div className="row">
+                    <div>
                         {actions}
                         {filteringChange &&
                             <button

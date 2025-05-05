@@ -14,10 +14,6 @@
     position: relative;
     flex-direction: column !important;
     padding-bottom: 5rem;
-
-    .filtersBtn {
-      margin-left: 1.2rem !important;
-    }
   }
 
   .tableActionsRight {
@@ -278,6 +274,11 @@
       color: var(--anchor);
       background: none;
     }
+  }
+
+  div {
+    display: flex;
+    flex-direction: row;
   }
 }
 

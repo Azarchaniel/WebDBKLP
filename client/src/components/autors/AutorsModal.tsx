@@ -162,7 +162,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                 />
             </div>
 
-            <div className="a-birth-date date-picker-container">
+            <div className="a-birth-date a-date-picker-container">
                 <DatePicker
                     className="form-control"
                     id='dateOfBirth'
@@ -183,6 +183,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     dateFormat='dd.MM.yyyy'
                     placeholderText={"Dátum narodenia"}
                     maxDate={new Date()}
+                    autoComplete="off"
                 />
                 {isValidDate(formData && "dateOfBirth" in formData ? formData?.dateOfBirth : false) ?
                     <button className='clearInput' type="button" onClick={() => {
@@ -191,7 +192,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     </button> : <></>}
             </div>
 
-            <div className="a-death-date date-picker-container">
+            <div className="a-death-date a-date-picker-container">
                 <DatePicker
                     className="form-control"
                     id='dateOfDeath'
@@ -211,6 +212,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     dateFormat='dd.MM.yyyy'
                     placeholderText={"Dátum smrti"}
                     maxDate={new Date()}
+                    autoComplete="off"
                 />
                 {isValidDate(formData && "dateOfDeath" in formData ? formData?.dateOfDeath : false) ?
                     <button className='clearInput' type="button" onClick={() => {
