@@ -71,7 +71,8 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
 
     res.cookie("token", token, {
         httpOnly: false,
-        secure: true
+        secure: true,
+        sameSite: 'None',
     });
 
     return res.status(200).json({token, refreshToken, user: user});
