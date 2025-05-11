@@ -1,5 +1,5 @@
 import {Schema, Document, Query} from 'mongoose';
-import {normalizeSearchFields} from "../utils/utils";
+import {normalizeSearchFields, stringifyName} from "../utils/utils";
 
 export interface IBase extends Document {
     deletedAt?: Date;
@@ -79,7 +79,7 @@ export const fullNameMiddleware = () => {
             const docInstance = this;
 
             if (docInstance instanceof Document) {
-                (docInstance as any).fullName = `${(docInstance as any).lastName ?? ""}${(docInstance as any).firstName ? ", " + (docInstance as any).firstName : ""}`;
+                (docInstance as any).fullName = stringifyName(docInstance);
             } else {
                 // @ts-ignore
                 const updateQuery = this.getUpdate();
@@ -92,7 +92,7 @@ export const fullNameMiddleware = () => {
                     // @ts-ignore
                     this.setUpdate({
                         ...updateQuery,
-                        fullName: `${doc.lastName ?? ""}${doc.firstName ? ", " + doc.firstName : ""}`,
+                        fullName: stringifyName(doc),
                     });
                 }
             }

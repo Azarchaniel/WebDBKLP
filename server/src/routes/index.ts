@@ -80,8 +80,6 @@ router.get('/lps', getAllLps)
 router.post('/add-lp', addLp)
 router.post('/delete-lp/:id', deleteLp)
 
-router.get('/webScrapper',)
-
 // ### DASHBOARD ###
 router.get('/count-books/:id', dashboard.countBooks)
 router.get('/get-dimensions-statistics', dashboard.getDimensionsStatistics)

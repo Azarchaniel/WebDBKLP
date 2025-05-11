@@ -110,7 +110,6 @@ const buildFilterQuery = (filters: {
 }[]): Record<string, any> => {
     if (!filters || filters.length === 0) return {};
 
-    console.log("Filters", filters);
     const filterQuery: Record<string, any> = {};
     filters.forEach(({id, value, operator}) => {
         if (value !== undefined && value !== null && value !== '') {

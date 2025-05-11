@@ -460,4 +460,13 @@ export const createLookupStage = (from: string, localField: string, as: string) 
     $lookup: {from, localField, foreignField: "_id", as}
 });
 
-
+export const stringifyName = (doc: any) => {
+    if (doc.firstName && doc.lastName) {
+        return `${doc.lastName}, ${doc.firstName}`;
+    } else if (doc.firstName) {
+        return doc.firstName;
+    } else if (doc.lastName) {
+        return doc.lastName;
+    }
+    return "";
+};

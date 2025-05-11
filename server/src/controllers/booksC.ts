@@ -2,7 +2,14 @@ import {Response, Request} from 'express';
 import {IBook, IUser} from '../types';
 import Book from '../models/book';
 import User from '../models/user';
-import {createLookupStage, formatMongoDbDecimal, getIdFromArray, sortByParam, webScrapper} from "../utils/utils";
+import {
+    createLookupStage,
+    formatMongoDbDecimal,
+    getIdFromArray,
+    sortByParam,
+    stringifyName,
+    webScrapper
+} from "../utils/utils";
 import mongoose, {PipelineStage, Types} from 'mongoose';
 import {optionFetchAllExceptDeleted, populateOptionsBook} from "../utils/constants";
 import diacritics from "diacritics";
@@ -105,7 +112,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({books: data, count});
     } catch (error) {
         console.error("Error fetching books:", error);
-        res.status(500).json({message: "Internal server error"});
+        res.status(500).json({error: "Chyba pri získavaní kníh! " + error});
     }
 };
 
@@ -136,7 +143,7 @@ const checkBooksUpdated = async (req: Request, res: Response): Promise<void> => 
         res.status(200).json({ latestUpdate: latestUpdate?.updatedAt });
     } catch (error) {
         console.error("Error checking book updates:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ error: "Chyba pri získavaní informácií o dátume kníh! " + error });
     }
 };
 
@@ -188,7 +195,7 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({books, count: totalCount});
     } catch (error) {
         console.error("Error fetching books by ids:", error);
-        res.status(500).json({message: "Internal server error"});
+        res.status(500).json({error: "Chyba pri získavaní kníh! " + error});
     }
 };
 
@@ -197,7 +204,7 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
         let {pageSize = "10_000", filterUsers, letter = "", model} = req.query;
 
         if (!letter || letter.length !== 1) {
-            res.status(400).json({message: "Invalid letter parameter."});
+            res.status(500).json({error: "Nevalidné písmeno."});
             return;
         }
 
@@ -218,7 +225,7 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
                 lookupColumn = "title";
                 break;
             default:
-                res.status(400).json({message: "Invalid model parameter."});
+                res.status(500).json({error: "Neznámy typ objektu!"});
                 return;
         }
 
@@ -238,7 +245,7 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
         const position = countBefore.length > 0 ? countBefore[0].count : 0;
 
         if (position === 0) {
-            res.status(404).json({ message: `Couldn't find any item starting with letter "${letter}".` });
+            res.status(404).json({ error: `Nie je možné nájsť prvú pozíciu písmena "${letter}"!` });
             return;
         }
 
@@ -248,7 +255,7 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
         res.status(200).json({ page });
     } catch (error) {
         console.error("Error calculating page:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ error: "Chyba pri presune na stranu!" + error });
     }
 };
 
@@ -260,7 +267,8 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
             .exec();
         res.status(200).json({book: book})
     } catch (err) {
-        throw err;
+        res.status(500).json({error: "Chyba pri získavaní knihy! " + err});
+        console.error("Error fetching book:", err);
     }
 }
 
@@ -282,7 +290,8 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
 
         res.status(200).json({message: 'Book added', book: newBook, books: allBooks})
     } catch (error) {
-        throw error
+        res.status(500).json({error: "Chyba pri pridávaní knihy! " + error});
+        console.error("Error adding book:", error);
     }
 }
 
@@ -311,7 +320,8 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
             books: allBooks,
         })
     } catch (error) {
-        throw error
+        res.status(500).json({error: "Chyba pri aktualizácii knihy! " + error});
+        console.error("Error updating book:", error);
     }
 }
 
@@ -339,7 +349,8 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
             books: allBooks,
         })
     } catch (error) {
-        throw error
+        res.status(500).json({error: "Chyba pri mazaní knihy! " + error});
+        console.error("Error deleting book:", error);
     }
 }
 
@@ -354,10 +365,11 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
         if (bookInfo) {
             res.status(200).json(bookInfo);
         } else {
-            res.status(401).json({message: "Book not found"});
+            res.status(401).json({error: "Kniha nebola nájdená."});
         }
-    } catch (err) {
-        throw "Problem at web scrapping: " + err;
+    } catch (err: any) {
+        res.status(500).json({error: "Chyba pri získavaní informácií o knihe! " + err.message});
+        console.error("Problem at web scrapping: " + err);
     }
 }
 
@@ -550,7 +562,7 @@ const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> =>
                         if (isRef && typeof value === 'object' && value !== null) {
                             return {
                                 _id: value._id?.toString(),
-                                name: value.name || `${value.lastName + ", " || ''}${value.firstName || ''}`.trim() || value.title || value._id?.toString()
+                                name: value.name || (value.firstName || value.lastName ? stringifyName(value) : false ) || value.title || value._id?.toString()
                             };
                         }
 
@@ -571,7 +583,7 @@ const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> =>
 
     } catch (error) {
         console.error("Error fetching unique field values:", error);
-        res.status(500).json({message: "Internal server error"});
+        res.status(500).json({error: "Chyba pri získavaní unikátnych hodnôt! " + error});
     }
 };
 
@@ -836,7 +848,8 @@ const dashboard = {
 
             res.status(200).json(formattedResult);
         } catch (error: unknown) {
-            console.log("Error while calculating statistics", error);
+            console.error("Error while calculating statistics", error);
+            res.status(500).json({error: "Chyba pri získavaní rozmerových štatistík! " + error});
         }
     },
     getSizesGroups: async (_: Request, res: Response): Promise<void> => {
@@ -924,58 +937,63 @@ const dashboard = {
             });
         } catch (err) {
             console.error("Error while getSizesGroups", err);
-            res.status(500).json({error: "Failed to get size groups."});
+            res.status(500).json({error: "Chyba pri získavaní rozmerových skupín! " + err});
         }
     },
     getLanguageStatistics: async (_: Request, res: Response): Promise<void> => {
-        const aggregationPipeline = [
-            {
-                $match: {
-                    deletedAt: undefined // Exclude documents that are deleted
+        try {
+            const aggregationPipeline = [
+                {
+                    $match: {
+                        deletedAt: undefined // Exclude documents that are deleted
+                    }
+                },
+                {
+                    $addFields: {
+                        firstLanguage: {$arrayElemAt: ["$language", 0]}
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$firstLanguage",
+                        count: {$sum: 1}
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        language: "$_id",
+                        count: 1
+                    }
                 }
-            },
-            {
-                $addFields: {
-                    firstLanguage: {$arrayElemAt: ["$language", 0]}
-                }
-            },
-            {
-                $group: {
-                    _id: "$firstLanguage",
-                    count: {$sum: 1}
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    language: "$_id",
-                    count: 1
-                }
-            }
-        ];
+            ];
 
-        let data = await Book.aggregate(aggregationPipeline);
-        // replace null in object with "-"
-        data.forEach(function (object) {
-            for (let key in object) {
-                if (object[key] == null || object[key] === "")
-                    object[key] = "Bez jazyka";
-            }
-        });
-
-        // merge count if key is same
-        data = Object.values(
-            data.reduce((acc: any, obj) => {
-                if (!acc[obj.language]) {
-                    acc[obj.language] = {...obj}; // Initialize with the first object
-                } else {
-                    acc[obj.language].count += obj.count; // Merge count values
+            let data = await Book.aggregate(aggregationPipeline);
+            // replace null in object with "-"
+            data.forEach(function (object) {
+                for (let key in object) {
+                    if (object[key] == null || object[key] === "")
+                        object[key] = "Bez jazyka";
                 }
-                return acc;
-            }, {})
-        );
+            });
 
-        res.status(200).json(data);
+            // merge count if key is same
+            data = Object.values(
+                data.reduce((acc: any, obj) => {
+                    if (!acc[obj.language]) {
+                        acc[obj.language] = {...obj}; // Initialize with the first object
+                    } else {
+                        acc[obj.language].count += obj.count; // Merge count values
+                    }
+                    return acc;
+                }, {})
+            );
+
+            res.status(200).json(data);
+        } catch (error) {
+            console.error("Error while calculating language statistics:", error);
+            res.status(500).json({error: "Chyba pri získavaní jazykových štatistík! " + error});
+        }
     },
     countBooks: async (req: Request, res: Response): Promise<void> => {
         try {
@@ -1030,10 +1048,11 @@ const dashboard = {
 
             res.status(200).json(sortedData);
         } catch (error) {
-            throw error;
+            console.error("Error counting books:", error);
+            res.status(500).json({error: "Chyba pri počítaní kníh! " + error});
         }
     },
-    getReadBy: async (req: Request, res: Response): Promise<void> => {
+    getReadBy: async (_: Request, res: Response): Promise<void> => {
         try {
             const users = (await User.find(optionFetchAllExceptDeleted).select('_id firstName lastName')) as Partial<IUser>[];
             const totalBooksRead = await Book.countDocuments({deletedAt: {$ne: undefined}});
@@ -1079,10 +1098,9 @@ const dashboard = {
             res.status(200).json(sortedData);
         } catch (error) {
             console.error('Error calculating reading statistics:', error);
-            res.status(500).json({message: 'Internal server error', error});
+            res.status(500).json({error: "Chyba pri získavaní štatistík čítania! " + error});
         }
     }
-
 }
 
 export {

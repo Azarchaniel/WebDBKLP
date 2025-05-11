@@ -124,9 +124,10 @@ export default function BookPage() {
                         saveFirstPageToCache(books, count, pagination);
                     }
                 })
-                .catch((err: Error) => console.trace(err))
+                .catch(() => {throw Error()})
                 .finally(() => setLoading(false));
-        } catch (err) {
+        } catch (err: any) {
+            toast.error(err.response.data.error);
             console.error('Error fetching books:', err);
             setLoading(false);
         }
@@ -164,15 +165,15 @@ export default function BookPage() {
         addBook(formData)
             .then(({status, data}) => {
                 if (status !== 200) {
-                    toast.error(`Chyba! Kniha ${data.book?.title} nebola ${formData._id ? "uložená" : "pridaná"}.`)
-                    throw new Error("Chyba! Kniha nebola pridaná!");
+                    throw Error();
                 }
                 toast.success(`Kniha ${data.book?.title} bola úspešne ${formData._id ? "uložená" : "pridaná"}.`);
                 setSaveBookSuccess(true);
                 fetchBooks()
             })
             .catch((err) => {
-                console.trace(err)
+                toast.error(err.response.data.error);
+                console.trace("Error getting books", err)
                 setSaveBookSuccess(false);
             })
             .finally(() => setWasCheckedLoading(false)) //TEMP
@@ -190,7 +191,10 @@ export default function BookPage() {
                 .then(({data}) => {
                     setUpdateBook(data.book);
                 })
-                .catch((err) => console.trace(err))
+                .catch((err) => {
+                    toast.error(err.response.data.error);
+                    console.trace(err);
+                })
         }
     }
 
@@ -202,7 +206,10 @@ export default function BookPage() {
                 .then(({data}) => {
                     bookToDelete = data.book;
                 })
-                .catch((err) => console.trace(err))
+                .catch((err) => {
+                    toast.error(err.response.data.error);
+                    console.trace(err)
+                })
         }
 
         openConfirmDialog({
@@ -218,7 +225,7 @@ export default function BookPage() {
                         fetchBooks();
                     })
                     .catch((err) => {
-                        toast.error("Chyba! Knihu nemožno vymazať!");
+                        toast.error(err.response.data.error);
                         console.trace(err);
                     })
             },

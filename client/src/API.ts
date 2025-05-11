@@ -81,7 +81,7 @@ axiosInstance.interceptors.response.use(
         return response;
     },
     (error) => {
-        console.error("Response error:", error);
+        //console.error("Response error:", error);
 
         if (error.response?.status === 401) {
             console.warn("Unauthorized!");
@@ -89,7 +89,7 @@ axiosInstance.interceptors.response.use(
 
         const now = Date.now();
         if (now - lastLogTime > 10000) { // Check if 10 seconds have passed since the last log
-            toast.warning("Neprihlásený užívateľ!");
+            //toast.warning("Neprihlásený užívateľ!");
             lastLogTime = now; // Update the last log time
         }
 
@@ -97,7 +97,10 @@ axiosInstance.interceptors.response.use(
     }
 );
 
-interface IPageByLetter { page: number }
+interface IPageByLetter {
+    page: number
+}
+
 export const getPageByStartingLetter = async (letter: string, pageSize: number, model: string, filterUsers?: string[]): Promise<AxiosResponse<IPageByLetter>> => {
     try {
         const response: AxiosResponse<IPageByLetter> = await axiosInstance.get(
@@ -220,16 +223,11 @@ export const deleteBook = async (
     }
 }
 
-//TODO: types
 export const getInfoAboutBook = async (isbn: string): Promise<any> => {
-    try {
-        const bookInfo: AxiosResponse<any> = await axiosInstance.get(
-            `${baseUrl}/get-book-info/${isbn}`
-        )
-        return bookInfo
-    } catch (error: any) {
-        throw new Error(error)
-    }
+    const bookInfo: AxiosResponse<any> = await axiosInstance.get(
+        `${baseUrl}/get-book-info/${isbn}`
+    )
+    return bookInfo
 }
 
 export const getUniqueFieldValues = async (): Promise<AxiosResponse> => {

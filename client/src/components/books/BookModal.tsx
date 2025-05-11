@@ -59,7 +59,11 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         if (!("title" in (formData || {})) && checkIsbnValidity(formData?.ISBN)) {
             openLoadingBooks(true);
             getInfoAboutBook(formData.ISBN)
-                .then(({data}) => {
+                .then(({data, status}) => {
+                    if (status !== 200) {
+                        throw Error();
+                    }
+
                     setFormData({
                         ...data,
                         published: {
@@ -71,7 +75,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
                     } as IBook)
                 })
                 .catch(err => {
-                    toast.error(`Chyba! Kniha nebola nájdená.`)
+                    toast.error(err.response.data.error);
                     console.error(`Chyba! Kniha ${formData.ISBN} nebola nájdená!`, err);
                 })
                 .finally(() => openLoadingBooks(false))
