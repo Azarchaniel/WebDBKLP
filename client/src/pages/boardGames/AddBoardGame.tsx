@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { IBoardGame, ValidationError } from "../../type";
-import { Modal } from "@components/Modal";
-import { BoardGamesModalBody, BoardGamesModalButtons } from "@components/boardGames/BoardGamesModal";
+import React, {useEffect, useState} from "react";
+import {IBoardGame, ValidationError} from "../../type";
+import {Modal} from "@components/Modal";
+import {BoardGamesModalBody} from "@components/boardGames/BoardGamesModal";
+import {ModalButtons} from "@components/Modal";
 
 interface Props {
     saveBoardGame: (formData: IBoardGame) => void;
@@ -10,7 +11,7 @@ interface Props {
     saveResultSuccess?: boolean;
 }
 
-const AddBoardGame: React.FC<Props> = ({ saveBoardGame, boardGame, onClose, saveResultSuccess }: Props) => {
+const AddBoardGame: React.FC<Props> = ({saveBoardGame, boardGame, onClose, saveResultSuccess}: Props) => {
     const [showModal, setShowModal] = useState(Boolean(boardGame));
     const [boardGameData, setBoardGameData] = useState<IBoardGame | object>(boardGame || {});
     const [error, setError] = useState<ValidationError[] | undefined>([
@@ -24,20 +25,20 @@ const AddBoardGame: React.FC<Props> = ({ saveBoardGame, boardGame, onClose, save
     useEffect(() => {
         switch (saveResultSuccess) {
             case true:
-                setOutline({ outline: "10px solid green" });
+                setOutline({outline: "10px solid green"});
                 break;
             case false:
-                setOutline({ outline: "10px solid red" });
+                setOutline({outline: "10px solid red"});
                 break;
             default:
-                setOutline({ outline: "none" });
+                setOutline({outline: "none"});
                 break;
         }
     }, [saveResultSuccess]);
 
     return (
         <>
-            <button type="button" className="addBtnTable" onClick={() => setShowModal(true)} />
+            <button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>
             {showModal && (
                 <Modal
                     customKey={boardGame?._id || "new"}
@@ -54,11 +55,11 @@ const AddBoardGame: React.FC<Props> = ({ saveBoardGame, boardGame, onClose, save
                         />
                     }
                     footer={
-                        <BoardGamesModalButtons
-                            saveBoardGame={() => saveBoardGame(boardGameData as IBoardGame)}
-                            cleanFields={() => {
+                        <ModalButtons
+                            onSave={() => saveBoardGame(boardGameData as IBoardGame)}
+                            onClear={() => {
                                 setBoardGameData({});
-                                setOutline({ outline: "none" });
+                                setOutline({outline: "none"});
                             }}
                             error={error}
                             saveResultSuccess={saveResultSuccess}

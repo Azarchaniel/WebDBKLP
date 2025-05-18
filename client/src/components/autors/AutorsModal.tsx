@@ -261,34 +261,3 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         </form>
     )
 }
-
-export const AutorsModalButtons = ({saveAutor, cleanFields, error, saveResultSuccess}: ButtonsProps) => {
-    const [loadingResult, setLoadingResult] = useState<boolean>(false);
-
-    useEffect(() => {
-        if (saveResultSuccess !== undefined && loadingResult) setLoadingResult(false);
-    }, [saveResultSuccess]);
-
-    const saveAutorHandler = useCallback(() => {
-        setLoadingResult(true);
-        saveAutor();
-    }, [saveAutor]);
-
-    return (
-        <div className="column">
-            <div>{showError(error)}</div>
-
-            <div className="buttons">
-                <button type="button" className="btn btn-secondary"
-                        onClick={cleanFields}>Vymazať polia
-                </button>
-                <button type="submit"
-                        disabled={Boolean(error?.length) || loadingResult}
-                        onClick={saveAutorHandler}
-                        className="btn btn-success">
-                    {loadingResult ? <LoadingSpinner color="white" size={50} marginTop={1}/> : "Uložiť"}
-                </button>
-            </div>
-        </div>
-    )
-}

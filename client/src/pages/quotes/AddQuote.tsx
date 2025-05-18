@@ -1,8 +1,9 @@
 import {IQuote, ValidationError} from "../../type";
 import React, {useEffect, useState} from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
-import {Modal} from "../../components/Modal";
-import {QuotesModalBody, QuotesModalButtons} from "../../components/quotes/QuotesModal";
+import {Modal} from "@components/Modal";
+import {QuotesModalBody} from "@components/quotes/QuotesModal";
+import {ModalButtons} from "@components/Modal";
 
 interface Props {
     saveQuote: (formData: IQuote | any) => void;
@@ -55,10 +56,11 @@ const AddQuote: React.FC<Props> = ({saveQuote, quote, onClose, saveResultSuccess
                 		onChange={setQuoteData}
                 		error={setError}
                 	/>}
-                	footer={<QuotesModalButtons
-                		saveQuote={() => saveQuote(quoteData as IQuote)}
-                		cleanFields={() => setQuoteData({})}
+                	footer={<ModalButtons
+                		onSave={() => saveQuote(quoteData as IQuote)}
+                		onClear={() => setQuoteData({})}
                 		error={error}
+						saveResultSuccess={saveResultSuccess}
                 	/>}
 					overrideStyle={outline}
                 />

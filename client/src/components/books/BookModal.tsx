@@ -509,36 +509,3 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         </div>
     </form>)
 }
-
-export const BooksModalButtons: React.FC<ButtonsProps> = ({saveBook, cleanFields, error, saveResultSuccess}) => {
-    const [loadingResult, setLoadingResult] = useState<boolean | undefined>(false);
-
-    useEffect(() => {
-        if (saveResultSuccess !== undefined && loadingResult) {
-            setLoadingResult(false);
-        }
-    }, [saveResultSuccess, loadingResult]);
-
-    const saveBookHandler = useCallback(() => {
-        setLoadingResult(true);
-        saveBook();
-    }, [saveBook]);
-
-    return (
-        <div className="column">
-            <div>{showError(error)}</div>
-
-            <div className="buttons">
-                <button type="button" className="btn btn-secondary"
-                        onClick={cleanFields}>Vymazať polia
-                </button>
-                <button type="submit"
-                        disabled={Boolean(error?.length) || loadingResult}
-                        onClick={saveBookHandler}
-                        className="btn btn-success">
-                    {loadingResult ? <LoadingSpinner color="white" size={50} marginTop={1}/> : "Uložiť"}
-                </button>
-            </div>
-        </div>
-    )
-}
