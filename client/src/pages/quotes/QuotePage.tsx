@@ -72,7 +72,8 @@ export default function QuotePage() {
             .then(({data: {quotes, count, onlyQuotedBooks}}: IQuote[] | any) => {
                 setFilteredQuotes(quotes);
                 setCountAll(count);
-                setBooks(onlyQuotedBooks);
+                //only overwrite books if this is init call
+                if (!books) setBooks(onlyQuotedBooks);
             })
             .catch((err: Error) => console.trace(err))
             .finally(() => setLoading(false))
@@ -140,7 +141,7 @@ export default function QuotePage() {
                     }
                     displayValue="showName"
                     placeholder="Z knih"
-                    onChange={({value}) => updateFilteredBooks(value as any)}
+                    onChange={({value}) => updateFilteredBooks(value as IBook[])}
                     name="fromBook"
                 />
             </div>
