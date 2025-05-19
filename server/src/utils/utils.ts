@@ -93,6 +93,13 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
 
         const foundAuthors = [];
 
+        if (authors.length === 1 && authors[0].match(/\s{3,}/g)) {
+            authors = authors[0]
+                .split(/\s{3,}/g)
+                .map(s => s.trim().replace(/\s{3,}/g, " ").replace(",", ""))
+                .filter(Boolean);
+        }
+
         for (let author of authors) {
             const splitted = author.split(" ");
             //@ts-ignore
@@ -106,7 +113,7 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
                 lastName = splitted[splitted?.length - 1];
             }
 
-            if (!lastName) return;
+            if (!lastName || firstName.includes("*") || firstName === "kolektiv") return;
 
             let queryOptions: any[] = [
                 {
@@ -302,7 +309,7 @@ export const webScrapper = async (isbn: string): Promise<any> => {
     //TODO: if grBook is different than dkBook, send warning or do something
     const mergedBook = {...grBook, ...dkBook}; //prefer DBK, so it is overwriting
 
-    mergedBook.ISBN =  mergedBook?.ISBN?.includes("-") ? mergedBook.ISBN : originalIsbn;
+    mergedBook.ISBN = mergedBook?.ISBN?.includes("-") ? mergedBook.ISBN : originalIsbn;
 
     const finalBook = {
         ...mergedBook,
@@ -322,7 +329,7 @@ export const sortByParam = (data: any, param: string) =>
 export const formatMongoDbDecimal = (num: unknown) => {
     if (!num) return;
     if (typeof num !== "string") return num;
-    return mongoose.Types.Decimal128.fromString((num).replace(",","."));
+    return mongoose.Types.Decimal128.fromString((num).replace(",", "."));
 }
 
 
@@ -351,7 +358,7 @@ async function normalizeFieldValue(value: any): Promise<string> {
     }
 
     if (typeof value === 'object') {
-        const { title, publisher }: any = value;
+        const {title, publisher}: any = value;
         return diacritics
             .remove(title ?? publisher ?? '')
             .replace(/[^a-zA-Z0-9\s]/g, ''); // Remove non-alphanumeric characters

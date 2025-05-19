@@ -3,7 +3,6 @@ import React, {useCallback, useEffect, useState} from "react";
 import {getInfoAboutBook} from "../../API";
 import {toast} from "react-toastify";
 import {
-    checkIsbnValidity,
     formatDimension,
     formPersonsFullName,
     validateNumber,
@@ -13,13 +12,11 @@ import {
     fetchAutors,
     fetchUsers
 } from "@utils";
-import {showError} from "../Modal";
 import {ArrayInput, InputField, LazyLoadMultiselect} from "@components/inputs";
 import {openLoadingBooks} from "../LoadingBooks";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
 import BarcodeScannerButton from "@components/BarcodeScanner";
-import LoadingSpinner from "@components/LoadingSpinner";
 import {createNewAutor, AutorRole} from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
 
@@ -28,13 +25,6 @@ interface BodyProps {
     onChange: (data: IBook | object) => void;
     error: (err: ValidationError[] | undefined) => void;
     editedLP?: IBook;
-}
-
-interface ButtonsProps {
-    saveBook: () => void;
-    cleanFields: () => void;
-    error?: ValidationError[] | undefined;
-    saveResultSuccess?: boolean;
 }
 
 export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
@@ -56,7 +46,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 
     const getBookFromISBN = () => {
         if (!formData?.ISBN) return;
-        if (!("title" in (formData || {})) && checkIsbnValidity(formData?.ISBN)) {
+        if (!("title" in (formData || {})) /*&& checkIsbnValidity(formData?.ISBN)*/) {
             openLoadingBooks(true);
             getInfoAboutBook(formData.ISBN)
                 .then(({data, status}) => {
@@ -155,11 +145,11 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
             localErrors = localErrors?.filter((err: ValidationError) => err.target !== "title") ?? localErrors;
         }
 
-        if ("ISBN" in formData && !checkIsbnValidity(formData?.ISBN)) {
+        /*if ("ISBN" in formData && !checkIsbnValidity(formData?.ISBN)) {
             localErrors.push({label: "Nevalidné ISBN!", target: "ISBN"});
-        } else {
+        } else {*/
             localErrors = localErrors?.filter((err: ValidationError) => err.target !== "ISBN") ?? localErrors;
-        }
+        //}
 
         if (!(numberValidations.every(n => n?.valid))) {
             numberValidations.filter(n => !(n?.valid))

@@ -82,12 +82,13 @@ export default function QuotePage() {
     const handleSaveQuote = (formData: IQuote): void => {
         setSaveQuoteSuccess(undefined);
         addQuote(formData)
-            .then(({status}) => {
+            .then(({status, data}) => {
                 if (status !== 201) {
                     throw new Error("Citát sa nepodarilo pridať!")
                 }
-                toast.success(`Citát bol úspešne ${formData._id ? 'upravený' : 'pridaný.'}`);
                 setSaveQuoteSuccess(true);
+                setFilteredQuotes(data.quotes);
+                toast.success(`Citát bol úspešne ${formData._id ? 'upravený' : 'pridaný.'}`);
             })
             .catch((err) => {
                 toast.error(`Citát sa nepodarilo ${formData._id ? 'upraviť' : 'pridať.'}!`);
