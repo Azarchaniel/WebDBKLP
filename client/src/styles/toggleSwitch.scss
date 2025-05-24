@@ -3,7 +3,7 @@ $label-colour: #00ADB5;
 $disabled-colour: #ddd;
 $toggle-colour: #28a745;
 $white: #fff;
-`
+
 .toggle-switch {
   position: relative;
   margin-right: 10px;
@@ -14,9 +14,11 @@ $white: #fff;
   -moz-user-select: none;
   -ms-user-select: none;
   text-align: left;
+
   &-checkbox {
     display: none;
   }
+
   &-label {
     display: block;
     overflow: hidden;
@@ -24,21 +26,26 @@ $white: #fff;
     border: 0 solid $label-colour;
     border-radius: 20px;
     margin: 0;
+
     &:focus {
       outline: none;
+
       > span {
         box-shadow: 0 0 2px 5px red;
       }
     }
+
     > span:focus {
       outline: none;
     }
   }
+
   &-inner {
     display: block;
     width: 200%;
     margin-left: -100%;
     transition: margin 0.3s ease-in 0s;
+
     &:before,
     &:after {
       display: block;
@@ -52,6 +59,7 @@ $white: #fff;
       font-weight: bold;
       box-sizing: border-box;
     }
+
     &:before {
       content: attr(data-yes);
       text-transform: uppercase;
@@ -60,14 +68,17 @@ $white: #fff;
       color: $white;
     }
   }
+
   &-disabled {
     background-color: $disabled-colour;
     cursor: not-allowed;
+
     &:before {
       background-color: $disabled-colour;
       cursor: not-allowed;
     }
   }
+
   &-inner:after {
     content: attr(data-no);
     text-transform: uppercase;
@@ -76,6 +87,7 @@ $white: #fff;
     color: $white;
     text-align: right;
   }
+
   &-switch {
     display: block;
     width: 24px;
@@ -89,16 +101,20 @@ $white: #fff;
     border-radius: 20px;
     transition: all 0.3s ease-in 0s;
   }
+
   &-checkbox:checked + &-label {
     .toggle-switch-inner {
       margin-left: 0;
     }
+
     .toggle-switch-switch {
       right: 0px;
     }
   }
+
   &.small-switch {
     width: 40px;
+
     .toggle-switch-inner {
       &:after,
       &:before {
@@ -107,12 +123,14 @@ $white: #fff;
         line-height: 20px;
       }
     }
+
     .toggle-switch-switch {
       width: 16px;
       right: 20px;
       margin: 2px;
     }
   }
+
   @media screen and (max-width: 991px) {
     transform: scale(0.9);
   }
@@ -121,5 +139,63 @@ $white: #fff;
   }
   @media screen and (max-width: 575px) {
     transform: scale(0.75);
+  }
+}
+
+// Three way toggle switch
+
+.three-state-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $white;
+  border-radius: 20px;
+  border: 1px solid $label-colour;
+  overflow: hidden;
+  width: 100%;
+  min-height: 40px;
+
+  .three-state-option {
+    flex: 1 1 0;
+    text-align: center;
+    padding: 10px 0;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.75rem;
+    color: $label-colour;
+    transition: background 0.2s, color 0.2s;
+    height: 100%;
+
+    &.three-state-active {
+      background: $toggle-colour;
+      color: $white;
+      font-weight: bold;
+      z-index: 1;
+    }
+
+    &:not(.three-state-active):hover {
+      background: lighten($toggle-colour, 35%);
+    }
+  }
+
+  &.toggle-switch-disabled,
+  &[aria-disabled="true"] {
+    opacity: 0.6;
+    pointer-events: none;
+
+    .three-state-option {
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Optional: Responsive/small version
+.three-state-switch.small-switch {
+  min-width: 120px;
+  min-height: 24px;
+
+  .three-state-option {
+    font-size: 0.85rem;
+    padding: 0.25em 0.5em;
   }
 }

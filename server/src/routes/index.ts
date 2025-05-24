@@ -19,7 +19,8 @@ import {
     getAllBoardGames,
     addBoardGame,
     updateBoardGame,
-    deleteBoardGame
+    deleteBoardGame,
+    countBGchildren
 } from '../controllers'
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
@@ -92,6 +93,7 @@ router.get('/boardgames', getAllBoardGames)
 router.get('/boardgame/:id', getBoardGame)
 router.post('/add-boardgame', addBoardGame)
 router.put('/edit-boardgame/:id', updateBoardGame)
+router.get('/boardgame/count-children/:id', countBGchildren)
 router.post('/delete-boardgame/:id', deleteBoardGame)
 
 export default router;

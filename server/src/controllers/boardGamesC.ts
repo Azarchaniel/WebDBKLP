@@ -13,7 +13,9 @@ const getAllBoardGames = async (req: Request, res: Response): Promise<void> => {
         const parsedPageSize = parseInt(pageSize as string, 10);
 
         const lookupStages = [
-            createLookupStage("autors", "autor", "autor")
+            createLookupStage("autors", "autor", "autor"),
+            createLookupStage("boardgames", "parent", "parent"),
+            createLookupStage("boardgames", "children", "children")
         ];
 
         const {data, count, latestUpdate} = await fetchDataWithPagination(
@@ -39,7 +41,11 @@ const getAllBoardGames = async (req: Request, res: Response): Promise<void> => {
 const getBoardGame = async (req: Request, res: Response): Promise<void> => {
     try {
         const {id} = req.params
-        const boardGame = await BoardGame.findById(id).populate('autor')
+        const boardGame =
+            await BoardGame.findById(id)
+                .populate('autor')
+                .populate("boardgames", "parent", "parent")
+                .populate("boardgames", "children", "children");
         if (!boardGame) {
             res.status(404).json({error: "Board game not found"})
             return
@@ -62,7 +68,9 @@ const addBoardGame = async (req: Request, res: Response): Promise<void> => {
             ageRecommendation,
             published,
             autor,
-            note
+            note,
+            parent,
+            children
         } = req.body
 
         const countryPublished = published ?
@@ -78,7 +86,9 @@ const addBoardGame = async (req: Request, res: Response): Promise<void> => {
             ageRecommendation,
             published: {...published, country: countryPublished},
             note,
-            autor: getIdFromArray(autor)
+            autor: getIdFromArray(autor),
+            parent: parent?.map((p: IBoardGame) => p._id),
+            children: children?.map((c: IBoardGame) => c._id)
         };
 
         const bgToSave = new BoardGame(boardGame);
@@ -102,7 +112,9 @@ const updateBoardGame = async (req: Request, res: Response): Promise<void> => {
             playTime,
             ageRecommendation,
             published,
-            autor
+            autor,
+            parent,
+            children
         } = req.body
 
         const countryPublished = published ?
@@ -117,7 +129,9 @@ const updateBoardGame = async (req: Request, res: Response): Promise<void> => {
             playTime,
             ageRecommendation,
             published: {...published, country: countryPublished},
-            autor: getIdFromArray(autor)
+            autor: getIdFromArray(autor),
+            parent: parent?.map((p: IBoardGame) => p._id),
+            children: children?.map((c: IBoardGame) => c._id)
         }, {new: true})
         if (!updatedBoardGame) {
             res.status(404).json({error: "Board game not found"})
@@ -130,10 +144,24 @@ const updateBoardGame = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
+const countBGchildren = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const {id} = req.params
+        const boardGame = await BoardGame.findById(id).lean();
+        if (!boardGame) {
+            res.status(404).json({error: "Žiadna spoločenská hra s týmto ID neexistuje"});
+        }
+        res.status(200).json({count: (boardGame as IBoardGame)?.children?.length})
+    } catch (error) {
+        console.error("Error counting children:", error);
+        res.status(500).json({error: "Internal server error"});
+    }
+}
+
 const deleteBoardGame = async (req: Request, res: Response): Promise<void> => {
     try {
         const {id} = req.params
-        const deletedBoardGame = await BoardGame.findByIdAndUpdate(id, {deletedAt: new Date()})
+        const deletedBoardGame = await BoardGame.findOneAndUpdate({_id: id}, {deletedAt: new Date()})
         if (!deletedBoardGame) {
             res.status(404).json({error: "Board game not found"})
             return
@@ -145,4 +173,4 @@ const deleteBoardGame = async (req: Request, res: Response): Promise<void> => {
     }
 }
 
-export {getAllBoardGames, getBoardGame, addBoardGame, updateBoardGame, deleteBoardGame};
+export {getAllBoardGames, getBoardGame, addBoardGame, updateBoardGame, countBGchildren, deleteBoardGame};

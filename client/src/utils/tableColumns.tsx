@@ -314,7 +314,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
         header: 'Počet hráčov',
         cell: ({cell}: { cell: any }) => {
             const value = cell.getValue() as TRange;
-            return value ? `${value?.from} - ${value?.to} hráčov` : "";
+            return value ? `${value?.from ?? "-"} - ${value?.to ?? "-"} hráčov` : "";
         },
     },
     {
@@ -322,7 +322,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
         header: 'Čas hrania (min)',
         cell: ({cell}: { cell: any }) => {
             const value = cell.getValue() as TRange;
-            return value ? `${value?.from} - ${value?.to} min` : "";
+            return value ? `${value?.from ?? "-"} - ${value?.to ?? "-"} min` : "";
         },
     },
     {
@@ -330,7 +330,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
         header: 'Odporúčaný vek',
         cell: ({cell}: { cell: any }) => {
             const value = cell.getValue() as TRange;
-            return value ? `${value?.from} - ${value?.to}` : "";
+            return value ? `${value?.from ?? "-"} - ${value?.to ?? "-"}` : "";
         },
     },
     {

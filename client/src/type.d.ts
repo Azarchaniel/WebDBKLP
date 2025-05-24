@@ -269,5 +269,6 @@ export interface IBoardGame {
     picture?: string;
     url?: string;
     note?: string;
-    expansions?: IBoardGame[];
+    parent?: IBoardGame[];
+    children?: IBoardGame[];
 }

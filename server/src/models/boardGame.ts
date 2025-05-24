@@ -19,7 +19,8 @@ const boardGameSchema = new Schema({
     autor: {type: [mongoose.Schema.Types.ObjectId], ref: 'Autor', required: false},
     picture: {type: String, required: false},
     url: {type: String, required: false},
-    expansions: [{type: Schema.Types.ObjectId, ref: 'BoardGame', required: false}],
+    parent: [{type: Schema.Types.ObjectId, ref: 'BoardGame', required: false}],
+    children: [{type: Schema.Types.ObjectId, ref: 'BoardGame', required: false}],
     note: {type: String, required: false},
 }, {
     timestamps: true
@@ -33,6 +34,38 @@ boardGameSchema.index({
     "normalizedSearchField.autor": "text"
 });
 
+boardGameSchema.post('save', async function(doc) {
+    // id board game was saved with parent field, find parent and add this board game to its children
+    if (doc.parent && doc.parent.length > 0) {
+        await mongoose.model('BoardGame').findOneAndUpdate(
+            { _id: { $in: doc.parent } },
+            { $addToSet: { children: doc._id } }
+        );
+    }
+});
+
+boardGameSchema.pre('findOneAndUpdate', async function() {
+    // if parent was deleted remove also it's children
+    const update = this.getUpdate();
+
+    // Check if this is a soft delete operation (setting deletedAt)
+    if (update && typeof update === 'object' && "deletedAt" in update && update.deletedAt) {
+        const query = this.getQuery();
+        const id = query._id;
+
+        // Cascade the soft delete to children
+        await mongoose.model('BoardGame').updateMany(
+            { parent: { $in: [id] } },
+            { deletedAt: update.deletedAt }
+        );
+
+        // Remove this board game's ID from all parents' children arrays
+        await mongoose.model('BoardGame').updateMany(
+            { children: id },
+            { $pull: { children: id } }
+        );
+    }
+});
 applyNormalizeSearchMiddleware(boardGameSchema, ['save', 'updateOne', 'findOneAndUpdate', 'deleteOne', 'findOneAndDelete'], "boardGame");
 applyFullNameMiddleware(boardGameSchema, ['save', 'updateOne', 'findOneAndUpdate', 'deleteOne', 'findOneAndDelete']);
 

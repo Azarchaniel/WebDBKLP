@@ -632,6 +632,19 @@ export const addBoardGame = async (
     }
 }
 
+export const countBGchildren = async (
+    _id: string
+): Promise<AxiosResponse<{ count: number }>> => {
+    try {
+        const response: AxiosResponse<{ count: number }> = await axiosInstance.get(
+            `${baseUrl}/boardgame/count-children/${_id}`
+        )
+        return response
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
 export const deleteBoardGame = async (
     _id: string
 ): Promise<AxiosResponse<ApiBookDataType>> => {

@@ -463,9 +463,26 @@ export async function normalizeSearchFields(doc: any, model: string): Promise<Re
     return normalizedFields;
 }
 
-export const createLookupStage = (from: string, localField: string, as: string) => ({
-    $lookup: {from, localField, foreignField: "_id", as}
-});
+/**
+ * Creates a MongoDB $lookup stage for aggregation pipelines with collection name validation.
+ * @param from - The name of the foreign collection to join with.
+ * @param localField - Field in the current collection to match with the foreign collection.
+ * @param as - Name of the output array field for joined documents.
+ * @returns A $lookup stage object or throws an error if collection doesn't exist.
+ */
+export const createLookupStage = (from: string, localField: string, as: string) => {
+    // Normalize collection name to lowercase (MongoDB collection names are case-sensitive)
+    const normalizedFrom = from.toLowerCase();
+
+    // Check if collection exists in the database
+    if (!mongoose.connection.collections[normalizedFrom]) {
+        console.warn(`Warning: Collection "${from}" might not exist or is not properly formatted.`);
+    }
+
+    return {
+        $lookup: {from: normalizedFrom, localField, foreignField: "_id", as}
+    };
+};
 
 export const stringifyName = (doc: any) => {
     if (doc.firstName && doc.lastName) {

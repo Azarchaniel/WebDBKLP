@@ -1,12 +1,11 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {IBoardGame, ILangCode, ValidationError} from "../../type";
 import {InputField, LazyLoadMultiselect} from "@components/inputs";
-import {showError} from "../Modal";
-import LoadingSpinner from "@components/LoadingSpinner";
 import {countryCode, fetchAutors, fetchBoardGames} from "@utils";
 import {createNewAutor, AutorRole} from "@utils/autor";
 import FromToInput from "@components/inputs/FromToInput";
 import TextArea from "@components/inputs/TextArea";
+import {ThreeStateToggleSwitch} from "@components/ToggleSwitch";
 
 interface BodyProps {
     data: IBoardGame | object;
@@ -14,12 +13,15 @@ interface BodyProps {
     error: (err: ValidationError[] | undefined) => void;
 }
 
-interface ButtonsProps {
-    saveBoardGame: () => void;
-    cleanFields: () => void;
-    error?: ValidationError[] | undefined;
-    saveResultSuccess?: boolean;
-}
+const getInitialExpansions = (data: IBoardGame | object): boolean | undefined => {
+    if ((data as IBoardGame).children && (data as IBoardGame).children!.length > 0) {
+        return true;
+    }
+    if ((data as IBoardGame).parent && (data as IBoardGame).parent!.length > 0) {
+        return false;
+    }
+    return undefined;
+};
 
 export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
     const [formData, setFormData] = useState(data as any);
@@ -27,6 +29,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
         {label: "Názov musí obsahovať aspoň jeden znak!", target: "title"},
     ]);
     const [reset, doReset] = useState<number>(0);
+    const [expansions, setExpansions] = useState<boolean | undefined>(getInitialExpansions(data));
 
     useEffect(() => {
         onChange(formData);
@@ -214,56 +217,42 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                     />
                 </div>
 
-                <div className="bg-expansions">
-                    <LazyLoadMultiselect
-                        value={formData?.expansions || []}
-                        displayValue="title"
-                        placeholder="Rozšírenia"
-                        onChange={handleInputChange}
-                        name="expansions"
-                        onSearch={fetchBoardGames}
-                        reset={Boolean(reset)}
-                    />
+                <div className="bg-expansions row">
+                    <div className="col">
+                        <ThreeStateToggleSwitch
+                            id="expansions"
+                            name="expansions"
+                            state={expansions}
+                            onChange={(state: boolean | undefined) => setExpansions(state)}
+                            optionLabels={["Má rozšírenia (deti)", "Žiadne rozšírenia", "Patrí k hre (rodičovi)"]}
+                        />
+                    </div>
+                    <div className="col">
+                        {expansions ?
+                            <LazyLoadMultiselect
+                                disabled={expansions === undefined}
+                                value={formData?.children || []}
+                                displayValue="title"
+                                placeholder="Má rozšírenia (deti)"
+                                onChange={handleInputChange}
+                                name="children"
+                                onSearch={fetchBoardGames}
+                                reset={Boolean(reset)}
+                            /> :
+                            <LazyLoadMultiselect
+                                disabled={expansions === undefined}
+                                selectionLimit={1}
+                                value={formData?.parent || []}
+                                displayValue="title"
+                                placeholder="Patrí k hre (rodičovi)"
+                                onChange={handleInputChange}
+                                name="parent"
+                                onSearch={fetchBoardGames}
+                                reset={Boolean(reset)}
+                            />}
+                    </div>
                 </div>
             </div>
         </form>
-    );
-};
-
-export const BoardGamesModalButtons: React.FC<ButtonsProps> = ({
-                                                                   saveBoardGame,
-                                                                   cleanFields,
-                                                                   error,
-                                                                   saveResultSuccess
-                                                               }: ButtonsProps) => {
-    const [loadingResult, setLoadingResult] = useState<boolean>(false);
-
-    useEffect(() => {
-        if (saveResultSuccess !== undefined && loadingResult) setLoadingResult(false);
-    }, [saveResultSuccess]);
-
-    const saveBoardGameHandler = useCallback(() => {
-        setLoadingResult(true);
-        saveBoardGame();
-    }, [saveBoardGame]);
-
-    return (
-        <div className="column">
-            <div>{showError(error)}</div>
-
-            <div className="buttons">
-                <button type="button" className="btn btn-secondary" onClick={cleanFields}>
-                    Vymazať polia
-                </button>
-                <button
-                    type="submit"
-                    disabled={Boolean(error?.length) || loadingResult}
-                    onClick={saveBoardGameHandler}
-                    className="btn btn-success"
-                >
-                    {loadingResult ? <LoadingSpinner color="white" size={50} marginTop={1}/> : "Uložiť"}
-                </button>
-            </div>
-        </div>
     );
 };

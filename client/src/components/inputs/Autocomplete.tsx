@@ -22,6 +22,7 @@ interface AutocompleteInputProps {
     reset?: boolean;
     onNew?: (query: string) => void;
     options?: OptionValue[]; // Can be string[] or Option[]
+    disabled?: boolean; // New prop to disable the input
 }
 
 /**
@@ -62,6 +63,7 @@ export const LazyLoadMultiselect = React.memo(({
                                                    reset,
                                                    onNew,
                                                    options = [], // Default to empty array if not provided
+                                                   disabled = false, // Default to false
                                                }: AutocompleteInputProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -78,12 +80,14 @@ export const LazyLoadMultiselect = React.memo(({
     const [isInputFocused, setIsInputFocused] = useState(false); // Track input focus
 
     const handleInputFocus = useCallback(() => {
+        if (disabled) return;
         setIsInputFocused(true);
-    }, []);
+    }, [disabled]);
 
     const handleInputBlur = useCallback(() => {
+        if (disabled) return;
         setIsInputFocused(false);
-    }, []);
+    }, [disabled]);
 
     useEffect(() => {
         if (options.some(option => typeof option === 'object' && option !== null && !(displayValue in option))) {
@@ -154,6 +158,7 @@ export const LazyLoadMultiselect = React.memo(({
     }, []);
 
     const handleSelect = useCallback((option: OptionValue) => {
+        if (disabled) return;
         let newSelectedValues;
 
         if (selectionLimit && selectedValues.length >= selectionLimit) {
@@ -174,14 +179,15 @@ export const LazyLoadMultiselect = React.memo(({
         setCurrentPage(1);
         setIsOpen(false);
         if (inputRef.current) inputRef.current.focus();
-    }, [selectedValues, onChange, name, selectionLimit, areOptionsEqual]);
+    }, [selectedValues, onChange, name, selectionLimit, areOptionsEqual, disabled]);
 
     const handleRemove = useCallback((option: OptionValue) => {
+        if (disabled) return;
         const newSelectedValues = selectedValues.filter(item => !areOptionsEqual(item, option));
         setSelectedValues(newSelectedValues);
         onChange({name, value: newSelectedValues});
         if (inputRef.current) inputRef.current.focus();
-    }, [selectedValues, onChange, name, areOptionsEqual]);
+    }, [selectedValues, onChange, name, areOptionsEqual, disabled]);
 
     const debouncedSearch = useCallback(
         debounce(async (query: string, page: number) => {
@@ -210,6 +216,7 @@ export const LazyLoadMultiselect = React.memo(({
     );
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if (disabled) return;
         const value = e.target.value;
         setInputValue(value);
         setSearchQuery(value);
@@ -219,6 +226,7 @@ export const LazyLoadMultiselect = React.memo(({
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
+        if (disabled) return;
         if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
             // Remove last chip when backspace is pressed on empty input
             handleRemove(selectedValues[selectedValues.length - 1]);
@@ -241,21 +249,23 @@ export const LazyLoadMultiselect = React.memo(({
     }, [filteredOptions, selectedValues, areOptionsEqual]);
 
     const handleInputClick = useCallback(() => {
+        if (disabled) return;
         setIsOpen(true);
         if (inputRef.current) inputRef.current.focus();
         if (inputValue === "") {
             debouncedSearch("", 1);
         }
-    }, [inputValue, debouncedSearch]);
+    }, [inputValue, debouncedSearch, disabled]);
 
     const handleCreateNew = useCallback(() => {
+        if (disabled) return;
         if (onNew && searchQuery) {
             onNew(searchQuery);
             setIsOpen(false);
             setInputValue("");
             setSearchQuery("");
         }
-    }, [onNew, searchQuery]);
+    }, [onNew, searchQuery, disabled]);
 
     const adjustDropdownPosition = useCallback(() => {
         if (menuRef.current && wrapperRef.current) {
@@ -319,22 +329,22 @@ export const LazyLoadMultiselect = React.memo(({
             {placeholder && <span
                 className={`autocomplete-label ${
                     inputValue || selectedValues.length > 0 || isInputFocused ? "active" : ""
-                }`}
+                } ${disabled ? "disabled" : ""}`}
             >
                 {placeholder}
             </span>}
             <div
                 ref={wrapperRef}
                 id={id}
-                className={`chip-multiselect ${customerror ? 'error' : ''}`}
+                className={`chip-multiselect ${customerror ? 'error' : ''} ${disabled ? 'disabled' : ''}`}
             >
                 <div className="input-wrapper">
                     <div className="chip-container">
                         {Array.isArray(selectedValues) && selectedValues.length > 0 && selectedValues.map((item, index) => (
                             <div
                                 key={index}
-                                className="chip"
-                                onClick={(e) => {
+                                className={`chip${disabled ? ' disabled' : ''}`}
+                                onClick={disabled ? undefined : (e) => {
                                     e.stopPropagation();
                                     handleRemove(item);
                                 }}
@@ -358,13 +368,15 @@ export const LazyLoadMultiselect = React.memo(({
                             placeholder=""
                             className="chip-input"
                             onClick={handleInputClick}
+                            disabled={disabled}
+                            tabIndex={disabled ? -1 : 0}
                         />
                     </div>
-                    <div className="chip-dropdown-indicator" onClick={handleInputClick}>
+                    <div className="chip-dropdown-indicator" onClick={disabled ? undefined : handleInputClick}>
                         <i className={`fa fa-chevron-${isOpen ? 'up' : 'down'}`}></i>
                     </div>
                 </div>
-                {isOpen && (
+                {isOpen && !disabled && (
                     <div
                         ref={menuRef}
                         className={`autocomplete-menu ${dropdownPosition === 'top' ? 'top' : ''}`}
@@ -390,7 +402,7 @@ export const LazyLoadMultiselect = React.memo(({
                                     <div
                                         key={index}
                                         className={`autocomplete-item ${selectionLimit && selectedValues?.length >= selectionLimit ? 'disabled' : ''}`}
-                                        onClick={() => handleSelect(option)}
+                                        onClick={disabled ? undefined : () => handleSelect(option)}
                                     >
                                         {getDisplayText(option)}
                                     </div>
