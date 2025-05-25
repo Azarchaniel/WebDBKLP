@@ -107,7 +107,7 @@ const updateBoardGame = async (req: Request, res: Response): Promise<void> => {
         const {
             title,
             description,
-            image,
+            picture,
             noPlayers,
             playTime,
             ageRecommendation,
@@ -124,7 +124,7 @@ const updateBoardGame = async (req: Request, res: Response): Promise<void> => {
         const updatedBoardGame = await BoardGame.findByIdAndUpdate(id, {
             title,
             description,
-            image,
+            picture,
             noPlayers,
             playTime,
             ageRecommendation,
@@ -137,7 +137,7 @@ const updateBoardGame = async (req: Request, res: Response): Promise<void> => {
             res.status(404).json({error: "Board game not found"})
             return
         }
-        res.status(200).json(updatedBoardGame)
+        res.status(201).json(updatedBoardGame)
     } catch (error) {
         console.error("Error updating board game:", error);
         res.status(500).json({error: "Internal server error"});

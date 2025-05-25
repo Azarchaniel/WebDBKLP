@@ -16,6 +16,7 @@ import {useAuth} from "@utils/context";
 import AddBoardGame from "./AddBoardGame";
 import "@styles/BoardGamesPage.scss";
 import {InputField} from "@components/inputs";
+import BoardGameDetail from "./BoardGameDetail";
 
 export default function BoardGamesPage() {
     const {isLoggedIn} = useAuth();
@@ -203,7 +204,7 @@ export default function BoardGamesPage() {
                         />
                     </div>
                 }
-                rowActions={(_id) => (
+                rowActions={(_id, expandRow) => (
                     isLoggedIn ? <div className="actionsRow" style={{pointerEvents: "auto"}}>
                         <button
                             title="Vymazať"
@@ -215,8 +216,15 @@ export default function BoardGamesPage() {
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateBoardGame(_id)}
                         />
+                        <button
+                            key={`detail-${_id}`}
+                            title="Detaily"
+                            className="fa fa-chevron-down"
+                            onClick={() => expandRow()}
+                        />
                     </div> : <></>
                 )}
+                expandedElement={(data) => <BoardGameDetail data={data}/>}
             />
             {Boolean(updateBoardGame) &&
                 <AddBoardGame

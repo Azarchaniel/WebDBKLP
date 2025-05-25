@@ -9,7 +9,7 @@ import {
     IUniqueFilterValues,
     IUser, TRange
 } from "../type";
-import {formatDimension, getBookLocation, tableHeaderColor} from "@utils";
+import {formatBoardGameRange, formatDimension, getBookLocation, tableHeaderColor} from "@utils";
 import React, {useState} from "react";
 import {countryCode, langCode} from "./locale";
 import {ShowHideRow} from "@components/books/ShowHideRow";
@@ -314,7 +314,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
         header: 'Počet hráčov',
         cell: ({cell}: { cell: any }) => {
             const value = cell.getValue() as TRange;
-            return value ? `${value?.from ?? "-"} - ${value?.to ?? "-"} hráčov` : "";
+            return value ? formatBoardGameRange(value) + " hráčov" : "";
         },
     },
     {
@@ -322,7 +322,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
         header: 'Čas hrania (min)',
         cell: ({cell}: { cell: any }) => {
             const value = cell.getValue() as TRange;
-            return value ? `${value?.from ?? "-"} - ${value?.to ?? "-"} min` : "";
+            return value ? formatBoardGameRange(value) + " min" : "";
         },
     },
     {
@@ -330,7 +330,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
         header: 'Odporúčaný vek',
         cell: ({cell}: { cell: any }) => {
             const value = cell.getValue() as TRange;
-            return value ? `${value?.from ?? "-"} - ${value?.to ?? "-"}` : "";
+            return value ? formatBoardGameRange(value) + " rokov" : "";
         },
     },
     {

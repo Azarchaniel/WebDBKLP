@@ -130,33 +130,6 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                     />
                 </div>
 
-                <div className="bg-no-players">
-                    <FromToInput
-                        value={formData?.noPlayers}
-                        placeholder="Počet hráčov"
-                        name="noPlayers"
-                        onChange={handleInputChange}
-                    />
-                </div>
-
-                <div className="bg-play-time">
-                    <FromToInput
-                        value={formData?.playTime}
-                        placeholder="Čas hrania (min)"
-                        name="playTime"
-                        onChange={handleInputChange}
-                    />
-                </div>
-
-                <div className="bg-age-recommendation">
-                    <FromToInput
-                        value={formData?.ageRecommendation}
-                        placeholder="Vekové rozmedzie"
-                        name="ageRecommendation"
-                        onChange={handleInputChange}
-                    />
-                </div>
-
                 <div className="bg-publisher">
                     <InputField
                         value={formData?.published?.publisher || ""}
@@ -186,6 +159,51 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         onChange={handleInputChange}
                         name="published.country"
                         reset={Boolean(reset)}
+                    />
+                </div>
+
+                <div className="bg-no-players">
+                    <InputField
+                        value={formData?.noPlayers?.from}
+                        placeholder="Počet hráčov od"
+                        name="published.publisher"
+                        onChange={handleInputChange}
+                    />
+                    <InputField
+                        value={formData?.noPlayers?.to}
+                        placeholder="Počet hráčov do"
+                        name="published.publisher"
+                        onChange={handleInputChange}
+                    />
+                </div>
+
+                <div className="bg-play-time">
+                    <InputField
+                        value={formData?.playTime?.from}
+                        placeholder="Čas hrania od"
+                        name="published.publisher"
+                        onChange={handleInputChange}
+                    />
+                    <InputField
+                        value={formData?.playTime?.to}
+                        placeholder="Čas hrania do"
+                        name="published.publisher"
+                        onChange={handleInputChange}
+                    />
+                </div>
+
+                <div className="bg-age-recommendation">
+                    <InputField
+                        value={formData?.ageRecommendation?.from}
+                        placeholder="Veková kategória od"
+                        name="published.publisher"
+                        onChange={handleInputChange}
+                    />
+                    <InputField
+                        value={formData?.ageRecommendation?.to}
+                        placeholder="Veková kategória do"
+                        name="published.publisher"
+                        onChange={handleInputChange}
                     />
                 </div>
 

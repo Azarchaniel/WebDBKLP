@@ -264,7 +264,7 @@ export interface IBoardGame {
     noPlayers?: TRange;
     playTime?: TRange;
     ageRecommendation?: TRange;
-    published?: TPublished;
+    published?: IPublished;
     autor?: string[];
     picture?: string;
     url?: string;

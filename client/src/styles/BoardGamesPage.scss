@@ -3,9 +3,11 @@
 .boardGameDetail {
   display: flex;
   flex-direction: row;
+  padding: 1rem;
 
   div {
     width: 50%;
+
     &:first-child {
       margin-right: 2rem;
     }
@@ -13,6 +15,11 @@
 
   &:hover {
     background-color: #f1f1f1;
+  }
+
+  img {
+    max-width: min(25rem, 75vw);
+    height: auto;
   }
 }
 
@@ -29,7 +36,7 @@
 }
 
 .bg-autor {
-    grid-area: 1 / 7 / 1 / 13;
+  grid-area: 1 / 7 / 1 / 13;
 }
 
 .bg-publisher {
@@ -72,11 +79,19 @@
   grid-area: 6 / 1 / 6 / 13;
 }
 
+.bg-no-players, .bg-age-recommendation, .bg-play-time {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
 @media screen and (width <= $mobile-width) {
   .boardGameDetail {
     flex-direction: column;
+
     div {
       width: 100%;
+
       &:first-child {
         margin-right: 0;
       }

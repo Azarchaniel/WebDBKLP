@@ -1,8 +1,6 @@
 import React from "react";
 import {IAutor, IBook, ILangCode, IUser} from "../../type";
-import {formatDimension, getPublishedCountry} from "../../utils/utils";
-import {langCode} from "../../utils/locale";
-import {cities} from "../../utils/constants";
+import {formatDimension, getPublishedCountry, langCode, cities} from "@utils";
 
 interface IExtendedBook extends IBook {
     autorsFull?: string | null;
