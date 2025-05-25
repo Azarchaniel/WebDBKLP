@@ -45,17 +45,12 @@ axiosInstance.interceptors.request.use(
             }
 
             if (exp - now < 60) {
-                //console.warn("Token is about to expire!");
-
                 const response = await axios.post(baseUrl + '/refresh-token', {
                     refreshToken: localStorage.getItem('refreshToken'),
                 });
-
-                // Update tokens
+                // Update only the access token, do not update refresh token
                 token = response.data.accessToken;
-                localStorage.setItem('accessToken', token!);
-                localStorage.setItem('refreshToken', response.data.refreshToken);
-
+                localStorage.setItem('token', token!);
                 config.headers.Authorization = `Bearer ${token}`;
             }
         }
@@ -446,6 +441,10 @@ export const login = async (
         throw new Error(error)
     }
 }
+
+export const logout = async (refreshToken: string): Promise<AxiosResponse> => {
+    return axiosInstance.post(baseUrl + "/logout", { refreshToken });
+};
 
 // ### LP ###
 export const getLPs = async (params?: any): Promise<AxiosResponse<ApiLPDataType>> => {

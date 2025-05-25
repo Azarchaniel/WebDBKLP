@@ -59,6 +59,8 @@
 
     img {
       padding-bottom: 1rem;
+      max-width: min(25rem, 75vw);
+      height: auto;
     }
   }
 

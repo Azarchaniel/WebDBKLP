@@ -33,13 +33,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Login function updates state and localStorage
     const login = useCallback((userData: IUser) => {
-        console.log('AuthContext: Attempting login with:', userData);
         try {
-            console.log(userData);
             localStorage.setItem('user', JSON.stringify(userData));
             setCurrentUser(userData);
-            console.log('AuthContext: setCurrentUser called successfully.');
-            // Potentially navigate or other side effects
         } catch (error) {
             console.error("Failed to save user to localStorage", error);
         }

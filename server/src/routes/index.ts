@@ -20,7 +20,7 @@ import {
     addBoardGame,
     updateBoardGame,
     deleteBoardGame,
-    countBGchildren
+    countBGchildren, logoutUser
 } from '../controllers'
 import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
 import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
@@ -42,6 +42,7 @@ router.use((req: Request, res: Response, next: NextFunction) => {
 
 // ### USER ###
 router.post('/login', loginUser)
+router.post('/logout', logoutUser);
 router.post('/refresh-token', refreshToken)
 
 router.get('/get-page-by-starting-letter', getPageByStartingLetter)

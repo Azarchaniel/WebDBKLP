@@ -127,7 +127,7 @@ export default function BookPage() {
                 .catch(() => {throw Error()})
                 .finally(() => setLoading(false));
         } catch (err: any) {
-            toast.error(err.response.data.error);
+            toast.error(err.response?.data?.error);
             console.error('Error fetching books:', err);
             setLoading(false);
         }
