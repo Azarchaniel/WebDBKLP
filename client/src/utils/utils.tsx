@@ -269,7 +269,7 @@ export const isMobile = (): boolean => {
 
 export const formatBoardGameRange = (range?: { from?: number; to?: number }, unit = "") => {
 	if (!range) return "-";
-	if (range.from && range.to) return `${range.from} - ${range.to} ${unit}`.trim();
+	if (range.from && range.to) return `${range.from} až ${range.to} ${unit}`.trim();
 	if (range.from) return `od ${range.from} ${unit}`.trim();
 	if (range.to) return `do ${range.to} ${unit}`.trim();
 	return "-";
