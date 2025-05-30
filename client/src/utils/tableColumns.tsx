@@ -338,7 +338,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
         header: 'Vydané',
         cell: ({cell}: { cell: any }) => {
             const published = cell.getValue() as IPublished;
-            return published ? `${published?.publisher} (${published?.year ?? "?"})` : "";
+            return published ? `${published?.publisher ?? "?"} (${published?.year ?? "?"})` : "";
         },
         sortingFn: "datetime",
     },
