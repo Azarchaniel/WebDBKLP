@@ -61,11 +61,11 @@ const LoginModal: React.FC = () => {
     return (
         <>
             <div
-                className={`${isLoggedIn ? "loggedIn" : ""} customLink loginBtn`}
+                className={`${isLoggedIn && currentUser ? "loggedIn" : ""} customLink loginBtn`}
                 onClick={() => setShowModal(true)}
                 title={isLoggedIn ? "Odhlásiť sa" : "Prihlásiť sa"}
             >
-                {isLoggedIn ? currentUser?.firstName : ""}
+                {isLoggedIn && currentUser ? currentUser.firstName : ""}
                 <i className="fa fa-user-circle" />
             </div>
             {showModal && !isLoggedIn &&

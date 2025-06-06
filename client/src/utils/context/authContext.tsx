@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
 import { IUser } from '../../type';
+import {jwtDecode} from "jwt-decode";
 
 interface AuthContextType {
     currentUser: IUser | null;
@@ -28,6 +29,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.removeItem('user'); // Clear corrupted data
         } finally {
             setIsLoading(false); // Done loading initial state
+        }
+    }, []);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            const { exp } = jwtDecode(token);
+            const now = Date.now() / 1000;
+            if (!exp || exp < now) {
+                // Token expired: clear user state and storage
+                localStorage.removeItem("token");
+                localStorage.removeItem("refreshToken");
+                setCurrentUser(null);
+            }
         }
     }, []);
 
