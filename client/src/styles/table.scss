@@ -224,6 +224,11 @@
       background-color: var(--anchor);
       box-shadow: inset 1000rem 1em rgba(255, 255, 255, 0.6);
     }
+
+    .expanded-row:hover {
+      background-color: inherit !important;
+      box-shadow: none !important;
+    }
   }
 
   td {

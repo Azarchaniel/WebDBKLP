@@ -114,7 +114,8 @@ const updateBoardGame = async (req: Request, res: Response): Promise<void> => {
             published,
             autor,
             parent,
-            children
+            children,
+            note
         } = req.body
 
         const countryPublished = published ?
@@ -131,7 +132,8 @@ const updateBoardGame = async (req: Request, res: Response): Promise<void> => {
             published: {...published, country: countryPublished},
             autor: getIdFromArray(autor),
             parent: parent?.map((p: IBoardGame) => p._id),
-            children: children?.map((c: IBoardGame) => c._id)
+            children: children?.map((c: IBoardGame) => c._id),
+            note: note
         }, {new: true})
         if (!updatedBoardGame) {
             res.status(404).json({error: "Board game not found"})

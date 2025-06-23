@@ -52,9 +52,9 @@ const BoardGameDetail: React.FC<Props> = React.memo(({data}) => {
         return (
             <>
                 {Boolean(data.parent?.length) &&
-                    <p>Patrí k hre: {(data.parent as IBoardGame[]).map((bg: IBoardGame) => bg.title)}</p>}
+                    <p>Patrí k hre: {(data.parent as IBoardGame[]).map((bg: IBoardGame) => bg.title).join(", ")}</p>}
                 {Boolean(data.children?.length) &&
-                    <p>Má rozšírenia: {(data.children as IBoardGame[]).map((bg: IBoardGame) => bg.title)}</p>}
+                    <p>Má rozšírenia: {(data.children as IBoardGame[]).map((bg: IBoardGame) => bg.title).join(", ")}</p>}
             </>
         );
     };

@@ -60,7 +60,10 @@ const ServerPaginationTable: React.FC<PropsMT> =
         const [filtering, setFiltering] = useState([]);
         const [dataForFilterInputs, setDataForFilterInputs] = useState(null);
         const [showFilters, setShowFilters] = useState(false);
-        const [numberFilterStates, setNumberFilterStates] = useState<Record<string, {value: string, operator: string}>>({});
+        const [numberFilterStates, setNumberFilterStates] = useState<Record<string, {
+            value: string,
+            operator: string
+        }>>({});
 
         const maxPage = Math.ceil(totalCount / currentPageSize);
 
@@ -424,42 +427,42 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                 </thead>
 
                                 <tbody style={{pointerEvents: "none"}}>
-                                    {table.getRowModel()?.rows?.map((row) => (
-                                        <React.Fragment key={row.original._id}>
-                                            <tr key={row.id}>
-                                                {row.getVisibleCells().map((cell) => (
-                                                    <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
-                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                    </td>
-                                                ))}
-                                                {rowActions &&
-                                                    <td
-                                                        key={`${row.id}-actions`}
-                                                        className="TSPactionsRow actions-animated-td"
-                                                        tabIndex={0}
-                                                    >
-                                                        <span className="actions-ellipsis">&#x2807;</span>
-                                                        <span className="actions-content">
+                                {table.getRowModel()?.rows?.map((row) => (
+                                    <React.Fragment key={row.original._id}>
+                                        <tr key={row.id}>
+                                            {row.getVisibleCells().map((cell) => (
+                                                <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </td>
+                                            ))}
+                                            {rowActions &&
+                                                <td
+                                                    key={`${row.id}-actions`}
+                                                    className="TSPactionsRow actions-animated-td"
+                                                    tabIndex={0}
+                                                >
+                                                    <span className="actions-ellipsis">&#x2807;</span>
+                                                    <span className="actions-content">
         {rowActions && rowActions(row.original._id, () => row.toggleExpanded())}
     </span>
-                                                    </td>
-                                                }
-                                            </tr>
-                                            {row.getIsExpanded() && (
-                                            isMobile() ? (
-                                            <div className="expanded-mobile-row" key={`${row.id}-expanded-mobile`}>
-                                                {expandedElement && expandedElement(row.original)}
-                                            </div>
-                                            ) : (
-                                            <tr key={`${row.id}-expanded`}>
-                                                <td colSpan={row.getAllCells().length + 1}>
-                                                    {expandedElement && expandedElement(row.original)}
                                                 </td>
-                                            </tr>
+                                            }
+                                        </tr>
+                                        {row.getIsExpanded() && (
+                                            isMobile() ? (
+                                                <div className="expanded-mobile-row" key={`${row.id}-expanded-mobile`}>
+                                                    {expandedElement && expandedElement(row.original)}
+                                                </div>
+                                            ) : (
+                                                <tr key={`${row.id}-expanded`} className="expanded-row">
+                                                    <td colSpan={row.getAllCells().length + 1}>
+                                                        {expandedElement && expandedElement(row.original)}
+                                                    </td>
+                                                </tr>
                                             )
-                                            )}
-                                        </React.Fragment>
-                                    ))}
+                                        )}
+                                    </React.Fragment>
+                                ))}
                                 </tbody>
                             </table>
                             {data.length === 0 && (
