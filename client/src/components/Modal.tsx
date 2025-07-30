@@ -67,6 +67,7 @@ export const showError = (error: string | any[] | undefined) => {
 interface ModalButtonsProps {
     onSave: () => void;
     onClear: () => void;
+    onRevert?: () => void;
     error?: ValidationError[] | undefined;
     saveResultSuccess?: boolean;
     saveLabel?: string;
@@ -76,6 +77,7 @@ interface ModalButtonsProps {
 export const ModalButtons: React.FC<ModalButtonsProps> = ({
     onSave,
     onClear,
+    onRevert,
     error,
     saveResultSuccess,
     saveLabel = "Uložiť",
@@ -99,8 +101,8 @@ export const ModalButtons: React.FC<ModalButtonsProps> = ({
                 <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={() => { console.log("TODO: Implement revert changes functionality") }}
-                >Vratit zmeny</button>
+                    onClick={onRevert}
+                >Vrátiť zmeny</button>
                 <button type="button" className="btn btn-secondary" onClick={onClear}>
                     {clearLabel}
                 </button>

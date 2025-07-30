@@ -190,29 +190,25 @@ export const addBook = async (
             const saveBook: AxiosResponse<ApiBookDataType> = await axiosInstance.post(
                 baseUrl + "/add-book",
                 formData
-            )
-            return saveBook
+            );
+            return saveBook;
         } else {
             if (Array.isArray(formData)) {
-                for (const book of formData) {
-                    console.log("Updating book: ", book);
-                    const updatedBook: AxiosResponse<ApiBookDataType> = await axiosInstance.put(
-                        `${baseUrl}/edit-book/${book._id}`,
-                        book
-                    )
-                    return updatedBook
-                }
+                const updatePromises = formData.map(async (book: IBook) =>
+                    await axiosInstance.put(`${baseUrl}/edit-book/${book._id}`, book)
+                );
+                const updatedBooks = await Promise.all(updatePromises);
+                return updatedBooks;
             } else {
                 const updatedBook: AxiosResponse<ApiBookDataType> = await axiosInstance.put(
                     `${baseUrl}/edit-book/${(formData as unknown as IBook)["_id"]}`,
                     formData
-                )
-                return updatedBook
+                );
+                return updatedBook;
             }
         }
     } catch (error: any) {
-        console.error(error);
-        throw new Error(error)
+        throw new Error(error);
     }
 }
 

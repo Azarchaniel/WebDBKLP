@@ -163,21 +163,25 @@ export default function BookPage() {
         setSaveBookSuccess(undefined);
 
         addBook(formData)
-            .then(({ status, data }) => {
-                if (status !== 200) {
-                    throw Error();
-                }
+            .then((res) => {
                 if (Array.isArray(formData) && formData.length > 1) {
-                    toast.success(`${formData.length} kníh bolo úspešne upravených.`);
+                    let message = "";
+                    if (res.length < 5) {
+                        message = `${res.length} knihy boli úspešne upravené.`;
+                    } else {
+                        message = `${res.length} kníh bolo úspešne upravených.`;
+                    }
+
+                    toast.success(message);
                 } else {
-                    toast.success(`Kniha ${data.book?.title} bola úspešne ${(formData as IBook)._id ? "uložená" : "pridaná"}.`);
+                    toast.success(`Kniha ${res[0].data.book?.title} bola úspešne ${(formData as IBook)._id ? "uložená" : "pridaná"}.`);
                 }
                 setSaveBookSuccess(true);
                 fetchBooks()
             })
             .catch((err) => {
-                toast.error(err.response.data.error);
-                console.trace("Error getting books", err)
+                toast.error(err.response?.data?.error);
+                console.trace("Error saving books", err)
                 setSaveBookSuccess(false);
             })
     }

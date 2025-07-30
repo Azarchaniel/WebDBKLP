@@ -65,6 +65,10 @@ const AddBook: React.FC<Props> = ({ saveBook, books, onClose, saveResultSuccess 
                             setBookData([]);
                             setOutline({ outline: "none" });
                         }}
+                        onRevert={() => {
+                            setBookData(books ?? []);
+                            setOutline({ outline: "none" });
+                        }}
                         error={error}
                         saveResultSuccess={saveResultSuccess}
                     />}
