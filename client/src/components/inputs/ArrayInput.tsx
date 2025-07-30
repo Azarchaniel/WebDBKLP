@@ -7,7 +7,7 @@ import React, {
     useState,
 } from "react";
 import "@styles/Autocomplete.scss";
-import "@styles/ArrayInput.scss"; // Make sure this is imported for floating-label styles
+import "@styles/ArrayInput.scss";
 
 interface ArrayInputProps {
     name: string;
@@ -18,12 +18,12 @@ interface ArrayInputProps {
 }
 
 export const ArrayInput: React.FC<ArrayInputProps> = React.memo(({
-                                                                     name,
-                                                                     value,
-                                                                     onChange,
-                                                                     placeholder = "Pridaj záznam...",
-                                                                     className,
-                                                                 }) => {
+    name,
+    value,
+    onChange,
+    placeholder = "Pridaj záznam...",
+    className,
+}) => {
     const [inputValue, setInputValue] = useState("");
     const [chips, setChips] = useState<string[]>(value || []);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -43,7 +43,7 @@ export const ArrayInput: React.FC<ArrayInputProps> = React.memo(({
             setChips(newChips);
             onChange({ name, value: newChips });
             setInputValue("");
-        } else if (event.key === "Backspace" && inputValue === "" && chips.length > 0) {
+        } else if (event.key === "Backspace" && inputValue === "" && chips?.length > 0) {
             event.preventDefault();
             const newChips = chips.slice(0, -1);
             setChips(newChips);
@@ -52,7 +52,7 @@ export const ArrayInput: React.FC<ArrayInputProps> = React.memo(({
     };
 
     const handleRemoveChip = useCallback((chipToRemove: string) => {
-        const newChips = chips.filter((chip) => chip !== chipToRemove);
+        const newChips = chips?.filter((chip) => chip !== chipToRemove);
         setChips(newChips);
         onChange({ name, value: newChips });
         if (inputRef.current) {
@@ -61,13 +61,13 @@ export const ArrayInput: React.FC<ArrayInputProps> = React.memo(({
     }, [chips, onChange]);
 
     // Determine if label should float
-    const shouldFloat = inputValue.length > 0 || chips.length > 0;
+    const shouldFloat = inputValue.length > 0 || chips?.length > 0;
 
     return (
         <div className={`array-input-wrapper ${className || ""}`}>
             <div className="chip-multiselect">
                 <div className="chip-container">
-                    {chips.map((chip, index) => (
+                    {(chips || []).map((chip, index) => (
                         <div key={index} className="chip">
                             {chip}
                             <span

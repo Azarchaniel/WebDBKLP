@@ -28,7 +28,6 @@ export interface IBook extends IBaseType {
     dimensions?: IDimension;
     hrefGoodReads?: string;
     hrefDatabazeKnih?: string;
-    wasChecked?: boolean; //TEMPORARY
 }
 
 export interface ILP extends IBaseType {

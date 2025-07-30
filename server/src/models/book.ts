@@ -30,7 +30,6 @@ const bookSchema: Schema = new Schema({
     picture: {type: String, required: false},
     hrefGoodReads: {type: String, required: false},
     hrefDatabazeKnih: {type: String, required: false},
-    wasChecked: {type: Boolean, required: false, default: false}, //TEMPORARY
 }, {timestamps: true})
 
 bookSchema.add(baseSchema);

@@ -175,12 +175,6 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
         header: 'Dátum úpravy',
         cell: ({cell}: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
         sortingFn: "datetime"
-    },
-    {
-        //TEMP
-        accessorKey: "wasChecked",
-        header: "skontrolovane",
-        cell: ({cell}: { cell: any }) => cell.getValue() ? "ANO" : "ne",
     }
 ];
 
@@ -369,7 +363,6 @@ export const ShowHideColumns = <T, >({columns, shown, setShown}: ShowHideColumns
         // ignore those columns
         const columnsForHidden = columns.filter((column: ColumnDef<T, any>) => {
             return (column as any).accessorKey !== "title" &&
-                /* TEMPORARY ->  */ (column as any).accessorKey !== "wasChecked" &&
                 (column as any).accessorKey !== "lastName"
         });
 

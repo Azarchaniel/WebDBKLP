@@ -1,7 +1,7 @@
-import {IBook, ILangCode, ValidationError} from "../../type";
-import React, {useCallback, useEffect, useState} from "react";
-import {getInfoAboutBook} from "../../API";
-import {toast} from "react-toastify";
+import { IBook, ILangCode, ValidationError } from "../../type";
+import React, { useCallback, useEffect, useState } from "react";
+import { getInfoAboutBook } from "../../API";
+import { toast } from "react-toastify";
 import {
     formatDimension,
     formPersonsFullName,
@@ -12,22 +12,22 @@ import {
     fetchAutors,
     fetchUsers
 } from "@utils";
-import {ArrayInput, InputField, LazyLoadMultiselect} from "@components/inputs";
-import {openLoadingBooks} from "../LoadingBooks";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faMagnifyingGlass} from "@fortawesome/free-solid-svg-icons";
+import { ArrayInput, InputField, LazyLoadMultiselect } from "@components/inputs";
+import { openLoadingBooks } from "../LoadingBooks";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import BarcodeScannerButton from "@components/BarcodeScanner";
-import {createNewAutor, AutorRole} from "@utils/autor";
+import { createNewAutor, AutorRole } from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
 
 interface BodyProps {
-    data: IBook | object;
+    data: IBook[];
     onChange: (data: IBook | object) => void;
     error: (err: ValidationError[] | undefined) => void;
     editedLP?: IBook;
 }
 
-export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
+export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
     const [formData, setFormData] = useState(data as any);
     const [errors, setErrors] = useState<ValidationError[]>([{
         label: "Názov knihy musí obsahovať aspoň jeden znak!",
@@ -49,7 +49,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         if (!("title" in (formData || {})) /*&& checkIsbnValidity(formData?.ISBN)*/) {
             openLoadingBooks(true);
             getInfoAboutBook(formData.ISBN)
-                .then(({data, status}) => {
+                .then(({ data, status }) => {
                     if (status !== 200) {
                         throw Error();
                     }
@@ -74,126 +74,138 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
 
     //edit book
     useEffect(() => {
-        if (!data) return;
+        if (!data || !Array.isArray(data) || data.length === 0) return;
 
-        const typedData: IBook = data as IBook;
-        const toBeModified: IBook = {
-            ...data,
-            location: {city: cities.filter(c => c.value === typedData?.location?.city)},
+        // Map each book in the array to the modified structure
+        const modifiedBooks = data?.map((book: IBook) => ({
+            ...book,
+            location: { city: cities.filter(c => c.value === book?.location?.city) },
             published: {
-                ...typedData.published,
+                ...book.published,
                 country: countryCode.filter((country: ILangCode) =>
-                    (typedData.published?.country as unknown as string[])?.includes(country.key))
+                    (book.published?.country as unknown as string[])?.includes(country.key))
             },
             dimensions: {
-                height: formatDimension(typedData.dimensions?.height),
-                width: formatDimension(typedData.dimensions?.width),
-                depth: formatDimension(typedData.dimensions?.depth),
-                weight: formatDimension(typedData.dimensions?.weight),
+                height: formatDimension(book.dimensions?.height),
+                width: formatDimension(book.dimensions?.width),
+                depth: formatDimension(book.dimensions?.depth),
+                weight: formatDimension(book.dimensions?.weight),
             },
-            language: langCode.filter((lang: ILangCode) => (typedData?.language as unknown as string[])?.includes(lang.key)),
-            readBy: formPersonsFullName(typedData.readBy),
-            owner: formPersonsFullName(typedData.owner),
-            exLibris: typedData.exLibris,
-        } as IBook;
+            language: langCode.filter((lang: ILangCode) => (book?.language as unknown as string[])?.includes(lang.key)),
+            readBy: formPersonsFullName(book.readBy),
+            owner: formPersonsFullName(book.owner),
+            exLibris: book.exLibris,
+        }));
 
-        setFormData(toBeModified);
+        setFormData(modifiedBooks);
     }, []);
 
     //error handling
     useEffect(() => {
-        //if there is no filled field, its disabled
         if (!formData) return;
 
-        //default name error
         let localErrors: ValidationError[] = [];
 
-        //some crazy defining ahead
-        let n1, n2, n3, n4, n5, n6;
-        n1 = n2 = n3 = n4 = n5 = n6 = {valid: true, label: ""} as ValidationError;
+        // Helper to validate a single book object
+        const validateBook = (book: any) => {
+            let errors: ValidationError[] = [];
+            let n1, n2, n3, n4, n5, n6;
+            n1 = n2 = n3 = n4 = n5 = n6 = { valid: true, label: "" } as ValidationError;
 
-        const [height, width, depth, weight]
-            = [formData.dimensions?.height, formData.dimensions?.width, formData.dimensions?.depth, formData.dimensions?.weight];
+            const [height, width, depth, weight] =
+                [book.dimensions?.height, book.dimensions?.width, book.dimensions?.depth, book.dimensions?.weight];
 
-        if (formData.dimensions || !(Object.keys(formData.dimensions ?? {}).length === 0)) {
-            n1 = {valid: validateNumber(height, {mustBePositive: true}), label: "Výška", target: "dimensions.height"};
-            n2 = {valid: validateNumber(width, {mustBePositive: true}), label: "Šírka", target: "dimensions.width"};
-            n3 = {valid: validateNumber(depth, {mustBePositive: true}), label: "Hrúbka", target: "dimensions.depth"};
-            n4 = {
-                valid: validateNumber(weight, {mustBePositive: true}),
-                label: "Hmotnosť",
-                target: "dimensions.weight"
+            if (book.dimensions || !(Object.keys(book.dimensions ?? {}).length === 0)) {
+                n1 = { valid: validateNumber(height, { mustBePositive: true }), label: "Výška", target: "dimensions.height" };
+                n2 = { valid: validateNumber(width, { mustBePositive: true }), label: "Šírka", target: "dimensions.width" };
+                n3 = { valid: validateNumber(depth, { mustBePositive: true }), label: "Hrúbka", target: "dimensions.depth" };
+                n4 = {
+                    valid: validateNumber(weight, { mustBePositive: true }),
+                    label: "Hmotnosť",
+                    target: "dimensions.weight"
+                };
+            }
+            n5 = {
+                valid: validateNumber(book.numberOfPages, { mustBeInteger: true, mustBePositive: true }),
+                label: "Počet strán",
+                target: "numberOfPages"
             };
-        }
-        n5 = {
-            valid: validateNumber(formData.numberOfPages, {mustBeInteger: true, mustBePositive: true}),
-            label: "Počet strán",
-            target: "numberOfPages"
-        };
-        if (formData.published || !(Object.keys(formData.published ?? {}).length === 0))
-            n6 = {
-                valid: validateNumber(formData.published?.year, {mustBeInteger: true, mustBePositive: true}),
-                label: "Rok vydania",
-                target: "published.year"
-            };
+            if (book.published || !(Object.keys(book.published ?? {}).length === 0))
+                n6 = {
+                    valid: validateNumber(book.published?.year, { mustBeInteger: true, mustBePositive: true }),
+                    label: "Rok vydania",
+                    target: "published.year"
+                };
 
-        const numberValidations = [n1, n2, n3, n4, n5, n6];
+            const numberValidations = [n1, n2, n3, n4, n5, n6];
 
-        if (!("title" in formData && formData?.title.trim().length > 0)) {
-            localErrors.push({label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title"});
-        } else {
-            localErrors = localErrors?.filter((err: ValidationError) => err.target !== "title") ?? localErrors;
-        }
+            if (!("title" in book && book?.title?.trim().length > 0)) {
+                errors.push({ label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title" });
+            }
 
-        /*if ("ISBN" in formData && !checkIsbnValidity(formData?.ISBN)) {
-            localErrors.push({label: "Nevalidné ISBN!", target: "ISBN"});
-        } else {*/
-            localErrors = localErrors?.filter((err: ValidationError) => err.target !== "ISBN") ?? localErrors;
-        //}
+            errors = errors?.filter((err: ValidationError) => err.target !== "ISBN") ?? errors;
 
-        if (!(numberValidations.every(n => n?.valid))) {
-            numberValidations.filter(n => !(n?.valid))
-                .map((numErr: ValidationError) => {
-                    return {
+            if (!(numberValidations.every(n => n?.valid))) {
+                numberValidations.filter(n => !(n?.valid))
+                    .map((numErr: ValidationError) => ({
                         label: numErr.label + " musí byť číslo!",
                         target: numErr.target || ""
-                    }
-                })
-                .forEach(err => localErrors.push(err))
+                    }))
+                    .forEach(err => errors.push(err));
+            } else {
+                errors = errors?.filter((err: ValidationError) => !err.label.includes(" musí byť číslo!")) ?? errors;
+            }
+
+            return errors;
+        };
+
+        if (Array.isArray(formData)) {
+            // Merge errors for all books, but only include unique errors by target
+            const allErrors = formData.flatMap(validateBook);
+            // Optionally, you can group errors by target or show which book has which error
+            localErrors = allErrors;
         } else {
-            localErrors = localErrors?.filter((err: ValidationError) => !err.label.includes(" musí byť číslo!")) ?? localErrors;
+            localErrors = validateBook(formData);
         }
 
         setErrors(localErrors);
         error(localErrors);
-    }, [formData])
+    }, [formData]);
 
     const handleInputChange = useCallback((input: any) => {
-        let name: string, value: string;
+        let name: string, value: any;
 
-        if ("target" in input) { // if it is a regular event
-            const {name: targetName, value: targetValue} = input.target;
+        if ("target" in input) {
+            const { name: targetName, value: targetValue } = input.target;
             name = targetName;
             value = targetValue;
-        } else { // if it is MultiSelect custom answer
+        } else {
             name = input.name;
             value = input.value;
         }
 
         setFormData((prevData: any) => {
-            // Helper function to create a nested object structure
-            const setNestedValue = (obj: any, keys: string[], value: any) => {
-                const key = keys.shift(); // Get the first key
-                if (!key) return value; // If no more keys, return the value
-                obj[key] = setNestedValue(obj[key] || {}, keys, value); // Recursively set the nested value
-                return obj;
+            const keys = name.split(".");
+
+            // Helper to set nested value
+            const setNestedValue = (obj: any, keys: string[], value: any): any => {
+                if (keys.length === 0) return value;
+                const [first, ...rest] = keys;
+                return {
+                    ...obj,
+                    [first]: setNestedValue(obj[first] ?? {}, rest, value)
+                };
             };
 
-            const keys = name.split("."); // Split name into keys
-            const updatedData = {...prevData}; // Clone previous data
-            setNestedValue(updatedData, keys, value); // Set nested value
-
-            return updatedData;
+            // If array, update all items (or you can target specific index if needed)
+            if (Array.isArray(prevData)) {
+                // If you want to update all items:
+                const updatedArray = prevData.map((item: any) => setNestedValue(item, [...keys], value));
+                return updatedArray;
+            } else {
+                // Single object
+                return setNestedValue(prevData, [...keys], value);
+            }
         });
     }, []);
 
@@ -201,48 +213,97 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
         return errors.find(err => err.target === name)?.label || "";
     }
 
+    /**
+     * Retrieves a nested value from an object using an array of keys.
+     *
+     * Iteratively accesses each key in the provided array, returning the value found at the final key,
+     * or `undefined` if any key in the path does not exist.
+     *
+     * @param obj - The object from which to retrieve the nested value.
+     * @param keys - An array of strings representing the path of keys to traverse.
+     * @returns The value found at the nested path, or `undefined` if any key is missing.
+     */
+    const getNestedValues = (obj: any, keys: string[]): any => {
+        return keys.reduce((current, key) => {
+            return current && current[key] !== undefined ? current[key] : undefined;
+        }, obj);
+    }
+
+    /**
+     * Returns name, value and placeholderfor input fields.
+     * @param name Field's name in formData
+     * @returns Object with name, value, placeholder and disabled state.
+     */
+    const getInputParams = (name: string): any => {
+        const keys = name.split(".");
+
+        if (Array.isArray(formData)) {
+            if (formData.length === 0) {
+                return { name, value: "" };
+            }
+            const values = formData.map((item: any) =>
+                keys.reduce((obj, key) => (obj && obj[key] !== undefined) ? obj[key] : "", item)
+            );
+            const uniqueValues = Array.from(new Set(values.map(v => JSON.stringify(v)))).map(v => JSON.parse(v));
+
+            if (uniqueValues.length === 1) {
+                // Only one unique value, fill it
+                return {
+                    name: name,
+                    value: getNestedValues(formData[0], keys),
+                };
+            } else {
+                // Multiple different values
+                return {
+                    name,
+                    value: "",
+                    placeholder: "Viacero hodnôt",
+                };
+            }
+        }
+
+        return {
+            name: name,
+            value: getNestedValues(formData, keys),
+        };
+    }
+
     return (<form>
         <div className="b-container">
             <div className="b-Nazov">
                 <InputField
-                    value={formData?.title || ""}
                     placeholder='*Názov'
-                    name="title"
                     onChange={handleInputChange}
                     customerror={getErrorMsg("title")}
+                    {...getInputParams("title")}
                 />
             </div>
             <div className="b-Podnazov">
                 <InputField
-                    value={formData?.subtitle || ""}
                     placeholder='Podnázov'
-                    name="subtitle"
                     onChange={handleInputChange}
+                    {...getInputParams("subtitle")}
                 />
             </div>
             <div className="b-Autor">
                 <LazyLoadMultiselect
-                    value={formData?.autor || []}
                     displayValue="fullName"
                     placeholder="Autor"
                     onChange={handleInputChange}
-                    name="autor"
                     onSearch={fetchAutors}
                     onNew={(autorString) => createNewAutor(autorString, AutorRole.AUTOR, setFormData)}
+                    {...getInputParams("autor")}
                 />
             </div>
             <div className="b-ISBN">
                 <InputField
-                    value={formData?.ISBN || ""}
                     placeholder='ISBN'
-                    name="ISBN"
-                    onChange={(input) => {
-                        handleInputChange(input);
-                    }}
+                    onChange={handleInputChange}
                     customerror={getErrorMsg("ISBN")}
+                    {...getInputParams("ISBN")}
                 />
                 <BarcodeScannerButton
-                    onBarcodeDetected={(code) => setFormData({...formData, ISBN: code})}
+                    onBarcodeDetected={(code) => setFormData({ ...formData, ISBN: code })}
                     onError={(error) => console.error(error)}
                 />
                 <button
@@ -257,243 +318,215 @@ export const BooksModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bod
             </div>
             <div className="b-Translator">
                 <LazyLoadMultiselect
-                    value={formData?.translator || []}
                     displayValue="fullName"
                     placeholder="Prekladateľ"
                     onChange={handleInputChange}
-                    name="translator"
                     onSearch={fetchAutors}
                     onNew={(autorString) => createNewAutor(autorString, AutorRole.TRANSLATOR, setFormData)}
+                    {...getInputParams("translator")}
                 />
             </div>
             <div className="b-Editor">
                 <LazyLoadMultiselect
-                    value={formData?.editor || []}
                     displayValue="fullName"
                     placeholder="Editor"
                     onChange={handleInputChange}
-                    name="editor"
                     onSearch={fetchAutors}
                     onNew={(autorString) => createNewAutor(autorString, AutorRole.EDITOR, setFormData)}
+                    {...getInputParams("editor")}
                 />
             </div>
             <div className="b-Ilustrator">
                 <LazyLoadMultiselect
-                    value={formData?.ilustrator || []}
                     displayValue="fullName"
                     placeholder="Ilustrátor"
                     onChange={handleInputChange}
-                    name="ilustrator"
                     onSearch={fetchAutors}
                     onNew={(autorString) => createNewAutor(autorString, AutorRole.ILUSTRATOR, setFormData)}
+                    {...getInputParams("ilustrator")}
                 />
             </div>
             <div className="b-Name">
                 <InputField
-                    value={formData?.edition?.title || ""}
                     placeholder='Názov edície'
-                    name="edition.title"
                     onChange={handleInputChange}
+                    {...getInputParams("edition.name")}
                 />
             </div>
             <div className="b-No">
                 <InputField
-                    value={formData?.edition?.no || ""}
                     placeholder='Číslo edície'
-                    name="edition.no"
                     onChange={handleInputChange}
+                    {...getInputParams("edition.no")}
                 />
             </div>
             <div className="b-NameS">
                 <InputField
-                    value={formData?.serie?.title || ""}
                     placeholder='Názov série'
-                    name="serie.title"
                     onChange={handleInputChange}
+                    {...getInputParams("serie.title")}
                 />
             </div>
             <div className="b-NoS">
                 <InputField
-                    value={formData?.serie?.no || ""}
                     placeholder='Číslo série'
-                    name="serie.no"
                     onChange={handleInputChange}
+                    {...getInputParams("serie.no")}
                 />
             </div>
             <div className="b-Vydavatel">
                 <InputField
-                    value={formData?.published?.publisher || ""}
                     placeholder='Vydavateľ'
-                    name="published.publisher"
                     onChange={handleInputChange}
+                    {...getInputParams("published.publisher")}
                 />
             </div>
             <div className="b-Rok">
                 <InputField
-                    value={formData?.published?.year || ""}
                     placeholder='Rok vydania'
-                    name="published.year"
                     onChange={handleInputChange}
                     customerror={getErrorMsg("published.year")}
+                    {...getInputParams("published.year")}
                 />
             </div>
             <div className="b-Krajina">
                 <LazyLoadMultiselect
                     selectionLimit={1}
-                    value={formData?.published?.country}
                     options={countryCode}
                     displayValue="value"
                     placeholder="Krajina vydania"
                     onChange={handleInputChange}
-                    name="published.country"
+                    {...getInputParams("published.country")}
                 />
             </div>
-
             <div className="b-Mesto">
                 <LazyLoadMultiselect
                     selectionLimit={1}
-                    value={formData?.location?.city}
                     options={cities}
                     displayValue="showValue"
                     placeholder="Mesto"
                     onChange={handleInputChange}
-                    name="location.city"
+                    {...getInputParams("location.city")}
                 />
             </div>
             <div className="b-Police">
                 <InputField
-                    value={formData?.location?.shelf || ""}
                     placeholder='Polica'
-                    name="location.shelf"
                     onChange={handleInputChange}
+                    {...getInputParams("location.shelf")}
                 />
             </div>
             <div className="b-language">
                 <LazyLoadMultiselect
-                    value={formData?.language}
                     options={langCode}
                     displayValue="value"
                     placeholder="Jazyk"
                     onChange={handleInputChange}
-                    name="language"
+                    {...getInputParams("language")}
                 />
             </div>
-
             <div className="b-Vyska">
                 <InputField
-                    value={formData?.dimensions?.height || ""}
                     placeholder='Výška (cm)'
-                    name="dimensions.height"
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.height")}
+                    {...getInputParams("dimensions.height")}
                 />
             </div>
             <div className="b-Sirka">
                 <InputField
-                    value={formData?.dimensions?.width || ""}
                     placeholder='Šírka (cm)'
-                    name="dimensions.width"
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.width")}
+                    {...getInputParams("dimensions.width")}
                 />
             </div>
             <div className="b-Hrubka">
                 <InputField
-                    value={formData?.dimensions?.depth || ""}
                     placeholder='Hrúbka (cm)'
-                    name="dimensions.depth"
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.depth")}
+                    {...getInputParams("dimensions.depth")}
                 />
             </div>
             <div className="b-Hmotnost">
                 <InputField
-                    value={formData?.dimensions?.weight || ""}
                     placeholder='Hmotnosť (g)'
-                    name="dimensions.weight"
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.weight")}
+                    {...getInputParams("dimensions.weight")}
                 />
             </div>
             <div className="b-Page-no">
                 <InputField
-                    value={formData?.numberOfPages || ""}
                     placeholder='Počet strán'
-                    name="numberOfPages"
                     onChange={handleInputChange}
                     customerror={getErrorMsg("numberOfPages")}
+                    {...getInputParams("numberOfPages")}
                 />
             </div>
             <div className="b-Obsah">
                 <ArrayInput
-                    name="content"
-                    value={formData?.content || []}
                     onChange={handleInputChange}
+                    {...getInputParams("content")}
                     placeholder="Obsah"
                 />
             </div>
             <div className="b-Poznamka">
-				<TextArea id='note' placeholder='Poznámka'
-                          className="form-control"
-                          name="note"
-                          autoComplete="off"
-                          rows={1}
-                          value={formData?.note || ""}
-                          onChange={handleInputChange}
+                <TextArea id='note' placeholder='Poznámka'
+                    className="form-control"
+                    autoComplete="off"
+                    rows={1}
+                    onChange={handleInputChange}
+                    {...getInputParams("note")}
                 />
             </div>
             <div className="b-Precitane">
                 <LazyLoadMultiselect
-                    value={formData?.readBy || []}
                     displayValue="fullName"
                     placeholder="Prečítané"
                     onChange={handleInputChange}
-                    name="readBy"
                     onSearch={fetchUsers}
+                    {...getInputParams("readBy")}
                 />
             </div>
-
             <div className="b-Vlastnik">
                 <LazyLoadMultiselect
-                    value={formData?.owner || []}
                     displayValue="fullName"
                     placeholder="Majiteľ"
                     onChange={handleInputChange}
-                    name="owner"
                     onSearch={fetchUsers}
+                    {...getInputParams("owner")}
                 />
             </div>
             <div className="b-Ex-Libris">
                 <label><input type="checkbox"
-                              id="exLibris"
-                              className="checkBox"
-                              value={formData?.exLibris}
-                              checked={formData?.exLibris}
-                              onChange={(e) => handleInputChange({name: "exLibris", value: e.target.checked})}
+                    id="exLibris"
+                    className="checkBox"
+                    value={formData?.exLibris}
+                    checked={formData?.exLibris}
+                    onChange={(e) => handleInputChange({ name: "exLibris", value: e.target.checked })}
                 />Ex Libris</label>
             </div>
             <div className="b-pic">
                 <InputField
-                    value={formData?.picture || ""}
                     placeholder='Obrázok'
-                    name="picture"
                     onChange={handleInputChange}
+                    {...getInputParams("picture")}
                 />
             </div>
             <div className="b-DK">
                 <InputField
-                    value={formData?.hrefDatabazeKnih || ""}
                     placeholder='URL Databáze knih'
-                    name="hrefDatabazeKnih"
                     onChange={handleInputChange}
+                    {...getInputParams("hrefDatabazeKnih")}
                 />
             </div>
             <div className="b-GR">
                 <InputField
-                    value={formData?.hrefGoodReads || ""}
                     placeholder='URL GoodReads'
-                    name="hrefGoodReads"
                     onChange={handleInputChange}
+                    {...getInputParams("hrefGoodReads")}
                 />
             </div>
         </div>

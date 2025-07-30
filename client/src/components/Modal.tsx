@@ -1,8 +1,8 @@
-import React, {ReactElement, memo, useCallback, useState, useEffect} from "react";
-import {createPortal} from "react-dom";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faExclamationTriangle} from "@fortawesome/free-solid-svg-icons";
-import {ValidationError} from "type";
+import React, { ReactElement, memo, useCallback, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import { ValidationError } from "type";
 import LoadingSpinner from "./LoadingSpinner";
 
 interface ModalProps {
@@ -15,16 +15,16 @@ interface ModalProps {
 }
 
 export const Modal: React.FC<ModalProps> = memo(({
-                                                     customKey,
-                                                     title,
-                                                     body,
-                                                     footer,
-                                                     onClose,
-                                                     overrideStyle
-                                                 }: ModalProps) => {
+    customKey,
+    title,
+    body,
+    footer,
+    onClose,
+    overrideStyle
+}: ModalProps) => {
     const modalContent = (
         <div className="customModalWrapper" key={customKey}>
-            <div className="customModalBackdrop"/>
+            <div className="customModalBackdrop" />
             <div className="customModal" style={overrideStyle}>
                 <div className="customModalHeader">
                     <span>{title}</span>
@@ -59,7 +59,7 @@ export const showError = (error: string | any[] | undefined) => {
 
     return (
         <div className="alert alert-danger">
-            <FontAwesomeIcon icon={faExclamationTriangle}/> {errorMessage}
+            <FontAwesomeIcon icon={faExclamationTriangle} /> {errorMessage}
         </div>
     );
 };
@@ -74,13 +74,13 @@ interface ModalButtonsProps {
 }
 
 export const ModalButtons: React.FC<ModalButtonsProps> = ({
-                                                              onSave,
-                                                              onClear,
-                                                              error,
-                                                              saveResultSuccess,
-                                                              saveLabel = "Uložiť",
-                                                              clearLabel = "Vymazať polia"
-                                                          }) => {
+    onSave,
+    onClear,
+    error,
+    saveResultSuccess,
+    saveLabel = "Uložiť",
+    clearLabel = "Vymazať polia"
+}) => {
     const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -96,6 +96,11 @@ export const ModalButtons: React.FC<ModalButtonsProps> = ({
         <div className="column">
             <div>{showError(error)}</div>
             <div className="buttons">
+                <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => { console.log("TODO: Implement revert changes functionality") }}
+                >Vratit zmeny</button>
                 <button type="button" className="btn btn-secondary" onClick={onClear}>
                     {clearLabel}
                 </button>
@@ -105,7 +110,7 @@ export const ModalButtons: React.FC<ModalButtonsProps> = ({
                     onClick={handleSave}
                     className="btn btn-success"
                 >
-                    {loading ? <LoadingSpinner color="white" size={50} marginTop={1}/> : saveLabel}
+                    {loading ? <LoadingSpinner color="white" size={50} marginTop={1} /> : saveLabel}
                 </button>
             </div>
         </div>

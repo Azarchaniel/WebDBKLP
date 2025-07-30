@@ -1,4 +1,4 @@
-import axios, {AxiosRequestConfig, AxiosResponse} from "axios"
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios"
 import {
     ApiAutorDataType,
     ApiBookDataType,
@@ -8,8 +8,8 @@ import {
     IBook,
     IUser
 } from "./type";
-import {toast} from "react-toastify";
-import {jwtDecode} from "jwt-decode";
+import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
 
 const baseUrl: string = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
 
@@ -36,7 +36,7 @@ axiosInstance.interceptors.request.use(
                 Authorization: `Bearer ${token}` // Attach token to Authorization header
             };
 
-            const {exp} = jwtDecode(token);
+            const { exp } = jwtDecode(token);
             const now = Date.now() / 1000;
 
             if (!exp) {
@@ -100,13 +100,13 @@ export const getPageByStartingLetter = async (letter: string, pageSize: number, 
     try {
         const response: AxiosResponse<IPageByLetter> = await axiosInstance.get(
             baseUrl + "/get-page-by-starting-letter", {
-                params: {
-                    letter,
-                    pageSize,
-                    model,
-                    filterUsers
-                }
+            params: {
+                letter,
+                pageSize,
+                model,
+                filterUsers
             }
+        }
         );
         return response;
     } catch (error: any) {
@@ -120,15 +120,15 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
     try {
         const books: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
             baseUrl + "/books", {
-                params: {
-                    page: params?.page ?? 1, // API expects 1-based index
-                    pageSize: params?.pageSize ?? 10_000,
-                    search: params?.search ?? "",
-                    sorting: params?.sorting ?? [{id: "title", desc: false}],
-                    filterUsers: params?.activeUsers,
-                    filters: params?.filters ?? []
-                }
-            });
+            params: {
+                page: params?.page ?? 1, // API expects 1-based index
+                pageSize: params?.pageSize ?? 10_000,
+                search: params?.search ?? "",
+                sorting: params?.sorting ?? [{ id: "title", desc: false }],
+                filterUsers: params?.activeUsers,
+                filters: params?.filters ?? []
+            }
+        });
         return books
     } catch (error: any) {
         throw new Error(error);
@@ -139,14 +139,14 @@ export const getBooksByIds = async (params?: any): Promise<AxiosResponse<ApiBook
     try {
         const books: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
             baseUrl + "/books-by-ids", {
-                params: {
-                    page: params?.page ?? 1, // API expects 1-based index
-                    pageSize: params?.pageSize ?? 10_000,
-                    search: params?.search ?? "",
-                    sorting: params?.sorting ?? [{id: "title", desc: false}],
-                    ids: params?.ids ?? [],
-                }
-            });
+            params: {
+                page: params?.page ?? 1, // API expects 1-based index
+                pageSize: params?.pageSize ?? 10_000,
+                search: params?.search ?? "",
+                sorting: params?.sorting ?? [{ id: "title", desc: false }],
+                ids: params?.ids ?? [],
+            }
+        });
         return books
     } catch (error: any) {
         console.error("Cannot get books by ids: ", error);
@@ -158,10 +158,10 @@ export const checkBooksUpdated = async (dataFrom?: Date): Promise<AxiosResponse<
     try {
         const response: AxiosResponse<{ latestUpdate: Date }> = await axiosInstance.get(
             baseUrl + "/books/check-updated", {
-                params: {
-                    dataFrom
-                }
+            params: {
+                dataFrom
             }
+        }
         );
         return response;
     } catch (error: any) {
@@ -183,21 +183,32 @@ export const getBook = async (
 }
 
 export const addBook = async (
-    formData: IBook
+    formData: IBook | IBook[] | object
 ): Promise<any> => {
     try {
-        if (!formData._id) {
+        if (!Array.isArray(formData) && !("id" in formData)) {
             const saveBook: AxiosResponse<ApiBookDataType> = await axiosInstance.post(
                 baseUrl + "/add-book",
                 formData
             )
             return saveBook
         } else {
-            const updatedBook: AxiosResponse<ApiBookDataType> = await axiosInstance.put(
-                `${baseUrl}/edit-book/${formData._id}`,
-                formData
-            )
-            return updatedBook
+            if (Array.isArray(formData)) {
+                for (const book of formData) {
+                    console.log("Updating book: ", book);
+                    const updatedBook: AxiosResponse<ApiBookDataType> = await axiosInstance.put(
+                        `${baseUrl}/edit-book/${book._id}`,
+                        book
+                    )
+                    return updatedBook
+                }
+            } else {
+                const updatedBook: AxiosResponse<ApiBookDataType> = await axiosInstance.put(
+                    `${baseUrl}/edit-book/${(formData as unknown as IBook)["_id"]}`,
+                    formData
+                )
+                return updatedBook
+            }
         }
     } catch (error: any) {
         console.error(error);
@@ -241,15 +252,15 @@ export const getAutors = async (params?: any): Promise<AxiosResponse<ApiAutorDat
     try {
         const autors: AxiosResponse<ApiAutorDataType> = await axiosInstance.get(
             baseUrl + "/autors", {
-                params: {
-                    page: params?.page ?? 1, // API expects 1-based index
-                    pageSize: params?.pageSize ?? 10_000,
-                    search: params?.search ?? "",
-                    sorting: params?.sorting ?? [{id: "lastName", desc: false}],
-                    filterUsers: params?.activeUsers,
-                    dataFrom: params?.dataFrom
-                }
+            params: {
+                page: params?.page ?? 1, // API expects 1-based index
+                pageSize: params?.pageSize ?? 10_000,
+                search: params?.search ?? "",
+                sorting: params?.sorting ?? [{ id: "lastName", desc: false }],
+                filterUsers: params?.activeUsers,
+                dataFrom: params?.dataFrom
             }
+        }
         )
         return autors
     } catch (error: any) {
@@ -336,11 +347,11 @@ export const getQuotes = async (filterByBook?: string[], activeUsers?: string[])
     try {
         const quotes: AxiosResponse<ApiQuoteDataType> = await axiosInstance.get(
             baseUrl + "/quotes", {
-                params: {
-                    activeUsers: activeUsers,
-                    filterByBook: filterByBook,
-                }
+            params: {
+                activeUsers: activeUsers,
+                filterByBook: filterByBook,
             }
+        }
         )
         return quotes
     } catch (error: any) {
@@ -421,7 +432,7 @@ export const getUser = async (userId: string): Promise<AxiosResponse<IUser>> => 
 }
 
 export const login = async (
-    {email, password}: {
+    { email, password }: {
         email: string,
         password: string
     }
@@ -429,11 +440,11 @@ export const login = async (
     try {
         const user: AxiosResponse<ApiUserDataType> = await axiosInstance.post(
             `${baseUrl}/login`, {
-                params: {
-                    email: email,
-                    password: password
-                }
+            params: {
+                email: email,
+                password: password
             }
+        }
         );
 
         return user;
@@ -451,13 +462,13 @@ export const getLPs = async (params?: any): Promise<AxiosResponse<ApiLPDataType>
     try {
         const lps: AxiosResponse<ApiLPDataType> = await axiosInstance.get(
             baseUrl + "/lps", {
-                params: {
-                    page: params?.page ?? 1,
-                    pageSize: params?.pageSize ?? 10_000,
-                    search: params?.search ?? "",
-                    sorting: params?.sorting ?? {id: "lastName", desc: false}
-                }
+            params: {
+                page: params?.page ?? 1,
+                pageSize: params?.pageSize ?? 10_000,
+                search: params?.search ?? "",
+                sorting: params?.sorting ?? { id: "lastName", desc: false }
             }
+        }
         )
         return lps
     } catch (error: any) {
@@ -581,14 +592,14 @@ export const getBoardGames = async (params?: any): Promise<AxiosResponse<any>> =
     try {
         const boardGames: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
             baseUrl + "/boardgames", {
-                params: {
-                    page: params?.page ?? 1, // API expects 1-based index
-                    pageSize: params?.pageSize ?? 10_000,
-                    search: params?.search ?? "",
-                    sorting: params?.sorting ?? [{id: "title", desc: false}],
-                    filters: params?.filters ?? []
-                }
-            });
+            params: {
+                page: params?.page ?? 1, // API expects 1-based index
+                pageSize: params?.pageSize ?? 10_000,
+                search: params?.search ?? "",
+                sorting: params?.sorting ?? [{ id: "title", desc: false }],
+                filters: params?.filters ?? []
+            }
+        });
         return boardGames
     } catch (error: any) {
         throw new Error(error);

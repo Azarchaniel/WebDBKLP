@@ -65,8 +65,7 @@ const normalizeBook = (data: any): IBook => {
         exLibris: data.exLibris,
         picture: data.picture,
         hrefGoodReads: data.hrefGoodReads,
-        hrefDatabazeKnih: data.hrefDatabazeKnih,
-        wasChecked: data.wasChecked //TEMPORARY
+        hrefDatabazeKnih: data.hrefDatabazeKnih
     } as unknown as IBook
 }
 
@@ -277,7 +276,6 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
         const data = req.body;
 
         const book: IBook = normalizeBook(data);
-        book.wasChecked = true; //TEMP
 
         const bookToSave = new Book(book);
 

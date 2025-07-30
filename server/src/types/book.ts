@@ -32,6 +32,5 @@ export interface IBook extends Document {
     hrefDatabazeKnih?: string;
     //binding?: string;
     normalizedSearchField?: {[key: string]: string};
-    wasChecked?: boolean; //TEMPORARY
 }
 //vazba: vazana, brozovana, sesit, kruzkovana, leporelo
