@@ -20,6 +20,32 @@ import BarcodeScannerButton from "@components/BarcodeScanner";
 import { createNewAutor, AutorRole } from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
 
+const emptyBook: IBook = {
+    _id: "",
+    title: "",
+    subtitle: "",
+    autor: [],
+    editor: [],
+    ilustrator: [],
+    translator: [],
+    ISBN: "",
+    language: [],
+    note: "",
+    numberOfPages: 0,
+    dimensions: { height: 0, width: 0, depth: 0, weight: 0 },
+    exLibris: false,
+    published: { publisher: "", year: 0, country: [] },
+    location: { city: [], shelf: "" },
+    owner: [],
+    readBy: [],
+    picture: "",
+    hrefGoodReads: "",
+    hrefDatabazeKnih: "",
+    content: [],
+    edition: { title: "", no: 0 },
+    serie: { title: "", no: 0 },
+};
+
 interface BodyProps {
     data: IBook[];
     onChange: (data: IBook | object) => void;
@@ -28,7 +54,11 @@ interface BodyProps {
 }
 
 export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
-    const [formData, setFormData] = useState(data as any);
+    const [formData, setFormData] = useState(
+        Array.isArray(data) && data.length > 0
+            ? data
+            : [emptyBook]
+    );
     const [errors, setErrors] = useState<ValidationError[]>([{
         label: "Názov knihy musí obsahovať aspoň jeden znak!",
         target: "title"
@@ -39,22 +69,22 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
     }, [formData]);
 
     useEffect(() => {
-        if (data !== formData) {
+        if (formData && JSON.stringify(data) !== JSON.stringify(formData)) {
             setFormData(normalizeBookData(data));
         }
     }, [data]);
 
     const getBookFromISBN = () => {
-        if (!formData?.ISBN) return;
+        if (!formData?.[0].ISBN) return;
         if (!("title" in (formData || {})) /*&& checkIsbnValidity(formData?.ISBN)*/) {
             openLoadingBooks(true);
-            getInfoAboutBook(formData.ISBN)
+            getInfoAboutBook(formData[0].ISBN)
                 .then(({ data, status }) => {
                     if (status !== 200) {
                         throw Error();
                     }
 
-                    setFormData({
+                    setFormData([{
                         ...data,
                         published: {
                             ...data.published,
@@ -62,11 +92,11 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                                 ((data as IBook)?.published?.country as unknown as string[])?.includes(country.key))
                         },
                         language: langCode.filter((lang: ILangCode) => ((data as IBook)?.language as unknown as string[])?.includes(lang.key)),
-                    } as IBook)
+                    } as IBook])
                 })
                 .catch(err => {
                     toast.error(err.response.data.error);
-                    console.error(`Chyba! Kniha ${formData.ISBN} nebola nájdená!`, err);
+                    console.error(`Chyba! Kniha ${formData[0].ISBN} nebola nájdená!`, err);
                 })
                 .finally(() => openLoadingBooks(false))
         }
@@ -196,7 +226,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 const [first, ...rest] = keys;
                 return {
                     ...obj,
-                    [first]: setNestedValue(obj[first] ?? {}, rest, value)
+                    [first]: setNestedValue(obj?.[first] ?? {}, rest, value)
                 };
             };
 
@@ -228,7 +258,10 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
      */
     const getNestedValues = (obj: any, keys: string[]): any => {
         return keys.reduce((current, key) => {
-            return current && current[key] !== undefined ? current[key] : undefined;
+            if (current && typeof current === "object" && key in current) {
+                return current[key];
+            }
+            return ""; // Return empty string if value is missing
         }, obj);
     }
 
@@ -306,7 +339,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     {...getInputParams("ISBN")}
                 />
                 <BarcodeScannerButton
-                    onBarcodeDetected={(code) => setFormData({ ...formData, ISBN: code })}
+                    onBarcodeDetected={(code) => setFormData([{ ...formData[0], ISBN: code }])}
                     onError={(error) => console.error(error)}
                 />
                 <button
@@ -506,8 +539,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 <label><input type="checkbox"
                     id="exLibris"
                     className="checkBox"
-                    value={formData?.exLibris}
-                    checked={formData?.exLibris}
+                    checked={formData?.[0]?.exLibris}
                     onChange={(e) => handleInputChange({ name: "exLibris", value: e.target.checked })}
                 />Ex Libris</label>
             </div>

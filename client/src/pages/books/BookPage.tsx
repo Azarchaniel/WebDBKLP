@@ -164,6 +164,7 @@ export default function BookPage() {
 
         addBook(formData)
             .then((res) => {
+                console.log("Book saved successfully:", res);
                 if (Array.isArray(formData) && formData.length > 1) {
                     let message = "";
                     if (res.length < 5) {
@@ -174,7 +175,11 @@ export default function BookPage() {
 
                     toast.success(message);
                 } else {
-                    toast.success(`Kniha ${res[0].data.book?.title} bola úspešne ${(formData as IBook)._id ? "uložená" : "pridaná"}.`);
+                    toast.success(
+                        `Kniha ${Array.isArray(res) ?
+                            res[0].data.book?.title :
+                            res.data.book?.title
+                        } bola úspešne ${(formData as IBook)._id ? "uložená" : "pridaná"}.`);
                 }
                 setSaveBookSuccess(true);
                 fetchBooks()
@@ -213,40 +218,59 @@ export default function BookPage() {
         }
     }
 
-    const handleDeleteBook = (_id: string): void => {
-        let bookToDelete = clonedBooks.find((book: IBook) => book._id === _id);
+    const handleDeleteBook = (_id?: string): void => {
+        // If multiple books are selected, delete all selected
+        const idsToDelete = selectedBooks.length > 0 ? selectedBooks : [_id];
 
-        if (!bookToDelete) {
-            getBook(_id)
-                .then(({ data }) => {
-                    bookToDelete = data.book;
-                })
+        if (idsToDelete.length === 0) return;
+
+        // Get book objects for confirmation dialog
+        const booksToDelete = clonedBooks.filter((book: IBook) => idsToDelete.includes(book._id));
+
+        const proceedDelete = (books: IBook[]) => {
+            const titles = books.map(b => b.title).join(", ");
+            openConfirmDialog({
+                text: books.length > 1
+                    ? `Naozaj chceš vymazať ${books.length} kníh: ${titles}?`
+                    : `Naozaj chceš vymazať knihu ${books[0]?.title}?`,
+                title: books.length > 1 ? "Vymazať knihy?" : "Vymazať knihu?",
+                onOk: () => {
+                    Promise.all(idsToDelete.filter((id): id is string => typeof id === "string" && id !== undefined).map(id => deleteBook(id)))
+                        .then((results) => {
+                            const successCount = results.filter(r => r.status === 200).length;
+                            if (successCount === 0) throw new Error("Error! Books not deleted");
+                            toast.success(
+                                successCount > 1
+                                    ? `${successCount} kníh bolo úspešne vymazaných.`
+                                    : `Kniha ${books[0].title} bola úspešne vymazaná.`
+                            );
+                            fetchBooks();
+                        })
+                        .catch((err) => {
+                            toast.error(err.response?.data?.error);
+                            console.trace(err);
+                        });
+                },
+                onCancel: () => { }
+            });
+        };
+
+        if (booksToDelete.length === idsToDelete.length) {
+            proceedDelete(booksToDelete);
+        } else {
+            // Some books not in local state, fetch them
+            Promise.all(idsToDelete.filter(id => typeof id === "string").map(id => {
+                const localBook = clonedBooks.find((book: IBook) => book._id === id);
+                return localBook
+                    ? Promise.resolve(localBook)
+                    : id ? getBook(id).then(({ data }) => data.book) : Promise.resolve(undefined);
+            }))
+                .then((books) => proceedDelete(books.filter(Boolean)))
                 .catch((err) => {
-                    toast.error(err.response.data.error);
-                    console.trace(err)
-                })
+                    toast.error(err.response?.data?.error);
+                    console.trace(err);
+                });
         }
-
-        openConfirmDialog({
-            text: `Naozaj chceš vymazať knihu ${bookToDelete?.title}?`,
-            title: "Vymazať knihu?",
-            onOk: () => {
-                deleteBook(_id)
-                    .then(({ status }) => {
-                        if (status !== 200) {
-                            throw new Error("Error! Book not deleted")
-                        }
-                        toast.success(`Kniha ${bookToDelete.title} bola úspešne vymazaná.`);
-                        fetchBooks();
-                    })
-                    .catch((err) => {
-                        toast.error(err.response.data.error);
-                        console.trace(err);
-                    })
-            },
-            onCancel: () => {
-            }
-        });
     }
 
     const handlePageSizeChange = (newPageSize: number) => {

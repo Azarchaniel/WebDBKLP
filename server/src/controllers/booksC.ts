@@ -1,5 +1,5 @@
-import {Response, Request} from 'express';
-import {IBook, IUser} from '../types';
+import { Response, Request } from 'express';
+import { IBook, IUser } from '../types';
 import Book from '../models/book';
 import User from '../models/user';
 import {
@@ -10,10 +10,10 @@ import {
     stringifyName,
     webScrapper
 } from "../utils/utils";
-import mongoose, {PipelineStage, Types} from 'mongoose';
-import {optionFetchAllExceptDeleted, populateOptionsBook} from "../utils/constants";
+import mongoose, { PipelineStage, Types } from 'mongoose';
+import { optionFetchAllExceptDeleted, populateOptionsBook } from "../utils/constants";
 import diacritics from "diacritics";
-import {buildPaginationPipeline, fetchDataWithPagination} from "../utils/queryUtils";
+import { buildPaginationPipeline, fetchDataWithPagination } from "../utils/queryUtils";
 import Autor from "../models/autor";
 import Lp from "../models/lp";
 
@@ -71,7 +71,7 @@ const normalizeBook = (data: any): IBook => {
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {page = "1", pageSize = "10_000", search = "", sorting, filterUsers, filters = []} = req.query;
+        const { page = "1", pageSize = "10_000", search = "", sorting, filterUsers, filters = [] } = req.query;
 
         const searchFields = [
             "autor", "editor", "ilustrator", "translator", "title", "subtitle", "content", "edition", "serie", "note", "published", "ISBN"
@@ -88,13 +88,13 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
 
         let additionalQuery: Record<string, any> = {};
         if (filterUsers) {
-            additionalQuery = {owner: {$in: (filterUsers as string[]).map(userId => new Types.ObjectId(userId))}};
+            additionalQuery = { owner: { $in: (filterUsers as string[]).map(userId => new Types.ObjectId(userId)) } };
         }
 
         const parsedPage = parseInt(page as string, 10);
         const parsedPageSize = parseInt(pageSize as string, 10);
 
-        const {data, count} = await fetchDataWithPagination(
+        const { data, count } = await fetchDataWithPagination(
             Book,
             {
                 page: isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage,
@@ -108,10 +108,10 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             additionalQuery
         );
 
-        res.status(200).json({books: data, count});
+        res.status(200).json({ books: data, count });
     } catch (error) {
         console.error("Error fetching books:", error);
-        res.status(500).json({error: "Chyba pri získavaní kníh! " + error});
+        res.status(500).json({ error: "Chyba pri získavaní kníh! " + error });
     }
 };
 
@@ -122,7 +122,7 @@ const checkBooksUpdated = async (req: Request, res: Response): Promise<void> => 
         // Find the most recently updated book
         const latestUpdate: {
             updatedAt: Date | undefined
-        } = await Book.findOne().sort({updatedAt: -1}).select('updatedAt').lean() as unknown as {
+        } = await Book.findOne().sort({ updatedAt: -1 }).select('updatedAt').lean() as unknown as {
             updatedAt: Date | undefined
         };
 
@@ -148,7 +148,7 @@ const checkBooksUpdated = async (req: Request, res: Response): Promise<void> => 
 
 const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
     try {
-        let {ids, search = "", page = "1", pageSize = "10"} = req.query;
+        let { ids, search = "", page = "1", pageSize = "10" } = req.query;
 
         // Validate and parse query parameters
         const parsedIds = Array.isArray(ids) ? ids : typeof ids === "string" ? [ids] : [];
@@ -161,23 +161,23 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
 
         // Build the query
         const query: mongoose.FilterQuery<IBook> = {
-            _id: {$in: parsedIds.map((id) => new Types.ObjectId(id as string))}
+            _id: { $in: parsedIds.map((id) => new Types.ObjectId(id as string)) }
         };
 
         // Add search condition if a search term is provided
         // Remove diacritics and special chars from the search term before performing the search
         if (search) {
             query.$or = [
-                { "title": {$regex: diacritics.remove(search as string)?.replace(/[^a-zA-Z0-9\s]/g, ''), $options: "i"}}
+                { "title": { $regex: diacritics.remove(search as string)?.replace(/[^a-zA-Z0-9\s]/g, ''), $options: "i" } }
             ];
         }
 
         // Aggregation pipeline
         const pipeline: PipelineStage[] = [
-            {$match: query}, // Match by query (ids and search)
+            { $match: query }, // Match by query (ids and search)
             createLookupStage("autors", "autor", "autor")
         ];
-        const paginationPipeline = buildPaginationPipeline(validPage, validPageSize, {title: 1})
+        const paginationPipeline = buildPaginationPipeline(validPage, validPageSize, { title: 1 })
 
         const books = await Book.aggregate([...pipeline, ...paginationPipeline]).collation({
             locale: "cs",
@@ -191,19 +191,19 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
         }).count("count");
         const totalCount = count[0]?.count ?? 0;
 
-        res.status(200).json({books, count: totalCount});
+        res.status(200).json({ books, count: totalCount });
     } catch (error) {
         console.error("Error fetching books by ids:", error);
-        res.status(500).json({error: "Chyba pri získavaní kníh! " + error});
+        res.status(500).json({ error: "Chyba pri získavaní kníh! " + error });
     }
 };
 
 const getPageByStartingLetter = async (req: Request, res: Response): Promise<void> => {
     try {
-        let {pageSize = "10_000", filterUsers, letter = "", model} = req.query;
+        let { pageSize = "10_000", filterUsers, letter = "", model } = req.query;
 
         if (!letter || letter.length !== 1) {
-            res.status(500).json({error: "Nevalidné písmeno."});
+            res.status(500).json({ error: "Nevalidné písmeno." });
             return;
         }
 
@@ -224,7 +224,7 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
                 lookupColumn = "title";
                 break;
             default:
-                res.status(500).json({error: "Neznámy typ objektu!"});
+                res.status(500).json({ error: "Neznámy typ objektu!" });
                 return;
         }
 
@@ -264,16 +264,16 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
             .findById(req.params.id)
             .populate(populateOptionsBook)
             .exec();
-        res.status(200).json({book: book})
+        res.status(200).json({ book: book })
     } catch (err) {
-        res.status(500).json({error: "Chyba pri získavaní knihy! " + err});
+        res.status(500).json({ error: "Chyba pri získavaní knihy! " + err });
         console.error("Error fetching book:", err);
     }
 }
 
 const addBook = async (req: Request, res: Response): Promise<void> => {
     try {
-        const data = req.body;
+        const data = req.body[0];
 
         const book: IBook = normalizeBook(data);
 
@@ -286,9 +286,9 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
             .populate(populateOptionsBook)
             .exec();
 
-        res.status(200).json({message: 'Book added', book: newBook, books: allBooks})
+        res.status(200).json({ message: 'Book added', book: newBook, books: allBooks })
     } catch (error) {
-        res.status(500).json({error: "Chyba pri pridávaní knihy! " + error});
+        res.status(500).json({ error: "Chyba pri pridávaní knihy! " + error });
         console.error("Error adding book:", error);
     }
 }
@@ -296,14 +296,14 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
 const updateBook = async (req: Request, res: Response): Promise<void> => {
     try {
         const {
-            params: {id},
+            params: { id },
             body,
         } = req;
 
         const book = normalizeBook(body);
 
         const updateBook = await Book.findByIdAndUpdate(
-            {_id: id},
+            { _id: id },
             book
         )
 
@@ -318,7 +318,7 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
             books: allBooks,
         })
     } catch (error) {
-        res.status(500).json({error: "Chyba pri aktualizácii knihy! " + error});
+        res.status(500).json({ error: "Chyba pri aktualizácii knihy! " + error });
         console.error("Error updating book:", error);
     }
 }
@@ -326,11 +326,11 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
 const deleteBook = async (req: Request, res: Response): Promise<void> => {
     try {
         const {
-            params: {id},
+            params: { id },
             body,
         } = req
         const deletedBook = await Book.findByIdAndUpdate(
-            {_id: id},
+            { _id: id },
             {
                 ...body,
                 deletedAt: new Date()
@@ -347,7 +347,7 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
             books: allBooks,
         })
     } catch (error) {
-        res.status(500).json({error: "Chyba pri mazaní knihy! " + error});
+        res.status(500).json({ error: "Chyba pri mazaní knihy! " + error });
         console.error("Error deleting book:", error);
     }
 }
@@ -355,7 +355,7 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
 const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
     try {
         const {
-            params: {isbn}
+            params: { isbn }
         } = req;
 
         const bookInfo = await webScrapper(isbn);
@@ -363,10 +363,10 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
         if (bookInfo) {
             res.status(200).json(bookInfo);
         } else {
-            res.status(401).json({error: "Kniha nebola nájdená."});
+            res.status(401).json({ error: "Kniha nebola nájdená." });
         }
     } catch (err: any) {
-        res.status(500).json({error: "Chyba pri získavaní informácií o knihe! " + err.message});
+        res.status(500).json({ error: "Chyba pri získavaní informácií o knihe! " + err.message });
         console.error("Problem at web scrapping: " + err);
     }
 }
@@ -560,7 +560,7 @@ const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> =>
                         if (isRef && typeof value === 'object' && value !== null) {
                             return {
                                 _id: value._id?.toString(),
-                                name: value.name || (value.firstName || value.lastName ? stringifyName(value) : false ) || value.title || value._id?.toString()
+                                name: value.name || (value.firstName || value.lastName ? stringifyName(value) : false) || value.title || value._id?.toString()
                             };
                         }
 
@@ -581,7 +581,7 @@ const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> =>
 
     } catch (error) {
         console.error("Error fetching unique field values:", error);
-        res.status(500).json({error: "Chyba pri získavaní unikátnych hodnôt! " + error});
+        res.status(500).json({ error: "Chyba pri získavaní unikátnych hodnôt! " + error });
     }
 };
 
@@ -600,26 +600,26 @@ const dashboard = {
                             {
                                 $group: {
                                     _id: null,
-                                    sumHeight: {$sum: "$dimensions.height"},
-                                    avgHeight: {$avg: "$dimensions.height"},
-                                    minHeight: {$min: "$dimensions.height"},
-                                    maxHeight: {$max: "$dimensions.height"},
-                                    heights: {$push: "$dimensions.height"},
-                                    sumWidth: {$sum: "$dimensions.width"},
-                                    avgWidth: {$avg: "$dimensions.width"},
-                                    minWidth: {$min: "$dimensions.width"},
-                                    maxWidth: {$max: "$dimensions.width"},
-                                    widths: {$push: "$dimensions.width"},
-                                    sumDepth: {$sum: "$dimensions.depth"},
-                                    avgDepth: {$avg: "$dimensions.depth"},
-                                    minDepth: {$min: "$dimensions.depth"},
-                                    maxDepth: {$max: "$dimensions.depth"},
-                                    depths: {$push: "$dimensions.depth"},
-                                    sumWeight: {$sum: "$dimensions.weight"},
-                                    avgWeight: {$avg: "$dimensions.weight"},
-                                    minWeight: {$min: "$dimensions.weight"},
-                                    maxWeight: {$max: "$dimensions.weight"},
-                                    weights: {$push: "$dimensions.weight"}
+                                    sumHeight: { $sum: "$dimensions.height" },
+                                    avgHeight: { $avg: "$dimensions.height" },
+                                    minHeight: { $min: "$dimensions.height" },
+                                    maxHeight: { $max: "$dimensions.height" },
+                                    heights: { $push: "$dimensions.height" },
+                                    sumWidth: { $sum: "$dimensions.width" },
+                                    avgWidth: { $avg: "$dimensions.width" },
+                                    minWidth: { $min: "$dimensions.width" },
+                                    maxWidth: { $max: "$dimensions.width" },
+                                    widths: { $push: "$dimensions.width" },
+                                    sumDepth: { $sum: "$dimensions.depth" },
+                                    avgDepth: { $avg: "$dimensions.depth" },
+                                    minDepth: { $min: "$dimensions.depth" },
+                                    maxDepth: { $max: "$dimensions.depth" },
+                                    depths: { $push: "$dimensions.depth" },
+                                    sumWeight: { $sum: "$dimensions.weight" },
+                                    avgWeight: { $avg: "$dimensions.weight" },
+                                    minWeight: { $min: "$dimensions.weight" },
+                                    maxWeight: { $max: "$dimensions.weight" },
+                                    weights: { $push: "$dimensions.weight" }
                                 }
                             },
                             {
@@ -632,18 +632,18 @@ const dashboard = {
                                         $let: {
                                             vars: {
                                                 sortedArray: "$heights",
-                                                len: {$size: "$heights"}
+                                                len: { $size: "$heights" }
                                             },
                                             in: {
                                                 $cond: [
-                                                    {$eq: [{$mod: ["$$len", 2]}, 0]},
+                                                    { $eq: [{ $mod: ["$$len", 2] }, 0] },
                                                     {
                                                         $avg: [
-                                                            {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
-                                                            {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
+                                                            { $arrayElemAt: ["$$sortedArray", { $divide: ["$$len", 2] }] },
+                                                            { $arrayElemAt: ["$$sortedArray", { $subtract: [{ $divide: ["$$len", 2] }, 1] }] }
                                                         ]
                                                     },
-                                                    {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]}
+                                                    { $arrayElemAt: ["$$sortedArray", { $floor: { $divide: ["$$len", 2] } }] }
                                                 ]
                                             }
                                         }
@@ -656,18 +656,18 @@ const dashboard = {
                                         $let: {
                                             vars: {
                                                 sortedArray: "$widths",
-                                                len: {$size: "$widths"}
+                                                len: { $size: "$widths" }
                                             },
                                             in: {
                                                 $cond: [
-                                                    {$eq: [{$mod: ["$$len", 2]}, 0]},
+                                                    { $eq: [{ $mod: ["$$len", 2] }, 0] },
                                                     {
                                                         $avg: [
-                                                            {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
-                                                            {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
+                                                            { $arrayElemAt: ["$$sortedArray", { $divide: ["$$len", 2] }] },
+                                                            { $arrayElemAt: ["$$sortedArray", { $subtract: [{ $divide: ["$$len", 2] }, 1] }] }
                                                         ]
                                                     },
-                                                    {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]}
+                                                    { $arrayElemAt: ["$$sortedArray", { $floor: { $divide: ["$$len", 2] } }] }
                                                 ]
                                             }
                                         }
@@ -680,18 +680,18 @@ const dashboard = {
                                         $let: {
                                             vars: {
                                                 sortedArray: "$depths",
-                                                len: {$size: "$depths"}
+                                                len: { $size: "$depths" }
                                             },
                                             in: {
                                                 $cond: [
-                                                    {$eq: [{$mod: ["$$len", 2]}, 0]},
+                                                    { $eq: [{ $mod: ["$$len", 2] }, 0] },
                                                     {
                                                         $avg: [
-                                                            {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
-                                                            {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
+                                                            { $arrayElemAt: ["$$sortedArray", { $divide: ["$$len", 2] }] },
+                                                            { $arrayElemAt: ["$$sortedArray", { $subtract: [{ $divide: ["$$len", 2] }, 1] }] }
                                                         ]
                                                     },
-                                                    {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]}
+                                                    { $arrayElemAt: ["$$sortedArray", { $floor: { $divide: ["$$len", 2] } }] }
                                                 ]
                                             }
                                         }
@@ -704,18 +704,18 @@ const dashboard = {
                                         $let: {
                                             vars: {
                                                 sortedArray: "$weights",
-                                                len: {$size: "$weights"}
+                                                len: { $size: "$weights" }
                                             },
                                             in: {
                                                 $cond: [
-                                                    {$eq: [{$mod: ["$$len", 2]}, 0]},
+                                                    { $eq: [{ $mod: ["$$len", 2] }, 0] },
                                                     {
                                                         $avg: [
-                                                            {$arrayElemAt: ["$$sortedArray", {$divide: ["$$len", 2]}]},
-                                                            {$arrayElemAt: ["$$sortedArray", {$subtract: [{$divide: ["$$len", 2]}, 1]}]}
+                                                            { $arrayElemAt: ["$$sortedArray", { $divide: ["$$len", 2] }] },
+                                                            { $arrayElemAt: ["$$sortedArray", { $subtract: [{ $divide: ["$$len", 2] }, 1] }] }
                                                         ]
                                                     },
-                                                    {$arrayElemAt: ["$$sortedArray", {$floor: {$divide: ["$$len", 2]}}]}
+                                                    { $arrayElemAt: ["$$sortedArray", { $floor: { $divide: ["$$len", 2] } }] }
                                                 ]
                                             }
                                         }
@@ -724,10 +724,10 @@ const dashboard = {
                             }
                         ],
                         modeHeight: [
-                            {$match: {"dimensions.height": { $ne: null }}},
-                            {$group: {_id: "$dimensions.height", modeHeight: {$sum: 1}}},
-                            {$sort: {modeHeight: -1}},
-                            {$limit: 1},
+                            { $match: { "dimensions.height": { $ne: null } } },
+                            { $group: { _id: "$dimensions.height", modeHeight: { $sum: 1 } } },
+                            { $sort: { modeHeight: -1 } },
+                            { $limit: 1 },
                             {
                                 $project: {
                                     _id: 0,
@@ -736,10 +736,10 @@ const dashboard = {
                             }
                         ],
                         modeWidth: [
-                            {$match: {"dimensions.width": { $ne: null }}},
-                            {$group: {_id: "$dimensions.width", modeWidth: {$sum: 1}}},
-                            {$sort: {modeWidth: -1}},
-                            {$limit: 1},
+                            { $match: { "dimensions.width": { $ne: null } } },
+                            { $group: { _id: "$dimensions.width", modeWidth: { $sum: 1 } } },
+                            { $sort: { modeWidth: -1 } },
+                            { $limit: 1 },
                             {
                                 $project: {
                                     _id: 0,
@@ -748,10 +748,10 @@ const dashboard = {
                             }
                         ],
                         modeDepth: [
-                            {$match: {"dimensions.depth": { $ne: null }}},
-                            {$group: {_id: "$dimensions.depth", modeDepth: {$sum: 1}}},
-                            {$sort: {modeDepth: -1}},
-                            {$limit: 1},
+                            { $match: { "dimensions.depth": { $ne: null } } },
+                            { $group: { _id: "$dimensions.depth", modeDepth: { $sum: 1 } } },
+                            { $sort: { modeDepth: -1 } },
+                            { $limit: 1 },
                             {
                                 $project: {
                                     _id: 0,
@@ -760,10 +760,10 @@ const dashboard = {
                             }
                         ],
                         modeWeight: [
-                            {$match: {"dimensions.weight": { $ne: null }}},
-                            {$group: {_id: "$dimensions.weight", modeWeight: { $sum: 1 }}},
-                            {$sort: { modeWeight: -1 }},
-                            {$limit: 1},
+                            { $match: { "dimensions.weight": { $ne: null } } },
+                            { $group: { _id: "$dimensions.weight", modeWeight: { $sum: 1 } } },
+                            { $sort: { modeWeight: -1 } },
+                            { $limit: 1 },
                             {
                                 $project: {
                                     _id: 0,
@@ -847,7 +847,7 @@ const dashboard = {
             res.status(200).json(formattedResult);
         } catch (error: unknown) {
             console.error("Error while calculating statistics", error);
-            res.status(500).json({error: "Chyba pri získavaní rozmerových štatistík! " + error});
+            res.status(500).json({ error: "Chyba pri získavaní rozmerových štatistík! " + error });
         }
     },
     getSizesGroups: async (_: Request, res: Response): Promise<void> => {
@@ -870,7 +870,7 @@ const dashboard = {
                                     boundaries: boundaries,
                                     default: null,
                                     output: {
-                                        count: {$sum: 1}
+                                        count: { $sum: 1 }
                                     }
                                 }
                             }
@@ -882,7 +882,7 @@ const dashboard = {
                                     boundaries: boundaries,
                                     default: null,
                                     output: {
-                                        count: {$sum: 1}
+                                        count: { $sum: 1 }
                                     }
                                 }
                             }
@@ -894,7 +894,7 @@ const dashboard = {
             const results = await Book.aggregate(aggregationPipeline);
 
             // Extract height and width results
-            const {heightGroups, widthGroups} = results[0];
+            const { heightGroups, widthGroups } = results[0];
 
             interface IDimensionGroup {
                 _id: string | number; //10, 20 ... 40+
@@ -935,7 +935,7 @@ const dashboard = {
             });
         } catch (err) {
             console.error("Error while getSizesGroups", err);
-            res.status(500).json({error: "Chyba pri získavaní rozmerových skupín! " + err});
+            res.status(500).json({ error: "Chyba pri získavaní rozmerových skupín! " + err });
         }
     },
     getLanguageStatistics: async (_: Request, res: Response): Promise<void> => {
@@ -948,13 +948,13 @@ const dashboard = {
                 },
                 {
                     $addFields: {
-                        firstLanguage: {$arrayElemAt: ["$language", 0]}
+                        firstLanguage: { $arrayElemAt: ["$language", 0] }
                     }
                 },
                 {
                     $group: {
                         _id: "$firstLanguage",
-                        count: {$sum: 1}
+                        count: { $sum: 1 }
                     }
                 },
                 {
@@ -979,7 +979,7 @@ const dashboard = {
             data = Object.values(
                 data.reduce((acc: any, obj) => {
                     if (!acc[obj.language]) {
-                        acc[obj.language] = {...obj}; // Initialize with the first object
+                        acc[obj.language] = { ...obj }; // Initialize with the first object
                     } else {
                         acc[obj.language].count += obj.count; // Merge count values
                     }
@@ -990,13 +990,13 @@ const dashboard = {
             res.status(200).json(data);
         } catch (error) {
             console.error("Error while calculating language statistics:", error);
-            res.status(500).json({error: "Chyba pri získavaní jazykových štatistík! " + error});
+            res.status(500).json({ error: "Chyba pri získavaní jazykových štatistík! " + error });
         }
     },
     countBooks: async (req: Request, res: Response): Promise<void> => {
         try {
             const {
-                params: {userId}
+                params: { userId }
             } = req
 
             let users = await User.find(optionFetchAllExceptDeleted);
@@ -1006,8 +1006,8 @@ const dashboard = {
                 const currUser = users.find(u => u._id === userId);
 
                 response.push({
-                    owner: {id: userId, firstName: currUser?.firstName ?? "", lastName: currUser?.lastName},
-                    count: await Book.countDocuments({owner: userId, deletedAt: undefined})
+                    owner: { id: userId, firstName: currUser?.firstName ?? "", lastName: currUser?.lastName },
+                    count: await Book.countDocuments({ owner: userId, deletedAt: undefined })
                 });
             } else {
                 let tempRes: any[] = [];
@@ -1015,8 +1015,8 @@ const dashboard = {
                     //get stats for every of users
                     tempRes.push(
                         {
-                            owner: {id: user._id, firstName: user?.firstName ?? "", lastName: user?.lastName},
-                            count: await Book.countDocuments({owner: user._id, deletedAt: undefined})
+                            owner: { id: user._id, firstName: user?.firstName ?? "", lastName: user?.lastName },
+                            count: await Book.countDocuments({ owner: user._id, deletedAt: undefined })
                         }
                     )
                 }
@@ -1024,15 +1024,15 @@ const dashboard = {
                 // get stats for books without owner
                 const query: mongoose.FilterQuery<IBook> = {
                     $or: [
-                        {owner: {$exists: false}},
-                        {owner: {$size: 0} as any}
+                        { owner: { $exists: false } },
+                        { owner: { $size: 0 } as any }
                     ],
                     deletedAt: undefined
                 }
 
                 tempRes.push(
                     {
-                        owner: {id: '', firstName: '', lastName: ''},
+                        owner: { id: '', firstName: '', lastName: '' },
                         count: await Book.countDocuments(query)
                     }
                 )
@@ -1040,20 +1040,20 @@ const dashboard = {
                 response = tempRes;
             }
 
-            response = response.map(dt => ({owner: dt.owner.firstName, count: dt.count}));
+            response = response.map(dt => ({ owner: dt.owner.firstName, count: dt.count }));
             const sortedData = sortByParam(response, "owner")
-            sortedData.push({owner: null, count: await Book.countDocuments({deletedAt: undefined})});
+            sortedData.push({ owner: null, count: await Book.countDocuments({ deletedAt: undefined }) });
 
             res.status(200).json(sortedData);
         } catch (error) {
             console.error("Error counting books:", error);
-            res.status(500).json({error: "Chyba pri počítaní kníh! " + error});
+            res.status(500).json({ error: "Chyba pri počítaní kníh! " + error });
         }
     },
     getReadBy: async (_: Request, res: Response): Promise<void> => {
         try {
             const users = (await User.find(optionFetchAllExceptDeleted).select('_id firstName lastName')) as Partial<IUser>[];
-            const totalBooksRead = await Book.countDocuments({deletedAt: {$ne: undefined}});
+            const totalBooksRead = await Book.countDocuments({ deletedAt: { $ne: undefined } });
 
             const result: any[] = await Promise.all(
                 users.map(async user => {
@@ -1070,7 +1070,7 @@ const dashboard = {
                         // Count books read by `user` that are owned by `otherUser`
                         const count = await Book.countDocuments({
                             owner: otherUserId,
-                            readBy: {$in: [userId]},
+                            readBy: { $in: [userId] },
                             deletedAt: undefined,
                         }) as number;
 
@@ -1096,7 +1096,7 @@ const dashboard = {
             res.status(200).json(sortedData);
         } catch (error) {
             console.error('Error calculating reading statistics:', error);
-            res.status(500).json({error: "Chyba pri získavaní štatistík čítania! " + error});
+            res.status(500).json({ error: "Chyba pri získavaní štatistík čítania! " + error });
         }
     }
 }

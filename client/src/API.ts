@@ -186,7 +186,10 @@ export const addBook = async (
     formData: IBook | IBook[] | object
 ): Promise<any> => {
     try {
-        if (!Array.isArray(formData) && !("id" in formData)) {
+        if (
+            (!Array.isArray(formData) && !("id" in formData)) ||
+            (Array.isArray(formData) && !formData[0]?._id)
+        ) {
             const saveBook: AxiosResponse<ApiBookDataType> = await axiosInstance.post(
                 baseUrl + "/add-book",
                 formData

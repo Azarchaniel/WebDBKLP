@@ -1,5 +1,5 @@
-import {Schema, Document, Query} from 'mongoose';
-import {normalizeSearchFields, stringifyName} from "../utils/utils";
+import { Schema, Document, Query } from 'mongoose';
+import { normalizeSearchFields, stringifyName } from "../utils/utils";
 
 export interface IBase extends Document {
     deletedAt?: Date;
@@ -10,10 +10,10 @@ export interface IBase extends Document {
 }
 
 export const baseSchema = new Schema<IBase>({
-    deletedAt: {type: Date, required: false},
-    normalizedSearchField: {type: JSON, required: false},
-    fullName: {type: String, required: false}
-}, {timestamps: true});
+    deletedAt: { type: Date, required: false },
+    normalizedSearchField: { type: JSON, required: false },
+    fullName: { type: String, required: false }
+}, { timestamps: true });
 
 /**
  * Middleware for normalizing search fields.
@@ -24,7 +24,11 @@ export const baseSchema = new Schema<IBase>({
 export const normalizeSearchMiddleware = (modelName: string) => {
     return async function (this: Document | Query<any, any>, next: any) {
         try {
-            const docInstance = this;
+            let docInstance = this;
+
+            if (Array.isArray(docInstance)) {
+                docInstance = docInstance[0];
+            }
 
             if (docInstance instanceof Document) {
                 // For `save` middleware
@@ -63,7 +67,7 @@ export const normalizeSearchMiddleware = (modelName: string) => {
  */
 export const updateAtMiddleware = () => {
     return function (this: Query<any, any>, next: any) {
-        this.set({updatedAt: new Date()});
+        this.set({ updatedAt: new Date() });
         next();
     };
 };
