@@ -1,5 +1,5 @@
 import { IBook, IBookColumnVisibility } from "../../type";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { addBook, checkBooksUpdated, deleteBook, getBook, getBooks } from "../../API";
 import { toast } from "react-toastify";
 import AddBook from "./AddBook";
@@ -12,7 +12,8 @@ import {
     getCachedTimestamp,
     loadFirstPageFromCache,
     saveFirstPageToCache,
-    isMobile
+    isMobile,
+    shortenStringKeepWord
 } from "@utils";
 import { openConfirmDialog } from "@components/ConfirmDialog";
 import ServerPaginationTable from "@components/table/TableSP";
@@ -228,11 +229,19 @@ export default function BookPage() {
         const booksToDelete = clonedBooks.filter((book: IBook) => idsToDelete.includes(book._id));
 
         const proceedDelete = (books: IBook[]) => {
-            const titles = books.map(b => b.title).join(", ");
+            const titles = shortenStringKeepWord(books.map(b => b.title).join("\n "), 150);
+
+            let message = "";
+            if (books.length > 1 && books.length < 5) {
+                message = `Naozaj chceš vymazať ${books.length} knihy:\n ${titles}?`;
+            } else if (books.length >= 5) {
+                message = `Naozaj chceš vymazať ${books.length} kníh:\n ${titles}?`;
+            } else {
+                message = `Naozaj chceš vymazať knihu ${titles}?`;
+            }
+
             openConfirmDialog({
-                text: books.length > 1
-                    ? `Naozaj chceš vymazať ${books.length} kníh: ${titles}?`
-                    : `Naozaj chceš vymazať knihu ${books[0]?.title}?`,
+                text: message,
                 title: books.length > 1 ? "Vymazať knihy?" : "Vymazať knihu?",
                 onOk: () => {
                     Promise.all(idsToDelete.filter((id): id is string => typeof id === "string" && id !== undefined).map(id => deleteBook(id)))

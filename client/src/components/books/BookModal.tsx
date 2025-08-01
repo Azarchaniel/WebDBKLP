@@ -10,7 +10,8 @@ import {
     langCode,
     cities,
     fetchAutors,
-    fetchUsers
+    fetchUsers,
+    emptyBook
 } from "@utils";
 import { ArrayInput, InputField, LazyLoadMultiselect } from "@components/inputs";
 import { openLoadingBooks } from "../LoadingBooks";
@@ -19,32 +20,6 @@ import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import BarcodeScannerButton from "@components/BarcodeScanner";
 import { createNewAutor, AutorRole } from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
-
-const emptyBook: IBook = {
-    _id: "",
-    title: "",
-    subtitle: "",
-    autor: [],
-    editor: [],
-    ilustrator: [],
-    translator: [],
-    ISBN: "",
-    language: [],
-    note: "",
-    numberOfPages: 0,
-    dimensions: { height: 0, width: 0, depth: 0, weight: 0 },
-    exLibris: false,
-    published: { publisher: "", year: 0, country: [] },
-    location: { city: [], shelf: "" },
-    owner: [],
-    readBy: [],
-    picture: "",
-    hrefGoodReads: "",
-    hrefDatabazeKnih: "",
-    content: [],
-    edition: { title: "", no: 0 },
-    serie: { title: "", no: 0 },
-};
 
 interface BodyProps {
     data: IBook[];
@@ -113,10 +88,10 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     (book.published?.country as unknown as string[])?.includes(country.key))
             },
             dimensions: {
-                height: formatDimension(book.dimensions?.height),
-                width: formatDimension(book.dimensions?.width),
-                depth: formatDimension(book.dimensions?.depth),
-                weight: formatDimension(book.dimensions?.weight),
+                height: formatDimension(book.dimensions?.height) ?? "",
+                width: formatDimension(book.dimensions?.width) ?? "",
+                depth: formatDimension(book.dimensions?.depth) ?? "",
+                weight: formatDimension(book.dimensions?.weight) ?? "",
             },
             language: langCode.filter((lang: ILangCode) => (book?.language as unknown as string[])?.includes(lang.key)),
             readBy: formPersonsFullName(book.readBy),
@@ -179,6 +154,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             errors = errors?.filter((err: ValidationError) => err.target !== "ISBN") ?? errors;
 
             if (!(numberValidations.every(n => n?.valid))) {
+                console.log("Nesprávne číslo: ", numberValidations);
                 numberValidations.filter(n => !(n?.valid))
                     .map((numErr: ValidationError) => ({
                         label: numErr.label + " musí byť číslo!",

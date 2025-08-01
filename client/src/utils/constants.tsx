@@ -1,9 +1,10 @@
-import { SortingState} from "@tanstack/react-table";
+import { SortingState } from "@tanstack/react-table";
+import { IBook } from "type";
 
 export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
-export const cities = [{value: "spisska", showValue: "Spišská"},
-    {value: "bruchotin", showValue: "Břuchotín"}
+export const cities = [{ value: "spisska", showValue: "Spišská" },
+{ value: "bruchotin", showValue: "Břuchotín" }
 ];
 
 export const chartLabels = {
@@ -30,11 +31,11 @@ export const chartColors = [
 ]
 
 export const autorRoles = [
-    {value: "autor", showValue: "Autor"},
-    {value: "editor", showValue: "Editor"},
-    {value: "ilustrator", showValue: "Ilustrátor"},
-    {value: "musician", showValue: "Hudobník"},
-    {value: "boardGameAutor", showValue: "Autor spol. hier"}
+    { value: "autor", showValue: "Autor" },
+    { value: "editor", showValue: "Editor" },
+    { value: "ilustrator", showValue: "Ilustrátor" },
+    { value: "musician", showValue: "Hudobník" },
+    { value: "boardGameAutor", showValue: "Autor spol. hier" }
 ];
 
 interface IPagination {
@@ -42,7 +43,7 @@ interface IPagination {
     pageSize: number;
     sorting: SortingState;
     search?: string;
-    filters?: {id: string, value: string}[];
+    filters?: { id: string, value: string }[];
 }
 
 export const DEFAULT_PAGINATION: IPagination = Object.freeze({
@@ -57,3 +58,29 @@ export const DEFAULT_PAGINATION: IPagination = Object.freeze({
 });
 
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
+
+export const emptyBook: IBook = {
+    _id: "",
+    title: "",
+    subtitle: "",
+    autor: [],
+    editor: [],
+    ilustrator: [],
+    translator: [],
+    ISBN: "",
+    language: [],
+    note: "",
+    numberOfPages: undefined,
+    dimensions: undefined,
+    exLibris: false,
+    published: undefined,
+    location: undefined,
+    owner: [],
+    readBy: [],
+    picture: "",
+    hrefGoodReads: "",
+    hrefDatabazeKnih: "",
+    content: [],
+    edition: undefined,
+    serie: undefined,
+};

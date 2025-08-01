@@ -16,18 +16,19 @@ export interface IBook extends IBaseType {
     edition?: IEditionSerie;
     serie?: IEditionSerie;
     ISBN?: string;
-    language: ILangCode[];
-    numberOfPages: number;
-    note: string;
-    published: IPublished;
-    location: ILocation;
-    exLibris: boolean;
-    owner: IUser[];
-    readBy: IUser[];
-    picture: string;
+    language?: ILangCode[];
+    numberOfPages?: number;
+    note?: string;
+    published?: IPublished;
+    location?: ILocation;
+    exLibris?: boolean;
+    owner?: IUser[];
+    readBy?: IUser[];
+    picture?: string;
     dimensions?: IDimension;
     hrefGoodReads?: string;
     hrefDatabazeKnih?: string;
+    dimensions?: IDimension;
 }
 
 export interface ILP extends IBaseType {
@@ -54,7 +55,7 @@ export interface IAutor extends IBaseType {
     dateOfDeath?: Date | string;
     note?: string;
     fullName?: string;
-    role?: {value: string, showValue: string}[] | string[];
+    role?: { value: string, showValue: string }[] | string[];
 }
 
 export interface IUser extends IBaseType {

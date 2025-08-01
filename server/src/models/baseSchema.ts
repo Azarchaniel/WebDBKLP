@@ -38,18 +38,21 @@ export const normalizeSearchMiddleware = (modelName: string) => {
                 // @ts-ignore
                 const updateQuery = this.getUpdate();
 
-                // Fetch the current document (if needed) to normalize fields
+                // Fetch the current document
                 // @ts-ignore
                 const doc = await this.model.findOne(this.getQuery());
 
-                if (doc) {
-                    const normalizedFields = await normalizeSearchFields(doc, modelName);
-                    // @ts-ignore
-                    this.setUpdate({
-                        ...updateQuery,
-                        normalizedSearchField: normalizedFields
-                    });
-                }
+                // Merge old doc with updateQuery to get the new state
+                const mergedDoc = doc ? { ...doc.toObject(), ...updateQuery } : updateQuery;
+
+                // Normalize using the merged document
+                const normalizedFields = await normalizeSearchFields(mergedDoc, modelName);
+
+                // @ts-ignore
+                this.setUpdate({
+                    ...updateQuery,
+                    normalizedSearchField: normalizedFields
+                });
             }
         } catch (error) {
             console.error(`Error in middleware when normalizing ${modelName}`, error);

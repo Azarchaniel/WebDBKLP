@@ -1,4 +1,5 @@
-import {FC} from "react";
+import { FC } from "react";
+import "@styles/ThreeStateCheckbox.scss";
 
 type ThreeStateCheckboxProps = {
     selectedAmount: number,
@@ -9,17 +10,16 @@ type ThreeStateCheckboxProps = {
 }
 
 export const ThreeStateCheckbox: FC<ThreeStateCheckboxProps> = ({
-                                                                    selectedAmount,
-                                                                    totalAmount,
-                                                                    onChange,
-                                                                    className = "",
-                                                                    disabled = false
-                                                                }) => {
-    const isIndeterminate = selectedAmount > 0 && selectedAmount < totalAmount;
-    const isChecked = selectedAmount === totalAmount;
+    selectedAmount,
+    totalAmount,
+    onChange,
+    className = "",
+    disabled = false
+}) => {
+    const isIndeterminate = selectedAmount > 0 && totalAmount > 0 && selectedAmount < totalAmount;
+    const isChecked = totalAmount > 0 && selectedAmount === totalAmount;
 
     const handleChange = () => {
-        console.log(`Checkbox changed: ${selectedAmount} ${totalAmount}`);
         if (isIndeterminate || !isChecked) {
             onChange(true);
         } else {
@@ -32,15 +32,14 @@ export const ThreeStateCheckbox: FC<ThreeStateCheckboxProps> = ({
             type="checkbox"
             checked={isChecked}
             onChange={handleChange}
-            className={`three-state-checkbox ${className}`
-            }
+            className={`${className} three-state-checkbox`}
             disabled={disabled}
             ref={(el) => {
                 if (el) {
                     el.indeterminate = isIndeterminate;
                 }
             }}
-            title={isIndeterminate ? "Čiastočne vybrané" : isChecked ? "Vybrané" : "Nevybrané"}
+            title={isIndeterminate ? `Čiastočne vybrané: ${selectedAmount}` : isChecked ? "Vybrané" : "Nevybrané"}
         />
     )
 }
