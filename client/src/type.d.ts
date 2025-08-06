@@ -89,6 +89,7 @@ type ApiAutorDataType = {
 }
 
 type BelongToAutor = {
+    id?: string;
     books: IBook[];
     lps: ILP[];
 }

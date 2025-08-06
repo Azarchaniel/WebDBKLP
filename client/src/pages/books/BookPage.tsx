@@ -165,7 +165,6 @@ export default function BookPage() {
 
         addBook(formData)
             .then((res) => {
-                console.log("Book saved successfully:", res);
                 if (Array.isArray(formData) && formData.length > 1) {
                     let message = "";
                     if (res.length < 5) {
@@ -186,7 +185,7 @@ export default function BookPage() {
                 fetchBooks()
             })
             .catch((err) => {
-                toast.error(err.response?.data?.error);
+                toast.error(err.response?.data?.error || "Chyba! Kniha nebola uložená!");
                 console.trace("Error saving books", err)
                 setSaveBookSuccess(false);
             })
@@ -206,7 +205,7 @@ export default function BookPage() {
                         if (data.book) setUpdateBooks([data.book]);
                     })
                     .catch((err) => {
-                        toast.error(err.response.data.error);
+                        toast.error(err.response.data.error || "Chyba! Kniha nebola nájdená!");
                         console.trace(err);
                     })
             }

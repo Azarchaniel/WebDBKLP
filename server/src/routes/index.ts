@@ -1,5 +1,5 @@
-import {Router} from 'express'
-import type {Request, Response, NextFunction} from 'express';
+import { Router } from 'express'
+import type { Request, Response, NextFunction } from 'express';
 import {
     getAllBooks,
     addBook,
@@ -20,13 +20,14 @@ import {
     addBoardGame,
     updateBoardGame,
     deleteBoardGame,
-    countBGchildren, logoutUser
+    countBGchildren, logoutUser,
+    getMultipleAutorsInfo
 } from '../controllers'
-import {addAutor, deleteAutor, getAllAutors, getAutor, updateAutor} from "../controllers";
-import {addQuote, deleteQuote, getAllQuotes, getQuote} from "../controllers";
-import {getAllUsers, getUser} from "../controllers";
-import {addLp, deleteLp, getAllLps, getLp} from "../controllers";
-import {userVerification} from "../middleware";
+import { addAutor, deleteAutor, getAllAutors, getAutor, updateAutor } from "../controllers";
+import { addQuote, deleteQuote, getAllQuotes, getQuote } from "../controllers";
+import { getAllUsers, getUser } from "../controllers";
+import { addLp, deleteLp, getAllLps, getLp } from "../controllers";
+import { userVerification } from "../middleware";
 
 const router: Router = Router()
 
@@ -65,6 +66,7 @@ router.post('/add-autor', addAutor)
 router.put('/edit-autor/:id', updateAutor)
 router.post('/delete-autor/:id', deleteAutor)
 router.get('/get-autor-info/:id', getAllAutorsBooks)
+router.post('/get-multiple-autors-info', getMultipleAutorsInfo)
 
 // ### QUOTES ###
 router.get('/quote/:id', getQuote)

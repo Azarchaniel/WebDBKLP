@@ -20,6 +20,7 @@ import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import BarcodeScannerButton from "@components/BarcodeScanner";
 import { createNewAutor, AutorRole } from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
+import { getInputParams } from "@utils/form";
 
 interface BodyProps {
     data: IBook[];
@@ -222,64 +223,6 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
         return errors.find(err => err.target === name)?.label || "";
     }
 
-    /**
-     * Retrieves a nested value from an object using an array of keys.
-     *
-     * Iteratively accesses each key in the provided array, returning the value found at the final key,
-     * or `undefined` if any key in the path does not exist.
-     *
-     * @param obj - The object from which to retrieve the nested value.
-     * @param keys - An array of strings representing the path of keys to traverse.
-     * @returns The value found at the nested path, or `undefined` if any key is missing.
-     */
-    const getNestedValues = (obj: any, keys: string[]): any => {
-        return keys.reduce((current, key) => {
-            if (current && typeof current === "object" && key in current) {
-                return current[key];
-            }
-            return ""; // Return empty string if value is missing
-        }, obj);
-    }
-
-    /**
-     * Returns name, value and placeholderfor input fields.
-     * @param name Field's name in formData
-     * @returns Object with name, value, placeholder and disabled state.
-     */
-    const getInputParams = (name: string): any => {
-        const keys = name.split(".");
-
-        if (Array.isArray(formData)) {
-            if (formData.length === 0) {
-                return { name, value: "" };
-            }
-            const values = formData.map((item: any) =>
-                keys.reduce((obj, key) => (obj && obj[key] !== undefined) ? obj[key] : "", item)
-            );
-            const uniqueValues = Array.from(new Set(values.map(v => JSON.stringify(v)))).map(v => JSON.parse(v));
-
-            if (uniqueValues.length === 1) {
-                // Only one unique value, fill it
-                return {
-                    name: name,
-                    value: getNestedValues(formData[0], keys),
-                };
-            } else {
-                // Multiple different values
-                return {
-                    name,
-                    value: "",
-                    placeholder: "Viacero hodnôt",
-                };
-            }
-        }
-
-        return {
-            name: name,
-            value: getNestedValues(formData, keys),
-        };
-    }
-
     return (<form>
         <div className="b-container">
             <div className="b-Nazov">
@@ -287,14 +230,14 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder='*Názov'
                     onChange={handleInputChange}
                     customerror={getErrorMsg("title")}
-                    {...getInputParams("title")}
+                    {...getInputParams("title", formData)}
                 />
             </div>
             <div className="b-Podnazov">
                 <InputField
                     placeholder='Podnázov'
                     onChange={handleInputChange}
-                    {...getInputParams("subtitle")}
+                    {...getInputParams("subtitle", formData)}
                 />
             </div>
             <div className="b-Autor">
@@ -304,7 +247,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
                     onNew={(autorString) => createNewAutor(autorString, AutorRole.AUTOR, setFormData)}
-                    {...getInputParams("autor")}
+                    {...getInputParams("autor", formData)}
                 />
             </div>
             <div className="b-ISBN">
@@ -312,7 +255,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder='ISBN'
                     onChange={handleInputChange}
                     customerror={getErrorMsg("ISBN")}
-                    {...getInputParams("ISBN")}
+                    {...getInputParams("ISBN", formData)}
                 />
                 <BarcodeScannerButton
                     onBarcodeDetected={(code) => setFormData([{ ...formData[0], ISBN: code }])}
@@ -335,7 +278,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
                     onNew={(autorString) => createNewAutor(autorString, AutorRole.TRANSLATOR, setFormData)}
-                    {...getInputParams("translator")}
+                    {...getInputParams("translator", formData)}
                 />
             </div>
             <div className="b-Editor">
@@ -345,7 +288,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
                     onNew={(autorString) => createNewAutor(autorString, AutorRole.EDITOR, setFormData)}
-                    {...getInputParams("editor")}
+                    {...getInputParams("editor", formData)}
                 />
             </div>
             <div className="b-Ilustrator">
@@ -355,42 +298,42 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
                     onNew={(autorString) => createNewAutor(autorString, AutorRole.ILUSTRATOR, setFormData)}
-                    {...getInputParams("ilustrator")}
+                    {...getInputParams("ilustrator", formData)}
                 />
             </div>
             <div className="b-Name">
                 <InputField
                     placeholder='Názov edície'
                     onChange={handleInputChange}
-                    {...getInputParams("edition.name")}
+                    {...getInputParams("edition.name", formData)}
                 />
             </div>
             <div className="b-No">
                 <InputField
                     placeholder='Číslo edície'
                     onChange={handleInputChange}
-                    {...getInputParams("edition.no")}
+                    {...getInputParams("edition.no", formData)}
                 />
             </div>
             <div className="b-NameS">
                 <InputField
                     placeholder='Názov série'
                     onChange={handleInputChange}
-                    {...getInputParams("serie.title")}
+                    {...getInputParams("serie.title", formData)}
                 />
             </div>
             <div className="b-NoS">
                 <InputField
                     placeholder='Číslo série'
                     onChange={handleInputChange}
-                    {...getInputParams("serie.no")}
+                    {...getInputParams("serie.no", formData)}
                 />
             </div>
             <div className="b-Vydavatel">
                 <InputField
                     placeholder='Vydavateľ'
                     onChange={handleInputChange}
-                    {...getInputParams("published.publisher")}
+                    {...getInputParams("published.publisher", formData)}
                 />
             </div>
             <div className="b-Rok">
@@ -398,7 +341,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder='Rok vydania'
                     onChange={handleInputChange}
                     customerror={getErrorMsg("published.year")}
-                    {...getInputParams("published.year")}
+                    {...getInputParams("published.year", formData)}
                 />
             </div>
             <div className="b-Krajina">
@@ -408,7 +351,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     displayValue="value"
                     placeholder="Krajina vydania"
                     onChange={handleInputChange}
-                    {...getInputParams("published.country")}
+                    {...getInputParams("published.country", formData)}
                 />
             </div>
             <div className="b-Mesto">
@@ -418,14 +361,14 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     displayValue="showValue"
                     placeholder="Mesto"
                     onChange={handleInputChange}
-                    {...getInputParams("location.city")}
+                    {...getInputParams("location.city", formData)}
                 />
             </div>
             <div className="b-Police">
                 <InputField
                     placeholder='Polica'
                     onChange={handleInputChange}
-                    {...getInputParams("location.shelf")}
+                    {...getInputParams("location.shelf", formData)}
                 />
             </div>
             <div className="b-language">
@@ -434,7 +377,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     displayValue="value"
                     placeholder="Jazyk"
                     onChange={handleInputChange}
-                    {...getInputParams("language")}
+                    {...getInputParams("language", formData)}
                 />
             </div>
             <div className="b-Vyska">
@@ -442,7 +385,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder='Výška (cm)'
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.height")}
-                    {...getInputParams("dimensions.height")}
+                    {...getInputParams("dimensions.height", formData)}
                 />
             </div>
             <div className="b-Sirka">
@@ -450,7 +393,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder='Šírka (cm)'
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.width")}
-                    {...getInputParams("dimensions.width")}
+                    {...getInputParams("dimensions.width", formData)}
                 />
             </div>
             <div className="b-Hrubka">
@@ -458,7 +401,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder='Hrúbka (cm)'
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.depth")}
-                    {...getInputParams("dimensions.depth")}
+                    {...getInputParams("dimensions.depth", formData)}
                 />
             </div>
             <div className="b-Hmotnost">
@@ -466,7 +409,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder='Hmotnosť (g)'
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.weight")}
-                    {...getInputParams("dimensions.weight")}
+                    {...getInputParams("dimensions.weight", formData)}
                 />
             </div>
             <div className="b-Page-no">
@@ -474,13 +417,13 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder='Počet strán'
                     onChange={handleInputChange}
                     customerror={getErrorMsg("numberOfPages")}
-                    {...getInputParams("numberOfPages")}
+                    {...getInputParams("numberOfPages", formData)}
                 />
             </div>
             <div className="b-Obsah">
                 <ArrayInput
                     onChange={handleInputChange}
-                    {...getInputParams("content")}
+                    {...getInputParams("content", formData)}
                     placeholder="Obsah"
                 />
             </div>
@@ -490,7 +433,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     autoComplete="off"
                     rows={1}
                     onChange={handleInputChange}
-                    {...getInputParams("note")}
+                    {...getInputParams("note", formData)}
                 />
             </div>
             <div className="b-Precitane">
@@ -499,7 +442,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder="Prečítané"
                     onChange={handleInputChange}
                     onSearch={fetchUsers}
-                    {...getInputParams("readBy")}
+                    {...getInputParams("readBy", formData)}
                 />
             </div>
             <div className="b-Vlastnik">
@@ -508,7 +451,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder="Majiteľ"
                     onChange={handleInputChange}
                     onSearch={fetchUsers}
-                    {...getInputParams("owner")}
+                    {...getInputParams("owner", formData)}
                 />
             </div>
             <div className="b-Ex-Libris">
@@ -523,21 +466,21 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 <InputField
                     placeholder='Obrázok'
                     onChange={handleInputChange}
-                    {...getInputParams("picture")}
+                    {...getInputParams("picture", formData)}
                 />
             </div>
             <div className="b-DK">
                 <InputField
                     placeholder='URL Databáze knih'
                     onChange={handleInputChange}
-                    {...getInputParams("hrefDatabazeKnih")}
+                    {...getInputParams("hrefDatabazeKnih", formData)}
                 />
             </div>
             <div className="b-GR">
                 <InputField
                     placeholder='URL GoodReads'
                     onChange={handleInputChange}
-                    {...getInputParams("hrefGoodReads")}
+                    {...getInputParams("hrefGoodReads", formData)}
                 />
             </div>
         </div>

@@ -1,20 +1,21 @@
 import "react-datepicker/dist/react-datepicker.css";
-import React, {useEffect, useState} from "react";
-import {IAutor, ValidationError} from "../../type";
-import {Modal} from "@components/Modal";
-import {AutorsModalBody} from "@components/autors/AutorsModal";
-import {ModalButtons} from "@components/Modal";
 
-interface Props {
-    saveAutor: (formData: IAutor) => void;
+import React, { useEffect, useState } from "react";
+import { IAutor, ValidationError } from "../../type";
+import { Modal } from "@components/Modal";
+import { AutorsModalBody } from "@components/autors/AutorsModal";
+import { ModalButtons } from "@components/Modal";
+
+type Props = {
+    saveAutor: (formData: IAutor[] | object) => void;
     onClose: () => void;
-    autor?: IAutor;
+    autors?: IAutor[];
     saveResultSuccess?: boolean;
 }
 
-const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose, saveResultSuccess}: Props) => {
-    const [showModal, setShowModal] = useState(Boolean(autor));
-    const [autorData, setAutorData] = useState<IAutor | object>(autor || {});
+const AddAutor: React.FC<Props> = ({ saveAutor, autors, onClose, saveResultSuccess }: Props) => {
+    const [showModal, setShowModal] = useState<boolean>(Boolean(autors));
+    const [autorData, setAutorData] = useState<IAutor[] | undefined>(autors);
     const [error, setError] = useState<ValidationError[] | undefined>([{
         label: "Priezvisko autora musí obsahovať aspoň jeden znak!",
         target: "lastName"
@@ -24,38 +25,50 @@ const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose, saveResultSuccess
     useEffect(() => {
         switch (saveResultSuccess) {
             case true:
-                setOutline({outline: "10px solid green"});
+                setOutline({ outline: "10px solid green" });
                 break;
             case false:
-                setOutline({outline: "10px solid red"});
+                setOutline({ outline: "10px solid red" });
                 break;
             default:
-                setOutline({outline: "none"});
+                setOutline({ outline: "none" });
                 break;
         }
     }, [saveResultSuccess]);
 
     return (
         <>
-            <button type="button" className="addBtnTable" onClick={() => setShowModal(true)}/>
+            {!autors && <button type="button" className="addBtnTable" onClick={() => setShowModal(true)} />}
             {showModal &&
                 <Modal
-                    customKey={autor?._id || "new"}
-                    title={(autor ? "Uprav" : "Pridaj") + " autora"}
+                    customKey={autors?.[0]?._id || "new"}
+                    title={(autors ? "Uprav" : "Pridaj") + " autora"}
                     onClose={() => {
                         setShowModal(false);
                         onClose();
                     }}
                     body={<AutorsModalBody
-                        data={autorData as IAutor}
-                        onChange={setAutorData}
+                        data={autorData as IAutor[]}
+                        onChange={(data: IAutor[] | object) => {
+                            if (Array.isArray(data)) {
+                                setAutorData(data as IAutor[]);
+                            } else if (typeof data === "object") {
+                                setAutorData([data as IAutor]);
+                            } else {
+                                setAutorData(undefined);
+                            }
+                        }}
                         error={setError}
                     />}
                     footer={<ModalButtons
-                        onSave={() => saveAutor(autorData as IAutor)}
+                        onSave={() => saveAutor(autorData as IAutor[])}
                         onClear={() => {
-                            setAutorData({});
-                            setOutline({outline: "none"});
+                            setAutorData([{} as IAutor]);
+                            setOutline({ outline: "none" });
+                        }}
+                        onRevert={() => {
+                            setAutorData(autors ?? [{} as IAutor]);
+                            setOutline({ outline: "none" });
                         }}
                         error={error}
                         saveResultSuccess={saveResultSuccess}
@@ -63,9 +76,8 @@ const AddAutor: React.FC<Props> = ({saveAutor, autor, onClose, saveResultSuccess
                     overrideStyle={outline}
                 />
             }
-
         </>
-    )
+    );
 }
 
-export default AddAutor
+export default AddAutor;

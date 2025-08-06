@@ -4,11 +4,12 @@ import {
     ApiBookDataType,
     ApiLPDataType,
     ApiQuoteDataType,
-    ApiUserDataType, BelongToAutor,
+    ApiUserDataType,
+    BelongToAutor,
+    IAutor,
     IBook,
     IUser
 } from "./type";
-import { toast } from "react-toastify";
 import { jwtDecode } from "jwt-decode";
 
 const baseUrl: string = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
@@ -283,32 +284,32 @@ export const getAutor = async (
 }
 
 export const addAutor = async (
-    formData: /*IAutor*/any
-): Promise<AxiosResponse<ApiAutorDataType>> => {
+    formData: IAutor | IAutor[] | object
+): Promise<any> => {
     try {
-        if (!formData._id) {
-            const autor: any/*Omit<IAutor, '_id'>*/ = {
-                firstName: formData.firstName ?? "",
-                lastName: formData.lastName,
-                nationality: formData.nationality ?? "",
-                location: formData.location ?? {
-                    city: "",
-                    shelf: ""
-                },
-                note: formData.note ?? "",
-                dateOfBirth: formData.dateOfBirth ?? undefined,
-                dateOfDeath: formData.dateOfDeath ?? undefined,
-                role: formData.role ?? undefined
-            }
-            return await axiosInstance.post(
+        if (
+            (!Array.isArray(formData) && !("id" in formData)) ||
+            (Array.isArray(formData) && !formData[0]?._id)
+        ) {
+            const saveAutor: AxiosResponse<ApiAutorDataType> = await axiosInstance.post(
                 baseUrl + "/add-autor",
-                autor
-            )
-        } else {
-            return await axiosInstance.put(
-                `${baseUrl}/edit-autor/${formData._id}`,
                 formData
-            )
+            );
+            return saveAutor;
+        } else {
+            if (Array.isArray(formData)) {
+                const updatePromises = formData.map(async (autor: IAutor) =>
+                    await axiosInstance.put(`${baseUrl}/edit-autor/${autor._id}`, autor)
+                );
+                const updatedAutors = await Promise.all(updatePromises);
+                return updatedAutors;
+            } else {
+                const updatedAutor: AxiosResponse<ApiAutorDataType> = await axiosInstance.put(
+                    `${baseUrl}/edit-autor/${(formData as unknown as IAutor)["_id"]}`,
+                    formData
+                );
+                return updatedAutor;
+            }
         }
     } catch (error: any) {
         throw new Error(error)
@@ -336,6 +337,20 @@ export const getAutorInfo = async (
             `${baseUrl}/get-autor-info/${_id}`
         )
         return enrichedAutor
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
+export const getMultipleAutorsInfo = async (
+    autors: string[]
+): Promise<AxiosResponse<BelongToAutor[]>> => {
+    try {
+        const enrichedAutors: AxiosResponse<BelongToAutor[]> = await axiosInstance.post(
+            `${baseUrl}/get-multiple-autors-info`,
+            { ids: autors }
+        )
+        return enrichedAutors
     } catch (error: any) {
         throw new Error(error)
     }
