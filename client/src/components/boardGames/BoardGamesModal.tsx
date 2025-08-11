@@ -1,11 +1,11 @@
-import React, {useCallback, useEffect, useState} from "react";
-import {IBoardGame, ILangCode, ValidationError} from "../../type";
-import {InputField, LazyLoadMultiselect} from "@components/inputs";
-import {countryCode, fetchAutors, fetchBoardGames} from "@utils";
-import {createNewAutor, AutorRole} from "@utils/autor";
-import FromToInput from "@components/inputs/FromToInput";
+import React, { useCallback, useEffect, useState } from "react";
+import { IBoardGame, ILangCode, ValidationError } from "../../type";
+import { InputField, LazyLoadMultiselect } from "@components/inputs";
+import { countryCode, fetchAutors, fetchBoardGames } from "@utils";
+import { createNewAutor, AutorRole } from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
-import {ThreeStateToggleSwitch} from "@components/ToggleSwitch";
+import { ThreeStateToggleSwitch } from "@components/ToggleSwitch";
+import { handleInputChange } from "@utils/form";
 
 interface BodyProps {
     data: IBoardGame | object;
@@ -23,10 +23,10 @@ const getInitialExpansions = (data: IBoardGame | object): boolean | undefined =>
     return undefined;
 };
 
-export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
+export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
     const [formData, setFormData] = useState(data as any);
     const [errors, setErrors] = useState<ValidationError[]>([
-        {label: "Názov musí obsahovať aspoň jeden znak!", target: "title"},
+        { label: "Názov musí obsahovať aspoň jeden znak!", target: "title" },
     ]);
     const [reset, doReset] = useState<number>(0);
     const [expansions, setExpansions] = useState<boolean | undefined>(getInitialExpansions(data));
@@ -61,13 +61,13 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
     }, []);
 
     useEffect(() => {
-        const data = formData as IBoardGame;
-        if (!data) return;
+        if (!formData || !Array.isArray(formData) || formData.length === 0) return;
+        const data = formData[0] as IBoardGame;
 
         let localErrors: ValidationError[] = [];
 
         if (!data.title?.trim()) {
-            localErrors.push({label: "Názov musí obsahovať aspoň jeden znak!", target: "title"});
+            localErrors.push({ label: "Názov musí obsahovať aspoň jeden znak!", target: "title" });
         } else {
             localErrors = localErrors.filter((err) => err.target !== "title");
         }
@@ -76,33 +76,8 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
         error(localErrors);
     }, [formData]);
 
-    const handleInputChange = useCallback((input: any) => {
-        let name: string, value: string;
-
-        if ("target" in input) { // if it is a regular event
-            const {name: targetName, value: targetValue} = input.target;
-            name = targetName;
-            value = targetValue;
-        } else { // if it is MultiSelect custom answer
-            name = input.name;
-            value = input.value;
-        }
-
-        setFormData((prevData: any) => {
-            // Helper function to create a nested object structure
-            const setNestedValue = (obj: any, keys: string[], value: any) => {
-                const key = keys.shift(); // Get the first key
-                if (!key) return value; // If no more keys, return the value
-                obj[key] = setNestedValue(obj[key] || {}, keys, value); // Recursively set the nested value
-                return obj;
-            };
-
-            const keys = name.split("."); // Split name into keys
-            const updatedData = {...prevData}; // Clone previous data
-            setNestedValue(updatedData, keys, value); // Set nested value
-
-            return updatedData;
-        });
+    const changeFormData = useCallback((input: any) => {
+        setFormData((prevData: any) => handleInputChange(input, prevData));
     }, []);
 
     return (
@@ -113,7 +88,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         value={formData?.title || ""}
                         placeholder="*Názov"
                         name="title"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                         customerror={errors.find((err) => err.target === "title")?.label || ""}
                     />
                 </div>
@@ -123,7 +98,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         value={formData?.autor || []}
                         displayValue="fullName"
                         placeholder="Autor"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                         name="autor"
                         onSearch={fetchAutors}
                         onNew={(autorString) => createNewAutor(autorString, AutorRole.BOARDGAME_AUTOR, setFormData, "autor")}
@@ -135,7 +110,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         value={formData?.published?.publisher || ""}
                         placeholder="Vydavateľ"
                         name="published.publisher"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                 </div>
 
@@ -145,7 +120,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         placeholder="Rok vydania"
                         name="published.year"
                         type="number"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                 </div>
 
@@ -156,7 +131,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         options={countryCode}
                         displayValue="value"
                         placeholder="Krajina vydania"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                         name="published.country"
                         reset={Boolean(reset)}
                     />
@@ -167,13 +142,13 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         value={formData?.noPlayers?.from}
                         placeholder="Počet hráčov od"
                         name="published.publisher"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                     <InputField
                         value={formData?.noPlayers?.to}
                         placeholder="Počet hráčov do"
                         name="published.publisher"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                 </div>
 
@@ -182,13 +157,13 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         value={formData?.playTime?.from}
                         placeholder="Čas hrania od"
                         name="published.publisher"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                     <InputField
                         value={formData?.playTime?.to}
                         placeholder="Čas hrania do"
                         name="published.publisher"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                 </div>
 
@@ -197,13 +172,13 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         value={formData?.ageRecommendation?.from}
                         placeholder="Veková kategória od"
                         name="published.publisher"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                     <InputField
                         value={formData?.ageRecommendation?.to}
                         placeholder="Veková kategória do"
                         name="published.publisher"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                 </div>
 
@@ -212,7 +187,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         value={formData?.picture || ""}
                         placeholder="Obrázok"
                         name="picture"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                 </div>
 
@@ -221,7 +196,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         value={formData?.url || ""}
                         placeholder="URL"
                         name="url"
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                 </div>
 
@@ -231,7 +206,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                         name="note"
                         rows={1}
                         value={formData?.note || ""}
-                        onChange={handleInputChange}
+                        onChange={changeFormData}
                     />
                 </div>
 
@@ -252,7 +227,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                                 value={formData?.children || []}
                                 displayValue="title"
                                 placeholder="Má rozšírenia (deti)"
-                                onChange={handleInputChange}
+                                onChange={changeFormData}
                                 name="children"
                                 onSearch={fetchBoardGames}
                                 reset={Boolean(reset)}
@@ -263,7 +238,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({data, onChange, error}
                                 value={formData?.parent || []}
                                 displayValue="title"
                                 placeholder="Patrí k hre (rodičovi)"
-                                onChange={handleInputChange}
+                                onChange={changeFormData}
                                 name="parent"
                                 onSearch={fetchBoardGames}
                                 reset={Boolean(reset)}

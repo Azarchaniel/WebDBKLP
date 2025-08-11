@@ -6,7 +6,7 @@ import { IAutor, ILangCode, ValidationError } from "../../type";
 import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import { sk } from "date-fns/locale/sk";
 import TextArea from "@components/inputs/TextArea";
-import { getInputParams } from "@utils/form";
+import { getInputParams, handleInputChange } from "@utils/form";
 
 registerLocale('sk', sk)
 
@@ -106,32 +106,8 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
     }, [formData]);
 
 
-    const handleInputChange = useCallback((input: any) => {
-        let name: string, value: string;
-
-        if ("target" in input) { // if it is a regular event
-            const { name: targetName, value: targetValue } = input.target;
-            name = targetName;
-            value = targetValue;
-        } else { // if it is MultiSelect custom answer
-            name = input.name;
-            value = input.value;
-        }
-
-        setFormData((prevData: IAutor[]) => {
-            const keys = name.split(".");
-            // Helper function to set nested value
-            const setNestedValue = (obj: any, keys: string[], value: any): any => {
-                if (keys.length === 0) return value;
-                const [first, ...rest] = keys;
-                return {
-                    ...obj,
-                    [first]: setNestedValue(obj?.[first] ?? {}, rest, value)
-                };
-            };
-            // Update all items in array (bulk edit pattern)
-            return prevData.map(item => setNestedValue(item, [...keys], value));
-        });
+    const changeFormData = useCallback((input: any) => {
+        setFormData((prevData: any) => handleInputChange(input, prevData));
     }, []);
 
     const getErrorMsg = (name: string): string => {
@@ -147,7 +123,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
             <div className="a-first-name">
                 <InputField
                     placeholder='Krstné meno'
-                    onChange={handleInputChange}
+                    onChange={changeFormData}
                     {...getInputParams("firstName", formData)}
                 />
             </div>
@@ -155,7 +131,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
             <div className="a-last-name">
                 <InputField
                     placeholder='*Priezvisko'
-                    onChange={handleInputChange}
+                    onChange={changeFormData}
                     customerror={getErrorMsg("lastName")}
                     {...getInputParams("lastName", formData)}
                 />
@@ -229,7 +205,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     options={countryCode}
                     displayValue="value"
                     placeholder="Národnosť"
-                    onChange={handleInputChange}
+                    onChange={changeFormData}
                     reset={Boolean(reset)}
                     {...getInputParams("nationality", formData)}
                 />
@@ -240,7 +216,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     options={autorRoles}
                     displayValue="showValue"
                     placeholder="Role"
-                    onChange={handleInputChange}
+                    onChange={changeFormData}
                     reset={Boolean(reset)}
                     {...getInputParams("role", formData)}
                 />
@@ -253,7 +229,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     className="form-control"
                     autoComplete="off"
                     rows={1}
-                    onChange={handleInputChange}
+                    onChange={changeFormData}
                     {...getInputParams("note", formData)}
                 />
             </div>

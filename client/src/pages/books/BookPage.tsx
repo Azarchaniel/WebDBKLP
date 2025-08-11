@@ -232,9 +232,9 @@ export default function BookPage() {
 
             let message = "";
             if (books.length > 1 && books.length < 5) {
-                message = `Naozaj chceš vymazať ${books.length} knihy:\n ${titles}?`;
+                message = `Naozaj chceš vymazať ${books.length} knihy:\n\n ${titles}?`;
             } else if (books.length >= 5) {
-                message = `Naozaj chceš vymazať ${books.length} kníh:\n ${titles}?`;
+                message = `Naozaj chceš vymazať ${books.length} kníh:\n\n ${titles}?`;
             } else {
                 message = `Naozaj chceš vymazať knihu ${titles}?`;
             }

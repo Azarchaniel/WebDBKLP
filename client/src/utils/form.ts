@@ -55,3 +55,52 @@ export const getNestedValues = (obj: any, keys: string[]): any => {
         return ""; // Return empty string if value is missing
     }, obj);
 }
+
+/**
+ * Generic handler for form input changes that works with both arrays and single objects
+ * @param input - The input event or object containing name and value
+ * @param formData - Current form data (can be array or single object)
+ * @returns Updated form data with the new value
+ * 
+ * Usage:
+ * const handleBookInputChange = useCallback((input: any) => {
+  setFormData((prevData: any) => handleInputChange(input, prevData));
+}, []);
+ */
+export const handleInputChange = <T>(input: any, formData: T | T[]): T | T[] => {
+    let name: string, value: any;
+
+    // Extract name and value from different input types
+    if ("target" in input) {
+        // If it's a DOM event
+        const { name: targetName, value: targetValue } = input.target;
+        name = targetName;
+        value = targetValue;
+    } else {
+        // If it's a custom object (like from MultiSelect)
+        name = input.name;
+        value = input.value;
+    }
+
+    // Helper to set nested value in an object
+    const setNestedValue = (obj: any, keys: string[], value: any): any => {
+        if (keys.length === 0) return value;
+        const [first, ...rest] = keys;
+        return {
+            ...obj,
+            [first]: setNestedValue(obj?.[first] ?? {}, rest, value)
+        };
+    };
+
+    // Split the property path into keys
+    const keys = name.split(".");
+
+    // Handle array vs single object
+    if (Array.isArray(formData)) {
+        // Update all items in the array
+        return formData.map((item: any) => setNestedValue(item, [...keys], value));
+    } else {
+        // Update single object
+        return setNestedValue(formData, [...keys], value);
+    }
+};

@@ -8,6 +8,7 @@ import {
     BelongToAutor,
     IAutor,
     IBook,
+    ILP,
     IUser
 } from "./type";
 import { jwtDecode } from "jwt-decode";
@@ -500,34 +501,41 @@ export const getLP = async (
 
         return lp;
     } catch (error: any) {
-        console.error("API ERROR");
         throw new Error(error)
     }
 }
 
 export const addLP = async (
-    formData: /*ILP*/any
-): Promise<AxiosResponse<ApiLPDataType>> => {
+    formData: ILP | ILP[] | object
+): Promise<any> => {
     try {
-        const {
-            "published.country": country,
-            ...lpData // Use rest operator to get the remaining properties
-        } = formData;
-
-        // Construct the lp object with the nested published property
-        const lp: any = {
-            ...lpData, // Spread the remaining properties
-            published: {
-                ...lpData["published"],
-                country: country ?? ""
-            },
-        };
-
-        const saveLP: AxiosResponse<ApiLPDataType> = await axiosInstance.post(
-            baseUrl + "/add-lp",
-            lp
-        )
-        return saveLP
+        if (
+            (!Array.isArray(formData) && !("id" in formData)) ||
+            (Array.isArray(formData) && !formData[0]?._id)
+        ) {
+            const { published, ...lpData } = formData as ILP;
+            formData = {
+                ...lpData,
+                published: {
+                    ...published,
+                    country: published?.country ?? ""
+                },
+            };
+        } else {
+            if (Array.isArray(formData)) {
+                const updatePromises = formData.map(async (lp: ILP) =>
+                    await axiosInstance.put(`${baseUrl}/edit-lp/${lp._id}`, lp)
+                );
+                const updatedLPs = await Promise.all(updatePromises);
+                return updatedLPs;
+            } else {
+                const updatedLp: AxiosResponse<ApiLPDataType> = await axiosInstance.put(
+                    `${baseUrl}/edit-lp/${(formData as unknown as ILP)._id}`,
+                    formData
+                )
+                return updatedLp;
+            }
+        }
     } catch (error: any) {
         throw new Error(error)
     }
