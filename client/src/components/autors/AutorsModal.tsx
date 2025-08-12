@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { countryCode, autorRoles } from "@utils";
+import { countryCode, autorRoles, emptyAutor } from "@utils";
 import { IAutor, ILangCode, ValidationError } from "../../type";
 import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import { sk } from "date-fns/locale/sk";
@@ -10,7 +10,6 @@ import { getInputParams, handleInputChange } from "@utils/form";
 
 registerLocale('sk', sk)
 
-
 interface BodyProps {
     data: IAutor[];
     onChange: (data: IAutor[] | object) => void;
@@ -18,93 +17,110 @@ interface BodyProps {
     editedAutor?: IAutor;
 }
 
-interface ButtonsProps {
-    saveAutor: () => void;
-    cleanFields: () => void;
-    error?: ValidationError[] | undefined;
-    saveResultSuccess?: boolean;
-}
-
-
 export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
-    const [formData, setFormData] = useState<IAutor[]>(
-        Array.isArray(data) && data.length > 0 ? data : [{} as IAutor]
+    const [formData, setFormData] = useState(
+        Array.isArray(data) && data.length > 0
+            ? data
+            : [emptyAutor]
     );
     const [errors, setErrors] = useState<ValidationError[]>(
         [{ label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName" }]);
     const [reset, doReset] = useState<number>(0);
 
+    // send form data to parent
     useEffect(() => {
         onChange(formData);
     }, [formData]);
 
     // clear form btn
     useEffect(() => {
-        if (!data) return;
-        if (Array.isArray(data) && data.length === 1 && Object.keys(data[0]).length === 0 && data[0].constructor === Object) {
-            setFormData(data);
-            doReset(prev => prev + 1);
+        console.log("2");
+        if (formData && JSON.stringify(data) !== JSON.stringify(formData)) {
+            setFormData(normalizeAutorData(data));
         }
     }, [data]);
 
-    //edit autor
+    // edit autor
     useEffect(() => {
         if (!data || !Array.isArray(data) || data.length === 0) return;
-        const typedData = data[0] as IAutor;
 
-        let role: any[] = [];
-        if ("role" in typedData) {
-            role = autorRoles.filter(obj => (typedData?.role as string[]).includes(obj?.value))
-        } else {
-            role = [];
-        }
-
-        const toBeModified: IAutor = {
-            ...typedData,
-            nationality: countryCode.filter((country: ILangCode) => typedData?.nationality?.includes(country.key)),
-            role: role,
-            dateOfBirth: typedData?.dateOfBirth ?
-                new Date(typedData?.dateOfBirth as string | number | Date) :
-                undefined,
-            dateOfDeath: typedData?.dateOfDeath ?
-                new Date(typedData?.dateOfDeath as string | number | Date) :
-                undefined
-        } as IAutor;
-
-        setFormData([toBeModified]);
+        const modifiedAutors = normalizeAutorData(data);
+        setFormData(modifiedAutors);
     }, []);
-
 
     // error handling
     useEffect(() => {
-        if (!formData || !Array.isArray(formData) || formData.length === 0) return;
-        const data = formData[0] as IAutor;
+        if (!formData) return;
 
         let localErrors: ValidationError[] = [];
 
-        //if length is over 0, its OK
-        const autorLength = data.lastName?.trim().length > 0;
-        if (!autorLength) {
-            localErrors.push({ label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName" });
-        } else {
-            localErrors = localErrors?.filter((err: ValidationError) => err.target !== "lastName") ?? localErrors;
+        const validateAutor = (data: IAutor) => {
+            let errors: ValidationError[] = [];
+            //if length is over 0, its OK
+            const autorsLastNameLength = data.lastName?.trim().length > 0;
+            if (!autorsLastNameLength) {
+                errors.push({ label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName" });
+            } else {
+                errors = errors?.filter((err: ValidationError) => err.target !== "lastName") ?? errors;
+            }
+
+            if (data.dateOfBirth && data.dateOfDeath) {
+                //if dateOfBirth is sooner, its OK
+                const dates = data.dateOfBirth! < data.dateOfDeath!;
+
+                if (!dates) {
+                    errors.push({ label: "Dátum smrti nemôže byť skôr, než dátum narodenia!", target: "dateOfDeath" });
+                } else {
+                    errors = errors?.filter((err: ValidationError) => err.target !== "dateOfDeath") ?? errors;
+                }
+            }
+
+            return errors;
         }
 
-        if (data.dateOfBirth && data.dateOfDeath) {
-            //if dateOfBirth is sooner, its OK
-            const dates = data.dateOfBirth! < data.dateOfDeath!;
-
-            if (!dates) {
-                localErrors.push({ label: "Dátum smrti nemôže byť skôr, než dátum narodenia!", target: "dateOfDeath" });
-            } else {
-                localErrors = localErrors?.filter((err: ValidationError) => err.target !== "dateOfDeath") ?? localErrors;
-            }
+        if (Array.isArray(formData)) {
+            // Merge errors for all books, but only include unique errors by target
+            const allErrors = formData.flatMap(validateAutor);
+            // Optionally, you can group errors by target or show which book has which error
+            localErrors = allErrors;
+        } else {
+            localErrors = validateAutor(formData);
         }
 
         setErrors(localErrors);
         error(localErrors);
     }, [formData]);
 
+    const normalizeAutorData = (autor: any[]): IAutor[] => {
+        return (Array.isArray(autor) ? autor : [autor]).map(item => {
+            if (!item) return emptyAutor;
+
+            let role: any[] = [];
+            if ("role" in item) {
+                role = autorRoles.filter(obj => (item?.role as string[]).includes(obj?.value))
+            } else {
+                role = [];
+            }
+
+            const modified: IAutor = {
+                ...item,
+                nationality: countryCode.filter((country: ILangCode) => item?.nationality?.includes(country.key)),
+                role: role,
+                dateOfBirth: item?.dateOfBirth ?
+                    new Date(item?.dateOfBirth as string | number | Date) :
+                    undefined,
+                dateOfDeath: item?.dateOfDeath ?
+                    new Date(item?.dateOfDeath as string | number | Date) :
+                    undefined
+            } as IAutor;
+
+            return {
+                ...emptyAutor,
+                ...item,
+                ...modified
+            };
+        });
+    }
 
     const changeFormData = useCallback((input: any) => {
         setFormData((prevData: any) => handleInputChange(input, prevData));
@@ -124,7 +140,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                 <InputField
                     placeholder='Krstné meno'
                     onChange={changeFormData}
-                    {...getInputParams("firstName", formData)}
+                    {...getInputParams("firstName", formData, "Krstné meno")}
                 />
             </div>
 
@@ -133,7 +149,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     placeholder='*Priezvisko'
                     onChange={changeFormData}
                     customerror={getErrorMsg("lastName")}
-                    {...getInputParams("lastName", formData)}
+                    {...getInputParams("lastName", formData, "*Priezvisko")}
                 />
             </div>
 
@@ -156,7 +172,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     })))}
                     locale="sk"
                     dateFormat='dd.MM.yyyy'
-                    placeholderText={"Dátum narodenia"}
+                    placeholderText={getInputParams("dateOfBirth", formData, "Dátum narodenia").placeholder}
                     maxDate={new Date()}
                     autoComplete="off"
                 />
@@ -185,7 +201,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     })))}
                     locale="sk"
                     dateFormat='dd.MM.yyyy'
-                    placeholderText={"Dátum smrti"}
+                    placeholderText={getInputParams("dateOfDeath", formData, "Dátum smrti").placeholder}
                     maxDate={new Date()}
                     autoComplete="off"
                 />
@@ -206,8 +222,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     displayValue="value"
                     placeholder="Národnosť"
                     onChange={changeFormData}
-                    reset={Boolean(reset)}
-                    {...getInputParams("nationality", formData)}
+                    {...getInputParams("nationality", formData, "Národnosť")}
                 />
             </div>
 
@@ -217,8 +232,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     displayValue="showValue"
                     placeholder="Role"
                     onChange={changeFormData}
-                    reset={Boolean(reset)}
-                    {...getInputParams("role", formData)}
+                    {...getInputParams("role", formData, "Role")}
                 />
             </div>
 
@@ -230,7 +244,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     autoComplete="off"
                     rows={1}
                     onChange={changeFormData}
-                    {...getInputParams("note", formData)}
+                    {...getInputParams("note", formData, "Poznámka")}
                 />
             </div>
         </form>

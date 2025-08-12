@@ -1,5 +1,5 @@
 import { SortingState } from "@tanstack/react-table";
-import { IBook } from "type";
+import { IAutor, IBook } from "type";
 
 export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
@@ -83,4 +83,15 @@ export const emptyBook: IBook = {
     content: [],
     edition: undefined,
     serie: undefined,
+};
+
+export const emptyAutor: IAutor = {
+    _id: "",
+    firstName: "",
+    lastName: "",
+    nationality: [],
+    dateOfBirth: undefined,
+    dateOfDeath: undefined,
+    role: [],
+    note: ""
 };

@@ -1,9 +1,15 @@
+interface IReturnInputParams {
+    name: string;
+    value: any;
+    placeholder?: string;
+}
+
 /**
  * Returns name, value and placeholderfor input fields.
  * @param name Field's name in formData
  * @returns Object with name, value, placeholder and disabled state.
  */
-export const getInputParams = (name: string, formData: any): any => {
+export const getInputParams = (name: string, formData: any, placeholder?: string): any => {
     const keys = name.split(".");
 
     if (Array.isArray(formData)) {
@@ -16,17 +22,21 @@ export const getInputParams = (name: string, formData: any): any => {
         const uniqueValues = Array.from(new Set(values.map(v => JSON.stringify(v)))).map(v => JSON.parse(v));
 
         if (uniqueValues.length === 1) {
-            // Only one unique value, fill it
-            return {
+            // Only one unique value, fill it. Don't change placeholder if it is not set
+            const returnParams: IReturnInputParams = {
                 name: name,
                 value: getNestedValues(formData[0], keys),
-            };
+            }
+
+            if (placeholder) returnParams.placeholder = placeholder;
+
+            return returnParams;
         } else {
             // Multiple different values
             return {
                 name,
                 value: "",
-                placeholder: "Viacero hodnôt",
+                placeholder: placeholder ? placeholder + " (viacero hodnôt)" : "Viacero hodnôt",
             };
         }
     }

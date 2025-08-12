@@ -40,15 +40,25 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
         target: "title"
     }]);
 
+    // send form data to parent
     useEffect(() => {
         onChange(formData);
     }, [formData]);
 
+    // clear form btn
     useEffect(() => {
         if (formData && JSON.stringify(data) !== JSON.stringify(formData)) {
             setFormData(normalizeBookData(data));
         }
     }, [data]);
+
+    //edit book
+    useEffect(() => {
+        if (!data || !Array.isArray(data) || data.length === 0) return;
+
+        const modifiedBooks = normalizeBookData(data);
+        setFormData(modifiedBooks);
+    }, []);
 
     const getBookFromISBN = () => {
         if (!formData?.[0].ISBN) return;
@@ -81,6 +91,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
     const normalizeBookData = (book: any[]): IBook[] => {
         // Map each book in the array to the modified structure
         return book?.map((book: IBook) => ({
+            ...emptyBook,
             ...book,
             location: { city: cities.filter(c => c.value === book?.location?.city) },
             published: {
@@ -100,14 +111,6 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             exLibris: book.exLibris,
         }) as IBook);
     }
-
-    //edit book
-    useEffect(() => {
-        if (!data || !Array.isArray(data) || data.length === 0) return;
-
-        const modifiedBooks = normalizeBookData(data);
-        setFormData(modifiedBooks);
-    }, []);
 
     //error handling
     useEffect(() => {
