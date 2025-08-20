@@ -14,7 +14,6 @@ interface BodyProps {
     data: IAutor[];
     onChange: (data: IAutor[] | object) => void;
     error: (err: ValidationError[] | undefined) => void;
-    editedAutor?: IAutor;
 }
 
 export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
@@ -25,7 +24,6 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
     );
     const [errors, setErrors] = useState<ValidationError[]>(
         [{ label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName" }]);
-    const [reset, doReset] = useState<number>(0);
 
     // send form data to parent
     useEffect(() => {
@@ -34,7 +32,6 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
 
     // clear form btn
     useEffect(() => {
-        console.log("2");
         if (formData && JSON.stringify(data) !== JSON.stringify(formData)) {
             setFormData(normalizeAutorData(data));
         }

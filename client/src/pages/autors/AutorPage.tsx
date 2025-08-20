@@ -157,9 +157,25 @@ export default function AutorPage() {
 
     const handleDeleteAutor = async (_id?: string): Promise<void> => {
         try {
-            // Use selectedAutors if present, otherwise _id
-            const idsToDelete = selectedAutors.length > 0 ? selectedAutors : (_id ? [_id] : []);
-            if (idsToDelete.length === 0) return;
+            const idsToDelete: string[] = [];
+
+            if (selectedAutors.length > 0 && !selectedAutors.includes(_id!)) {
+                // If specific _id is provided, or if we have selected autors but the provided _id
+                // is not among them, we delete only the specified _id
+                idsToDelete.push(_id!);
+            } else if (selectedAutors.length > 0) {
+                // If no specific _id is provided but we have selected autors,
+                // or if the provided _id is already in the selection,
+                // we delete all selected autors
+                idsToDelete.push(...selectedAutors);
+            } else if (_id) {
+                // If there's no selection but a specific _id is provided, we delete only that
+                idsToDelete.push(_id);
+            } else {
+                // If there's no _id and no selection, show error
+                toast.error("Vyber aspoň jedného autora na vymazanie!");
+                return;
+            }
 
             if (idsToDelete.length === 1) {
                 // Single autor delete (keep current logic)
@@ -229,7 +245,7 @@ export default function AutorPage() {
 
                 openConfirmDialog({
                     title: "Vymazať autorov?",
-                    text: `Naozaj chceš vymazať týchto autorov?\n\n${list}`,
+                    text: `Naozaj chceš vymazať ${autors.length} autorov?\n\n${list}`,
                     onOk: async () => {
                         try {
                             await Promise.all(idsToDelete.map(id => deleteAutor(id)));

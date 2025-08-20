@@ -1,4 +1,4 @@
-import { ILP, ValidationError } from "../../type";
+import { IBook, ILP, ValidationError } from "../../type";
 import React, { useEffect, useState } from "react";
 import { Modal } from "@components/Modal";
 import { LPsModalBody } from "@components/lps/LPsModal";
@@ -51,8 +51,17 @@ const AddLp: React.FC<Props> = ({ saveLp, lps, onClose, saveResultSuccess }: Pro
                         onClose();
                     }}
                     body={<LPsModalBody
-                        data={lpData as ILP[] | ILP | object}
-                        onChange={onChange}
+                        data={lpData as ILP[]}
+                        onChange={(data: ILP | object | ILP[]) => {
+                            // If data is an array of ILP, set directly; otherwise, wrap in array
+                            if (Array.isArray(data)) {
+                                setLpData(data as ILP[]);
+                            } else if (typeof data === "object") {
+                                setLpData([data as ILP]);
+                            } else {
+                                setLpData(undefined);
+                            }
+                        }}
                         error={setError}
                     />}
                     footer={<ModalButtons

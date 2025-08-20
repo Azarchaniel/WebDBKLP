@@ -9,8 +9,8 @@ import TextArea from "@components/inputs/TextArea";
 import { getInputParams } from "@utils/form";
 
 interface BodyProps {
-    data: ILP[] | ILP | object;
-    onChange: (data: ILP[] | ILP | object) => void;
+    data: ILP[];
+    onChange: (data: ILP[] | object) => void;
     error: (err: ValidationError[] | undefined) => void;
     editedLP?: ILP;
 }

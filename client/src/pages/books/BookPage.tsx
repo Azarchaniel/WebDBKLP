@@ -219,10 +219,25 @@ export default function BookPage() {
     }
 
     const handleDeleteBook = (_id?: string): void => {
-        // If multiple books are selected, delete all selected
-        const idsToDelete = selectedBooks.length > 0 ? selectedBooks : [_id];
+        const idsToDelete: string[] = [];
 
-        if (idsToDelete.length === 0) return;
+        if (selectedBooks.length > 0 && !selectedBooks.includes(_id!)) {
+            // If specific _id is provided, or if we have selected books but the provided _id
+            // is not among them, we delete only the specified _id
+            idsToDelete.push(_id!);
+        } else if (selectedBooks.length > 0) {
+            // If no specific _id is provided but we have selected books,
+            // or if the provided _id is already in the selection,
+            // we delete all selected books
+            idsToDelete.push(...selectedBooks);
+        } else if (_id) {
+            // If there's no selection but a specific _id is provided, we delete only that
+            idsToDelete.push(_id);
+        } else {
+            // If there's no _id and no selection, show error
+            toast.error("Vyber aspoň jednu knihu na vymazanie!");
+            return;
+        }
 
         // Get book objects for confirmation dialog
         const booksToDelete = clonedBooks.filter((book: IBook) => idsToDelete.includes(book._id));
@@ -232,9 +247,9 @@ export default function BookPage() {
 
             let message = "";
             if (books.length > 1 && books.length < 5) {
-                message = `Naozaj chceš vymazať ${books.length} knihy:\n\n ${titles}?`;
+                message = `Naozaj chceš vymazať ${books.length} knihy?\n\n ${titles}`;
             } else if (books.length >= 5) {
-                message = `Naozaj chceš vymazať ${books.length} kníh:\n\n ${titles}?`;
+                message = `Naozaj chceš vymazať ${books.length} kníh?\n\n ${titles}`;
             } else {
                 message = `Naozaj chceš vymazať knihu ${titles}?`;
             }

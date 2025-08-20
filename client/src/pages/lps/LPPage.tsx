@@ -1,6 +1,6 @@
 import AddLP from "./AddLP";
 import { IBookColumnVisibility, ILP } from "../../type";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { addLP, deleteLP, getLPs, getLP } from "../../API";
 import { toast } from "react-toastify";
 import {
@@ -143,55 +143,81 @@ export default function LPPage() {
     }
 
     const handleDeleteLP = async (_id?: string): Promise<void> => {
-        // Use selectedLPs if present, otherwise _id
-        const idsToDelete = selectedLPs.length > 0 ? selectedLPs : (_id ? [_id] : []);
-        if (idsToDelete.length === 0) return;
+        const idsToDelete: string[] = [];
 
-        if (idsToDelete.length === 1) {
-            let lpToDelete = LPs.find((lp: ILP) => lp._id === idsToDelete[0]);
-            if (!lpToDelete) {
-                try {
-                    const { data } = await getLP(idsToDelete[0]);
-                    lpToDelete = data.lp;
-                } catch (err) { console.trace(err); }
+        if (selectedLPs.length > 0 && !selectedLPs.includes(_id!)) {
+            // If specific _id is provided, or if we have selected LPs but the provided _id
+            // is not among them, we delete only the specified _id
+            idsToDelete.push(_id!);
+        } else if (selectedLPs.length > 0) {
+            // If no specific _id is provided but we have selected LPs,
+            // or if the provided _id is already in the selection,
+            // we delete all selected LPs
+            idsToDelete.push(...selectedLPs);
+        } else if (_id) {
+            // If there's no selection but a specific _id is provided, we delete only that
+            idsToDelete.push(_id);
+        } else {
+            // If there's no _id and no selection, show error
+            toast.error("Vyber aspoň jedno LP na vymazanie!");
+            return;
+        }
+
+        // Get LP objects for confirmation dialog
+        const lpsToDelete = LPs.filter((lp: ILP) => idsToDelete.includes(lp._id));
+
+        const proceedDelete = (lps: ILP[]) => {
+            const titles = lps.map(lp => lp.title).join("\n ");
+
+            let message = "";
+            if (lps.length > 1) {
+                message = `Naozaj chceš vymazať ${lps.length} LP?\n\n ${titles}`;
+            } else {
+                message = `Naozaj chceš vymazať LP ${titles}?`;
             }
+
             openConfirmDialog({
-                title: "Vymazať LP?",
-                text: "Naozaj chceš vymazať LP " + lpToDelete?.title + "?",
+                text: message,
+                title: lps.length > 1 ? "Vymazať LP?" : "Vymazať LP?",
                 onOk: () => {
-                    deleteLP(idsToDelete[0])
-                        .then(({ status }) => {
-                            if (status !== 200) {
-                                throw new Error("Error! LP not deleted")
-                            }
-                            toast.success("LP bolo úspešne vymazané.");
+                    Promise.all(idsToDelete.filter((id): id is string => typeof id === "string" && id !== undefined)
+                        .map(id => deleteLP(id)))
+                        .then((results) => {
+                            const successCount = results.filter(r => r.status === 200).length;
+                            if (successCount === 0) throw new Error("Error! LPs not deleted");
+                            toast.success(
+                                successCount > 1
+                                    ? `${successCount} LP bolo úspešne vymazaných.`
+                                    : `LP ${lps[0].title} bolo úspešne vymazané.`
+                            );
                             fetchLPs();
                         })
                         .catch((err) => {
-                            toast.error("Došlo k chybe!");
+                            toast.error(err.response?.data?.error || "Došlo k chybe pri mazaní!");
                             console.trace(err);
-                        })
+                        });
                 },
                 onCancel: () => { }
             });
+        };
+
+        if (lpsToDelete.length === idsToDelete.length) {
+            proceedDelete(lpsToDelete);
         } else {
-            openConfirmDialog({
-                title: `Vymazať ${idsToDelete.length} LP?`,
-                text: `Naozaj chceš vymazať ${idsToDelete.length} LP?`,
-                onOk: async () => {
-                    try {
-                        await Promise.all(idsToDelete.map(id => deleteLP(id)));
-                        toast.success(`${idsToDelete.length} LP bolo úspešne vymazaných.`);
-                        fetchLPs();
-                    } catch (err) {
-                        toast.error("Došlo k chybe pri mazaní viacerých LP!");
-                        console.trace(err);
-                    }
-                },
-                onCancel: () => { }
-            });
+            // Some LPs not in local state, fetch them
+            Promise.all(idsToDelete.filter(id => typeof id === "string").map(id => {
+                const localLP = LPs.find((lp: ILP) => lp._id === id);
+                return localLP
+                    ? Promise.resolve(localLP)
+                    : id ? getLP(id).then(({ data }) => data.lp) : Promise.resolve(undefined);
+            }))
+                .then((lps) => proceedDelete(lps.filter(Boolean) as ILP[]))
+                .catch((err) => {
+                    toast.error(err.response?.data?.error || "Chyba pri načítaní LP!");
+                    console.trace(err);
+                });
         }
-    }
+    };
 
     const handlePageSizeChange = (newPageSize: number) => {
         const newPage = Math.floor(((pagination.page - 1) * pagination.pageSize) / newPageSize) + 1;

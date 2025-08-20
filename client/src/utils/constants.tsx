@@ -1,5 +1,5 @@
 import { SortingState } from "@tanstack/react-table";
-import { IAutor, IBook } from "type";
+import { IAutor, IBoardGame, IBook, ILP } from "type";
 
 export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
@@ -94,4 +94,32 @@ export const emptyAutor: IAutor = {
     dateOfDeath: undefined,
     role: [],
     note: ""
+};
+
+export const emptyLp: ILP = {
+    _id: "",
+    autor: [],
+    title: "",
+    subtitle: "",
+    countLp: 0,
+    speed: 0,
+    published: undefined,
+    language: [],
+    note: "",
+};
+
+export const emptyBoardGame: IBoardGame = {
+    _id: "",
+    title: "",
+    image: "",
+    noPlayers: undefined,
+    playTime: undefined,
+    ageRecommendation: undefined,
+    published: undefined,
+    autor: [],
+    picture: "",
+    url: "",
+    note: "",
+    parent: [],
+    children: [],
 };
