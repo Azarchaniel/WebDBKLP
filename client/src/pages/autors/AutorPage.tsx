@@ -35,6 +35,7 @@ export default function AutorPage() {
         control: false,
         firstName: true,
         lastName: true,
+        role: !isMobile(),
         nationality: !isMobile(),
         dateOfBirth: !isMobile(),
         dateOfDeath: !isMobile(),

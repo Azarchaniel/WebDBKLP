@@ -3,8 +3,10 @@ import { IAutor, IBoardGame, IBook, ILP } from "type";
 
 export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
-export const cities = [{ value: "spisska", showValue: "Spišská" },
-{ value: "bruchotin", showValue: "Břuchotín" }
+export const cities = [
+    { value: "spisska", showValue: "Spišská" },
+    { value: 'ujezd', showValue: 'Újezd u Chocně' },
+    { value: "bruchotin", showValue: "Břuchotín" }
 ];
 
 export const chartLabels = {
@@ -34,6 +36,7 @@ export const autorRoles = [
     { value: "autor", showValue: "Autor" },
     { value: "editor", showValue: "Editor" },
     { value: "ilustrator", showValue: "Ilustrátor" },
+    { value: "translator", showValue: "Prekladateľ" },
     { value: "musician", showValue: "Hudobník" },
     { value: "boardGameAutor", showValue: "Autor spol. hier" }
 ];
