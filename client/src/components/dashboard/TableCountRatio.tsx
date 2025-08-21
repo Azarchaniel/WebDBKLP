@@ -1,7 +1,7 @@
-import {toPercentage} from "../../utils/utils";
-import {Bar} from "react-chartjs-2";
+import { isMobile, toPercentage } from "../../utils/utils";
+import { Bar } from "react-chartjs-2";
 
-export const TableCountRatio = ({data, title}: { data: any[], title: string }) => {
+export const TableCountRatio = ({ data, title }: { data: any[], title: string }) => {
 	if (!data || data?.length === 0) return <>Žiadne dáta</>;
 
 	const dimensionGroups = [
@@ -36,31 +36,50 @@ export const TableCountRatio = ({data, title}: { data: any[], title: string }) =
 	};
 
 	return (<div className="column">
-		<table border={1} cellPadding="10" cellSpacing="0" style={{width: "100%", textAlign: "center"}}>
+		<table className="phone-table">
 			<thead>
-			<tr>
-				<th className="firstCell">{title}</th>
-				{dimensionGroups.map((column) => (
-					<th key={column}>{column}</th>
-				))}
-			</tr>
+				<tr>
+					<th>{title}</th>
+					<th>Počet</th>
+					<th>Pomer</th>
+				</tr>
 			</thead>
 			<tbody>
-			<tr>
-				<td><b>Počet</b></td>
-				{dimensionGroups.map((column) => (
-					<td key={column}>{data?.find((sg: any) => sg.group === column)?.count ?? "-"}</td>
+				{dimensionGroups.map((group) => (
+					<tr key={group}>
+						<td><b>{group}</b></td>
+						<td>{data?.find((sg) => sg.group === group)?.count ?? "-"}</td>
+						<td>{toPercentage(data?.find((sg) => sg.group === group)?.ratio) ?? "-"}</td>
+					</tr>
 				))}
-			</tr>
-			<tr>
-				<td><b>Pomer</b></td>
-				{dimensionGroups.map((column) => (
-					<td key={column}>{toPercentage(data?.find((sg: any) => sg.group === column)?.ratio) ?? "-"}</td>
-				))}
-			</tr>
 			</tbody>
 		</table>
-		<div style={{height: "1rem"}}/>
-		<Bar data={dataChart} options={optionsChart} height="70%"/>
+
+		<table className="desktop-table" border={1} cellPadding="10" cellSpacing="0" style={{ textAlign: "center" }}>
+			<thead>
+				<tr>
+					<th className="firstCell">{title}</th>
+					{dimensionGroups.map((column) => (
+						<th key={column}>{column}</th>
+					))}
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td><b>Počet</b></td>
+					{dimensionGroups.map((column) => (
+						<td key={column}>{data?.find((sg: any) => sg.group === column)?.count ?? "-"}</td>
+					))}
+				</tr>
+				<tr>
+					<td><b>Pomer</b></td>
+					{dimensionGroups.map((column) => (
+						<td key={column}>{toPercentage(data?.find((sg: any) => sg.group === column)?.ratio) ?? "-"}</td>
+					))}
+				</tr>
+			</tbody>
+		</table>
+		<div style={{ height: "1rem" }} />
+		<Bar data={dataChart} options={optionsChart} height="70%" />
 	</div>)
 }

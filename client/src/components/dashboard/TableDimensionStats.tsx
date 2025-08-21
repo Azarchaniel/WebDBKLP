@@ -1,10 +1,10 @@
-import {formatDimension} from "../../utils/utils";
+import { formatDimension } from "../../utils/utils";
 
 interface Props {
 	dimensionStats: any;
 }
 
-export const DashboardTableStats = ({dimensionStats}: Props) => {
+export const DashboardTableStats = ({ dimensionStats }: Props) => {
 	// if no data, then it is: { height: {}, width: {}, depth: {}, weight: {} }
 	if (!dimensionStats || Object.values(dimensionStats).every((v: any) => Object.keys(v).length === 0)) return <>Žiadne dáta</>;
 
@@ -27,7 +27,27 @@ export const DashboardTableStats = ({dimensionStats}: Props) => {
 
 	return (
 		<div>
-			<table border={1} cellPadding="10" cellSpacing="0" style={{width: "100%", textAlign: "center"}}>
+			<div className="phone-table">
+				{columns.map((column) => (
+					<div key={column} className="mobile-section">
+						<div className="section-title">
+							{translationMap[column]}
+						</div>
+						<table className="responsive-table" border={1} cellPadding="8" cellSpacing="0" style={{ width: "100%", textAlign: "center" }}>
+							<tbody>
+								{rows.map((row) => (
+									<tr key={row}>
+										<td><b>{translationMap[row]}</b></td>
+										<td>{formatDimension(dimensionStats[row][column])}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				))}
+			</div>
+
+			<table className="desktop-table" border={1} cellPadding="10" cellSpacing="0" style={{ width: "100%", textAlign: "center" }}>
 				<thead>
 					<tr>
 						<th className="firstCell" />
@@ -42,12 +62,12 @@ export const DashboardTableStats = ({dimensionStats}: Props) => {
 							<td><b>{translationMap[row]}</b></td>
 							{columns.map((column) => (
 								<td key={column}>{formatDimension(dimensionStats[row][column])}</td>
-								))}
+							))}
 						</tr>
 					))}
 				</tbody>
 			</table>
-			<div style={{height: "1rem"}}/>
+			<div style={{ height: "1rem" }} />
 		</div>
 	);
 };

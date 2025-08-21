@@ -495,9 +495,23 @@ textarea {
   }
 }
 
-// ^^^
+.desktop-table {
+  display: table;
+}
+
+.phone-table {
+  display: none;
+}
 
 @media screen and (width <=$mobile-width) {
+  .desktop-table {
+    display: none;
+  }
+
+  .phone-table {
+    display: table;
+  }
+
   .App {
     margin: 3rem 3rem 0 0;
   }
