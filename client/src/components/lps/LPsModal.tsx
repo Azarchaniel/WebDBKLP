@@ -1,30 +1,24 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
-import {countryCode, langCode, fetchAutors, formPersonsFullName, getPublishedCountry} from "@utils";
-import {ILangCode, ILP, ValidationError} from "../../type";
-import {showError} from "../Modal";
-import {InputField, LazyLoadMultiselect} from "@components/inputs";
+import { countryCode, langCode, fetchAutors, formPersonsFullName, getPublishedCountry } from "@utils";
+import { ILangCode, ILP, ValidationError } from "../../type";
+import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import "@styles/LpPage.scss";
-import LoadingSpinner from "@components/LoadingSpinner";
-import {createNewAutor, AutorRole} from "@utils/autor";
+import { createNewAutor, AutorRole } from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
+import { getInputParams } from "@utils/form";
 
 interface BodyProps {
-    data: ILP | object;
-    onChange: (data: ILP | object) => void;
+    data: ILP[];
+    onChange: (data: ILP[] | object) => void;
     error: (err: ValidationError[] | undefined) => void;
     editedLP?: ILP;
 }
 
-interface ButtonsProps {
-    saveLP: () => void;
-    cleanFields: () => void;
-    error?: ValidationError[] | undefined;
-    saveResultSuccess?: boolean;
-}
-
-export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
-    const [formData, setFormData] = useState(data as any);
+export const LPsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
+    const [formData, setFormData] = useState<ILP[] | ILP | object>(
+        Array.isArray(data) && data.length > 0 ? data : data
+    );
     const [errors, setErrors] = useState<ValidationError[]>([{
         label: "Názov LP musí obsahovať aspoň jeden znak!",
         target: "title"
@@ -36,39 +30,69 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
 
     useEffect(() => {
         if (!data) return;
-        if (Object.keys(data).length === 0 && data.constructor === Object) setFormData(data);
+        if (Array.isArray(data) && data.length === 1 && Object.keys(data[0]).length === 0 && data[0].constructor === Object) {
+            setFormData(data);
+        }
     }, [data]);
 
     //edit LP
     useEffect(() => {
         if (!data) return;
 
-        const country = getPublishedCountry((data as ILP)?.published?.country);
+        if (Array.isArray(data) && data.length > 0) {
+            const modifiedLPs = data.map(lp => {
+                const country = getPublishedCountry(lp?.published?.country);
 
-        const toBeModified: ILP = {
-            ...data,
-            autor: formPersonsFullName((data as ILP)?.autor),
-            published: {...(data as ILP)?.published, country: country ? [country] : []},
-            language: langCode.filter((lang: ILangCode) => ((data as ILP)?.language as unknown as string[])?.includes(lang.key))
-        } as ILP;
+                return {
+                    ...lp,
+                    autor: formPersonsFullName(lp?.autor),
+                    published: { ...lp?.published, country: country ? [country] : [] },
+                    language: langCode.filter((lang: ILangCode) => (lp?.language as unknown as string[])?.includes(lang.key))
+                } as ILP;
+            });
 
-        setFormData(toBeModified);
+            setFormData(modifiedLPs);
+        } else if (!Array.isArray(data)) {
+            const typedData = data as ILP;
+            const country = getPublishedCountry(typedData?.published?.country);
+
+            const toBeModified: ILP = {
+                ...typedData,
+                autor: formPersonsFullName(typedData?.autor),
+                published: { ...typedData?.published, country: country ? [country] : [] },
+                language: langCode.filter((lang: ILangCode) => (typedData?.language as unknown as string[])?.includes(lang.key))
+            } as ILP;
+
+            setFormData(toBeModified);
+        }
     }, []);
 
     //error handling
     useEffect(() => {
-        //shortcut
-        const data = (formData as unknown as ILP);
-
         //if there is no filled field, its disabled
-        if (!data) return;
+        if (!formData) return;
 
         let localErrors: ValidationError[] = [];
 
-        if (!(data?.title && data.title.trim().length > 0)) {
-            localErrors.push({label: "Názov musí obsahovať aspoň jeden znak!", target: "title"});
+        if (Array.isArray(formData)) {
+            // For multi-edit, we check the first item only
+            // Since we're changing all items in the same way
+            const firstLP = formData[0] as ILP;
+
+            if (!(firstLP?.title && firstLP.title.trim().length > 0)) {
+                localErrors.push({ label: "Názov musí obsahovať aspoň jeden znak!", target: "title" });
+            } else {
+                localErrors = localErrors?.filter((err: ValidationError) => err.target !== "title") ?? localErrors;
+            }
         } else {
-            localErrors = localErrors?.filter((err: ValidationError) => err.target !== "title") ?? localErrors;
+            //shortcut
+            const data = (formData as unknown as ILP);
+
+            if (!(data?.title && data.title.trim().length > 0)) {
+                localErrors.push({ label: "Názov musí obsahovať aspoň jeden znak!", target: "title" });
+            } else {
+                localErrors = localErrors?.filter((err: ValidationError) => err.target !== "title") ?? localErrors;
+            }
         }
 
         error(localErrors);
@@ -79,7 +103,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
         let name: string, value: string;
 
         if ("target" in input) { // if it is a regular event
-            const {name: targetName, value: targetValue} = input.target;
+            const { name: targetName, value: targetValue } = input.target;
             name = targetName;
             value = targetValue;
         } else { // if it is MultiSelect custom answer
@@ -97,10 +121,19 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
             };
 
             const keys = name.split("."); // Split name into keys
-            const updatedData = {...prevData}; // Clone previous data
-            setNestedValue(updatedData, keys, value); // Set nested value
 
-            return updatedData;
+            if (Array.isArray(prevData)) {
+                // Update all items in array (bulk edit pattern)
+                return prevData.map(item => {
+                    const updatedItem = { ...item };
+                    setNestedValue(updatedItem, [...keys], value);
+                    return updatedItem;
+                });
+            } else {
+                const updatedData = { ...prevData }; // Clone previous data
+                setNestedValue(updatedData, keys, value); // Set nested value
+                return updatedData;
+            }
         });
     }, []);
 
@@ -112,97 +145,101 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
         <form className="l-form-grid">
             <div className="l-title">
                 <InputField
-                    value={(formData as ILP)?.title || ""}
                     placeholder='*Názov'
-                    name="title"
                     onChange={handleInputChange}
                     customerror={getErrorMsg("title")}
+                    {...getInputParams('title', formData)}
                 />
             </div>
 
             <div className="l-subtitle">
                 <InputField
-                    value={(formData as ILP)?.subtitle || ""}
                     placeholder='Podnázov'
-                    name="subtitle"
                     onChange={handleInputChange}
+                    {...getInputParams('subtitle', formData)}
                 />
             </div>
 
             <div className="l-autor">
                 <LazyLoadMultiselect
-                    value={formData?.autor || []}
                     displayValue="fullName"
                     placeholder="Autor"
                     onChange={handleInputChange}
-                    name="autor"
                     onSearch={fetchAutors}
                     onNew={(autorString) => createNewAutor(autorString, AutorRole.MUSICIAN, setFormData, "autor")}
+                    {...getInputParams('autor', formData)}
                 />
             </div>
 
             <div className="l-speed">
                 <InputField
-                    value={(formData as ILP)?.speed || ""}
                     placeholder='Počet otáčok'
-                    name="speed"
                     onChange={handleInputChange}
+                    {...getInputParams('speed', formData)}
                 />
             </div>
 
             <div className="l-countLp">
                 <InputField
-                    value={(formData as ILP)?.countLp || ""}
                     placeholder='Počet platní'
-                    name="countLp"
                     onChange={handleInputChange}
+                    {...getInputParams('countLp', formData)}
                 />
             </div>
 
             <div className="l-year">
                 <InputField
-                    value={(formData as ILP)?.published?.year || ""}
                     placeholder='Rok vydania'
-                    name='published.year'
                     onChange={handleInputChange}
+                    {...getInputParams('published.year', formData)}
                 />
             </div>
 
             <div className="l-country">
                 <LazyLoadMultiselect
                     selectionLimit={1}
-                    value={formData?.published?.country}
                     options={countryCode}
                     displayValue="value"
                     placeholder="Krajina vydania"
                     onChange={(data) => {
-                        setFormData({
-                            ...formData,
-                            "published.country": data.value.map(v => (v as any).key)
-                        })
+                        if (Array.isArray(formData)) {
+                            setFormData(formData.map(item => ({
+                                ...item,
+                                published: {
+                                    ...(item.published || {}),
+                                    country: data.value.map(v => (v as any).key)
+                                }
+                            })));
+                        } else {
+                            setFormData({
+                                ...formData,
+                                published: {
+                                    ...(formData as any)?.published || {},
+                                    country: data.value.map(v => (v as any).key)
+                                }
+                            });
+                        }
                     }}
-                    name="published.country"
+                    {...getInputParams('published.country', formData)}
                 />
             </div>
 
             <div className="l-publisher">
                 <InputField
-                    value={(formData as ILP)?.published?.publisher || ""}
                     placeholder='Vydavateľ'
-                    name='published.publisher'
                     onChange={handleInputChange}
+                    {...getInputParams('published.publisher', formData)}
                 />
             </div>
 
             <div className="l-language">
                 <LazyLoadMultiselect
                     selectionLimit={1}
-                    value={formData?.language || []}
                     options={countryCode}
                     displayValue="value"
                     placeholder="Jazyk"
                     onChange={handleInputChange}
-                    name="language"
+                    {...getInputParams('language', formData)}
                 />
             </div>
 
@@ -211,11 +248,10 @@ export const LPsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyP
                     id='note'
                     placeholder='Poznámka'
                     className="form-control"
-                    name="note"
                     autoComplete="off"
                     rows={1}
-                    value={formData?.note || ""}
                     onChange={handleInputChange}
+                    {...getInputParams('note', formData)}
                 />
             </div>
         </form>

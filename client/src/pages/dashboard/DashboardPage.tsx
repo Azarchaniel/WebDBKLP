@@ -1,17 +1,17 @@
-import {useEffect, useState} from "react";
-import {countBooks, getDimensionsStatistics, getLanguageStatistics, getReadBy, getSizeGroups} from "../../API";
-import {DashboardPieChart} from "@components/dashboard/DashboardPieChart";
-import {DashboardTableStats} from "@components/dashboard/DashboardTableStats";
-import {IDimensionsStatistics, ILanguageStatistics, IUserReadingStats} from "../../type";
-import {TableCountRatio} from "@components/dashboard/TableCountRatio";
-import {TableLanguageStats} from "@components/dashboard/TableLanguageStats";
-import {Tab, Tabs} from "@components/Tabs";
-import {ReadByChart} from "@components/dashboard/ReadByChart";
-import {useAuth} from "@utils/context";
-import {LoadingBooks} from "@components/LoadingBooks";
+import { useEffect, useState } from "react";
+import { countBooks, getDimensionsStatistics, getLanguageStatistics, getReadBy, getSizeGroups } from "../../API";
+import { DashboardPieChart } from "@components/dashboard/DashboardPieChart";
+import { DashboardTableStats } from "@components/dashboard/TableDimensionStats";
+import { IDimensionsStatistics, ILanguageStatistics, IUserReadingStats } from "../../type";
+import { TableCountRatio } from "@components/dashboard/TableCountRatio";
+import { TableLanguageStats } from "@components/dashboard/TableLanguageStats";
+import { Tab, Tabs } from "@components/Tabs";
+import { ReadByChart } from "@components/dashboard/ReadByChart";
+import { useAuth } from "@utils/context";
+import { LoadingBooks } from "@components/LoadingBooks";
 
 export default function DashboardPage() {
-    const {currentUser, isLoading: isAuthLoading} = useAuth();
+    const { currentUser, isLoading: isAuthLoading } = useAuth();
     const [countAllBooks, setCountAllBooks] = useState<{
         owner: { id: string, firstName: string, lastName: string } | null,
         count: number
@@ -66,7 +66,7 @@ export default function DashboardPage() {
             <Tabs>
                 {readBy.map((user: any) => {
                     return <Tab key={user.name} label={user.name}>
-                        <ReadByChart data={user.stats}/>
+                        <ReadByChart data={user.stats} />
                     </Tab>
                 })}
             </Tabs>
@@ -76,24 +76,24 @@ export default function DashboardPage() {
 
     return (
         <div className="dashboardContainer">
-            {isLoadingData && <LoadingBooks/>}
-            <div className="dashboardItem" style={{padding: 0}}>
-                <DashboardPieChart data={countAllBooks}/>
+            {isLoadingData && <LoadingBooks />}
+            <div className="dashboardItem" style={{ padding: 0 }}>
+                <DashboardPieChart data={countAllBooks} />
             </div>
-            <div className="dashboardItem" style={{padding: 0}}>
+            <div className="dashboardItem" style={{ padding: 0 }}>
                 {getTabsForReadByStats()}
             </div>
             <div className="dashboardItem">
-                <TableLanguageStats languageStats={langStats}/>
+                <TableLanguageStats languageStats={langStats} />
             </div>
             <div className="dashboardItem">
-                <TableCountRatio data={sizeGroups?.height} title="Výška (cm)"/>
+                <TableCountRatio data={sizeGroups?.height} title="Výška (cm)" />
             </div>
             <div className="dashboardItem">
-                <TableCountRatio data={sizeGroups?.width} title="Šírka (cm)"/>
+                <TableCountRatio data={sizeGroups?.width} title="Šírka (cm)" />
             </div>
             <div className="dashboardItem">
-                <DashboardTableStats dimensionStats={dimensionStats}/>
+                <DashboardTableStats dimensionStats={dimensionStats} />
             </div>
         </div>
     );

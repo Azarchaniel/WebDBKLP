@@ -3,7 +3,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap");
 @import url("https://fonts.cdnfonts.com/css/lucida-handwriting-std");
 
-body, html, main, #root {
+body,
+html,
+main,
+#root {
   font-family: 'Nunito', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -16,7 +19,8 @@ body, html, main, #root {
   margin: 4rem 3rem;
 }
 
-::-moz-selection { /* Code for Firefox */
+::-moz-selection {
+  /* Code for Firefox */
   color: white;
   background: var(--anchor);
 }
@@ -98,7 +102,9 @@ body, html, main, #root {
   visibility: hidden;
 }
 
-.showHideRow, label, .hideShowCheckbox {
+.showHideRow,
+label,
+.hideShowCheckbox {
   cursor: pointer;
 
   &:hover {
@@ -217,7 +223,8 @@ body, html, main, #root {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Semi-transparent black */
     z-index: 1001;
   }
 
@@ -271,10 +278,12 @@ body, html, main, #root {
   overflow: visible;
 }
 
-input, textarea {
-  &:focus ~ .floating-label,
-  &:not(:placeholder-shown) ~ .floating-label,
-  & ~ .active {
+input,
+textarea {
+
+  &:focus~.floating-label,
+  &:not(:placeholder-shown)~.floating-label,
+  &~.active {
     top: -0.2rem;
     left: 0.5rem;
     line-height: 11px;
@@ -314,8 +323,10 @@ input, textarea {
 
 .dashboardContainer {
   display: grid;
-  grid-template-rows: repeat(2, 1fr); /* 2 rows of equal height */
-  grid-template-columns: repeat(3, 1fr); /* 3 columns of equal width */
+  grid-template-rows: repeat(2, 1fr);
+  /* 2 rows of equal height */
+  grid-template-columns: repeat(3, 1fr);
+  /* 3 columns of equal width */
   gap: 10px;
   width: 100%;
   height: 42rem;
@@ -325,9 +336,9 @@ input, textarea {
 .dashboardItem {
   color: black;
   background-image: radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
-  radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
-  radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
-  radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px); // dotted border
+    radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
+    radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px),
+    radial-gradient(circle, var(--menu) 0.5px, transparent 0.5px); // dotted border
   background-position: left top, right top, left bottom, left top;
   background-repeat: repeat-x, repeat-y, repeat-x, repeat-y;
   background-size: 17px 1px, 1px 17px, 17px 1px, 1px 17px;
@@ -434,6 +445,7 @@ input, textarea {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -483,9 +495,23 @@ input, textarea {
   }
 }
 
-// ^^^
+.desktop-table {
+  display: table;
+}
 
-@media screen and (width <= $mobile-width) {
+.phone-table {
+  display: none;
+}
+
+@media screen and (width <=$mobile-width) {
+  .desktop-table {
+    display: none;
+  }
+
+  .phone-table {
+    display: table;
+  }
+
   .App {
     margin: 3rem 3rem 0 0;
   }
@@ -520,6 +546,10 @@ input, textarea {
 }
 
 .form-control:focus {
-    box-shadow: none !important;
-    border: 2px solid var(--anchor) !important;
+  box-shadow: none !important;
+  border: 2px solid var(--anchor) !important;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--anchor);
 }

@@ -1,4 +1,4 @@
-import {ColumnDef, createColumnHelper} from "@tanstack/react-table";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import {
     IAutor,
     IBook,
@@ -9,15 +9,15 @@ import {
     IUniqueFilterValues,
     IUser, TRange
 } from "../type";
-import {formatBoardGameRange, formatDimension, getBookLocation, tableHeaderColor} from "@utils";
-import React, {useState} from "react";
-import {countryCode, langCode} from "./locale";
-import {ShowHideRow} from "@components/books/ShowHideRow";
+import { autorRoles, formatBoardGameRange, formatDimension, getBookLocation, tableHeaderColor } from "@utils";
+import React, { useState } from "react";
+import { countryCode, langCode } from "./locale";
+import { ShowHideRow } from "@components/books/ShowHideRow";
 
 const createDateElement = (value: Date): React.ReactElement => {
     const date = new Date(value).toLocaleDateString("cs-CZ");
     const time = new Date(value).toLocaleTimeString("cs-CZ");
-    return <span title={time} style={{pointerEvents: "auto"}}>{date}</span>
+    return <span title={time} style={{ pointerEvents: "auto" }}>{date}</span>
 }
 
 const columnHelper = createColumnHelper<any>();
@@ -58,7 +58,7 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'content',
         header: 'Obsah',
-        cell: ({cell}: { cell: any }) => cell?.getValue()?.join(", ")
+        cell: ({ cell }: { cell: any }) => cell?.getValue()?.join(", ")
     },
     {
         accessorKey: 'ISBN',
@@ -115,7 +115,7 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'edition',
         header: 'Edícia',
-        cell: ({cell}: {
+        cell: ({ cell }: {
             cell: any
         }) => `${cell.getValue()?.title ?? ""} ${cell.getValue()?.no ? "(" + cell.getValue()?.no + ")" : ""}`,
         sortingFn: "alphanumeric",
@@ -123,7 +123,7 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'serie',
         header: 'Séria',
-        cell: ({cell}: {
+        cell: ({ cell }: {
             cell: any
         }) => `${cell.getValue()?.title ?? ""} ${cell.getValue()?.no ? "(" + cell.getValue()?.no + ")" : ""}`,
         sortingFn: "alphanumeric",
@@ -131,7 +131,7 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'published',
         header: 'Vydané',
-        cell: ({cell}: { cell: any }) => {
+        cell: ({ cell }: { cell: any }) => {
             const published = cell.getValue() as IPublished;
             return published ? `${published?.publisher} (${published?.year ?? "?"})` : "";
         },
@@ -140,8 +140,8 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'exLibris',
         header: 'Ex Libris',
-        cell: ({cell}: { cell: any }) => (cell.getValue() ? <span className="trueMark"/> :
-            <span className="falseMark"/>),
+        cell: ({ cell }: { cell: any }) => (cell.getValue() ? <span className="trueMark" /> :
+            <span className="falseMark" />),
     },
     {
         accessorKey: 'ownersFull',
@@ -150,7 +150,7 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'readBy',
         header: 'Prečítané',
-        cell: ({cell}: { cell: any }) => {
+        cell: ({ cell }: { cell: any }) => {
             const readBy = cell.getValue() as IUser[];
             return readBy?.map(user => user.firstName).join(', ') || '';
         },
@@ -158,7 +158,7 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'location',
         header: 'Umiestnenie',
-        cell: ({cell}: { cell: any }) => getBookLocation(cell.getValue() as unknown as ILocation),
+        cell: ({ cell }: { cell: any }) => getBookLocation(cell.getValue() as unknown as ILocation),
     },
     {
         accessorKey: 'note',
@@ -167,20 +167,14 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'createdAt',
         header: 'Dátum pridania',
-        cell: ({cell}: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
         sortingFn: "datetime"
     },
     {
         accessorKey: 'updatedAt',
         header: 'Dátum úpravy',
-        cell: ({cell}: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
         sortingFn: "datetime"
-    },
-    {
-        //TEMP
-        accessorKey: "wasChecked",
-        header: "skontrolovane",
-        cell: ({cell}: { cell: any }) => cell.getValue() ? "ANO" : "ne",
     }
 ];
 
@@ -203,34 +197,43 @@ export const getAutorTableColumns = (): ColumnDef<IAutor, any>[] => [
     {
         accessorKey: 'nationality',
         header: 'Národnosť',
-        cell: ({cell}: { cell: any }) => countryCode.filter(cc => cc.key === cell.getValue()).map(cc => cc.value) ?? "-"
+        cell: ({ cell }: { cell: any }) => countryCode.filter(cc => cc.key === cell.getValue()).map(cc => cc.value) ?? "-"
     },
     {
         accessorKey: 'dateOfBirth',
         header: 'Narodenie',
         sortingFn: "datetime",
-        cell: ({cell}: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString("sk-SK") : null
+        cell: ({ cell }: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString("sk-SK") : null
     },
     {
         accessorKey: 'dateOfDeath',
         header: 'Úmrtie',
         sortingFn: "datetime",
-        cell: ({cell}: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString("sk-SK") : null
+        cell: ({ cell }: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString("sk-SK") : null
     },
     {
         accessorKey: 'note',
         header: 'Poznámka'
     },
     {
+        accessorKey: 'role',
+        header: 'Rola',
+        cell: ({ cell }: { cell: any }) => {
+            const roles = cell.getValue() as string[];
+            if (!roles || roles.length === 0) return "-";
+            return roles.map((role: string) => autorRoles.find(r => r.value === role)?.showValue).join(', ');
+        }
+    },
+    {
         accessorKey: 'createdAt',
         header: 'Dátum pridania',
-        cell: ({cell}: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
         sortingFn: "datetime"
     },
     {
         accessorKey: 'updatedAt',
         header: 'Dátum úpravy',
-        cell: ({cell}: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
         sortingFn: "datetime"
     },
 ];
@@ -259,7 +262,7 @@ export const getLPTableColumns = (): ColumnDef<any, any>[] => [
     {
         accessorKey: 'language',
         header: 'Jazyk',
-        cell: ({cell}: { cell: any }) => langCode
+        cell: ({ cell }: { cell: any }) => langCode
             .filter(lang => (Array.isArray(cell.getValue()) ? cell.getValue() : []).includes(lang.key))
             .map(lang => lang.value)
             .join(', ')
@@ -275,7 +278,7 @@ export const getLPTableColumns = (): ColumnDef<any, any>[] => [
     {
         accessorKey: 'published',
         header: 'Vydané',
-        cell: ({cell}: { cell: any }) => {
+        cell: ({ cell }: { cell: any }) => {
             const published = cell.getValue() as IPublished;
             return published ? `${published?.publisher ?? ""} (${published?.year ?? "-"})` : null;
         },
@@ -283,11 +286,11 @@ export const getLPTableColumns = (): ColumnDef<any, any>[] => [
     {
         accessorKey: 'createdAt',
         header: 'Dátum pridania',
-        cell: ({cell}: { cell: any }) => {
+        cell: ({ cell }: { cell: any }) => {
             const value = cell.getValue() as unknown as string;
             const date = new Date(value).toLocaleDateString("cs-CZ");
             const time = new Date(value).toLocaleTimeString("cs-CZ");
-            return <span title={time} style={{pointerEvents: "auto"}}>{date}</span>
+            return <span title={time} style={{ pointerEvents: "auto" }}>{date}</span>
         },
         sortingFn: "datetime"
     },
@@ -312,7 +315,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
     {
         accessorKey: 'noPlayers',
         header: 'Počet hráčov',
-        cell: ({cell}: { cell: any }) => {
+        cell: ({ cell }: { cell: any }) => {
             const value = cell.getValue() as TRange;
             return value ? formatBoardGameRange(value) + " hráčov" : "";
         },
@@ -320,7 +323,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
     {
         accessorKey: 'playTime',
         header: 'Čas hrania (min)',
-        cell: ({cell}: { cell: any }) => {
+        cell: ({ cell }: { cell: any }) => {
             const value = cell.getValue() as TRange;
             return value ? formatBoardGameRange(value) + " min" : "";
         },
@@ -328,7 +331,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
     {
         accessorKey: 'ageRecommendation',
         header: 'Odporúčaný vek',
-        cell: ({cell}: { cell: any }) => {
+        cell: ({ cell }: { cell: any }) => {
             const value = cell.getValue() as TRange;
             return value ? formatBoardGameRange(value) + " rokov" : "";
         },
@@ -336,7 +339,7 @@ export const getBoardGameTableColumns = (): ColumnDef<any, any>[] => [
     {
         accessorKey: 'published',
         header: 'Vydané',
-        cell: ({cell}: { cell: any }) => {
+        cell: ({ cell }: { cell: any }) => {
             const published = cell.getValue() as IPublished;
             return published ? `${published?.publisher ?? "?"} (${published?.year ?? "?"})` : "";
         },
@@ -362,19 +365,18 @@ interface ShowHideColumnsProps<T> {
     setShown: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
 }
 
-export const ShowHideColumns = <T, >({columns, shown, setShown}: ShowHideColumnsProps<T>) => {
+export const ShowHideColumns = <T,>({ columns, shown, setShown }: ShowHideColumnsProps<T>) => {
     const [dimensionsHidden, setDimensionsHidden] = useState<boolean>(shown.dimensions ?? false);
 
     const getColumnsForHidden = () => {
         // ignore those columns
         const columnsForHidden = columns.filter((column: ColumnDef<T, any>) => {
             return (column as any).accessorKey !== "title" &&
-                /* TEMPORARY ->  */ (column as any).accessorKey !== "wasChecked" &&
                 (column as any).accessorKey !== "lastName"
         });
 
         return columnsForHidden.map((column: any) => {
-            const {header, accessorKey}: { header: string, accessorKey: keyof typeof column } = column;
+            const { header, accessorKey }: { header: string, accessorKey: keyof typeof column } = column;
 
             if (column.id === "dimensions") {
                 return <ShowHideRow
@@ -391,14 +393,14 @@ export const ShowHideColumns = <T, >({columns, shown, setShown}: ShowHideColumns
                             depth: !dimensionsHidden,
                             weight: !dimensionsHidden
                         }));
-                    }}/>
+                    }} />
             }
 
             return <ShowHideRow
                 key={accessorKey as string}
                 label={header}
                 init={shown[accessorKey as string]}
-                onChange={() => setShown({...shown, [accessorKey]: !shown[accessorKey as string]})}
+                onChange={() => setShown({ ...shown, [accessorKey]: !shown[accessorKey as string] })}
             />
         })
     }

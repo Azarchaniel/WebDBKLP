@@ -1,15 +1,17 @@
-import axios, {AxiosRequestConfig, AxiosResponse} from "axios"
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios"
 import {
     ApiAutorDataType,
     ApiBookDataType,
     ApiLPDataType,
     ApiQuoteDataType,
-    ApiUserDataType, BelongToAutor,
+    ApiUserDataType,
+    BelongToAutor,
+    IAutor,
     IBook,
+    ILP,
     IUser
 } from "./type";
-import {toast} from "react-toastify";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const baseUrl: string = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
 
@@ -36,7 +38,7 @@ axiosInstance.interceptors.request.use(
                 Authorization: `Bearer ${token}` // Attach token to Authorization header
             };
 
-            const {exp} = jwtDecode(token);
+            const { exp } = jwtDecode(token);
             const now = Date.now() / 1000;
 
             if (!exp) {
@@ -100,13 +102,13 @@ export const getPageByStartingLetter = async (letter: string, pageSize: number, 
     try {
         const response: AxiosResponse<IPageByLetter> = await axiosInstance.get(
             baseUrl + "/get-page-by-starting-letter", {
-                params: {
-                    letter,
-                    pageSize,
-                    model,
-                    filterUsers
-                }
+            params: {
+                letter,
+                pageSize,
+                model,
+                filterUsers
             }
+        }
         );
         return response;
     } catch (error: any) {
@@ -120,15 +122,15 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
     try {
         const books: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
             baseUrl + "/books", {
-                params: {
-                    page: params?.page ?? 1, // API expects 1-based index
-                    pageSize: params?.pageSize ?? 10_000,
-                    search: params?.search ?? "",
-                    sorting: params?.sorting ?? [{id: "title", desc: false}],
-                    filterUsers: params?.activeUsers,
-                    filters: params?.filters ?? []
-                }
-            });
+            params: {
+                page: params?.page ?? 1, // API expects 1-based index
+                pageSize: params?.pageSize ?? 10_000,
+                search: params?.search ?? "",
+                sorting: params?.sorting ?? [{ id: "title", desc: false }],
+                filterUsers: params?.activeUsers,
+                filters: params?.filters ?? []
+            }
+        });
         return books
     } catch (error: any) {
         throw new Error(error);
@@ -139,14 +141,14 @@ export const getBooksByIds = async (params?: any): Promise<AxiosResponse<ApiBook
     try {
         const books: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
             baseUrl + "/books-by-ids", {
-                params: {
-                    page: params?.page ?? 1, // API expects 1-based index
-                    pageSize: params?.pageSize ?? 10_000,
-                    search: params?.search ?? "",
-                    sorting: params?.sorting ?? [{id: "title", desc: false}],
-                    ids: params?.ids ?? [],
-                }
-            });
+            params: {
+                page: params?.page ?? 1, // API expects 1-based index
+                pageSize: params?.pageSize ?? 10_000,
+                search: params?.search ?? "",
+                sorting: params?.sorting ?? [{ id: "title", desc: false }],
+                ids: params?.ids ?? [],
+            }
+        });
         return books
     } catch (error: any) {
         console.error("Cannot get books by ids: ", error);
@@ -158,10 +160,10 @@ export const checkBooksUpdated = async (dataFrom?: Date): Promise<AxiosResponse<
     try {
         const response: AxiosResponse<{ latestUpdate: Date }> = await axiosInstance.get(
             baseUrl + "/books/check-updated", {
-                params: {
-                    dataFrom
-                }
+            params: {
+                dataFrom
             }
+        }
         );
         return response;
     } catch (error: any) {
@@ -183,25 +185,35 @@ export const getBook = async (
 }
 
 export const addBook = async (
-    formData: IBook
+    formData: IBook | IBook[] | object
 ): Promise<any> => {
     try {
-        if (!formData._id) {
+        if (
+            (!Array.isArray(formData) && !("id" in formData)) ||
+            (Array.isArray(formData) && !formData[0]?._id)
+        ) {
             const saveBook: AxiosResponse<ApiBookDataType> = await axiosInstance.post(
                 baseUrl + "/add-book",
                 formData
-            )
-            return saveBook
+            );
+            return saveBook;
         } else {
-            const updatedBook: AxiosResponse<ApiBookDataType> = await axiosInstance.put(
-                `${baseUrl}/edit-book/${formData._id}`,
-                formData
-            )
-            return updatedBook
+            if (Array.isArray(formData)) {
+                const updatePromises = formData.map(async (book: IBook) =>
+                    await axiosInstance.put(`${baseUrl}/edit-book/${book._id}`, book)
+                );
+                const updatedBooks = await Promise.all(updatePromises);
+                return updatedBooks;
+            } else {
+                const updatedBook: AxiosResponse<ApiBookDataType> = await axiosInstance.put(
+                    `${baseUrl}/edit-book/${(formData as unknown as IBook)["_id"]}`,
+                    formData
+                );
+                return updatedBook;
+            }
         }
     } catch (error: any) {
-        console.error(error);
-        throw new Error(error)
+        throw new Error(error);
     }
 }
 
@@ -241,15 +253,15 @@ export const getAutors = async (params?: any): Promise<AxiosResponse<ApiAutorDat
     try {
         const autors: AxiosResponse<ApiAutorDataType> = await axiosInstance.get(
             baseUrl + "/autors", {
-                params: {
-                    page: params?.page ?? 1, // API expects 1-based index
-                    pageSize: params?.pageSize ?? 10_000,
-                    search: params?.search ?? "",
-                    sorting: params?.sorting ?? [{id: "lastName", desc: false}],
-                    filterUsers: params?.activeUsers,
-                    dataFrom: params?.dataFrom
-                }
+            params: {
+                page: params?.page ?? 1, // API expects 1-based index
+                pageSize: params?.pageSize ?? 10_000,
+                search: params?.search ?? "",
+                sorting: params?.sorting ?? [{ id: "lastName", desc: false }],
+                filterUsers: params?.activeUsers,
+                dataFrom: params?.dataFrom
             }
+        }
         )
         return autors
     } catch (error: any) {
@@ -273,32 +285,32 @@ export const getAutor = async (
 }
 
 export const addAutor = async (
-    formData: /*IAutor*/any
-): Promise<AxiosResponse<ApiAutorDataType>> => {
+    formData: IAutor | IAutor[] | object
+): Promise<any> => {
     try {
-        if (!formData._id) {
-            const autor: any/*Omit<IAutor, '_id'>*/ = {
-                firstName: formData.firstName ?? "",
-                lastName: formData.lastName,
-                nationality: formData.nationality ?? "",
-                location: formData.location ?? {
-                    city: "",
-                    shelf: ""
-                },
-                note: formData.note ?? "",
-                dateOfBirth: formData.dateOfBirth ?? undefined,
-                dateOfDeath: formData.dateOfDeath ?? undefined,
-                role: formData.role ?? undefined
-            }
-            return await axiosInstance.post(
+        if (
+            (!Array.isArray(formData) && !("id" in formData)) ||
+            (Array.isArray(formData) && !formData[0]?._id)
+        ) {
+            const saveAutor: AxiosResponse<ApiAutorDataType> = await axiosInstance.post(
                 baseUrl + "/add-autor",
-                autor
-            )
-        } else {
-            return await axiosInstance.put(
-                `${baseUrl}/edit-autor/${formData._id}`,
                 formData
-            )
+            );
+            return saveAutor;
+        } else {
+            if (Array.isArray(formData)) {
+                const updatePromises = formData.map(async (autor: IAutor) =>
+                    await axiosInstance.put(`${baseUrl}/edit-autor/${autor._id}`, autor)
+                );
+                const updatedAutors = await Promise.all(updatePromises);
+                return updatedAutors;
+            } else {
+                const updatedAutor: AxiosResponse<ApiAutorDataType> = await axiosInstance.put(
+                    `${baseUrl}/edit-autor/${(formData as unknown as IAutor)["_id"]}`,
+                    formData
+                );
+                return updatedAutor;
+            }
         }
     } catch (error: any) {
         throw new Error(error)
@@ -331,16 +343,30 @@ export const getAutorInfo = async (
     }
 }
 
+export const getMultipleAutorsInfo = async (
+    autors: string[]
+): Promise<AxiosResponse<BelongToAutor[]>> => {
+    try {
+        const enrichedAutors: AxiosResponse<BelongToAutor[]> = await axiosInstance.post(
+            `${baseUrl}/get-multiple-autors-info`,
+            { ids: autors }
+        )
+        return enrichedAutors
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
 // ### QUOTES ###
 export const getQuotes = async (filterByBook?: string[], activeUsers?: string[]): Promise<AxiosResponse<ApiQuoteDataType>> => {
     try {
         const quotes: AxiosResponse<ApiQuoteDataType> = await axiosInstance.get(
             baseUrl + "/quotes", {
-                params: {
-                    activeUsers: activeUsers,
-                    filterByBook: filterByBook,
-                }
+            params: {
+                activeUsers: activeUsers,
+                filterByBook: filterByBook,
             }
+        }
         )
         return quotes
     } catch (error: any) {
@@ -421,7 +447,7 @@ export const getUser = async (userId: string): Promise<AxiosResponse<IUser>> => 
 }
 
 export const login = async (
-    {email, password}: {
+    { email, password }: {
         email: string,
         password: string
     }
@@ -429,11 +455,11 @@ export const login = async (
     try {
         const user: AxiosResponse<ApiUserDataType> = await axiosInstance.post(
             `${baseUrl}/login`, {
-                params: {
-                    email: email,
-                    password: password
-                }
+            params: {
+                email: email,
+                password: password
             }
+        }
         );
 
         return user;
@@ -451,13 +477,13 @@ export const getLPs = async (params?: any): Promise<AxiosResponse<ApiLPDataType>
     try {
         const lps: AxiosResponse<ApiLPDataType> = await axiosInstance.get(
             baseUrl + "/lps", {
-                params: {
-                    page: params?.page ?? 1,
-                    pageSize: params?.pageSize ?? 10_000,
-                    search: params?.search ?? "",
-                    sorting: params?.sorting ?? {id: "lastName", desc: false}
-                }
+            params: {
+                page: params?.page ?? 1,
+                pageSize: params?.pageSize ?? 10_000,
+                search: params?.search ?? "",
+                sorting: params?.sorting ?? { id: "lastName", desc: false }
             }
+        }
         )
         return lps
     } catch (error: any) {
@@ -475,34 +501,41 @@ export const getLP = async (
 
         return lp;
     } catch (error: any) {
-        console.error("API ERROR");
         throw new Error(error)
     }
 }
 
 export const addLP = async (
-    formData: /*ILP*/any
-): Promise<AxiosResponse<ApiLPDataType>> => {
+    formData: ILP | ILP[] | object
+): Promise<any> => {
     try {
-        const {
-            "published.country": country,
-            ...lpData // Use rest operator to get the remaining properties
-        } = formData;
-
-        // Construct the lp object with the nested published property
-        const lp: any = {
-            ...lpData, // Spread the remaining properties
-            published: {
-                ...lpData["published"],
-                country: country ?? ""
-            },
-        };
-
-        const saveLP: AxiosResponse<ApiLPDataType> = await axiosInstance.post(
-            baseUrl + "/add-lp",
-            lp
-        )
-        return saveLP
+        if (
+            (!Array.isArray(formData) && !("id" in formData)) ||
+            (Array.isArray(formData) && !formData[0]?._id)
+        ) {
+            const { published, ...lpData } = formData as ILP;
+            formData = {
+                ...lpData,
+                published: {
+                    ...published,
+                    country: published?.country ?? ""
+                },
+            };
+        } else {
+            if (Array.isArray(formData)) {
+                const updatePromises = formData.map(async (lp: ILP) =>
+                    await axiosInstance.put(`${baseUrl}/edit-lp/${lp._id}`, lp)
+                );
+                const updatedLPs = await Promise.all(updatePromises);
+                return updatedLPs;
+            } else {
+                const updatedLp: AxiosResponse<ApiLPDataType> = await axiosInstance.put(
+                    `${baseUrl}/edit-lp/${(formData as unknown as ILP)._id}`,
+                    formData
+                )
+                return updatedLp;
+            }
+        }
     } catch (error: any) {
         throw new Error(error)
     }
@@ -581,14 +614,14 @@ export const getBoardGames = async (params?: any): Promise<AxiosResponse<any>> =
     try {
         const boardGames: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
             baseUrl + "/boardgames", {
-                params: {
-                    page: params?.page ?? 1, // API expects 1-based index
-                    pageSize: params?.pageSize ?? 10_000,
-                    search: params?.search ?? "",
-                    sorting: params?.sorting ?? [{id: "title", desc: false}],
-                    filters: params?.filters ?? []
-                }
-            });
+            params: {
+                page: params?.page ?? 1, // API expects 1-based index
+                pageSize: params?.pageSize ?? 10_000,
+                search: params?.search ?? "",
+                sorting: params?.sorting ?? [{ id: "title", desc: false }],
+                filters: params?.filters ?? []
+            }
+        });
         return boardGames
     } catch (error: any) {
         throw new Error(error);

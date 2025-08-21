@@ -1,0 +1,39 @@
+.three-state-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 15px;
+    height: 15px;
+    border: 2px solid white;
+    background-color: var(--anchor);
+    position: relative;
+}
+
+.three-state-checkbox:checked {
+    background-color: var(--anchor);
+}
+
+.three-state-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+}
+
+.three-state-checkbox:indeterminate {
+    background-color: var(--anchor);
+}
+
+.three-state-checkbox:indeterminate::after {
+    content: '–';
+    position: absolute;
+    left: 47%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}

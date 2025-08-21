@@ -1,10 +1,10 @@
-import React, {ReactElement, useEffect, useState} from 'react';
+import React, {ReactElement, useEffect, useState, FC} from 'react';
 import {
     useReactTable,
     getCoreRowModel,
     getPaginationRowModel,
     ColumnDef,
-    flexRender, SortingState, getExpandedRowModel, ExpandedState,
+    flexRender, SortingState, getExpandedRowModel, ExpandedState, RowSelectionState,
 } from '@tanstack/react-table';
 import {LoadingBooks} from "../LoadingBooks";
 import Pagination from "./Pagination";
@@ -12,6 +12,7 @@ import "@styles/table.scss";
 import {getUniqueFieldValues} from "../../API";
 import {isMobile, mapBookColumnsToFilterTypes, mapColumnName} from "@utils";
 import {InputField, LazyLoadMultiselect} from "@components/inputs";
+import ThreeStateCheckbox from "@components/inputs/ThreeStateCheckbox";
 
 type PropsMT = {
     title: string;
@@ -21,6 +22,7 @@ type PropsMT = {
     pageSizeChange: (pageSize: number) => void;
     sortingChange: (sorting: SortingState) => void;
     filteringChange?: (filters: any[]) => void;
+    selectedChanged?: (selected: any) => void;
     totalCount: number;
     actions?: ReactElement;
     rowActions?: (_id: string, expandRow: () => void) => ReactElement;
@@ -36,7 +38,7 @@ type PropsMT = {
     expandedElement?: (data: any) => ReactElement;
 };
 
-const ServerPaginationTable: React.FC<PropsMT> =
+const ServerPaginationTable: FC<PropsMT> =
     ({
          title,
          data = [],
@@ -51,11 +53,13 @@ const ServerPaginationTable: React.FC<PropsMT> =
          loading = false,
          pagination = {page: 1, pageSize: 50, sorting: [{id: "", desc: true}]},
          hiddenCols,
-         expandedElement
+         expandedElement,
+         selectedChanged
      }) => {
         const [currentPage, setCurrentPage] = useState(pagination.page);
         const [currentPageSize, setCurrentPageSize] = useState(pagination.pageSize);
-        const [sorting, setSorting] = React.useState<SortingState>(pagination.sorting)
+        const [sorting, setSorting] = useState<SortingState>(pagination.sorting);
+        const [selectedRows, setSelectedRows] = useState<RowSelectionState>({});
         const [expanded, setExpanded] = useState<ExpandedState>({});
         const [filtering, setFiltering] = useState([]);
         const [dataForFilterInputs, setDataForFilterInputs] = useState(null);
@@ -85,6 +89,12 @@ const ServerPaginationTable: React.FC<PropsMT> =
         useEffect(() => {
             pageSizeChange(currentPageSize);
         }, [currentPageSize]);
+
+        useEffect(() => {
+            if (selectedChanged) {
+                selectedChanged(Object.keys(selectedRows));
+            }
+        }, [selectedRows]);
 
         useEffect(() => {
             if (filteringChange) {
@@ -338,7 +348,11 @@ const ServerPaginationTable: React.FC<PropsMT> =
             onColumnFiltersChange: (val: any) => setFiltering(val), // Update filtering state
             getRowCanExpand: () => true, //all rows can expand
             getExpandedRowModel: getExpandedRowModel(),
-            manualFiltering: true
+            manualFiltering: true,
+            enableRowSelection: true,
+            enableMultiRowSelection: true,
+            getRowId: (row) => row._id,
+            onRowSelectionChange: setSelectedRows
         });
 
         return (
@@ -408,7 +422,15 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                                     )}
                                                 </th>
                                             ))}
-                                            <th key={`${headerGroup.id}-actions`} className="TSPactionsRow"/>
+                                            <th key={`${headerGroup.id}-actions`} className="TSPactionsRow">
+                                                <>
+                                                    <ThreeStateCheckbox
+                                                        selectedAmount={Object.keys(selectedRows).length}
+                                                        totalAmount={table.getRowModel()?.rows?.length || 0}
+                                                        onChange={(selectAll) => selectAll ? table.toggleAllRowsSelected() : table.resetRowSelection()}
+                                                    />
+                                                </>
+                                            </th>
                                         </tr>
                                         {showFilters && index === table.getHeaderGroups().length - 1 && (
                                             <tr key={headerGroup.id + "-filter"} className="filter-header">
@@ -441,9 +463,24 @@ const ServerPaginationTable: React.FC<PropsMT> =
                                                     className="TSPactionsRow actions-animated-td"
                                                     tabIndex={0}
                                                 >
+                                                    {/* This is the three-vertical-dots-button for row actions, like edit, delete, etc. */}
                                                     <span className="actions-ellipsis">&#x2807;</span>
                                                     <span className="actions-content">
         {rowActions && rowActions(row.original._id, () => row.toggleExpanded())}
+                                                        <input type="checkbox" className="checkBox"
+                                                               checked={selectedRows[row.id]}
+                                                               onChange={() => {
+                                                                   setSelectedRows((prev) => {
+                                                                       const newSelection = {...prev};
+                                                                       if (newSelection[row.id]) {
+                                                                           delete newSelection[row.id];
+                                                                       } else {
+                                                                           newSelection[row.id] = true;
+                                                                       }
+                                                                       return newSelection;
+                                                                   });
+                                                               }}
+                                                               title="Vybrať riadok"/>
     </span>
                                                 </td>
                                             }

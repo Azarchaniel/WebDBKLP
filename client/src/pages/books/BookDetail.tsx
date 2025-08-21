@@ -1,6 +1,6 @@
 import React from "react";
-import {IAutor, IBook, ILangCode, IUser} from "../../type";
-import {formatDimension, getPublishedCountry, langCode, cities} from "@utils";
+import { IAutor, IBook, ILangCode, IUser } from "../../type";
+import { formatDimension, getPublishedCountry, langCode, cities } from "@utils";
 
 interface IExtendedBook extends IBook {
     autorsFull?: string | null;
@@ -13,7 +13,7 @@ interface Props {
     data: IExtendedBook;
 }
 
-const BookDetail: React.FC<Props> = React.memo(({data}) => {
+const BookDetail: React.FC<Props> = React.memo(({ data }) => {
     // Helper functions
     const renderContributorRow = (
         contributors: keyof IExtendedBook,
@@ -32,26 +32,26 @@ const BookDetail: React.FC<Props> = React.memo(({data}) => {
     const renderDimensions = () => {
         if (!data.dimensions) return null;
 
-        const {dimensions} = data;
+        const { dimensions } = data;
 
         return (
             <>
                 <p>Rozmery: </p>
                 <table className="bookDimensions">
                     <tbody>
-                    <tr>
-                        <td>Výška: {formatDimension(dimensions.height) ?? "-"} cm</td>
-                        <td>Šírka: {formatDimension(dimensions.width) ?? "-"} cm</td>
-                    </tr>
-                    <tr>
-                        <td>Hrúbka: {formatDimension(dimensions.depth) ?? "-"} cm</td>
-                        <td>
-                            {dimensions.weight && `Hmotnosť: ${formatDimension(dimensions.weight) ?? "-"} g`}
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>Výška: {formatDimension(dimensions.height) ?? "-"} cm</td>
+                            <td>Šírka: {formatDimension(dimensions.width) ?? "-"} cm</td>
+                        </tr>
+                        <tr>
+                            <td>Hrúbka: {formatDimension(dimensions.depth) ?? "-"} cm</td>
+                            <td>
+                                {dimensions.weight && `Hmotnosť: ${formatDimension(dimensions.weight) ?? "-"} g`}
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
-                <p/>
+                <p />
             </>
         );
     };
@@ -72,7 +72,7 @@ const BookDetail: React.FC<Props> = React.memo(({data}) => {
     };
 
     const renderPublisherInfo = () => {
-        const {publisher, year, country} = data.published;
+        const { publisher, year, country } = data.published ?? {};
 
         if (!publisher && !year && !country) return null;
 
@@ -114,7 +114,7 @@ const BookDetail: React.FC<Props> = React.memo(({data}) => {
                             src="img/DBKicon.png"
                             width="32"
                             alt="DBK"
-                            style={{marginLeft: "0.3rem"}}
+                            style={{ marginLeft: "0.3rem" }}
                         />
                     </a>
                 )}
@@ -124,7 +124,7 @@ const BookDetail: React.FC<Props> = React.memo(({data}) => {
                             src="https://www.goodreads.com/favicon.ico"
                             width="32"
                             alt="GR"
-                            style={{marginLeft: "0.3rem"}}
+                            style={{ marginLeft: "0.3rem" }}
                         />
                     </a>
                 )}
@@ -136,7 +136,7 @@ const BookDetail: React.FC<Props> = React.memo(({data}) => {
         return (
             <div>
                 {data.picture ? (
-                    <img src={data.picture} alt="titulka"/>
+                    <img src={data.picture} alt="titulka" />
                 ) : (
                     <img
                         src="img/no_thumbnail.svg"
@@ -176,9 +176,9 @@ const BookDetail: React.FC<Props> = React.memo(({data}) => {
 
                 <p>
                     Ex Libris: {data.exLibris ?
-                    <span className="trueMark"/> :
-                    <span className="falseMark"/>
-                }
+                        <span className="trueMark" /> :
+                        <span className="falseMark" />
+                    }
                 </p>
             </div>
         </div>

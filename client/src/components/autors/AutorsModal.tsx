@@ -1,136 +1,126 @@
-import React, {useCallback, useEffect, useState} from "react";
-import DatePicker, {registerLocale} from "react-datepicker";
+import React, { useCallback, useEffect, useState } from "react";
+import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import {countryCode, autorRoles} from "@utils";
-import {IAutor, ILangCode, ValidationError} from "../../type";
-import {InputField, LazyLoadMultiselect} from "@components/inputs";
-import {showError} from "../Modal";
-import {sk} from "date-fns/locale/sk";
-import LoadingSpinner from "@components/LoadingSpinner";
+import { countryCode, autorRoles, emptyAutor } from "@utils";
+import { IAutor, ILangCode, ValidationError } from "../../type";
+import { InputField, LazyLoadMultiselect } from "@components/inputs";
+import { sk } from "date-fns/locale/sk";
 import TextArea from "@components/inputs/TextArea";
+import { getInputParams, handleInputChange } from "@utils/form";
 
 registerLocale('sk', sk)
 
 interface BodyProps {
-    data: IAutor | object;
-    onChange: (data: IAutor | object) => void;
+    data: IAutor[];
+    onChange: (data: IAutor[] | object) => void;
     error: (err: ValidationError[] | undefined) => void;
-    editedAutor?: IAutor;
 }
 
-interface ButtonsProps {
-    saveAutor: () => void;
-    cleanFields: () => void;
-    error?: ValidationError[] | undefined;
-    saveResultSuccess?: boolean;
-}
-
-export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
-    const [formData, setFormData] = useState(data as any);
+export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
+    const [formData, setFormData] = useState(
+        Array.isArray(data) && data.length > 0
+            ? data
+            : [emptyAutor]
+    );
     const [errors, setErrors] = useState<ValidationError[]>(
-        [{label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName"}]);
-    const [reset, doReset] = useState<number>(0);
+        [{ label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName" }]);
 
+    // send form data to parent
     useEffect(() => {
-        onChange(formData)
+        onChange(formData);
     }, [formData]);
 
     // clear form btn
     useEffect(() => {
-        if (!data) return;
-        if (Object.keys(data).length === 0 && data.constructor === Object) {
-            setFormData(data);
-            doReset(prev => prev + 1);
+        if (formData && JSON.stringify(data) !== JSON.stringify(formData)) {
+            setFormData(normalizeAutorData(data));
         }
     }, [data]);
 
-    //edit autor
+    // edit autor
     useEffect(() => {
-        if (!data) return;
-        const typedData = data as IAutor;
+        if (!data || !Array.isArray(data) || data.length === 0) return;
 
-        let role: any[] = [];
-        if ("role" in typedData) {
-            role = autorRoles.filter(obj => (typedData?.role as string[]).includes(obj?.value))
-        } else {
-            role = [];
-        }
-
-        const toBeModified: IAutor = {
-            ...data,
-            nationality: countryCode.filter((country: ILangCode) => typedData?.nationality?.includes(country.key)),
-            role: role,
-            dateOfBirth: typedData?.dateOfBirth ?
-                new Date(typedData?.dateOfBirth as string | number | Date) :
-                undefined,
-            dateOfDeath: typedData?.dateOfDeath ?
-                new Date(typedData?.dateOfDeath as string | number | Date) :
-                undefined
-        } as IAutor;
-
-        setFormData(toBeModified);
+        const modifiedAutors = normalizeAutorData(data);
+        setFormData(modifiedAutors);
     }, []);
 
     // error handling
     useEffect(() => {
-        //shortcut
-        const data = (formData as unknown as IAutor);
-
-        //if there is no filled field, its disabled
-        if (!data) return;
+        if (!formData) return;
 
         let localErrors: ValidationError[] = [];
 
-        //if length is over 0, its OK
-        const autorLength = data.lastName?.trim().length > 0;
-        if (!autorLength) {
-            localErrors.push({label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "firstName"});
-        } else {
-            localErrors = localErrors?.filter((err: ValidationError) => err.target !== "firstName") ?? localErrors;
+        const validateAutor = (data: IAutor) => {
+            let errors: ValidationError[] = [];
+            //if length is over 0, its OK
+            const autorsLastNameLength = data.lastName?.trim().length > 0;
+            if (!autorsLastNameLength) {
+                errors.push({ label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName" });
+            } else {
+                errors = errors?.filter((err: ValidationError) => err.target !== "lastName") ?? errors;
+            }
+
+            if (data.dateOfBirth && data.dateOfDeath) {
+                //if dateOfBirth is sooner, its OK
+                const dates = data.dateOfBirth! < data.dateOfDeath!;
+
+                if (!dates) {
+                    errors.push({ label: "Dátum smrti nemôže byť skôr, než dátum narodenia!", target: "dateOfDeath" });
+                } else {
+                    errors = errors?.filter((err: ValidationError) => err.target !== "dateOfDeath") ?? errors;
+                }
+            }
+
+            return errors;
         }
 
-        if (data.dateOfBirth && data.dateOfDeath) {
-            //if dateOfBirth is sooner, its OK
-            const dates = data.dateOfBirth! < data.dateOfDeath!;
-
-            if (!dates) {
-                localErrors.push({label: "Dátum smrti nemôže byť skôr, než dátum narodenia!", target: "dateOfDeath"});
-            } else {
-                localErrors = localErrors?.filter((err: ValidationError) => err.target !== "dateOfDeath") ?? localErrors;
-            }
+        if (Array.isArray(formData)) {
+            // Merge errors for all books, but only include unique errors by target
+            const allErrors = formData.flatMap(validateAutor);
+            // Optionally, you can group errors by target or show which book has which error
+            localErrors = allErrors;
+        } else {
+            localErrors = validateAutor(formData);
         }
 
         setErrors(localErrors);
         error(localErrors);
     }, [formData]);
 
-    const handleInputChange = useCallback((input: any) => {
-        let name: string, value: string;
+    const normalizeAutorData = (autor: any[]): IAutor[] => {
+        return (Array.isArray(autor) ? autor : [autor]).map(item => {
+            if (!item) return emptyAutor;
 
-        if ("target" in input) { // if it is a regular event
-            const {name: targetName, value: targetValue} = input.target;
-            name = targetName;
-            value = targetValue;
-        } else { // if it is MultiSelect custom answer
-            name = input.name;
-            value = input.value;
-        }
+            let role: any[] = [];
+            if ("role" in item) {
+                role = autorRoles.filter(obj => (item?.role as string[]).includes(obj?.value))
+            } else {
+                role = [];
+            }
 
-        setFormData((prevData: any) => {
-            // Helper function to create a nested object structure
-            const setNestedValue = (obj: any, keys: string[], value: any) => {
-                const key = keys.shift(); // Get the first key
-                if (!key) return value; // If no more keys, return the value
-                obj[key] = setNestedValue(obj[key] || {}, keys, value); // Recursively set the nested value
-                return obj;
+            const modified: IAutor = {
+                ...item,
+                nationality: countryCode.filter((country: ILangCode) => item?.nationality?.includes(country.key)),
+                role: role,
+                dateOfBirth: item?.dateOfBirth ?
+                    new Date(item?.dateOfBirth as string | number | Date) :
+                    undefined,
+                dateOfDeath: item?.dateOfDeath ?
+                    new Date(item?.dateOfDeath as string | number | Date) :
+                    undefined
+            } as IAutor;
+
+            return {
+                ...emptyAutor,
+                ...item,
+                ...modified
             };
-
-            const keys = name.split("."); // Split name into keys
-            const updatedData = {...prevData}; // Clone previous data
-            setNestedValue(updatedData, keys, value); // Set nested value
-
-            return updatedData;
         });
+    }
+
+    const changeFormData = useCallback((input: any) => {
+        setFormData((prevData: any) => handleInputChange(input, prevData));
     }, []);
 
     const getErrorMsg = (name: string): string => {
@@ -145,20 +135,18 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         <form>
             <div className="a-first-name">
                 <InputField
-                    value={formData?.firstName || ""}
                     placeholder='Krstné meno'
-                    name="firstName"
-                    onChange={handleInputChange}
+                    onChange={changeFormData}
+                    {...getInputParams("firstName", formData, "Krstné meno")}
                 />
             </div>
 
             <div className="a-last-name">
                 <InputField
-                    value={formData?.lastName || ""}
                     placeholder='*Priezvisko'
-                    name="lastName"
-                    onChange={handleInputChange}
+                    onChange={changeFormData}
                     customerror={getErrorMsg("lastName")}
+                    {...getInputParams("lastName", formData, "*Priezvisko")}
                 />
             </div>
 
@@ -167,27 +155,30 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     className="form-control"
                     id='dateOfBirth'
                     selected={
-                        (formData as IAutor)?.dateOfBirth ?
-                            new Date((formData as IAutor)?.dateOfBirth as string | number | Date) :
+                        getInputParams("dateOfBirth", formData).value ?
+                            new Date(getInputParams("dateOfBirth", formData).value as string | number | Date) :
                             undefined
                     }
-                    onChange={(dateOfBirth: any) => setFormData({
-                        ...formData,
+                    onChange={(dateOfBirth: any) => setFormData(formData.map((item: IAutor) => ({
+                        ...item,
                         dateOfBirth
-                    })}
-                    onSelect={(dateOfBirth: any) => setFormData({
-                        ...formData,
+                    })))}
+                    onSelect={(dateOfBirth: any) => setFormData(formData.map((item: IAutor) => ({
+                        ...item,
                         dateOfBirth
-                    })}
+                    })))}
                     locale="sk"
                     dateFormat='dd.MM.yyyy'
-                    placeholderText={"Dátum narodenia"}
+                    placeholderText={getInputParams("dateOfBirth", formData, "Dátum narodenia").placeholder}
                     maxDate={new Date()}
                     autoComplete="off"
                 />
                 {isValidDate(formData && "dateOfBirth" in formData ? formData?.dateOfBirth : false) ?
                     <button className='clearInput' type="button" onClick={() => {
-                        setFormData({...formData, dateOfBirth: undefined})
+                        setFormData(formData.map((item: IAutor) => ({
+                            ...item,
+                            dateOfBirth: undefined
+                        })))
                     }}>&#10006;
                     </button> : <></>}
             </div>
@@ -196,27 +187,27 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                 <DatePicker
                     className="form-control"
                     id='dateOfDeath'
-                    selected={
-                        (formData as IAutor)?.dateOfDeath ?
-                            new Date((formData as IAutor)?.dateOfDeath as string | number | Date) :
-                            undefined}
-                    onChange={(dateOfDeath: any) => setFormData({
-                        ...formData,
+                    selected={getInputParams("dateOfDeath", formData).value ? new Date(getInputParams("dateOfDeath", formData).value as string | number | Date) : undefined}
+                    onChange={(dateOfDeath: any) => setFormData(formData.map((item: IAutor) => ({
+                        ...item,
                         dateOfDeath
-                    })}
-                    onSelect={(dateOfDeath: any) => setFormData({
-                        ...formData,
+                    })))}
+                    onSelect={(dateOfDeath: any) => setFormData(formData.map((item: IAutor) => ({
+                        ...item,
                         dateOfDeath
-                    })}
+                    })))}
                     locale="sk"
                     dateFormat='dd.MM.yyyy'
-                    placeholderText={"Dátum smrti"}
+                    placeholderText={getInputParams("dateOfDeath", formData, "Dátum smrti").placeholder}
                     maxDate={new Date()}
                     autoComplete="off"
                 />
                 {isValidDate(formData && "dateOfDeath" in formData ? formData?.dateOfDeath : false) ?
                     <button className='clearInput' type="button" onClick={() => {
-                        setFormData({...formData, dateOfDeath: undefined})
+                        setFormData(formData.map((item: IAutor) => ({
+                            ...item,
+                            dateOfDeath: undefined
+                        })))
                     }}>&#10006;
                     </button> : <></>}
             </div>
@@ -224,13 +215,11 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
             <div className="a-nationality">
                 <LazyLoadMultiselect
                     selectionLimit={1}
-                    value={formData?.nationality || []}
                     options={countryCode}
                     displayValue="value"
                     placeholder="Národnosť"
-                    onChange={handleInputChange}
-                    name="nationality"
-                    reset={Boolean(reset)}
+                    onChange={changeFormData}
+                    {...getInputParams("nationality", formData, "Národnosť")}
                 />
             </div>
 
@@ -239,10 +228,8 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     options={autorRoles}
                     displayValue="showValue"
                     placeholder="Role"
-                    value={formData?.role || []}
-                    name="role"
-                    onChange={handleInputChange}
-                    reset={Boolean(reset)}
+                    onChange={changeFormData}
+                    {...getInputParams("role", formData, "Role")}
                 />
             </div>
 
@@ -251,11 +238,10 @@ export const AutorsModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     id='note'
                     placeholder='Poznámka'
                     className="form-control"
-                    name="note"
                     autoComplete="off"
                     rows={1}
-                    value={formData?.note || ""}
-                    onChange={handleInputChange}
+                    onChange={changeFormData}
+                    {...getInputParams("note", formData, "Poznámka")}
                 />
             </div>
         </form>
