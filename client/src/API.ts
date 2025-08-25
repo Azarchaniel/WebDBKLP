@@ -22,8 +22,35 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
     async (config: AxiosRequestConfig<any>): Promise<any> => {
-        let token = localStorage.getItem("token");
+        // Define public routes that don't need authentication
+        const publicRoutes = [
+            '/books',
+            '/autors',
+            '/book/',
+            '/autor/',
+            '/lps',
+            '/lp/',
+            '/boardgames',
+            '/boardgame/',
+            '/quotes',
+            '/quote/'
+        ];
 
+        // Check if current request URL is a public route
+        const isPublicRoute = publicRoutes.some(route =>
+            config.url?.includes(route) && config.method?.toLowerCase() === 'get'
+        );
+
+        // Skip authentication for public GET routes
+        if (isPublicRoute) {
+            config.headers = {
+                ...config.headers,
+                "Content-Type": "application/json"
+            };
+            return config;
+        }
+
+        let token = localStorage.getItem("token");
         const refreshToken = localStorage.getItem('refreshToken');
 
         // Skip refresh if no refreshToken is available
@@ -78,15 +105,34 @@ axiosInstance.interceptors.response.use(
         return response;
     },
     (error) => {
-        //console.error("Response error:", error);
-
+        // Handle unauthorized errors (token expired)
         if (error.response?.status === 401) {
-            console.warn("Unauthorized!");
+            console.warn("Unauthorized! Token may be expired.");
+
+            // Clear auth data if unauthorized
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const { exp } = jwtDecode(token);
+                    const now = Date.now() / 1000;
+                    if (!exp || exp < now) {
+                        // Clear all auth data if token is expired
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('refreshToken');
+                        localStorage.removeItem('user');
+
+                        // Force page reload to update auth state
+                        window.location.href = '/';
+                        return Promise.reject(new Error('Session expired. Please log in again.'));
+                    }
+                } catch (e) {
+                    console.error("Error decoding token:", e);
+                }
+            }
         }
 
         const now = Date.now();
         if (now - lastLogTime > 10000) { // Check if 10 seconds have passed since the last log
-            //toast.warning("Neprihlásený užívateľ!");
             lastLogTime = now; // Update the last log time
         }
 

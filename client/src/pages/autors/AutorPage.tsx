@@ -319,8 +319,8 @@ export default function AutorPage() {
                         />
                     </div>
                 }
-                rowActions={(_id, expandRow) => (
-                    isLoggedIn ? <div className="actionsRow" style={{ pointerEvents: "auto" }}>
+                rowActions={isLoggedIn ? (_id, expandRow) => (
+                    <div className="actionsRow" style={{ pointerEvents: "auto" }}>
                         <button
                             title="¨Vymazať"
                             onClick={() => handleDeleteAutor(_id)}
@@ -336,8 +336,8 @@ export default function AutorPage() {
                             className="fa fa-chevron-down"
                             onClick={() => expandRow()}
                         />
-                    </div> : <></>
-                )}
+                    </div>
+                ) : undefined}
                 expandedElement={(data) => <AutorDetail data={data} />}
                 selectedChanged={(ids) => setSelectedAutors(ids)}
             />
