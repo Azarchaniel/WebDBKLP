@@ -284,8 +284,8 @@ export default function BoardGamesPage() {
                         />
                     </div>
                 }
-                rowActions={(_id, expandRow) => (
-                    isLoggedIn ? <div className="actionsRow" style={{ pointerEvents: "auto" }}>
+                rowActions={isLoggedIn ? (_id, expandRow) => (
+                    <div className="actionsRow" style={{ pointerEvents: "auto" }}>
                         <button
                             title="Vymazať"
                             onClick={() => handleDeleteBoardGame(_id)}
@@ -302,8 +302,8 @@ export default function BoardGamesPage() {
                             className="fa fa-chevron-down"
                             onClick={() => expandRow()}
                         />
-                    </div> : <></>
-                )}
+                    </div>
+                ) : undefined}
                 expandedElement={(data) => <BoardGameDetail data={data} />}
                 selectedChanged={(ids) => setSelectedBoardGames(ids)}
             />
