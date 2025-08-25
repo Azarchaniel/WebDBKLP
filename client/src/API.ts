@@ -199,11 +199,20 @@ export const addBook = async (
             return saveBook;
         } else {
             if (Array.isArray(formData)) {
-                const updatePromises = formData.map(async (book: IBook) =>
-                    await axiosInstance.put(`${baseUrl}/edit-book/${book._id}`, book)
-                );
-                const updatedBooks = await Promise.all(updatePromises);
-                return updatedBooks;
+                // Process in batches of 5 books
+                const BATCH_SIZE = 5;
+                const results = [];
+
+                for (let i = 0; i < formData.length; i += BATCH_SIZE) {
+                    const batch = formData.slice(i, i + BATCH_SIZE);
+                    const batchPromises = batch.map(async (book: IBook) =>
+                        await axiosInstance.put(`${baseUrl}/edit-book/${book._id}`, book)
+                    );
+                    const batchResults = await Promise.all(batchPromises);
+                    results.push(...batchResults);
+                }
+
+                return results;
             } else {
                 const updatedBook: AxiosResponse<ApiBookDataType> = await axiosInstance.put(
                     `${baseUrl}/edit-book/${(formData as unknown as IBook)["_id"]}`,
@@ -299,11 +308,20 @@ export const addAutor = async (
             return saveAutor;
         } else {
             if (Array.isArray(formData)) {
-                const updatePromises = formData.map(async (autor: IAutor) =>
-                    await axiosInstance.put(`${baseUrl}/edit-autor/${autor._id}`, autor)
-                );
-                const updatedAutors = await Promise.all(updatePromises);
-                return updatedAutors;
+                // Process in batches of 5 autors
+                const BATCH_SIZE = 5;
+                const results = [];
+
+                for (let i = 0; i < formData.length; i += BATCH_SIZE) {
+                    const batch = formData.slice(i, i + BATCH_SIZE);
+                    const batchPromises = batch.map(async (autor: IAutor) =>
+                        await axiosInstance.put(`${baseUrl}/edit-autor/${autor._id}`, autor)
+                    );
+                    const batchResults = await Promise.all(batchPromises);
+                    results.push(...batchResults);
+                }
+
+                return results;
             } else {
                 const updatedAutor: AxiosResponse<ApiAutorDataType> = await axiosInstance.put(
                     `${baseUrl}/edit-autor/${(formData as unknown as IAutor)["_id"]}`,
@@ -390,21 +408,60 @@ export const getQuote = async (
 
 export const addQuote = async (
     formData: any
-): Promise<AxiosResponse<ApiQuoteDataType>> => {
+): Promise<AxiosResponse<ApiQuoteDataType> | any> => {
     try {
-        const quote: any = {
-            id: formData._id,
-            text: formData.text,
-            fromBook: formData.fromBook,
-            pageNo: formData.pageNo ?? null,
-            owner: formData.owner ?? [],
-            note: formData.note
+        if (Array.isArray(formData)) {
+            // Process in batches of 5 quotes
+            const BATCH_SIZE = 5;
+            const results = [];
+
+            for (let i = 0; i < formData.length; i += BATCH_SIZE) {
+                const batch = formData.slice(i, i + BATCH_SIZE);
+                const batchPromises = batch.map(async (quoteData) => {
+                    const quote: any = {
+                        id: quoteData._id,
+                        text: quoteData.text,
+                        fromBook: quoteData.fromBook,
+                        pageNo: quoteData.pageNo ?? null,
+                        owner: quoteData.owner ?? [],
+                        note: quoteData.note
+                    };
+
+                    if (!quote.id) {
+                        return await axiosInstance.post(baseUrl + "/add-quote", quote);
+                    } else {
+                        return await axiosInstance.put(`${baseUrl}/edit-quote/${quote.id}`, quote);
+                    }
+                });
+                const batchResults = await Promise.all(batchPromises);
+                results.push(...batchResults);
+            }
+
+            return results;
+        } else {
+            const quote: any = {
+                id: formData._id,
+                text: formData.text,
+                fromBook: formData.fromBook,
+                pageNo: formData.pageNo ?? null,
+                owner: formData.owner ?? [],
+                note: formData.note
+            };
+
+            if (!quote.id) {
+                const saveQuote: AxiosResponse<ApiQuoteDataType> = await axiosInstance.post(
+                    baseUrl + "/add-quote",
+                    quote
+                );
+                return saveQuote;
+            } else {
+                const updatedQuote: AxiosResponse<ApiQuoteDataType> = await axiosInstance.put(
+                    `${baseUrl}/edit-quote/${quote.id}`,
+                    quote
+                );
+                return updatedQuote;
+            }
         }
-        const saveQuote: AxiosResponse<ApiQuoteDataType> = await axiosInstance.post(
-            baseUrl + "/add-quote",
-            quote
-        )
-        return saveQuote
     } catch (error: any) {
         throw new Error(error)
     }
@@ -523,11 +580,20 @@ export const addLP = async (
             };
         } else {
             if (Array.isArray(formData)) {
-                const updatePromises = formData.map(async (lp: ILP) =>
-                    await axiosInstance.put(`${baseUrl}/edit-lp/${lp._id}`, lp)
-                );
-                const updatedLPs = await Promise.all(updatePromises);
-                return updatedLPs;
+                // Process in batches of 5 LPs
+                const BATCH_SIZE = 5;
+                const results = [];
+
+                for (let i = 0; i < formData.length; i += BATCH_SIZE) {
+                    const batch = formData.slice(i, i + BATCH_SIZE);
+                    const batchPromises = batch.map(async (lp: ILP) =>
+                        await axiosInstance.put(`${baseUrl}/edit-lp/${lp._id}`, lp)
+                    );
+                    const batchResults = await Promise.all(batchPromises);
+                    results.push(...batchResults);
+                }
+
+                return results;
             } else {
                 const updatedLp: AxiosResponse<ApiLPDataType> = await axiosInstance.put(
                     `${baseUrl}/edit-lp/${(formData as unknown as ILP)._id}`,
@@ -645,18 +711,38 @@ export const addBoardGame = async (
     formData: any
 ): Promise<any> => {
     try {
-        if (!formData._id) {
+        if (
+            (!Array.isArray(formData) && !formData._id) ||
+            (Array.isArray(formData) && !formData[0]?._id)
+        ) {
             const saveBoardGame: AxiosResponse<any> = await axiosInstance.post(
                 baseUrl + "/add-boardgame",
                 formData
             )
             return saveBoardGame
         } else {
-            const updatedBoardGame: AxiosResponse<any> = await axiosInstance.put(
-                `${baseUrl}/edit-boardgame/${formData._id}`,
-                formData
-            )
-            return updatedBoardGame
+            if (Array.isArray(formData)) {
+                // Process in batches of 5 board games
+                const BATCH_SIZE = 5;
+                const results = [];
+
+                for (let i = 0; i < formData.length; i += BATCH_SIZE) {
+                    const batch = formData.slice(i, i + BATCH_SIZE);
+                    const batchPromises = batch.map(async (boardGame: any) =>
+                        await axiosInstance.put(`${baseUrl}/edit-boardgame/${boardGame._id}`, boardGame)
+                    );
+                    const batchResults = await Promise.all(batchPromises);
+                    results.push(...batchResults);
+                }
+
+                return results;
+            } else {
+                const updatedBoardGame: AxiosResponse<any> = await axiosInstance.put(
+                    `${baseUrl}/edit-boardgame/${formData._id}`,
+                    formData
+                )
+                return updatedBoardGame
+            }
         }
     } catch (error: any) {
         console.error(error);
