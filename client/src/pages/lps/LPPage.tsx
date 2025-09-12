@@ -31,10 +31,11 @@ export default function LPPage() {
         autorsFull: true,
         subtitle: !isMobile(),
         language: !isMobile(),
-        createdAt: !isMobile(),
         speed: !isMobile(),
         countLp: !isMobile(),
         published: !isMobile(),
+        createdAt: false,
+        updatedAt: !isMobile(),
     });
     const [selectedLPs, setSelectedLPs] = useState<string[]>([]);
     const popRef = useRef<HTMLDivElement>(null);

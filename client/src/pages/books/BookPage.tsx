@@ -60,9 +60,9 @@ export default function BookPage() {
         readBy: !isMobile(),
         note: !isMobile(),
         location: !isMobile(),
+        ownersFull: !isMobile(),
         createdAt: false,
         updatedAt: !isMobile(),
-        ownersFull: !isMobile()
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
