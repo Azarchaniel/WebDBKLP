@@ -1,7 +1,7 @@
-import React, {useState, useRef, useEffect} from 'react';
-import {BrowserMultiFormatReader, DecodeHintType, Result, NotFoundException} from '@zxing/library';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faBarcode, faBan, faTimes} from '@fortawesome/free-solid-svg-icons';
+import React, { useState, useRef, useEffect } from 'react';
+import { BrowserMultiFormatReader, DecodeHintType, Result, NotFoundException } from '@zxing/library';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBarcode, faBan, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 interface BarcodeScannerButtonProps {
     onBarcodeDetected: (barcode: string) => void;
@@ -9,9 +9,9 @@ interface BarcodeScannerButtonProps {
 }
 
 const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
-                                                                       onBarcodeDetected,
-                                                                       onError,
-                                                                   }) => {
+    onBarcodeDetected,
+    onError,
+}) => {
     const [isScanning, setIsScanning] = useState<boolean>(false);
     const [showNotFoundIcon, setShowNotFoundIcon] = useState<boolean>(false);
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -42,12 +42,20 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
             // Ensure video element exists before accessing srcObject
             if (!videoRef.current) throw new Error("Video element not available.");
 
-            const stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}});
+            const stream = await navigator.mediaDevices.getUserMedia();
+            if (!stream || !videoRef.current) throw new Error("Could not get video stream.");
             videoRef.current.srcObject = stream;
             // Wait for metadata to load to avoid race conditions
-            await new Promise((resolve) => {
-                if (videoRef.current) videoRef.current.onloadedmetadata = resolve;
+            await new Promise((resolve, reject) => {
+                if (videoRef.current) {
+                    videoRef.current.onloadedmetadata = () => resolve(true);
+                    videoRef.current.onerror = (e) => reject(e);
+                } else {
+                    reject(new Error("Video element not available after stream assignment."));
+                }
             });
+            // Check if srcObject is still set before playing
+            if (!videoRef.current.srcObject) throw new Error("Video stream lost before play.");
             await videoRef.current.play();
 
             // Start decoding
@@ -55,7 +63,6 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                 if (result) {
                     setShowNotFoundIcon(false);
                     onBarcodeDetected(result.getText());
-                    // No need to call stopScanning here, useEffect cleanup will handle it when isScanning changes
                     setIsScanning(false);
                 } else if (error) {
                     if (error instanceof NotFoundException) {
@@ -64,18 +71,28 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                         setShowNotFoundIcon(false);
                         if (onError) onError(error);
                         console.error('Error during decoding:', error);
-                        // Consider if you want to stop on other errors
+                        // Optionally stop scanning on fatal errors
                         // setIsScanning(false);
                     }
                 } else {
-                    // No result, no error, likely just waiting for a barcode
                     setShowNotFoundIcon(false);
                 }
             });
         } catch (error: any) {
             if (onError) onError(error as Error);
             console.error('Error setting up scanner:', error);
-            stopScanning();
+            // Ensure resources are cleaned up on error
+            if (codeReaderRef.current) {
+                try { codeReaderRef.current.reset(); } catch (e) { }
+                codeReaderRef.current = null;
+            }
+            if (videoRef.current && videoRef.current.srcObject) {
+                const stream = videoRef.current.srcObject as MediaStream;
+                stream.getTracks().forEach((track) => track.stop());
+                videoRef.current.srcObject = null;
+            }
+            setShowNotFoundIcon(false);
+            setIsScanning(false);
         }
     };
 
@@ -93,7 +110,11 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
         // Stop camera stream
         if (videoRef.current && videoRef.current.srcObject) {
             const stream = videoRef.current.srcObject as MediaStream;
-            stream.getTracks().forEach((track) => track.stop()); // Stop all tracks
+            stream.getTracks().forEach((track) => {
+                if (track.readyState === 'live') {
+                    track.stop();
+                }
+            });
             videoRef.current.srcObject = null; // Release the stream from the video element
         }
 
@@ -120,7 +141,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
     return (
         <>
             <button onClick={toggleScanning} type="button" className="isbnScanner" title="Naskenuj ISBN">
-                <FontAwesomeIcon icon={faBarcode}/>
+                <FontAwesomeIcon icon={faBarcode} />
             </button>
             {isScanning && (
                 <div className="videoWrapper">
@@ -141,8 +162,8 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                     </button>
                     {showNotFoundIcon && (
                         <span className="fa-stack fa-lg videErrorIconWrapper">
-                            <FontAwesomeIcon icon={faBarcode} className="fa-stack-1x" style={{color: 'white'}}/>
-                            <FontAwesomeIcon icon={faBan} className="fa-stack-1x"/>
+                            <FontAwesomeIcon icon={faBarcode} className="fa-stack-1x" style={{ color: 'white' }} />
+                            <FontAwesomeIcon icon={faBan} className="fa-stack-1x" />
                         </span>
                     )}
                 </div>
