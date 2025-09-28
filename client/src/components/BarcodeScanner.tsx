@@ -56,6 +56,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                     reject(new Error("Video element not available after stream assignment."));
                 }
             });
+
             if (!videoRef.current.srcObject) throw new Error("Video stream lost before play.");
             await videoRef.current.play();
 
@@ -84,6 +85,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
         } catch (error: any) {
             if (onError) onError(error as Error);
             console.error('Error setting up scanner:', error);
+
             if (codeReaderRef.current) {
                 try { codeReaderRef.current.reset(); } catch (e) { }
                 codeReaderRef.current = null;
@@ -145,7 +147,9 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                     track.stop();
                 }
             });
+
             videoRef.current.srcObject = null;
+
         }
         setShowNotFoundIcon(false);
         if (canvasRef.current) {

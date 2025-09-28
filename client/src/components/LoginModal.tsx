@@ -1,13 +1,13 @@
-import React, {ChangeEvent, useState} from "react";
-import {Modal, showError} from "./Modal";
-import {toast} from "react-toastify";
-import {loginUser, logoutUser} from "@utils";
-import {CustomPasswordField, InputField} from "@components/inputs";
-import {useAuth} from "@utils/context";
-import {IUser} from "../type";
+import React, { ChangeEvent, useState, useEffect } from "react";
+import { Modal, showError } from "./Modal";
+import { toast } from "react-toastify";
+import { loginUser, logoutUser, isUserLoggedIn } from "@utils";
+import { CustomPasswordField, InputField } from "@components/inputs";
+import { useAuth } from "@utils/context";
+import { IUser } from "../type";
 
 const LoginModal: React.FC = () => {
-    const { login, isLoggedIn, currentUser } = useAuth();
+    const { login, logout, isLoggedIn, currentUser, checkTokenValidity } = useAuth();
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState({
         email: "",
@@ -15,8 +15,21 @@ const LoginModal: React.FC = () => {
     });
     const [error, setError] = useState("Zadaj užívateľský email!");
 
+    // Verify token validity on component render and periodically
+    useEffect(() => {
+        // Check token validity immediately
+        checkTokenValidity();
+
+        // Check token validity every minute
+        const tokenCheckInterval = setInterval(() => {
+            checkTokenValidity();
+        }, 60000);
+
+        return () => clearInterval(tokenCheckInterval);
+    }, [checkTokenValidity]);
+
     const getErrMsg = (form: any) => {
-        const {email, password} = form;
+        const { email, password } = form;
 
         const getErrorMessage = (fieldId: string) => {
             return fieldId === "email" ? "Zadaj užívateľský email!" : "Zadaj heslo!";
@@ -32,9 +45,9 @@ const LoginModal: React.FC = () => {
     }
 
     const updateForm = (event: ChangeEvent<HTMLInputElement>) => {
-        const {id, value} = event.target;
+        const { id, value } = event.target;
         setForm((prevData) => {
-            const updatedForm = {...prevData, [id]: value}; // Compute updated form state
+            const updatedForm = { ...prevData, [id]: value }; // Compute updated form state
             getErrMsg(updatedForm);
             return updatedForm;
         });
@@ -74,17 +87,17 @@ const LoginModal: React.FC = () => {
                     title="Prihlásenie"
                     onClose={() => setShowModal(false)}
                     body={<form
-                            className="column"
-                            style={{gap: "0.5rem"}}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                    e.preventDefault(); // Prevent default behavior like form submission
-                                    sendLogin().then(_ => null);
-                                }
-                            }}
+                        className="column"
+                        style={{ gap: "0.5rem" }}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                e.preventDefault(); // Prevent default behavior like form submission
+                                sendLogin().then(_ => null);
+                            }
+                        }}
                     >
                         <input type="email" placeholder="Email" className="form-control" id="email"
-                                    onChange={(e) => updateForm(e)} autoComplete="true"
+                            onChange={(e) => updateForm(e)} autoComplete="true"
                         />
                         <CustomPasswordField
                             placeholder="Heslo"
@@ -103,16 +116,16 @@ const LoginModal: React.FC = () => {
                         <div>{showError(error)}</div>
                         <div className="buttons">
                             <button type="button" className="btn btn-secondary"
-                                    onClick={() => setShowModal(false)}>Zrušiť
+                                onClick={() => setShowModal(false)}>Zrušiť
                             </button>
                             <button type="submit"
-                                    disabled={Boolean(error?.length)}
-                                    onClick={() => sendLogin()}
-                                    className="btn btn-success">Prihlásiť
+                                disabled={Boolean(error?.length)}
+                                onClick={() => sendLogin()}
+                                className="btn btn-success">Prihlásiť
                             </button>
                         </div>
                     </div>}
-                    overrideStyle={{width: "30rem"}}
+                    overrideStyle={{ width: "30rem" }}
                 />
             }
             {showModal && isLoggedIn &&
@@ -123,7 +136,7 @@ const LoginModal: React.FC = () => {
                     body={<span>Skutočne sa chceš odhlásiť?</span>}
                     footer={<form
                         className="column"
-                        style={{gap: "0.5rem"}}
+                        style={{ gap: "0.5rem" }}
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
                                 e.preventDefault(); // Prevent default behavior like form submission
@@ -133,15 +146,15 @@ const LoginModal: React.FC = () => {
                     >
                         <div className="buttons">
                             <button type="button" className="btn btn-secondary"
-                                    onClick={() => setShowModal(false)}>Zrušiť
+                                onClick={() => setShowModal(false)}>Zrušiť
                             </button>
                             <button type="submit"
-                                    onClick={() => sendLogout()}
-                                    className="btn btn-success">Odhlásiť
+                                onClick={() => sendLogout()}
+                                className="btn btn-success">Odhlásiť
                             </button>
                         </div>
                     </form>}
-                    overrideStyle={{width: "25rem"}}
+                    overrideStyle={{ width: "25rem" }}
                 />
             }
         </>

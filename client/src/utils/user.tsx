@@ -1,31 +1,55 @@
-import {jwtDecode} from "jwt-decode";
-import {login, logout as apiLogout} from "../API";
-import {clearCache} from "./indexDb";
+import { jwtDecode } from "jwt-decode";
+import { login, logout as apiLogout } from "../API";
+import { clearCache } from "./indexDb";
 
 let lastLogTime = 0;
 
 export const isUserLoggedIn = () => {
     const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
 
-    if (!token) {
+    if (!token || !user) {
         const now = Date.now();
         if (now - lastLogTime > 10000) { // Check if 10 seconds have passed since the last log
-            console.error('No token found. Please login to continue.');
+            console.error('No token or user found. Please login to continue.');
             lastLogTime = now; // Update the last log time
         }
 
-        return false; // No token, user is not logged in
+        // Clear any incomplete auth state
+        if (!token && user) {
+            localStorage.removeItem('user');
+        }
+
+        if (token && !user) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+        }
+
+        return false; // No token or user, not logged in
     }
 
     try {
-        const decoded = jwtDecode(token);
+        const decoded = jwtDecode<{ exp?: number }>(token);
         const now = Math.floor(Date.now() / 1000);
 
+        // Check if token is expired
+        if (decoded.exp && now > decoded.exp) {
+            // Token expired, clear all auth data
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('user');
+            return false;
+        }
+
         // Token exists and is valid
-        return !(decoded.exp && now > decoded.exp);
+        return true;
     } catch (error) {
         console.error("Error decoding token:", error);
-        return false; // Token is invalid
+        // Invalid token, clear auth data
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        return false;
     }
 };
 
@@ -38,7 +62,7 @@ export const loginUser = async (loginForm: {
 
         if (res.status === 200) {
             // @ts-ignore
-            const {token, refreshToken, user} = res.data;
+            const { token, refreshToken, user } = res.data;
 
             // Save token to localStorage or sessionStorage
             localStorage.setItem('token', token);
@@ -59,10 +83,22 @@ export const logoutUser = async () => {
         try {
             await apiLogout(refreshToken);
         } catch (e) {
+            console.warn("Error during API logout:", e);
             // Ignore errors, proceed with local cleanup
         }
     }
-    localStorage.clear(); //clean all data
+
+    // Explicitly remove authentication items
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+
+    // Clean other data if needed
+    localStorage.clear();
+
+    // Clear cached data
     await clearCache(); //clear IndexDB - cached Books data
+
+    // Redirect to home page
     window.location.replace("/");
 }

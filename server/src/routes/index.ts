@@ -32,9 +32,28 @@ import { userVerification } from "../middleware";
 const router: Router = Router()
 
 router.use((req: Request, res: Response, next: NextFunction) => {
+    // Routes that don't require authentication
     const publicRoutes = ['/login', '/refresh-token'];
 
-    if (publicRoutes.includes(req.path)) {
+    // Allow GET requests to these base paths without authentication
+    const publicGetPaths = [
+        '/books',
+        '/autors',
+        '/book/',
+        '/autor/',
+        '/lps',
+        '/lp/',
+        '/boardgames',
+        '/boardgame/',
+        '/quotes',
+        '/quote/'
+    ];
+
+    // Check if it's a public route or a GET request to a public path
+    if (
+        publicRoutes.includes(req.path) ||
+        (req.method === 'GET' && publicGetPaths.some(path => req.path.startsWith(path)))
+    ) {
         return next();
     }
 

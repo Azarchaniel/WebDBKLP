@@ -1,16 +1,16 @@
 import AddQuote from "./AddQuote";
-import {IBook, IQuote} from "../../type";
+import { IBook, IQuote } from "../../type";
 import QuoteItem from "./QuoteItem";
-import React, {useEffect, useState} from "react";
-import {addQuote, deleteQuote, getQuotes} from "../../API";
-import {toast} from "react-toastify";
-import {generateColors, getRandomShade, ScrollToTopBtn, fetchQuotedBooks} from "@utils";
-import {LoadingBooks} from "@components/LoadingBooks";
-import {useReadLocalStorage} from "usehooks-ts";
-import {openConfirmDialog} from "@components/ConfirmDialog";
-import {LazyLoadMultiselect} from "@components/inputs";
+import React, { useEffect, useState } from "react";
+import { addQuote, deleteQuote, getQuotes } from "../../API";
+import { toast } from "react-toastify";
+import { generateColors, getRandomShade, ScrollToTopBtn, fetchQuotedBooks } from "@utils";
+import { LoadingBooks } from "@components/LoadingBooks";
+import { useReadLocalStorage } from "usehooks-ts";
+import { openConfirmDialog } from "@components/ConfirmDialog";
+import { LazyLoadMultiselect } from "@components/inputs";
 import "@styles/QuotePage.scss";
-import {useAuth} from "@utils/context";
+import { useAuth } from "@utils/context";
 
 interface QuoteGroup {
     bookId: string;
@@ -19,7 +19,7 @@ interface QuoteGroup {
 }
 
 export default function QuotePage() {
-    const {isLoggedIn, currentUser} = useAuth();
+    const { isLoggedIn, currentUser } = useAuth();
     const [books, setBooks] = useState<IBook[]>([]);
     const [booksToFilter, setBooksToFilter] = useState<IBook[]>([]);
     const [filteredQuotes, setFilteredQuotes] = useState<IQuote[]>([]);
@@ -69,7 +69,7 @@ export default function QuotePage() {
         setLoading(true);
 
         getQuotes(books, activeUser)
-            .then(({data: {quotes, count, onlyQuotedBooks}}: IQuote[] | any) => {
+            .then(({ data: { quotes, count, onlyQuotedBooks } }: IQuote[] | any) => {
                 setFilteredQuotes(quotes);
                 setCountAll(count);
                 //only overwrite books if this is init call
@@ -82,7 +82,7 @@ export default function QuotePage() {
     const handleSaveQuote = (formData: IQuote): void => {
         setSaveQuoteSuccess(undefined);
         addQuote(formData)
-            .then(({status, data}) => {
+            .then(({ status, data }) => {
                 if (status !== 201) {
                     throw new Error("Citát sa nepodarilo pridať!")
                 }
@@ -108,6 +108,7 @@ export default function QuotePage() {
                             throw new Error("Error! Quote not deleted")
                         }
                         toast.success("Citát bol úspešne vymazaný.");
+                        fetchQuotes();
                     })
                     .catch((err) => {
                         toast.error("Chyba! Citát nemožno vymazať!");
@@ -127,11 +128,11 @@ export default function QuotePage() {
         <>
             {isLoggedIn && <AddQuote
                 saveQuote={handleSaveQuote}
-                onClose={() => {}}
-                saveResultSuccess={saveQuoteSuccess}/>
+                onClose={() => { }}
+                saveResultSuccess={saveQuoteSuccess} />
             }
             <div>
-                {loading ? <LoadingBooks/> : <></>}
+                {loading ? <LoadingBooks /> : <></>}
             </div>
             <h6 className="h6MaterialClone">Citáty ({countAll})</h6>
             <div className="quoteBookSearch">
@@ -142,7 +143,7 @@ export default function QuotePage() {
                     }
                     displayValue="showName"
                     placeholder="Z knih"
-                    onChange={({value}) => updateFilteredBooks(value as IBook[])}
+                    onChange={({ value }) => updateFilteredBooks(value as IBook[])}
                     name="fromBook"
                 />
             </div>
@@ -164,10 +165,10 @@ export default function QuotePage() {
                         ))}
                     </>
                 ) : (
-                    <span style={{color: "black"}}>Žiadne citáty neboli nájdené!</span>
+                    <span style={{ color: "black" }}>Žiadne citáty neboli nájdené!</span>
                 )}
             </div>
-            <ScrollToTopBtn scrollToTop={scrollToTopOfPage}/>
+            <ScrollToTopBtn scrollToTop={scrollToTopOfPage} />
         </>
     )
 }

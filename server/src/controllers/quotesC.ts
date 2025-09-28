@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {IPopulateOptions, IQuote, IBook} from "../types";
+import { IPopulateOptions, IQuote, IBook } from "../types";
 import Quote from "../models/quote"
 import { optionFetchAllExceptDeleted } from "../utils/constants";
 
@@ -8,7 +8,7 @@ const populateOptions: IPopulateOptions[] = [
         path: 'fromBook',
         model: 'Book',
         select: 'title autor published',
-        populate: {path: 'autor', model: 'Autor'}
+        populate: { path: 'autor', model: 'Autor' }
     },
     { path: 'owner', model: 'User' }
 ];
@@ -87,14 +87,9 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
                 }
             )
 
-            const allQuotes: IQuote[] = await Quote
-                .find()
-                .populate(populateOptions)
-                .exec();
             res.status(201).json({
                 message: 'Quote updated',
-                quote: updateQuote,
-                quotes: allQuotes,
+                quote: updateQuote
             });
         }
     } catch (err) {
@@ -105,24 +100,18 @@ const addQuote = async (req: Request, res: Response): Promise<void> => {
 const deleteQuote = async (req: Request, res: Response): Promise<void> => {
     try {
         const {
-            params: {id},
+            params: { id },
         } = req
         const deletedQuote: IQuote | null = await Quote.findByIdAndUpdate(
-            {_id: id},
+            { _id: id },
             {
                 deletedAt: new Date()
             }
         )
 
-        const allQuotes: IQuote[] = await Quote
-            .find()
-            .populate(populateOptions)
-            .exec();
-
         res.status(200).json({
             message: 'Quote deleted',
-            quote: deletedQuote,
-            quotes: allQuotes,
+            quote: deletedQuote
         })
     } catch (error) {
         throw error

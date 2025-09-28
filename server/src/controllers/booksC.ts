@@ -304,18 +304,13 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
 
         const updateBook = await Book.findByIdAndUpdate(
             { _id: id },
-            book
-        )
-
-        const allBooks = await Book
-            .find(optionFetchAllExceptDeleted)
-            .populate(populateOptionsBook)
-            .exec();
+            book,
+            { new: true }
+        ).populate(populateOptionsBook);
 
         res.status(200).json({
             message: 'Book updated',
-            book: updateBook,
-            books: allBooks,
+            book: updateBook
         })
     } catch (error) {
         res.status(500).json({ error: "Chyba pri aktualizácii knihy! " + error });

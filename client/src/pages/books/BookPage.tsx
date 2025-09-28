@@ -60,9 +60,9 @@ export default function BookPage() {
         readBy: !isMobile(),
         note: !isMobile(),
         location: !isMobile(),
+        ownersFull: !isMobile(),
         createdAt: false,
         updatedAt: !isMobile(),
-        ownersFull: !isMobile()
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
@@ -386,8 +386,8 @@ export default function BookPage() {
                         />
                     </div>
                 }
-                rowActions={(_id, expandRow) => (
-                    isLoggedIn ? <div key={_id} className="actionsRow" style={{ pointerEvents: "auto" }}>
+                rowActions={isLoggedIn ? (_id, expandRow) => (
+                    <div key={_id} className="actionsRow" style={{ pointerEvents: "auto" }}>
                         <button
                             key={`delete-${_id}`}
                             title="¨Vymazať"
@@ -406,8 +406,8 @@ export default function BookPage() {
                             className="fa fa-chevron-down"
                             onClick={() => expandRow()}
                         />
-                    </div> : <></>
-                )}
+                    </div>
+                ) : undefined}
                 expandedElement={(data) => <BookDetail data={data} />}
                 selectedChanged={(ids) => setSelectedBooks(ids)}
             />

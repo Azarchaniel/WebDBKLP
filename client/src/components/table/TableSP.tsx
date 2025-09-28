@@ -1,4 +1,4 @@
-import React, {ReactElement, useEffect, useState, FC} from 'react';
+import React, { ReactElement, useEffect, useState, FC } from 'react';
 import {
     useReactTable,
     getCoreRowModel,
@@ -6,12 +6,12 @@ import {
     ColumnDef,
     flexRender, SortingState, getExpandedRowModel, ExpandedState, RowSelectionState,
 } from '@tanstack/react-table';
-import {LoadingBooks} from "../LoadingBooks";
+import { LoadingBooks } from "../LoadingBooks";
 import Pagination from "./Pagination";
 import "@styles/table.scss";
-import {getUniqueFieldValues} from "../../API";
-import {isMobile, mapBookColumnsToFilterTypes, mapColumnName} from "@utils";
-import {InputField, LazyLoadMultiselect} from "@components/inputs";
+import { getUniqueFieldValues } from "../../API";
+import { isMobile, mapBookColumnsToFilterTypes, mapColumnName } from "@utils";
+import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import ThreeStateCheckbox from "@components/inputs/ThreeStateCheckbox";
 
 type PropsMT = {
@@ -40,22 +40,22 @@ type PropsMT = {
 
 const ServerPaginationTable: FC<PropsMT> =
     ({
-         title,
-         data = [],
-         columns,
-         actions,
-         rowActions,
-         pageChange,
-         pageSizeChange,
-         sortingChange,
-         filteringChange,
-         totalCount,
-         loading = false,
-         pagination = {page: 1, pageSize: 50, sorting: [{id: "", desc: true}]},
-         hiddenCols,
-         expandedElement,
-         selectedChanged
-     }) => {
+        title,
+        data = [],
+        columns,
+        actions,
+        rowActions,
+        pageChange,
+        pageSizeChange,
+        sortingChange,
+        filteringChange,
+        totalCount,
+        loading = false,
+        pagination = { page: 1, pageSize: 50, sorting: [{ id: "", desc: true }] },
+        hiddenCols,
+        expandedElement,
+        selectedChanged
+    }) => {
         const [currentPage, setCurrentPage] = useState(pagination.page);
         const [currentPageSize, setCurrentPageSize] = useState(pagination.pageSize);
         const [sorting, setSorting] = useState<SortingState>(pagination.sorting);
@@ -101,7 +101,7 @@ const ServerPaginationTable: FC<PropsMT> =
                 // Map any object values to just their _id before sending to the parent component
                 const processedFilters = filtering?.map((filter: { id: string, value: any, operator?: string }) => {
                     // Process the value based on its type
-                    let processedFilter = {...filter};
+                    let processedFilter = { ...filter };
 
                     if (filter.value && typeof filter.value === 'object') {
                         // If value is an array of objects with _id
@@ -173,11 +173,11 @@ const ServerPaginationTable: FC<PropsMT> =
                                             return prev.filter((f: any) => f.id !== columnName);
                                         } else {
                                             return prev.map((f: any) =>
-                                                f.id === columnName ? {...f, value} : f
+                                                f.id === columnName ? { ...f, value } : f
                                             );
                                         }
                                     } else {
-                                        return [...prev, {id: columnName, value}];
+                                        return [...prev, { id: columnName, value }];
                                     }
                                 });
                             }}
@@ -196,11 +196,11 @@ const ServerPaginationTable: FC<PropsMT> =
                                             return prev.filter((f: any) => f.id !== columnName);
                                         } else {
                                             return prev.map((f: any) =>
-                                                f.id === columnName ? {...f, value} : f
+                                                f.id === columnName ? { ...f, value } : f
                                             );
                                         }
                                     } else {
-                                        return [...prev, {id: columnName, value: value}];
+                                        return [...prev, { id: columnName, value: value }];
                                     }
                                 });
                             }}
@@ -215,7 +215,7 @@ const ServerPaginationTable: FC<PropsMT> =
                     return (
                         <select
                             className="form-control"
-                            style={{padding: "0"}}
+                            style={{ padding: "0" }}
                             value={(filtering as any[]).find((f) => f.id === columnName)?.value || ''}
                             onChange={(e) => {
                                 const value = e.target.value;
@@ -226,11 +226,11 @@ const ServerPaginationTable: FC<PropsMT> =
                                             return prev.filter((f: any) => f.id !== columnName);
                                         } else {
                                             return prev.map((f: any) =>
-                                                f.id === columnName ? {...f, value: value} : f
+                                                f.id === columnName ? { ...f, value: value } : f
                                             );
                                         }
                                     } else {
-                                        return [...prev, {id: columnName, value: value}];
+                                        return [...prev, { id: columnName, value: value }];
                                     }
                                 });
                             }}
@@ -245,7 +245,7 @@ const ServerPaginationTable: FC<PropsMT> =
                     const numValue = numFilter?.value || '';
                     const numOperator = numFilter?.operator || '=';
 
-                    const currentNumFilter = numberFilterStates[columnName] || {value: numValue, operator: numOperator};
+                    const currentNumFilter = numberFilterStates[columnName] || { value: numValue, operator: numOperator };
 
                     const handleOperatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
                         const operator = e.target.value;
@@ -254,7 +254,7 @@ const ServerPaginationTable: FC<PropsMT> =
                         // Update local state
                         setNumberFilterStates(prev => ({
                             ...prev,
-                            [columnName]: {value, operator}
+                            [columnName]: { value, operator }
                         }));
 
                         // Only update filter if both are set
@@ -263,10 +263,10 @@ const ServerPaginationTable: FC<PropsMT> =
                                 const existingFilter = prev.find((f: any) => f.id === columnName);
                                 if (existingFilter) {
                                     return prev.map((f: any) =>
-                                        f.id === columnName ? {...f, value, operator} : f
+                                        f.id === columnName ? { ...f, value, operator } : f
                                     );
                                 } else {
-                                    return [...prev, {id: columnName, value, operator}];
+                                    return [...prev, { id: columnName, value, operator }];
                                 }
                             });
                         }
@@ -279,7 +279,7 @@ const ServerPaginationTable: FC<PropsMT> =
                         // Update local state
                         setNumberFilterStates(prev => ({
                             ...prev,
-                            [columnName]: {value, operator}
+                            [columnName]: { value, operator }
                         }));
 
                         // Handle filter update based on value
@@ -290,10 +290,10 @@ const ServerPaginationTable: FC<PropsMT> =
                                 const existingFilter = prev.find((f: any) => f.id === columnName);
                                 if (existingFilter) {
                                     return prev.map((f: any) =>
-                                        f.id === columnName ? {...f, value, operator} : f
+                                        f.id === columnName ? { ...f, value, operator } : f
                                     );
                                 } else {
-                                    return [...prev, {id: columnName, value, operator}];
+                                    return [...prev, { id: columnName, value, operator }];
                                 }
                             });
                         }
@@ -305,7 +305,7 @@ const ServerPaginationTable: FC<PropsMT> =
                                 className="form-control operator-select"
                                 value={currentNumFilter.operator}
                                 onChange={handleOperatorChange}
-                                style={{width: "40px", flex: "0 0 auto", padding: "0 4px"}}
+                                style={{ width: "40px", flex: "0 0 auto", padding: "0 4px" }}
                                 title="Zvoľte operátor porovnania"
                             >
                                 <option value="=" title="má rovnako">=</option>
@@ -317,7 +317,7 @@ const ServerPaginationTable: FC<PropsMT> =
                                 type="number"
                                 value={currentNumFilter.value}
                                 onChange={handleValueChange}
-                                style={{flex: "1 1 auto"}}
+                                style={{ flex: "1 1 auto" }}
                             />
                         </div>
                     );
@@ -358,7 +358,7 @@ const ServerPaginationTable: FC<PropsMT> =
         return (
             <div className="p-4">
                 <div className="headerTitleAction">
-                    <h4 className="ml-4 mb-3" style={{color: "black"}}>{title}</h4>
+                    <h4 className="ml-4 mb-3" style={{ color: "black" }}>{title}</h4>
                     <div>
                         {actions}
                         {filteringChange &&
@@ -371,135 +371,136 @@ const ServerPaginationTable: FC<PropsMT> =
                                     }
                                 }}
                             >
-                                <i className="fas fa-filter" title="Filtre"/>
+                                <i className="fas fa-filter" title="Filtre" />
                             </button>}
                     </div>
                 </div>
                 <div>
                     {loading ? (
                         <div className="flex justify-center p-4">
-                            <LoadingBooks/>
+                            <LoadingBooks />
                         </div>
                     ) : (
                         <>
                             <table className="serverPaginationTable">
                                 <thead className="tableHeader">
-                                {table.getHeaderGroups().map((headerGroup, index) => (
-                                    <React.Fragment key={headerGroup.id}>
-                                        <tr key={headerGroup.id}>
-                                            {headerGroup.headers.map((header) => (
-                                                <th key={`${headerGroup.id}-${header.id}`} colSpan={header.colSpan}
-                                                    className={`TSP${header.column.id} ${showFilters ? "filter-header" : ""}`}>
-                                                    {header.isPlaceholder ? null : (
-                                                        <div
-                                                            className={
-                                                                header.column.getCanSort()
-                                                                    ? 'cursor-pointer select-none'
-                                                                    : ''
-                                                            }
-                                                            onClick={header.column.getToggleSortingHandler()}
-                                                            title={
-                                                                header.column.getCanSort()
-                                                                    ? header.column.getNextSortingOrder() === 'asc'
-                                                                        ? 'Radiť vzostupne'
-                                                                        : header.column.getNextSortingOrder() === 'desc'
-                                                                            ? 'Radiť zostupne'
-                                                                            : "Reset"
-                                                                    : undefined
-                                                            }
-                                                        >
-                                                            {flexRender(
-                                                                header.column.columnDef.header,
-                                                                header.getContext()
-                                                            )}
-                                                            {{
-                                                                asc: <i className="fa fa-angle-up ml-2"
-                                                                        style={{fontSize: "24px"}}></i>,
-                                                                desc: <i className="fa fa-angle-down ml-2"
-                                                                         style={{fontSize: "24px"}}></i>,
-                                                            }[header.column.getIsSorted() as string] ?? null}
-                                                        </div>
-                                                    )}
-                                                </th>
-                                            ))}
-                                            <th key={`${headerGroup.id}-actions`} className="TSPactionsRow">
-                                                <>
-                                                    <ThreeStateCheckbox
-                                                        selectedAmount={Object.keys(selectedRows).length}
-                                                        totalAmount={table.getRowModel()?.rows?.length || 0}
-                                                        onChange={(selectAll) => selectAll ? table.toggleAllRowsSelected() : table.resetRowSelection()}
-                                                    />
-                                                </>
-                                            </th>
-                                        </tr>
-                                        {showFilters && index === table.getHeaderGroups().length - 1 && (
-                                            <tr key={headerGroup.id + "-filter"} className="filter-header">
+                                    {table.getHeaderGroups().map((headerGroup, index) => (
+                                        <React.Fragment key={headerGroup.id}>
+                                            <tr key={headerGroup.id}>
                                                 {headerGroup.headers.map((header) => (
-                                                    <th key={`${headerGroup.id}-${header.id}-filter`}>
-                                                        {header.column.getCanFilter() && (
-                                                            getInputForColumn(header.column.id)
+                                                    <th key={`${headerGroup.id}-${header.id}`} colSpan={header.colSpan}
+                                                        className={`TSP${header.column.id} ${showFilters ? "filter-header" : ""}`}>
+                                                        {header.isPlaceholder ? null : (
+                                                            <div
+                                                                className={
+                                                                    header.column.getCanSort()
+                                                                        ? 'cursor-pointer select-none'
+                                                                        : ''
+                                                                }
+                                                                onClick={header.column.getToggleSortingHandler()}
+                                                                title={
+                                                                    header.column.getCanSort()
+                                                                        ? header.column.getNextSortingOrder() === 'asc'
+                                                                            ? 'Radiť vzostupne'
+                                                                            : header.column.getNextSortingOrder() === 'desc'
+                                                                                ? 'Radiť zostupne'
+                                                                                : "Reset"
+                                                                        : undefined
+                                                                }
+                                                            >
+                                                                {flexRender(
+                                                                    header.column.columnDef.header,
+                                                                    header.getContext()
+                                                                )}
+                                                                {{
+                                                                    asc: <i className="fa fa-angle-up ml-2"
+                                                                        style={{ fontSize: "24px" }}></i>,
+                                                                    desc: <i className="fa fa-angle-down ml-2"
+                                                                        style={{ fontSize: "24px" }}></i>,
+                                                                }[header.column.getIsSorted() as string] ?? null}
+                                                            </div>
                                                         )}
                                                     </th>
                                                 ))}
-                                                <th key={`${headerGroup.id}-actions-filter`}></th>
+                                                {rowActions && (
+                                                    <th key={`${headerGroup.id}-actions`} className="TSPactionsRow">
+                                                        <>
+                                                            <ThreeStateCheckbox
+                                                                selectedAmount={Object.keys(selectedRows).length}
+                                                                totalAmount={table.getRowModel()?.rows?.length || 0}
+                                                                onChange={(selectAll) => selectAll ? table.toggleAllRowsSelected() : table.resetRowSelection()}
+                                                            />
+                                                        </>
+                                                    </th>)}
                                             </tr>
-                                        )}
-                                    </React.Fragment>
-                                ))}
+                                            {showFilters && index === table.getHeaderGroups().length - 1 && (
+                                                <tr key={headerGroup.id + "-filter"} className="filter-header">
+                                                    {headerGroup.headers.map((header) => (
+                                                        <th key={`${headerGroup.id}-${header.id}-filter`}>
+                                                            {header.column.getCanFilter() && (
+                                                                getInputForColumn(header.column.id)
+                                                            )}
+                                                        </th>
+                                                    ))}
+                                                    <th key={`${headerGroup.id}-actions-filter`}></th>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))}
                                 </thead>
 
-                                <tbody style={{pointerEvents: "none"}}>
-                                {table.getRowModel()?.rows?.map((row) => (
-                                    <React.Fragment key={row.original._id}>
-                                        <tr key={row.id}>
-                                            {row.getVisibleCells().map((cell) => (
-                                                <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
-                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                </td>
-                                            ))}
-                                            {rowActions &&
-                                                <td
-                                                    key={`${row.id}-actions`}
-                                                    className="TSPactionsRow actions-animated-td"
-                                                    tabIndex={0}
-                                                >
-                                                    {/* This is the three-vertical-dots-button for row actions, like edit, delete, etc. */}
-                                                    <span className="actions-ellipsis">&#x2807;</span>
-                                                    <span className="actions-content">
-        {rowActions && rowActions(row.original._id, () => row.toggleExpanded())}
-                                                        <input type="checkbox" className="checkBox"
-                                                               checked={selectedRows[row.id]}
-                                                               onChange={() => {
-                                                                   setSelectedRows((prev) => {
-                                                                       const newSelection = {...prev};
-                                                                       if (newSelection[row.id]) {
-                                                                           delete newSelection[row.id];
-                                                                       } else {
-                                                                           newSelection[row.id] = true;
-                                                                       }
-                                                                       return newSelection;
-                                                                   });
-                                                               }}
-                                                               title="Vybrať riadok"/>
-    </span>
-                                                </td>
-                                            }
-                                        </tr>
-                                        {row.getIsExpanded() && (
-                                            isMobile() ? (
-                                                <div className="expanded-mobile-row" key={`${row.id}-expanded-mobile`}>
-                                                    {expandedElement && expandedElement(row.original)}
-                                                </div>
-                                            ) : (
-                                                <tr key={`${row.id}-expanded`} className="expanded-row">
-                                                    <td colSpan={row.getAllCells().length + 1}>
-                                                        {expandedElement && expandedElement(row.original)}
+                                <tbody style={{ pointerEvents: "none" }}>
+                                    {table.getRowModel()?.rows?.map((row) => (
+                                        <React.Fragment key={row.original._id}>
+                                            <tr key={row.id}>
+                                                {row.getVisibleCells().map((cell) => (
+                                                    <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
+                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                     </td>
-                                                </tr>
-                                            )
-                                        )}
-                                    </React.Fragment>
-                                ))}
+                                                ))}
+                                                {rowActions &&
+                                                    <td
+                                                        key={`${row.id}-actions`}
+                                                        className="TSPactionsRow actions-animated-td"
+                                                        tabIndex={0}
+                                                    >
+                                                        {/* This is the three-vertical-dots-button for row actions, like edit, delete, etc. */}
+                                                        <span className="actions-ellipsis">&#x2807;</span>
+                                                        <span className="actions-content">
+                                                            {rowActions && rowActions(row.original._id, () => row.toggleExpanded())}
+                                                            <input type="checkbox" className="checkBox"
+                                                                checked={selectedRows[row.id]}
+                                                                onChange={() => {
+                                                                    setSelectedRows((prev) => {
+                                                                        const newSelection = { ...prev };
+                                                                        if (newSelection[row.id]) {
+                                                                            delete newSelection[row.id];
+                                                                        } else {
+                                                                            newSelection[row.id] = true;
+                                                                        }
+                                                                        return newSelection;
+                                                                    });
+                                                                }}
+                                                                title="Vybrať riadok" />
+                                                        </span>
+                                                    </td>
+                                                }
+                                            </tr>
+                                            {row.getIsExpanded() && (
+                                                isMobile() ? (
+                                                    <div className="expanded-mobile-row" key={`${row.id}-expanded-mobile`}>
+                                                        {expandedElement && expandedElement(row.original)}
+                                                    </div>
+                                                ) : (
+                                                    <tr key={`${row.id}-expanded`} className="expanded-row">
+                                                        <td colSpan={row.getAllCells().length + 1}>
+                                                            {expandedElement && expandedElement(row.original)}
+                                                        </td>
+                                                    </tr>
+                                                )
+                                            )}
+                                        </React.Fragment>
+                                    ))}
                                 </tbody>
                             </table>
                             {data.length === 0 && (

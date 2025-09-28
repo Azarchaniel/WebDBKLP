@@ -31,10 +31,11 @@ export default function LPPage() {
         autorsFull: true,
         subtitle: !isMobile(),
         language: !isMobile(),
-        createdAt: !isMobile(),
         speed: !isMobile(),
         countLp: !isMobile(),
         published: !isMobile(),
+        createdAt: false,
+        updatedAt: !isMobile(),
     });
     const [selectedLPs, setSelectedLPs] = useState<string[]>([]);
     const popRef = useRef<HTMLDivElement>(null);
@@ -274,8 +275,8 @@ export default function LPPage() {
                         />
                     </div>
                 }
-                rowActions={(_id) => (
-                    isLoggedIn ? <div className="actionsRow" style={{ pointerEvents: "auto" }}>
+                rowActions={isLoggedIn ? (_id) => (
+                    <div className="actionsRow" style={{ pointerEvents: "auto" }}>
                         <button
                             title="¨Vymazať"
                             onClick={() => handleDeleteLP(_id)}
@@ -286,8 +287,8 @@ export default function LPPage() {
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateLp(_id)}
                         />
-                    </div> : <></>
-                )}
+                    </div>
+                ) : undefined}
                 selectedChanged={(ids) => setSelectedLPs(ids)}
             />
             {Boolean(updateLP) &&
