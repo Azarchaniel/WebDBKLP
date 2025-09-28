@@ -1,9 +1,9 @@
-import React, {forwardRef, useEffect, useRef, useState} from "react";
+import React, { forwardRef, useEffect, useRef, useState } from "react";
 import "../styles/font-awesome/css/all.css";
 import "../styles/sidebar.scss";
-import {ISideMenuItems} from "../type";
-import {Link, useLocation} from "react-router-dom";
-import {useClickOutside} from "@hooks";
+import { ISideMenuItems } from "../type";
+import { Link, useLocation } from "react-router-dom";
+import { useClickOutside } from "@hooks";
 
 interface HamburgerToXProps {
     onClick: () => void;
@@ -79,10 +79,21 @@ const Sidebar = () => {
                 />
                 {content.map(item => (
                     <Link to={item.route} key={item.route} className={location.pathname === item.route ? "active" : ""}>
-                        <i className={item.icon}/>
+                        <i className={item.icon} />
                         {sidebarOpened && <span>{item.title}</span>}
                     </Link>
                 ))}
+                <div style={{ display: "flex", alignItems: "center", flexGrow: 1 }}>{/* Empty space */}</div>
+                <a
+                    title="O autorovi"
+                    href="https://github.com/Azarchaniel"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="github-link"
+                >
+                    <i className="fab fa-github" />
+                    {sidebarOpened && <span>O autorovi</span>}
+                </a>
             </nav>
         </>
     )

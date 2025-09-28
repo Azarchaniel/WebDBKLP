@@ -4,6 +4,7 @@
   .sideBar {
     height: 3rem !important;
     position: fixed;
+
     a:not(:first-child) {
       display: none;
     }
@@ -11,7 +12,7 @@
 
   .opened {
     width: 100vw !important;
-    height: 22rem !important;
+    height: 25rem !important;
     display: flex;
     flex-direction: column;
 
@@ -128,8 +129,11 @@
   margin-right: 27px;
   cursor: pointer;
 
-  &:hover { // Add hover effect to the whole hamburger container
+  &:hover {
+
+    // Add hover effect to the whole hamburger container
     a.main-nav-toggle {
+
       &:after,
       &:before,
       i {

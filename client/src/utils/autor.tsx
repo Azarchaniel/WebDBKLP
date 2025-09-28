@@ -33,34 +33,53 @@ export const createNewAutor = (
         lastName = name.trim();
     }
 
-    addAutor({ firstName, lastName, role: [{ value: role }] })
+    addAutor([{ firstName, lastName, role: [{ value: role }] }])
         .then((res) => {
             if (res.status === 201 && res.data?.autor?._id) {
                 toast.success("Autor úspešne vytvorený");
 
                 if (setFormData) {
                     setFormData((prevData: any) => {
-                        let currentRole;
-                        if (formDataParamName) {
-                            currentRole = formDataParamName;
+                        // Check if prevData is an array (BookModal) or object (other forms)
+                        if (Array.isArray(prevData)) {
+                            // Handle array case (like in BookModal)
+                            // For arrays, we need to update specific fields based on role
+                            const updatedArray = prevData.map(item => {
+                                const roleField = role || "autor";
+                                const fieldToUpdate = formDataParamName || roleField;
+
+                                // Create a new object with the updated field
+                                return {
+                                    ...item,
+                                    [fieldToUpdate]: [...(item[fieldToUpdate] || []), res.data?.autor]
+                                };
+                            });
+
+                            return updatedArray;
                         } else {
-                            currentRole = role || "autor";
-                        }
+                            // Handle object case (original behavior)
+                            let currentRole;
+                            if (formDataParamName) {
+                                currentRole = formDataParamName;
+                            } else {
+                                currentRole = role || "autor";
+                            }
 
-                        const currentRoleData = prevData[currentRole];
+                            const currentRoleData = prevData?.[currentRole];
 
-                        // Check if currentRole exists in prevData
-                        if (!prevData.hasOwnProperty(currentRole)) {
+                            // Check if currentRole exists in prevData
+                            if (!prevData || !prevData.hasOwnProperty(currentRole)) {
+                                return {
+                                    ...prevData,
+                                    [currentRole]: [res.data?.autor],
+                                };
+                            }
+
                             return {
                                 ...prevData,
-                                [currentRole]: [res.data?.autor],
+                                [currentRole]: [...(currentRoleData ?? []), res.data?.autor],
                             };
                         }
-
-                        return {
-                            ...prevData,
-                            [currentRole]: [...(currentRoleData ?? []), res.data?.autor],
-                        };
                     });
                 }
             } else {

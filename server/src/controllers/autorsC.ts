@@ -142,7 +142,7 @@ const getMultipleAutorsInfo = async (req: Request, res: Response): Promise<void>
 }
 
 const addAutor = async (req: Request, res: Response): Promise<void> => {
-    const { firstName, lastName, dateOfBirth, dateOfDeath, note, nationality, role } = req.body;
+    const { firstName, lastName, dateOfBirth, dateOfDeath, note, nationality, role } = req.body[0];
 
     try {
         const autor: IAutor = new Autor({
