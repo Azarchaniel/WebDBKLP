@@ -1,4 +1,4 @@
-import puppeteer, {Page} from 'puppeteer';
+import puppeteer, { Page } from 'puppeteer';
 import axios from "axios";
 import xml2js from "xml2js";
 import Autor from "../models/autor";
@@ -21,14 +21,22 @@ export const getIdFromArray = (arrOfObj: Object[]) => {
     })
 }
 
-const getContentFromElement = async (page: Page, identificator: string, silent?: boolean): Promise<string | undefined> => {
+const getContentFromElement = async (
+    page: Page,
+    selector: string,
+    optional: boolean = false
+): Promise<string | undefined> => {
     try {
-        await page.waitForSelector(identificator, {timeout: 250});
-        return await page.$eval(identificator, el => el.textContent?.trim());
-
+        const element = await page.$(selector);
+        if (!element) {
+            return optional ? undefined : '';
+        }
+        const text = await page.evaluate(el => el?.textContent?.trim() || '', element);
+        return text || undefined;
     } catch (error) {
-        if (!silent) console.warn(`Element not found for selector: ${identificator}`);
-        return "";
+        if (optional) return undefined;
+        console.log(`Selector ${selector} not found`);
+        return undefined;
     }
 };
 
@@ -103,7 +111,7 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
         for (let author of authors) {
             const splitted = author.split(" ");
             //@ts-ignore
-            let {firstName, lastName} = "";
+            let { firstName, lastName } = "";
 
             // if name consist of only one word
             if (splitted?.length === 1) {
@@ -126,7 +134,7 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
 
             if (firstName) {
                 const firstNameConditions: any[] = [
-                    {firstName: firstName}
+                    { firstName: firstName }
                 ];
 
                 if (!firstName.includes(".")) {
@@ -143,16 +151,16 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
                     {
                         $and: [
                             queryOptions[0], // Prioritize lastName condition
-                            firstName ? {$or: firstNameConditions} : {} // Include firstName conditions only when lastName matches
+                            firstName ? { $or: firstNameConditions } : {} // Include firstName conditions only when lastName matches
                         ]
                     }
                 ];
             }
 
-            let foundAuthor = await Autor.findOne({$or: queryOptions}).collation({locale: "cs", strength: 1});
+            let foundAuthor = await Autor.findOne({ $or: queryOptions }).collation({ locale: "cs", strength: 1 });
 
             if (!foundAuthor) {
-                foundAuthor = await Autor.create({firstName: firstName, lastName: lastName});
+                foundAuthor = await Autor.create({ firstName: firstName, lastName: lastName });
             }
 
             //cleaning obj, so there is no hidden params from Mongo
@@ -173,74 +181,226 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
     }
 }
 
+/**
+ * If there is no direct selector, find by text label and take the next sibling
+ * @param page 
+ * @param labelText 
+ * @returns 
+ */
+const extractLabeledData = async (page: Page, labelText: string): Promise<string | null> => {
+    return await page.evaluate((label) => {
+        const labelElement = Array.from(document.querySelectorAll('span.category'))
+            .find(span => span.textContent?.includes(label));
+        if (labelElement && labelElement.nextElementSibling) {
+            return labelElement.nextElementSibling.textContent?.trim() || null;
+        }
+        return null;
+    }, labelText);
+};
+
 const databazeKnih = async (isbn: string): Promise<object | boolean> => {
     try {
         console.log("DK called ", isbn);
-        //TODO: giant security hole
-        const browser = await puppeteer.launch({headless: true, args: ['--no-sandbox'], timeout: 0});
-        //const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox'],
+            timeout: 0
+        });
 
         const page: Page = await browser.newPage();
         await page.goto('https://www.databazeknih.cz/search?q=' + isbn);
 
+        // Check if no book was found
         const noBookFound = await getContentFromElement(page, "h1[class='oddown']", true);
-
         if (noBookFound) {
             console.error(`Book ${isbn} not found.`);
             await browser.close();
             return false;
         }
 
-        await page.click('a[href=""]');
-        await page.waitForSelector("div[id='more_book_info']");
+        // Click on the first book result - need to find the correct link
+        // Usually the first result is in a link that goes to the book detail page
+        try {
+            await page.waitForSelector('a[href*="/knihy/"]', { timeout: 5000 });
+            await page.click('a[href*="/knihy/"]');
+        } catch (error) {
+            await page.waitForSelector('a[href*="/prehled-knihy/"]', { timeout: 5000 });
+            await page.click('a[href*="/prehled-knihy/"]');
+        }
 
-        const title = await getContentFromElement(page, "h1[itemprop='name']");
-        const autor = await getContentFromElement(page, "span[itemprop='author']");
+        // Alternative approach for "více info..." - look for JavaScript link or specific selectors
+        try {
+            await page.evaluate(() => {
+                const links = Array.from(document.querySelectorAll('a'));
+                const viceInfoLink = links.find(link =>
+                    link.textContent?.includes('více info') ||
+                    link.textContent?.includes('více info...')
+                );
+                if (viceInfoLink) {
+                    viceInfoLink.click();
+                }
+            });
+            await new Promise(r => setTimeout(r, 1500));
+        } catch (error) {
+            console.log("JavaScript approach for 'více info...' failed");
+        }
+
+        // Extract book data - using more robust selectors
+        const title = await getContentFromElement(page, "h1") ||
+            await getContentFromElement(page, "h1[class*='od']");
+
+        const autor = await getContentFromElement(page, "span[class='author']") ||
+            await getContentFromElement(page, "a[href*='/autori/']");
+
         const translator = await getContentFromElement(page, "span[itemprop='translator']");
         const ilustrator = await getContentFromElement(page, "span[itemprop='ilustrator']");
-        const yearOfPublish = await getContentFromElement(page, "span[itemprop='datePublished']");
-        const publisher = await getContentFromElement(page, "span[itemprop='publisher']");
+
+        // Year and publisher - may be in different formats
+        const yearOfPublish = await getContentFromElement(page, "span[itemprop='datePublished']") ||
+            await extractYearFromText(page);
+
+        const publisher = await getContentFromElement(page, "span[itemprop='publisher']") ||
+            await getContentFromElement(page, "a[href*='/nakladatelstvi/']");
+
         const noPages = await getContentFromElement(page, "span[itemprop='numberOfPages']");
-        const isbnFound = await getContentFromElement(page, "span[itemprop='isbn']");
-        const language = await getContentFromElement(page, "span[itemprop='language']");
-        const serieTitle = await getContentFromElement(page, "a[class='odright_pet']");
+
+        let isbnFound = await getContentFromElement(page, "span[itemprop='isbn']");
+        if (!isbnFound) {
+            // Alternative: look for ISBN in text content using regex
+            isbnFound = await page.evaluate(() => {
+                const bodyText = document.body.textContent || '';
+                const isbnMatch = bodyText.match(/ISBN:?\s*([0-9-]{10,17})/i);
+                return isbnMatch ? isbnMatch[1] : undefined;
+            });
+        }
+
+        const language = await extractLabeledData(page, "Jazyk vydání:") || await getContentFromElement(page, "span[itemprop='language']");
+
+        // Series information
+        const serieTitle = await getContentFromElement(page, "a[class='odright_pet']") ||
+            await getContentFromElement(page, "a[href*='/serie/']");
         const serieNo = getNumberFromString(await getContentFromElement(page, "span[class='odright_pet']"));
-        const editionTitle = await getContentFromElement(page, "a[itemprop=\"bookEdition\"]");
+
+        // Edition information
+        const editionTitle = await extractLabeledData(page, "Edice:");
         const editionNo = getNumberFromString(await getContentFromElement(page, "em[class='info st_normal']"));
+
         const urlDB = page.url();
-        const imgHref = await page.$eval("img[class='kniha_img coverOnDetail']", el => el.src);
+
+        // Image extraction with fallbacks
+        let imgHref = '';
+        try {
+            imgHref = await page.$eval("img[class*='kniha_img']", el => (el as HTMLImageElement).src);
+        } catch {
+            try {
+                imgHref = await page.$eval("img[class*='cover']", el => (el as HTMLImageElement).src);
+            } catch {
+                console.log("Book cover image not found");
+            }
+        }
 
         await browser.close();
 
-        return {
-            title: title?.replace(" přehled", ""),
-            autor: [autor].map(autor => autor?.replace(" (p)", "")),
-            translator: [translator],
-            ilustrator: [ilustrator],
+        const book = {
+            title: title?.replace(" přehled", "").trim(),
+            autor: [autor].map(autor => autor?.replace(" (p)", "").trim()).filter(Boolean),
+            translator: [translator].filter(Boolean),
+            ilustrator: [ilustrator].filter(Boolean),
             published: {
-                publisher,
-                year: yearOfPublish,
-                country: [mapDBKlanguageToLangCode(language)],
+                publisher: publisher?.trim(),
+                year: yearOfPublish?.trim(),
+                country: language ? [mapDBKlanguageToLangCode(language)] : [],
             },
-            numberOfPages: noPages,
-            ISBN: isbnFound,
-            language: [mapDBKlanguageToLangCode(language)],
+            numberOfPages: noPages?.trim(),
+            ISBN: isbnFound?.trim(),
+            language: language ? [mapDBKlanguageToLangCode(language)] : [],
             serie: {
-                title: serieTitle,
+                title: serieTitle?.trim(),
                 no: serieNo,
             },
             edition: {
-                title: editionTitle,
+                title: editionTitle?.trim(),
                 no: editionNo,
             },
             hrefDatabazeKnih: urlDB,
             picture: imgHref,
-        }
+        };
+
+        return book;
+
     } catch (error) {
         console.error("Error in databazeKnih", error);
         return {};
     }
-}
+};
+
+// Helper function to extract year from text content
+const extractYearFromText = async (page: Page): Promise<string | null> => {
+    try {
+        const yearText = await page.evaluate(() => {
+            const text = document.body.textContent || '';
+            const yearMatch = text.match(/Vydáno:\s*(\d{4})/);
+            return yearMatch ? yearMatch[1] : null;
+        });
+        return yearText;
+    } catch {
+        return null;
+    }
+};
+
+/**
+ * Merges two objects, preferring values from the second object but only if they are truthy.
+ * This preserves values from the first object when the second object has falsy values.
+ * 
+ * @param baseObj - The base object to merge into
+ * @param overrideObj - The object with override values
+ * @returns A new object with merged values
+ */
+export const mergeObjects = (baseObj: any, overrideObj: any): any => {
+    // Create a deep copy of the base object to avoid mutations
+    const result = { ...baseObj };
+
+    // Iterate through all properties of the override object
+    for (const key in overrideObj) {
+        if (Object.prototype.hasOwnProperty.call(overrideObj, key)) {
+            const overrideValue = overrideObj[key];
+
+            // If value is an object (but not null), recursively merge
+            if (overrideValue && typeof overrideValue === 'object' && !Array.isArray(overrideValue)) {
+                // Initialize as empty object if the property doesn't exist in result
+                result[key] = result[key] || {};
+                // Recursively merge nested properties, only if they have truthy values
+                for (const subKey in overrideValue) {
+                    if (Object.prototype.hasOwnProperty.call(overrideValue, subKey) && overrideValue[subKey]) {
+                        result[key][subKey] = overrideValue[subKey];
+                    }
+                }
+            }
+            // For arrays, check if there's at least one non-empty string or truthy value
+            else if (Array.isArray(overrideValue)) {
+                // Only use the override array if it contains at least one meaningful value
+                const hasValidContent = overrideValue.some(item => {
+                    // For strings, check if they're non-empty after trimming
+                    if (typeof item === 'string') {
+                        return item.trim() !== '';
+                    }
+                    // For other types, check if they're truthy
+                    return !!item;
+                });
+
+                if (hasValidContent) {
+                    result[key] = overrideValue;
+                }
+            }
+            // For primitive values, only override if truthy
+            else if (overrideValue) {
+                result[key] = overrideValue;
+            }
+        }
+    }
+
+    return result;
+};
 
 const goodreads = async (isbn: string): Promise<object | boolean> => {
     if (isbn.length < 10) return false;
@@ -254,7 +414,7 @@ const goodreads = async (isbn: string): Promise<object | boolean> => {
 
         const bookFetched = json.GoodreadsResponse.book[0];
 
-        const {author} = bookFetched.authors[0];
+        const { author } = bookFetched.authors[0];
 
         return {
             title: bookFetched.title[0],
@@ -307,8 +467,7 @@ export const webScrapper = async (isbn: string): Promise<any> => {
     }
 
     //TODO: if grBook is different than dkBook, send warning or do something
-    const mergedBook = {...grBook, ...dkBook}; //prefer DBK, so it is overwriting
-
+    const mergedBook = mergeObjects(grBook, dkBook);
     mergedBook.ISBN = mergedBook?.ISBN?.includes("-") ? mergedBook.ISBN : originalIsbn;
 
     const finalBook = {
@@ -358,7 +517,7 @@ async function normalizeFieldValue(value: any): Promise<string> {
     }
 
     if (typeof value === 'object') {
-        const {title, publisher}: any = value;
+        const { title, publisher }: any = value;
         return diacritics
             .remove(title ?? publisher ?? '')
             .replace(/[^a-zA-Z0-9\s]/g, ''); // Remove non-alphanumeric characters
@@ -405,6 +564,7 @@ export async function normalizeSearchFields(doc: any, model: string): Promise<Re
                 autor: doc.autor,
                 editor: doc.editor,
                 ilustrator: doc.ilustrator,
+                translator: doc.translator,
                 title: doc.title,
                 subtitle: doc.subtitle,
                 edition: doc.edition,
@@ -480,7 +640,7 @@ export const createLookupStage = (from: string, localField: string, as: string) 
     }
 
     return {
-        $lookup: {from: normalizedFrom, localField, foreignField: "_id", as}
+        $lookup: { from: normalizedFrom, localField, foreignField: "_id", as }
     };
 };
 

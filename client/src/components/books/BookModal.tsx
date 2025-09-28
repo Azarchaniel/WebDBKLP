@@ -188,7 +188,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
     const handleInputChange = useCallback((input: any) => {
         let name: string, value: any;
 
-        if ("target" in input) {
+        if (typeof input === 'object' && "target" in input) {
             const { name: targetName, value: targetValue } = input.target;
             name = targetName;
             value = targetValue;
@@ -261,7 +261,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     {...getInputParams("ISBN", formData)}
                 />
                 <BarcodeScannerButton
-                    onBarcodeDetected={(code) => setFormData([{ ...formData[0], ISBN: code }])}
+                    onBarcodeDetected={(code) => handleInputChange({ name: "ISBN", value: code })}
                     onError={(error) => console.error(error)}
                 />
                 <button
@@ -308,7 +308,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 <InputField
                     placeholder='Názov edície'
                     onChange={handleInputChange}
-                    {...getInputParams("edition.name", formData)}
+                    {...getInputParams("edition.title", formData)}
                 />
             </div>
             <div className="b-No">
