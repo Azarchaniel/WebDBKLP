@@ -1,4 +1,3 @@
-import AddAutor from "./AddAutor";
 import React, { useEffect, useRef, useState } from "react";
 import { IAutor, IBookColumnVisibility } from "../../type";
 import { addAutor, deleteAutor, getAutor, getAutorInfo, getAutors, getMultipleAutorsInfo } from "../../API";
@@ -10,6 +9,7 @@ import {
     ShowHideColumns,
     isMobile
 } from "@utils";
+import { useAutorModal } from "@components/autors/useAutorModal";
 import { openConfirmDialog } from "@components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
 import AutorDetail from "./AutorDetail";
@@ -24,7 +24,6 @@ export default function AutorPage() {
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
-    const [updateAutor, setUpdateAutor] = useState<IAutor[] | undefined>();
     const [pagination, setPagination] = useState({
         ...DEFAULT_PAGINATION,
         sorting: [{ id: "lastName", desc: false }] as SortingState
@@ -130,6 +129,8 @@ export default function AutorPage() {
             });
     }
 
+    const { openAutorModal } = useAutorModal();
+
     const handleUpdateAutor = (_id?: string): any => {
         setSaveAutorSuccess(undefined);
 
@@ -137,11 +138,21 @@ export default function AutorPage() {
             const autorToUpdate = autors.find((autor: IAutor) => autor._id === _id);
 
             if (autorToUpdate) {
-                setUpdateAutor([autorToUpdate]);
+                // Use persistent modal for a single autor
+                openAutorModal(
+                    [autorToUpdate],
+                    handleSaveAutor
+                );
             } else {
                 getAutor(_id)
                     .then(({ data }) => {
-                        if (data.autor) setUpdateAutor([data.autor]);
+                        if (data.autor) {
+                            // Use persistent modal for fetched autor
+                            openAutorModal(
+                                [data.autor],
+                                handleSaveAutor
+                            );
+                        }
                     })
                     .catch((err) => {
                         toast.error(err.response?.data?.error || "Chyba! Autor nebol nájdený!");
@@ -152,7 +163,11 @@ export default function AutorPage() {
 
         if (selectedAutors.length > 0) {
             const autorsToUpdate = autors.filter((autor: IAutor) => selectedAutors.includes(autor._id));
-            setUpdateAutor(autorsToUpdate);
+            // Use persistent modal for multiple selected autors
+            openAutorModal(
+                autorsToUpdate,
+                handleSaveAutor
+            );
         }
     }
 
@@ -269,9 +284,13 @@ export default function AutorPage() {
         setPagination(prevState => ({ ...prevState, page: newPage, pageSize: newPageSize }));
     };
 
+    // Handle adding a new autor
+    const handleAddAutor = () => {
+        openAutorModal([], handleSaveAutor);
+    };
+
     return (
         <>
-            {isLoggedIn && <AddAutor saveAutor={handleSaveAutor} onClose={() => setUpdateAutor(undefined)} saveResultSuccess={saveAutorSuccess} />}
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
                 <ShowHideColumns columns={getAutorTableColumns()} shown={showColumn} setShown={setShowColumn} />
             </div>
@@ -311,6 +330,15 @@ export default function AutorPage() {
                                 </button>
                             </div>
                         </div>
+                        {/* Add autor button for authenticated users */}
+                        {isLoggedIn && (
+                            <button
+                                type="button"
+                                className="addBtnTable"
+                                onClick={handleAddAutor}
+                                title="Pridať nového autora"
+                            />
+                        )}
                         <i
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
@@ -341,13 +369,6 @@ export default function AutorPage() {
                 expandedElement={(data) => <AutorDetail data={data} />}
                 selectedChanged={(ids) => setSelectedAutors(ids)}
             />
-            {Boolean(updateAutor) &&
-                <AddAutor
-                    saveAutor={handleSaveAutor}
-                    autors={updateAutor}
-                    onClose={() => setUpdateAutor(undefined)}
-                    saveResultSuccess={saveAutorSuccess}
-                />}
         </>
     )
 }

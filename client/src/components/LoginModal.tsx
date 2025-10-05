@@ -1,13 +1,13 @@
 import React, { ChangeEvent, useState, useEffect } from "react";
 import { Modal, showError } from "./Modal";
 import { toast } from "react-toastify";
-import { loginUser, logoutUser, isUserLoggedIn } from "@utils";
-import { CustomPasswordField, InputField } from "@components/inputs";
+import { loginUser, logoutUser } from "@utils";
 import { useAuth } from "@utils/context";
 import { IUser } from "../type";
+import { CustomPasswordField } from "./inputs";
 
 const LoginModal: React.FC = () => {
-    const { login, logout, isLoggedIn, currentUser, checkTokenValidity } = useAuth();
+    const { login, isLoggedIn, currentUser, checkTokenValidity } = useAuth();
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState({
         email: "",
@@ -97,7 +97,7 @@ const LoginModal: React.FC = () => {
                         }}
                     >
                         <input type="email" placeholder="Email" className="form-control" id="email"
-                            onChange={(e) => updateForm(e)} autoComplete="true"
+                            onChange={(e) => updateForm(e)} autoComplete="email"
                         />
                         <CustomPasswordField
                             placeholder="Heslo"
@@ -108,7 +108,7 @@ const LoginModal: React.FC = () => {
                                         id: "password",
                                         value
                                     }
-                                } as unknown as ChangeEvent<HTMLInputElement>)}
+                                } as ChangeEvent<HTMLInputElement>)}
                         />
 
                     </form>}
@@ -133,17 +133,8 @@ const LoginModal: React.FC = () => {
                     customKey="logout"
                     title="Odhlásenie"
                     onClose={() => setShowModal(false)}
-                    body={<span>Skutočne sa chceš odhlásiť?</span>}
-                    footer={<form
-                        className="column"
-                        style={{ gap: "0.5rem" }}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                                e.preventDefault(); // Prevent default behavior like form submission
-                                sendLogin().then(_ => null);
-                            }
-                        }}
-                    >
+                    body={<p>Skutočne sa chceš odhlásiť?</p>}
+                    footer={
                         <div className="buttons">
                             <button type="button" className="btn btn-secondary"
                                 onClick={() => setShowModal(false)}>Zrušiť
@@ -153,8 +144,7 @@ const LoginModal: React.FC = () => {
                                 className="btn btn-success">Odhlásiť
                             </button>
                         </div>
-                    </form>}
-                    overrideStyle={{ width: "25rem" }}
+                    }
                 />
             }
         </>

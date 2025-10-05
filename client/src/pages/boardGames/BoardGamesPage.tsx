@@ -17,6 +17,7 @@ import AddBoardGame from "./AddBoardGame";
 import "@styles/BoardGamesPage.scss";
 import { InputField } from "@components/inputs";
 import BoardGameDetail from "./BoardGameDetail";
+import { useBoardGameModal } from "@components/boardGames/useBoardGameModal";
 
 export default function BoardGamesPage() {
     const { isLoggedIn } = useAuth();
@@ -28,6 +29,7 @@ export default function BoardGamesPage() {
         ...DEFAULT_PAGINATION,
         sorting: [{ id: "title", desc: false }] as SortingState
     });
+    const { openBoardGameModal } = useBoardGameModal();
     const [saveBoardGameSuccess, setSaveBoardGameSuccess] = useState<boolean | undefined>(undefined);
     const [showColumn, setShowColumn] = useState<IBookColumnVisibility>({
         control: false,
@@ -123,11 +125,23 @@ export default function BoardGamesPage() {
             const boardGameToUpdate = boardGames.find((boardGame: any) => boardGame._id === _id);
 
             if (boardGameToUpdate) {
-                setUpdateBoardGame([boardGameToUpdate]);
+                // Use the persistent modal for a single board game
+                openBoardGameModal(
+                    [boardGameToUpdate],
+                    handleSaveBoardGame,
+                    saveBoardGameSuccess
+                );
             } else {
                 getBoardGame(_id)
                     .then(({ data }) => {
-                        setUpdateBoardGame([data.boardGame]);
+                        if (data.boardGame) {
+                            // Use the persistent modal for fetched board game
+                            openBoardGameModal(
+                                [data.boardGame],
+                                handleSaveBoardGame,
+                                saveBoardGameSuccess
+                            );
+                        }
                     })
                     .catch((err) => {
                         toast.error(err.response?.data?.error || "Chyba! Spoločenská hra nebola nájdená!");
@@ -141,7 +155,12 @@ export default function BoardGamesPage() {
             const selectedBoardGamesData = boardGames.filter((game: IBoardGame) =>
                 selectedBoardGames.includes(game._id));
 
-            setUpdateBoardGame(selectedBoardGamesData);
+            // Use the persistent modal for multiple selected board games
+            openBoardGameModal(
+                selectedBoardGamesData,
+                handleSaveBoardGame,
+                saveBoardGameSuccess
+            );
         }
     };
 
@@ -232,11 +251,17 @@ export default function BoardGamesPage() {
         setPagination(prevState => ({ ...prevState, page: newPage, pageSize: newPageSize }));
     };
 
+    // Handle the add board game button click
+    const handleAddBoardGame = () => {
+        setSaveBoardGameSuccess(undefined);
+        openBoardGameModal([] as IBoardGame[], handleSaveBoardGame, saveBoardGameSuccess);
+    };
+
     return (
         <>
             {isLoggedIn &&
-                <AddBoardGame saveBoardGame={handleSaveBoardGame} onClose={() => setUpdateBoardGame(undefined)}
-                    saveResultSuccess={saveBoardGameSuccess} />}
+                <button type="button" className="addBtnTable" onClick={handleAddBoardGame} />
+            }
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
                 <ShowHideColumns columns={getBoardGameTableColumns()} shown={showColumn} setShown={setShowColumn} />
             </div>
@@ -307,13 +332,6 @@ export default function BoardGamesPage() {
                 expandedElement={(data) => <BoardGameDetail data={data} />}
                 selectedChanged={(ids) => setSelectedBoardGames(ids)}
             />
-            {Boolean(updateBoardGame) &&
-                <AddBoardGame
-                    saveBoardGame={handleSaveBoardGame}
-                    boardGame={updateBoardGame}
-                    onClose={() => setUpdateBoardGame(undefined)}
-                    saveResultSuccess={saveBoardGameSuccess}
-                />}
         </>
     );
 }

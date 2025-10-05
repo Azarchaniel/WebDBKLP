@@ -1,4 +1,3 @@
-import AddQuote from "./AddQuote";
 import { IBook, IQuote } from "../../type";
 import QuoteItem from "./QuoteItem";
 import React, { useEffect, useState } from "react";
@@ -11,6 +10,7 @@ import { openConfirmDialog } from "@components/ConfirmDialog";
 import { LazyLoadMultiselect } from "@components/inputs";
 import "@styles/QuotePage.scss";
 import { useAuth } from "@utils/context";
+import { useQuoteModal } from "@components/quotes/useQuoteModal";
 
 interface QuoteGroup {
     bookId: string;
@@ -28,6 +28,7 @@ export default function QuotePage() {
     const [loading, setLoading] = useState(true);
     const [saveQuoteSuccess, setSaveQuoteSuccess] = useState<boolean | undefined>(undefined);
     const [quoteGroups, setQuoteGroups] = useState<QuoteGroup[]>([]);
+    const { openQuoteModal } = useQuoteModal();
 
     useEffect(() => {
         fetchQuotes();
@@ -124,13 +125,22 @@ export default function QuotePage() {
         window.scroll(0, 0)
     }
 
+    // Handle the add quote button click
+    const handleAddQuote = () => {
+        setSaveQuoteSuccess(undefined);
+        openQuoteModal(undefined, handleSaveQuote, saveQuoteSuccess);
+    };
+
     return (
         <>
-            {isLoggedIn && <AddQuote
-                saveQuote={handleSaveQuote}
-                onClose={() => { }}
-                saveResultSuccess={saveQuoteSuccess} />
-            }
+            {isLoggedIn && (
+                <button
+                    type="button"
+                    className="addQuote"
+                    onClick={handleAddQuote}
+                    data-tip="Pridaj citát"
+                />
+            )}
             <div>
                 {loading ? <LoadingBooks /> : <></>}
             </div>

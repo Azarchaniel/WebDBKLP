@@ -191,18 +191,18 @@ label,
   border: 2px solid rgb(240, 240, 240);
   border-radius: 6px;
   position: relative;
-  bottom: 70px;
   color: black;
-  min-width: 250px;
+  min-width: 30rem;
   max-width: 80vw;
-  //min-height: 300px;
   max-height: 80vh;
+  user-select: none;
 
   &Body {
     padding: 1rem;
     max-height: calc(80vh - 2.1rem - 2.1rem);
     max-width: 60vw;
     overflow: auto;
+    user-select: text;
   }
 
   &Wrapper {
@@ -215,6 +215,21 @@ label,
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    pointer-events: none;
+
+    /* When modal is minimized, allow interactions with underlying content */
+    &.minimized {
+      background: transparent;
+    }
+  }
+
+  /* Make sure the modal itself captures pointer events */
+  &,
+  &Footer,
+  &Body,
+  &Header,
+  button {
+    pointer-events: auto;
   }
 
   &Backdrop {
@@ -224,8 +239,8 @@ label,
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    /* Semi-transparent black */
     z-index: 1001;
+    pointer-events: auto;
   }
 
   &Header {
@@ -237,13 +252,33 @@ label,
     font-size: 1.5rem;
     color: var(--anchor);
     border-bottom: 1px solid lightgray;
+    cursor: grab;
+    touch-action: none;
 
+    .modalControls {
+      display: flex;
+      align-items: center;
+    }
+
+    .minimizeModal,
     .closeModal {
       background-color: transparent;
       border: none;
-      font-size: 2rem;
       color: var(--anchor);
       cursor: pointer;
+      padding: 0 0.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .minimizeModal {
+      font-size: 1.2rem;
+      margin-right: 0.4rem;
+    }
+
+    .closeModal {
+      font-size: 2rem;
     }
   }
 
