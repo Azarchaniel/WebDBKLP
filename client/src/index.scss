@@ -244,7 +244,7 @@ label,
   }
 
   &Header {
-    padding: 0.3rem 1rem 0.3rem 1rem;
+    padding: 0 1rem 0.3rem 1rem;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -263,10 +263,10 @@ label,
     .minimizeModal,
     .closeModal {
       background-color: transparent;
-      border: none;
+      border: none !important;
       color: var(--anchor);
       cursor: pointer;
-      padding: 0 0.3rem;
+      padding: 0 0.3rem !important;
       display: flex;
       align-items: center;
       justify-content: center;
