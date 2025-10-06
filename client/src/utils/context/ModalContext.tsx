@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactElement, useCallback } from 'react';
+import React, { createContext, useState, useContext, ReactElement, useCallback, useEffect } from 'react';
 import { Modal } from '../../components/Modal';
 import { createPortal } from 'react-dom';
 
@@ -38,6 +38,44 @@ const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [modals, setModals] = useState<ModalState[]>([]);
+
+    // Handle window resize to reposition minimized modals
+    useEffect(() => {
+        const handleResize = () => {
+            setModals(prevModals => {
+                const minimizedModals = prevModals.filter(modal => modal.isOpen && modal.minimized);
+
+                if (minimizedModals.length === 0) return prevModals;
+
+                // Recalculate positions for all minimized modals
+                const newPositions = new Map<string, { x: number, y: number }>();
+
+                minimizedModals.forEach((modal, index) => {
+                    // Get all modals that come before this one (already positioned)
+                    const previousModals = minimizedModals.slice(0, index);
+                    const mockPreviousModals = previousModals.map(prevModal => ({
+                        ...prevModal,
+                        position: newPositions.get(prevModal.customKey) || prevModal.position
+                    }));
+
+                    const newPosition = getMinimizedPosition(mockPreviousModals);
+                    newPositions.set(modal.customKey, newPosition);
+                });
+
+                // Update all modals with new positions
+                return prevModals.map(modal => {
+                    const newPosition = newPositions.get(modal.customKey);
+                    if (newPosition) {
+                        return { ...modal, position: newPosition };
+                    }
+                    return modal;
+                });
+            });
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [window.innerHeight, window.innerWidth]);
 
     const showModal = useCallback((props: {
         customKey: string,
@@ -115,68 +153,81 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, []);
 
     // Function to calculate position for minimized modals to appear side by side
-    const getMinimizedPosition = useCallback((modals: ModalState[]) => {
+    const getMinimizedPosition = useCallback((existingMinimizedModals: ModalState[]) => {
         const PADDING = 5; // edge padding
-        const MINIMIZED_WIDTH = 250; // width of minimized modal
+        const MINIMIZED_WIDTH = 285; // width of minimized modal
         const MINIMIZED_HEIGHT = 50; // height of minimized modal
 
-        // Get all currently open and minimized modals
-        const minimizedModals = modals.filter(m => m.isOpen && m.minimized);
-
-        if (minimizedModals.length === 0) {
+        if (existingMinimizedModals.length === 0) {
             // If this is the first minimized modal, position at bottom left
             return {
-                x: PADDING,
+                x: PADDING + 46,
                 y: window.innerHeight - MINIMIZED_HEIGHT - PADDING
             };
         }
 
-        // Sort minimized modals by x position to find the rightmost
-        const sortedModals = [...minimizedModals].sort((a, b) => {
+        // Sort minimized modals by x position, then by y position for proper row handling
+        const sortedModals = [...existingMinimizedModals].sort((a, b) => {
+            const aY = a.position.y || 0;
+            const bY = b.position.y || 0;
+            if (aY !== bY) return bY - aY; // Higher y values first (bottom rows first)
+
             const aX = a.position.x || 0;
             const bX = b.position.x || 0;
-            return bX - aX; // descending order to get rightmost first
+            return aX - bX; // Then by x position (left to right)
         });
 
-        // Get the rightmost modal's position
-        const rightmostModal = sortedModals[0];
-        const rightEdge = (rightmostModal.position.x || 0) + MINIMIZED_WIDTH;
+        // Find the bottom-most row
+        const bottomRow = sortedModals.filter(modal =>
+            modal.position.y === sortedModals[0].position.y
+        );
+
+        // Sort bottom row by x position to find rightmost
+        const rightmostInBottomRow = bottomRow.sort((a, b) => {
+            const aX = a.position.x || 0;
+            const bX = b.position.x || 0;
+            return bX - aX; // Descending to get rightmost first
+        })[0];
+
+        const rightEdge = (rightmostInBottomRow.position.x || 0) + MINIMIZED_WIDTH;
+        const currentY = rightmostInBottomRow.position.y || 0;
 
         // Check if we need to wrap to a new row
-        if (rightEdge + MINIMIZED_WIDTH + PADDING > window.innerWidth) {
-            // Start a new row above the current row
-            return {
+        if (rightEdge + 5 + MINIMIZED_WIDTH > window.innerWidth - PADDING) {
+            // Start a new row above the current bottom row
+            const newPosition = {
                 x: PADDING,
-                y: (rightmostModal.position.y || 0) - MINIMIZED_HEIGHT - 5 // 5px gap between rows
+                y: currentY - MINIMIZED_HEIGHT - 5 // 5px gap between rows
             };
+
+            return newPosition;
         }
 
-        // Position next to the rightmost modal
-        return {
+        // Position next to the rightmost modal in the bottom row
+        const newPosition = {
             x: rightEdge + 5, // 5px gap between modals
-            y: rightmostModal.position.y || 0
+            y: currentY
         };
+
+        return newPosition;
     }, []);
 
     const minimizeModal = useCallback((key: string) => {
         setModals(prevModals => {
-            // First, mark the modal as minimized
-            const updatedModals = prevModals.map(modal =>
+            // First, get all other minimized modals (excluding the one being minimized)
+            const otherMinimizedModals = prevModals.filter(modal =>
+                modal.customKey !== key && modal.isOpen && modal.minimized
+            );
+
+            // Calculate position based on existing minimized modals
+            const newPosition = getMinimizedPosition([...otherMinimizedModals]);
+
+            // Now update all modals, setting the minimized modal to its new position
+            return prevModals.map(modal =>
                 modal.customKey === key ? {
                     ...modal,
                     minimized: true,
-                    // Store current position as a reference for maximizing
-                    previousPosition: modal.minimized ? modal.previousPosition : modal.position
-                } : modal
-            );
-
-            // Then calculate its position alongside other minimized modals
-            const newPosition = getMinimizedPosition(updatedModals);
-
-            // Apply the position to the minimized modal
-            return updatedModals.map(modal =>
-                modal.customKey === key ? {
-                    ...modal,
+                    previousPosition: modal.minimized ? modal.previousPosition : modal.position,
                     position: newPosition
                 } : modal
             );

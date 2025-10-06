@@ -197,6 +197,13 @@ label,
   max-height: 80vh;
   user-select: none;
 
+  // when modal is minimized
+  &Wrapper.minimized & {
+    min-width: 18rem !important;
+    max-width: 18rem !important;
+  }
+
+
   &Body {
     padding: 1rem;
     max-height: calc(80vh - 2.1rem - 2.1rem);
