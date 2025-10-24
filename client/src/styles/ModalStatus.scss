@@ -1,0 +1,46 @@
+// Styles for modal footer status message
+.modal-buttons-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.75rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.modal-footer-left {
+    flex: 1 1 auto;
+    min-width: 200px;
+}
+
+.modal-footer-right {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.modal-status-message {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    margin-top: 0.4rem;
+    line-height: 1.2;
+    max-width: 320px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid transparent;
+}
+
+.modal-status-message.success {
+    background: #e6f9ec;
+    color: #1d7a2e;
+    border-color: #1d7a2e;
+}
+
+.modal-status-message.fail {
+    background: #fdecea;
+    color: #b32020;
+    border-color: #b32020;
+}

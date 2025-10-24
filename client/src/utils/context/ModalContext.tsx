@@ -102,23 +102,16 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         : modal
                 );
             } else {
-                // Add new modal centered in the viewport
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-                const modalWidth = 600; // Default modal width estimate
-                const modalHeight = 400; // Default modal height estimate
-
-                // Center the modal in the viewport
-                const centerPosition = {
-                    x: Math.max(0, (viewportWidth - modalWidth) / 2),
-                    y: Math.max(0, (viewportHeight - modalHeight) / 3) // Slightly above center
-                };
-
+                // Add new modal with null position so that the Modal component
+                // applies CSS centering (50% / 50% with translate(-50%, -50%)).
+                // Using null avoids relying on an approximate width/height and ensures
+                // true visual centering based on the actual rendered size.
+                // Any subsequent movement (drag/minimize) will replace null with concrete coordinates.
                 return [...prevModals, {
                     ...props,
                     isOpen: true,
                     minimized: false,
-                    position: centerPosition
+                    position: { x: null, y: null }
                 }];
             }
         });
@@ -288,6 +281,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         // During active dragging, don't update React state
         if (isDragging) {
+            console.log("Modal is dragging, skipping React state update:", key);
             // Mark this modal as currently being dragged
             activeDragState.activeModalKey = key;
 
@@ -318,6 +312,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         // For non-dragging updates (like initial positioning or minimize/maximize),
         // update React state directly but still use requestAnimationFrame for smoothness
+        console.log("Non-dragging position update, updating React state:", key, position);
         const modalData = positionUpdatesRef.current.get(key);
         if (modalData?.rafId) {
             cancelAnimationFrame(modalData.rafId);
@@ -356,86 +351,34 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
 };
 
-// Individual modal component wrapped in memo to prevent unnecessary re-renders
-const MemoizedModal = React.memo(
-    ({
-        modal,
-        onClose,
-        onMinimizeToggle,
-        onPositionChange
-    }: {
-        modal: ModalState,
-        onClose: () => void,
-        onMinimizeToggle: () => void,
-        onPositionChange: (position: { x: number, y: number }, isDragging?: boolean) => void
-    }) => {
-        return createPortal(
-            <Modal
-                key={modal.customKey}
-                customKey={modal.customKey}
-                title={modal.title}
-                body={modal.body}
-                footer={modal.footer}
-                onClose={onClose}
-                isMinimized={modal.minimized}
-                onMinimizeToggle={onMinimizeToggle}
-                position={modal.position}
-                onPositionChange={onPositionChange}
-            />,
-            document.body
-        );
-    },
-    // Enhanced comparison function for better performance during dragging
-    (prevProps, nextProps) => {
-        const prevModal = prevProps.modal;
-        const nextModal = nextProps.modal;
-
-        // Check if the modal key matches the one currently being dragged
-        const isDragging = activeDragState.activeModalKey === prevModal.customKey;
-
-        // Skip all re-renders during active dragging since we're using direct DOM manipulation
-        if (isDragging) {
-            // Allow only critical changes during dragging like minimize/maximize
-            if (prevModal.minimized !== nextModal.minimized) {
-                return false; // Re-render needed
-            }
-            return true; // Skip most re-renders during dragging
-        }
-
-        // For normal operation (not dragging), re-render for these changes
-        if (prevModal.title !== nextModal.title ||
-            prevModal.minimized !== nextModal.minimized ||
-            prevProps.onClose !== nextProps.onClose) {
-            return false;
-        }
-
-        // For body and footer, only re-render if they change
-        if (prevModal.body !== nextModal.body ||
-            prevModal.footer !== nextModal.footer) {
-            return false;
-        }
-
-        // For position changes, only re-render for significant changes
-        if (prevModal.position.x !== nextModal.position.x ||
-            prevModal.position.y !== nextModal.position.y) {
-
-            // If both positions are defined, check the magnitude of change
-            if (prevModal.position.x !== null && prevModal.position.y !== null &&
-                nextModal.position.x !== null && nextModal.position.y !== null) {
-
-                const dx = Math.abs((prevModal.position.x || 0) - (nextModal.position.x || 0));
-                const dy = Math.abs((prevModal.position.y || 0) - (nextModal.position.y || 0));
-
-                // Only re-render for large position changes
-                return (dx < 5 && dy < 5); // Skip re-render for small changes
-            }
-
-            return false; // Different position types, re-render
-        }
-
-        return true; // Default to not re-rendering if nothing significant changed
-    }
-);
+// Individual modal component - temporarily removing memo to test
+const MemoizedModal = ({
+    modal,
+    onClose,
+    onMinimizeToggle,
+    onPositionChange
+}: {
+    modal: ModalState,
+    onClose: () => void,
+    onMinimizeToggle: () => void,
+    onPositionChange: (position: { x: number, y: number }, isDragging?: boolean) => void
+}) => {
+    return createPortal(
+        <Modal
+            key={modal.customKey}
+            customKey={modal.customKey}
+            title={modal.title}
+            body={modal.body}
+            footer={modal.footer}
+            onClose={onClose}
+            isMinimized={modal.minimized}
+            onMinimizeToggle={onMinimizeToggle}
+            position={modal.position}
+            onPositionChange={onPositionChange}
+        />,
+        document.body
+    );
+};
 
 // Modal container component that will persist across route changes
 const ModalContainer: React.FC = () => {

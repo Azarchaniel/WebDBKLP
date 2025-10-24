@@ -198,9 +198,10 @@ const extractLabeledData = async (page: Page, labelText: string): Promise<string
     }, labelText);
 };
 
+const DATABAZE_KNIH_TIMEOUT_MS = 8000; // 8 seconds overall per navigation / wait
 const databazeKnih = async (isbn: string): Promise<object | boolean> => {
     try {
-        console.log("DK called ", isbn);
+        console.info("DK called ", isbn);
         const browser = await puppeteer.launch({
             headless: true,
             args: ['--no-sandbox'],
@@ -208,7 +209,24 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         });
 
         const page: Page = await browser.newPage();
-        await page.goto('https://www.databazeknih.cz/search?q=' + isbn);
+        // Apply stricter (8s) timeouts for all waits & navigation
+        page.setDefaultNavigationTimeout(DATABAZE_KNIH_TIMEOUT_MS);
+        page.setDefaultTimeout(DATABAZE_KNIH_TIMEOUT_MS);
+
+        try {
+            await page.goto('https://www.databazeknih.cz/search?q=' + isbn, {
+                timeout: DATABAZE_KNIH_TIMEOUT_MS,
+                waitUntil: 'domcontentloaded'
+            });
+        } catch (navErr: any) {
+            if (navErr?.name === 'TimeoutError') {
+                console.error(`databazeKnih navigation timed out after ${DATABAZE_KNIH_TIMEOUT_MS}ms for ISBN ${isbn}`);
+            } else {
+                console.error(`databazeKnih navigation error for ISBN ${isbn}`, navErr);
+            }
+            await browser.close();
+            return false; // early exit on navigation failure
+        }
 
         // Check if no book was found
         const noBookFound = await getContentFromElement(page, "h1[class='oddown']", true);
@@ -247,7 +265,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 
         // Extract book data - using more robust selectors
         const title = await getContentFromElement(page, "h1") ||
-            await getContentFromElement(page, "h1[class*='od']");
+            await getContentFromElement(page, "h1[class='oddown_five']");
 
         const autor = await getContentFromElement(page, "span[class='author']") ||
             await getContentFromElement(page, "a[href*='/autori/']");
@@ -285,12 +303,12 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         const editionTitle = await extractLabeledData(page, "Edice:");
         const editionNo = getNumberFromString(await getContentFromElement(page, "em[class='info st_normal']"));
 
-        const urlDB = page.url();
+        const urlDB = await page.evaluate(() => location.href);
 
         // Image extraction with fallbacks
         let imgHref = '';
         try {
-            imgHref = await page.$eval("img[class*='kniha_img']", el => (el as HTMLImageElement).src);
+            imgHref = await page.$eval("img[alt*='Obálka knihy ']", el => (el as HTMLImageElement).src);
         } catch {
             try {
                 imgHref = await page.$eval("img[class*='cover']", el => (el as HTMLImageElement).src);
@@ -328,7 +346,11 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 
         return book;
 
-    } catch (error) {
+    } catch (error: any) {
+        if (error?.name === 'TimeoutError') {
+            console.error(`databazeKnih timed out (global catch) after ${DATABAZE_KNIH_TIMEOUT_MS}ms`);
+            return false;
+        }
         console.error("Error in databazeKnih", error);
         return {};
     }
@@ -405,7 +427,7 @@ export const mergeObjects = (baseObj: any, overrideObj: any): any => {
 const goodreads = async (isbn: string): Promise<object | boolean> => {
     if (isbn.length < 10) return false;
     try {
-        console.log("GR called ", isbn);
+        console.info("GR called ", isbn);
 
         const url = `https://www.goodreads.com/book/isbn/${isbn}?key=cvAALPZ596Xc4Fnrv6pnw`;
         const response = await axios.get(url);

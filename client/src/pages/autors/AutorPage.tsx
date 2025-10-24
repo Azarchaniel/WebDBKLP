@@ -115,7 +115,7 @@ export default function AutorPage() {
                 } else {
                     toast.success(
                         `Autor ${Array.isArray(res) ?
-                            stringifyAutors({ autor: res[0].data.autor }) :
+                            stringifyAutors({ autor: res[0].data.autor })[0].autorsFull :
                             stringifyAutors({ autor: res.data.autor })[0].autorsFull}
                         bol úspešne ${(formData as IAutor)._id ? "uložený" : "pridaný"}.`);
                 }

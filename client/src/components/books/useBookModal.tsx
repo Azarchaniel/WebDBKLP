@@ -1,8 +1,8 @@
-import React from 'react';
 import { useModal } from '@utils/context/ModalContext';
 import { IBook, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { BooksModalBody } from './BookModal';
+import { emptyBook } from '@utils';
 
 /**
  * Custom hook for managing Book modals with persistence across navigation
@@ -18,17 +18,47 @@ export const useBookModal = () => {
      */
     const openBookModal = (
         books: IBook[],
-        onSave: (formData: IBook | IBook[] | object) => void,
+        onSave: (formData: IBook | IBook[] | object) => Promise<any>,
         saveResultSuccess?: boolean
     ) => {
         // Generate a unique key for this modal instance
         const modalKey = books.length > 0 && books[0]._id
             ? `edit-book-${books[0]._id}`
             : `add-book-${Date.now()}`;
+        const isEdit = books.length > 0 && Boolean(books[0]?._id);
 
-        // Internal state for form data and validation
-        let formData: IBook | IBook[] | object = [];
+        // Internal mutable container for form data and validation (kept outside React state – updates trigger manual re-showModal)
+        // Initialize with original books (if any) so that an immediate save without edits preserves original data.
+        let formData: IBook[] | IBook | object = books && books.length ? books : [emptyBook];
         let validationErrors: ValidationError[] | undefined = undefined;
+        // Version to force remount of body component when clearing/reverting
+        let bodyVersion = 0;
+
+        // Helper to (re)render the modal with provided data
+        const reShow = (dataForBody: IBook[]) => {
+            bodyVersion += 1;
+            showModal({
+                customKey: modalKey,
+                title: isEdit ? 'Úprava knihy' : 'Pridanie knihy',
+                body: (
+                    <BooksModalBody
+                        key={`book-body-${modalKey}-${bodyVersion}`}
+                        data={dataForBody}
+                        onChange={handleChange}
+                        error={handleError}
+                    />
+                ),
+                footer: (
+                    <ModalButtons
+                        onSave={handleSave}
+                        onClear={handleClear}
+                        onRevert={handleRevert}
+                        error={validationErrors}
+                        saveResultSuccess={saveResultSuccess}
+                    />
+                )
+            });
+        };
 
         // Handler for form changes
         const handleChange = (data: IBook | IBook[] | object) => {
@@ -42,56 +72,42 @@ export const useBookModal = () => {
 
         // Handler for saving the book
         const handleSave = () => {
-            onSave(formData);
+            // Forward the promise so ModalButtons can manage spinner lifecycle
+            return onSave(formData);
         };
 
-        // Handler for clearing the form
+        // Handler to clear all inputs in the form
         const handleClear = () => {
-            // Reset to empty book
-            formData = [];
+            const currentArray: IBook[] = Array.isArray(formData)
+                ? (formData as IBook[])
+                : [(formData as IBook)];
 
-            // Re-render the modal with updated data
-            showModal({
-                customKey: modalKey,
-                title: books.length > 0 && books[0]._id ? 'Úprava knihy' : 'Pridanie knihy',
-                body: (
-                    <BooksModalBody
-                        data={[]}
-                        onChange={handleChange}
-                        error={handleError}
-                    />
-                ),
-                footer: (
-                    <ModalButtons
-                        onSave={handleSave}
-                        onClear={handleClear}
-                        error={validationErrors}
-                        saveResultSuccess={saveResultSuccess}
-                    />
-                )
-            });
+            const clearedArray: IBook[] = currentArray.map(() => ({ ...emptyBook } as IBook));
+
+            // Update internal data container
+            formData = clearedArray;
+            // Reset validation; BooksModalBody will recompute on mount/update
+            validationErrors = undefined;
+
+            // Re-render body with cleared data to propagate change to UI
+            reShow(clearedArray);
+        };
+
+        // Handler to revert form to the original object(s)
+        const handleRevert = () => {
+            const originalArray: IBook[] = (books && books.length ? books : [emptyBook]) as IBook[];
+
+            // Deep copy to decouple from any references
+            const revertedArray: IBook[] = JSON.parse(JSON.stringify(originalArray));
+
+            formData = revertedArray;
+            validationErrors = undefined;
+
+            reShow(revertedArray);
         };
 
         // Open the modal
-        showModal({
-            customKey: modalKey,
-            title: books.length > 0 && books[0]._id ? 'Úprava knihy' : 'Pridanie knihy',
-            body: (
-                <BooksModalBody
-                    data={books}
-                    onChange={handleChange}
-                    error={handleError}
-                />
-            ),
-            footer: (
-                <ModalButtons
-                    onSave={handleSave}
-                    onClear={handleClear}
-                    error={validationErrors}
-                    saveResultSuccess={saveResultSuccess}
-                />
-            )
-        });
+        reShow(books && books.length ? books : [emptyBook]);
 
         // Return a method to close the modal
         return {

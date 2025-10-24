@@ -1,4 +1,4 @@
-import React, { ReactElement, memo, useCallback, useState, useEffect, useRef } from "react";
+import React, { ReactElement, useCallback, useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle, faWindowMinimize, faWindowMaximize } from "@fortawesome/free-solid-svg-icons";
 import { ValidationError } from "type";
@@ -18,37 +18,7 @@ interface ModalProps {
     modalIndex?: number;
 }
 
-// Custom comparison function for memo to prevent unnecessary re-renders
-const arePropsEqual = (prevProps: ModalProps, nextProps: ModalProps) => {
-    // Always re-render if these core props change
-    if (prevProps.title !== nextProps.title ||
-        prevProps.customKey !== nextProps.customKey ||
-        prevProps.isMinimized !== nextProps.isMinimized) {
-        return false;
-    }
-
-    // For position changes during dragging, skip re-renders
-    // This is critical for performance
-    const prevPosition = prevProps.position;
-    const nextPosition = nextProps.position;
-
-    if (prevPosition && nextPosition &&
-        prevPosition.x !== null && prevPosition.y !== null &&
-        nextPosition.x !== null && nextPosition.y !== null) {
-        // Only re-render if the position change is significant (>5px)
-        const xDiff = Math.abs((prevPosition.x || 0) - (nextPosition.x || 0));
-        const yDiff = Math.abs((prevPosition.y || 0) - (nextPosition.y || 0));
-
-        // Skip small movements to improve performance
-        if (xDiff < 5 && yDiff < 5) {
-            return true; // skip re-render
-        }
-    }
-
-    // For all other props, do a normal comparison
-    return false;
-};
-export const Modal: React.FC<ModalProps> = memo(({
+export const Modal: React.FC<ModalProps> = ({
     customKey,
     title,
     body,
@@ -98,33 +68,34 @@ export const Modal: React.FC<ModalProps> = memo(({
     // Window boundaries with padding
     const PADDING = 5; // 5px padding from the edges
 
-    // Handle the start of the drag - simplified to match LoginModal behavior
     const onMouseDown = useCallback((e: React.MouseEvent) => {
         if (e.button !== 0) return; // Only left mouse button
 
         if (modalRef.current) {
-            // Get the current position of the modal
             const modalRect = modalRef.current.getBoundingClientRect();
 
-            // Calculate the position of the mouse relative to the modal
-            const relX = e.clientX - modalRect.left;
-            const relY = e.clientY - modalRect.top;
+            // Always use the current visual position from getBoundingClientRect()
+            // This ensures we get the exact pixel position regardless of how it's currently positioned
+            const currentX = modalRect.left;
+            const currentY = modalRect.top;
 
-            setRel({ x: relX, y: relY });
+            setRel({
+                x: e.clientX - currentX,
+                y: e.clientY - currentY
+            });
 
-            // If this is the first time dragging, set initial position to current position
-            if (position.x === null || position.y === null) {
-                setPosition({
-                    x: modalRect.left,
-                    y: modalRect.top
-                });
-            }
+            // Always set explicit position to prevent jump
+            setPosition({
+                x: currentX,
+                y: currentY
+            });
 
             setDragging(true);
             e.stopPropagation();
             e.preventDefault();
         }
-    }, [position.x, position.y]);    // Enhanced drag motion handler with better edge handling
+    }, [setPosition]);
+
     const onMouseMove = useCallback((e: MouseEvent) => {
         if (!dragging) return;
 
@@ -198,6 +169,7 @@ export const Modal: React.FC<ModalProps> = memo(({
         e.stopPropagation();
         e.preventDefault();
     }, [dragging]);        // Set up and clean up event listeners - simplified
+
     useEffect(() => {
         if (dragging) {
             document.addEventListener("mousemove", onMouseMove);
@@ -243,17 +215,21 @@ export const Modal: React.FC<ModalProps> = memo(({
         }
     }, [minimized, position, previousPosition, onMinimizeToggle]);
 
+    const hasExplicitPosition = position.x !== null && position.y !== null;
+
     const modalStyle: React.CSSProperties = {
         ...overrideStyle,
-        position: position.x !== null && position.y !== null ? "fixed" : undefined,
-        left: position.x !== null ? position.x : undefined,
-        top: position.y !== null ? position.y : undefined,
-        margin: position.x !== null || position.y !== null ? 0 : undefined,
-        zIndex: 1010, // Increased z-index to ensure it's always on top
+        position: "fixed",
+        left: hasExplicitPosition ? position.x! : "50%",
+        top: hasExplicitPosition ? position.y! : "50%",
+        transform: hasExplicitPosition ? undefined : "translate(-50%, -50%)",
+        margin: 0,
+        zIndex: 1010,
         width: minimized ? "100px" : undefined,
-        transition: dragging ? "none" : "width 0.2s ease, height 0.2s ease", // Disable transitions during drag
+        // Remove transition during drag to prevent visual lag
+        transition: dragging ? "none" : "all 0.2s ease",
         maxHeight: minimized ? "50px" : "80vh",
-        boxShadow: minimized ? "0 2px 10px rgba(0, 0, 0, 0.3)" : undefined, // Add shadow when minimized for better visibility
+        boxShadow: minimized ? "0 2px 10px rgba(0, 0, 0, 0.3)" : undefined,
     };
 
     // Direct render instead of using portal since the context will handle the portal
@@ -308,7 +284,7 @@ export const Modal: React.FC<ModalProps> = memo(({
             </div>
         </div>
     );
-}, arePropsEqual);
+};
 
 export const showError = (error: string | any[] | undefined) => {
     if (!error || (Array.isArray(error) && error.length === 0)) return null;
@@ -328,11 +304,11 @@ export const showError = (error: string | any[] | undefined) => {
 };
 
 interface ModalButtonsProps {
-    onSave: () => void;
+    onSave: () => void | Promise<{ success: boolean; message: string } | any>;
     onClear: () => void;
     onRevert?: () => void;
     error?: ValidationError[] | undefined;
-    saveResultSuccess?: boolean;
+    saveResultSuccess?: boolean; // legacy flag, can be removed later
     saveLabel?: string;
     clearLabel?: string;
 }
@@ -347,27 +323,95 @@ export const ModalButtons: React.FC<ModalButtonsProps> = ({
     clearLabel = "Vymazať polia"
 }) => {
     const [loading, setLoading] = useState<boolean>(false);
+    const [statusMessage, setStatusMessage] = useState<{ success: boolean; message: string } | null>(null);
+    const startRef = useRef<number | null>(null);
+    const fallbackRef = useRef<number | null>(null);
+
+    // Timing configuration
+    const MIN_SPINNER_MS = 300;      // minimum visible spinner time
+    const AUTO_HIDE_MS = 5000;       // fallback for fire-and-forget saves without success signal
 
     useEffect(() => {
-        if (saveResultSuccess !== undefined && loading) setLoading(false);
+        // External success/failure arrived: hide spinner respecting minimum display time
+        if (loading && saveResultSuccess !== undefined) {
+            const elapsed = startRef.current ? performance.now() - startRef.current : 0;
+            const remaining = Math.max(MIN_SPINNER_MS - elapsed, 0);
+            setTimeout(() => setLoading(false), remaining);
+        }
     }, [saveResultSuccess, loading]);
 
+    // Cleanup fallback timeout on unmount or when loading ends
+    useEffect(() => {
+        if (!loading && fallbackRef.current) {
+            clearTimeout(fallbackRef.current);
+            fallbackRef.current = null;
+        }
+        return () => {
+            if (fallbackRef.current) {
+                clearTimeout(fallbackRef.current);
+                fallbackRef.current = null;
+            }
+        };
+    }, [loading]);
+
     const handleSave = useCallback(() => {
+        startRef.current = performance.now();
         setLoading(true);
-        onSave();
-    }, [onSave]);
+        let maybePromise: any;
+        try {
+            maybePromise = onSave();
+        } catch (err) {
+            // Synchronous exception: hide after minimum time
+            const elapsed = performance.now() - (startRef.current || performance.now());
+            const remaining = Math.max(MIN_SPINNER_MS - elapsed, 0);
+            setTimeout(() => setLoading(false), remaining);
+            return;
+        }
+
+        const isPromise = typeof maybePromise === 'object' && maybePromise !== null && typeof maybePromise.then === 'function';
+        if (isPromise) {
+            (maybePromise as Promise<any>)
+                .then((result) => {
+                    // Expecting { success, message }
+                    if (result && typeof result === 'object' && 'success' in result && 'message' in result) {
+                        setStatusMessage({ success: result.success, message: result.message });
+                    }
+                })
+                .finally(() => {
+                    const elapsed = performance.now() - (startRef.current || performance.now());
+                    const remaining = Math.max(MIN_SPINNER_MS - elapsed, 0);
+                    setTimeout(() => setLoading(false), remaining);
+                });
+        } else {
+            // Fire-and-forget: rely on external success flag, but ensure auto-hide eventually
+            if (fallbackRef.current) clearTimeout(fallbackRef.current);
+            fallbackRef.current = window.setTimeout(() => {
+                if (loading) setLoading(false);
+            }, AUTO_HIDE_MS);
+        }
+    }, [onSave, loading]);
 
     return (
-        <div className="column">
-            <div>{showError(error)}</div>
-            <div className="buttons">
+        <div className="modal-buttons-wrapper">
+            <div className="modal-footer-left">
+                {showError(error)}
+                {statusMessage && (
+                    <div
+                        className={`modal-status-message ${statusMessage.success ? 'success' : 'fail'}`}
+                        title={statusMessage.message}
+                    >
+                        {statusMessage.message}
+                    </div>
+                )}
+            </div>
+            <div className="buttons modal-footer-right">
                 <button
                     type="button"
                     className="btn btn-secondary"
                     onClick={onRevert}
                 >Vrátiť zmeny
                 </button>
-                <button type="button" className="btn btn-secondary" onClick={onClear}>
+                <button type="button" className="btn btn-secondary" onClick={() => { onClear(); setStatusMessage(null); }}>
                     {clearLabel}
                 </button>
                 <button

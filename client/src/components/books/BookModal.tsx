@@ -47,7 +47,9 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
 
     // clear form btn
     useEffect(() => {
-        if (formData && JSON.stringify(data) !== JSON.stringify(formData)) {
+        // Only reset formData if data is not empty and different from current formData
+        if (data && Array.isArray(data) && data.length > 0 &&
+            formData && JSON.stringify(data) !== JSON.stringify(formData)) {
             setFormData(normalizeBookData(data));
         }
     }, [data]);

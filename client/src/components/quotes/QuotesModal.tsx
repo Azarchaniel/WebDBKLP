@@ -1,9 +1,9 @@
-import {IQuote, ValidationError} from "../../type";
-import React, {useCallback, useEffect, useState} from "react";
-import {showError} from "../Modal";
-import {InputField, LazyLoadMultiselect} from "@components/inputs";
-import {Wysiwyg} from "../Wysiwyg";
-import {fetchBooks, fetchUsers, formPersonsFullName} from "@utils";
+import { IQuote, ValidationError } from "../../type";
+import React, { useCallback, useEffect, useState } from "react";
+import { showError } from "../Modal";
+import { InputField, LazyLoadMultiselect } from "@components/inputs";
+import { Wysiwyg } from "../Wysiwyg";
+import { fetchBooks, fetchUsers, formPersonsFullName } from "@utils";
 import TextArea from "@components/inputs/TextArea";
 
 interface BodyProps {
@@ -20,11 +20,11 @@ interface ButtonsProps {
     saveResultSuccess?: boolean;
 }
 
-export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: BodyProps) => {
+export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
     const [formData, setFormData] = useState<IQuote | any>(data);
     const [errors, setErrors] = useState<ValidationError[]>([
-        {label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"},
-        {label: "Musí byť vybraná kniha!", target: "fromBook"}
+        { label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text" },
+        { label: "Musí byť vybraná kniha!", target: "fromBook" }
     ]);
 
     useEffect(() => {
@@ -62,13 +62,13 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
         let localErrors: ValidationError[] = [];
 
         if (!(data?.text?.trim().length > 0)) {
-            localErrors.push({label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text"});
+            localErrors.push({ label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text" });
         } else {
             localErrors = localErrors?.filter((err: ValidationError) => err.target !== "text") ?? localErrors;
         }
 
         if (!data?.fromBook) {
-            localErrors.push({label: "Musí byť vybraná kniha!", target: "fromBook"});
+            localErrors.push({ label: "Musí byť vybraná kniha!", target: "fromBook" });
         } else {
             localErrors = localErrors?.filter((err: ValidationError) => err.target !== "fromBook") ?? localErrors;
         }
@@ -78,10 +78,11 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
     }, [formData])
 
     const handleInputChange = useCallback((input: any) => {
+        console.log("input change", input);
         let name: string, value: string;
 
         if ("target" in input) { // if it is a regular event
-            const {name: targetName, value: targetValue} = input.target;
+            const { name: targetName, value: targetValue } = input.target;
             name = targetName;
             value = targetValue;
         } else { // if it is MultiSelect custom answer
@@ -99,7 +100,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
             };
 
             const keys = name.split("."); // Split name into keys
-            const updatedData = {...prevData}; // Clone previous data
+            const updatedData = { ...prevData }; // Clone previous data
             setNestedValue(updatedData, keys, value); // Set nested value
 
             return updatedData;
@@ -132,7 +133,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
                     name="fromBook"
                     placeholder="*Z knihy"
                     onSearch={fetchBooks}
-                    //customerror={getErrorMsg("fromBook")}
+                //customerror={getErrorMsg("fromBook")}
                 />
             </div>
             <div>
@@ -173,7 +174,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({data, onChange, error}: Bo
     </form>)
 }
 
-export const QuotesModalButtons = ({saveQuote, cleanFields, error, saveResultSuccess}: ButtonsProps) => {
+export const QuotesModalButtons = ({ saveQuote, cleanFields, error, saveResultSuccess }: ButtonsProps) => {
     const [loadingResult, setLoadingResult] = useState<boolean | undefined>(false);
 
     useEffect(() => {
@@ -192,12 +193,12 @@ export const QuotesModalButtons = ({saveQuote, cleanFields, error, saveResultSuc
 
         <div className="buttons">
             <button type="button" className="btn btn-secondary"
-                    onClick={cleanFields}>Vymazať polia
+                onClick={cleanFields}>Vymazať polia
             </button>
             <button type="submit"
-                    disabled={Boolean(error?.length)}
-                    onClick={saveQuoteHandler}
-                    className="btn btn-success">Uložiť citát
+                disabled={Boolean(error?.length)}
+                onClick={saveQuoteHandler}
+                className="btn btn-success">Uložiť citát
             </button>
         </div>
     </div>)

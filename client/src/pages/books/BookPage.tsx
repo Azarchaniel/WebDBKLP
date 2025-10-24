@@ -161,36 +161,39 @@ export default function BookPage() {
 
     const { openBookModal } = useBookModal();
 
-    const handleSaveBook = (formData: IBook | object | IBook[]): void => {
+    const handleSaveBook = (formData: IBook | object | IBook[]): Promise<{ success: boolean; message: string }> => {
         setSaveBookSuccess(undefined);
 
-        addBook(formData)
+        return addBook(formData)
             .then((res) => {
+                let message = "";
                 if (Array.isArray(formData) && formData.length > 1) {
-                    let message = "";
                     if (res.length < 5) {
                         message = `${res.length} knihy boli úspešne upravené.`;
                     } else {
                         message = `${res.length} kníh bolo úspešne upravených.`;
                     }
-
                     toast.success(message);
                 } else {
-                    toast.success(
-                        `Kniha ${Array.isArray(res) ?
-                            res[0].data.book?.title :
-                            res.data.book?.title
-                        } bola úspešne ${(formData as IBook)._id ? "uložená" : "pridaná"}.`);
+                    const bookTitle = Array.isArray(res)
+                        ? res[0].data.book?.title
+                        : res.data.book?.title;
+                    message = `Kniha ${bookTitle} bola úspešne ${(formData as IBook)._id ? "uložená" : "pridaná"}.`;
+                    toast.success(message);
                 }
                 setSaveBookSuccess(true);
-                fetchBooks()
+                fetchBooks();
+                return { success: true, message };
             })
             .catch((err) => {
-                toast.error(err.response?.data?.error || "Chyba! Kniha nebola uložená!");
-                console.trace("Error saving books", err)
+                const message = err.response?.data?.error || "Chyba! Kniha nebola uložená!";
+                toast.error(message);
+                console.trace("Error saving books", err);
                 setSaveBookSuccess(false);
-            })
-    }
+                // Resolve with failure object (do not throw so modal can display message)
+                return { success: false, message };
+            });
+    };
 
     const handleUpdateBook = (_id?: string): void => {
         setSaveBookSuccess(undefined);
@@ -202,7 +205,8 @@ export default function BookPage() {
                 // Use the persistent modal for a single book
                 openBookModal(
                     [bookToUpdate],
-                    handleSaveBook
+                    handleSaveBook,
+                    saveBookSuccess
                 );
             } else {
                 getBook(_id)
@@ -211,7 +215,8 @@ export default function BookPage() {
                             // Use the persistent modal for fetched book
                             openBookModal(
                                 [data.book],
-                                handleSaveBook
+                                handleSaveBook,
+                                saveBookSuccess
                             );
                         }
                     })
@@ -226,7 +231,8 @@ export default function BookPage() {
             // Use the persistent modal for multiple selected books
             openBookModal(
                 selectedBooksData,
-                handleSaveBook
+                handleSaveBook,
+                saveBookSuccess
             );
         }
     }
@@ -320,7 +326,7 @@ export default function BookPage() {
 
     // Handle the add book button click
     const handleAddBook = () => {
-        openBookModal([], handleSaveBook);
+        openBookModal([], handleSaveBook, saveBookSuccess);
     };
 
     return (
