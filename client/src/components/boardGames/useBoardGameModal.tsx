@@ -30,33 +30,18 @@ export const useBoardGameModal = () => {
         let formData: IBoardGame[] | object = boardGames || [];
         let validationErrors: ValidationError[] | undefined = undefined;
 
-        // Handler for form changes
-        const handleChange = (data: IBoardGame[] | object) => {
-            formData = data;
-        };
+        const getTitle = () => boardGames.length > 0 && boardGames[0]._id ? 'Uprav spoločenskú hru' : 'Pridaj spoločenskú hru';
 
-        // Handler for form validation errors
-        const handleError = (errors: ValidationError[] | undefined) => {
-            validationErrors = errors;
-        };
+        // Helper to render the modal with given data
+        const renderModal = (data: IBoardGame[] | object, includeRevert: boolean = true) => {
+            const dataArray = Array.isArray(data) ? data : [data as IBoardGame];
 
-        // Handler for saving the board game
-        const handleSave = () => {
-            onSave(formData);
-        };
-
-        // Handler for clearing the form
-        const handleClear = () => {
-            // Reset to empty board game
-            formData = [{}];
-
-            // Re-render the modal with updated data
             showModal({
                 customKey: modalKey,
-                title: boardGames.length > 0 && boardGames[0]._id ? 'Uprav spoločenskú hru' : 'Pridaj spoločenskú hru',
+                title: getTitle(),
                 body: (
                     <BoardGamesModalBody
-                        data={[{}] as IBoardGame[]}
+                        data={dataArray}
                         onChange={handleChange}
                         error={handleError}
                     />
@@ -65,29 +50,7 @@ export const useBoardGameModal = () => {
                     <ModalButtons
                         onSave={handleSave}
                         onClear={handleClear}
-                        onRevert={() => {
-                            formData = boardGames;
-                            showModal({
-                                customKey: modalKey,
-                                title: boardGames.length > 0 && boardGames[0]._id ? 'Uprav spoločenskú hru' : 'Pridaj spoločenskú hru',
-                                body: (
-                                    <BoardGamesModalBody
-                                        data={boardGames}
-                                        onChange={handleChange}
-                                        error={handleError}
-                                    />
-                                ),
-                                footer: (
-                                    <ModalButtons
-                                        onSave={handleSave}
-                                        onClear={handleClear}
-                                        onRevert={() => { }}
-                                        error={validationErrors}
-                                        saveResultSuccess={saveResultSuccess}
-                                    />
-                                )
-                            });
-                        }}
+                        onRevert={includeRevert ? handleRevert : undefined}
                         error={validationErrors}
                         saveResultSuccess={saveResultSuccess}
                     />
@@ -95,49 +58,38 @@ export const useBoardGameModal = () => {
             });
         };
 
+        // Handler for form changes
+        const handleChange = (data: IBoardGame[] | object) => {
+            formData = data;
+        };
+
+        // Handler for form validation errors
+        const handleError = (errors: ValidationError[] | undefined) => {
+            validationErrors = errors;
+            renderModal(formData);
+        };
+
+        // Handler for saving the board game
+        const handleSave = () => {
+            return onSave(formData);
+        };
+
+        // Handler for clearing the form
+        const handleClear = () => {
+            formData = [{}];
+            validationErrors = undefined;
+            renderModal(formData);
+        };
+
+        // Handler for reverting changes
+        const handleRevert = () => {
+            formData = boardGames;
+            validationErrors = undefined;
+            renderModal(boardGames);
+        };
+
         // Open the modal
-        showModal({
-            customKey: modalKey,
-            title: boardGames.length > 0 && boardGames[0]._id ? 'Uprav spoločenskú hru' : 'Pridaj spoločenskú hru',
-            body: (
-                <BoardGamesModalBody
-                    data={boardGames}
-                    onChange={handleChange}
-                    error={handleError}
-                />
-            ),
-            footer: (
-                <ModalButtons
-                    onSave={handleSave}
-                    onClear={handleClear}
-                    onRevert={() => {
-                        formData = boardGames;
-                        showModal({
-                            customKey: modalKey,
-                            title: boardGames.length > 0 && boardGames[0]._id ? 'Uprav spoločenskú hru' : 'Pridaj spoločenskú hru',
-                            body: (
-                                <BoardGamesModalBody
-                                    data={boardGames}
-                                    onChange={handleChange}
-                                    error={handleError}
-                                />
-                            ),
-                            footer: (
-                                <ModalButtons
-                                    onSave={handleSave}
-                                    onClear={handleClear}
-                                    onRevert={() => { }}
-                                    error={validationErrors}
-                                    saveResultSuccess={saveResultSuccess}
-                                />
-                            )
-                        });
-                    }}
-                    error={validationErrors}
-                    saveResultSuccess={saveResultSuccess}
-                />
-            )
-        });
+        renderModal(boardGames);
 
         // Return a method to close the modal
         return {

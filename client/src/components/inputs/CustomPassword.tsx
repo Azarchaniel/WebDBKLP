@@ -14,7 +14,6 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
     const [maskedPassword, setMaskedPassword] = useState(''); // Masked display value
     const [realPassword, setRealPassword] = useState(''); // Actual stored password
     const [showPassword, setShowPassword] = useState(false);
-    const [hasFocus, setHasFocus] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
     const hiddenPasswordRef = useRef<HTMLInputElement>(null);
 
@@ -22,13 +21,6 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
     const getRandomMaskCharacter = () => {
         return maskCharacters[Math.floor(Math.random() * maskCharacters.length)];
     };
-
-    // Keep focus when password state changes
-    useEffect(() => {
-        if (hasFocus && inputRef.current) {
-            inputRef.current.focus();
-        }
-    }, [realPassword.length, hasFocus]);
 
     const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = event.target.value;
@@ -169,64 +161,28 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
         setShowPassword((prev) => !prev); // Toggle the showPassword state
     };
 
-    // Update hidden field handler to sync changes from autofill
-    const handleHiddenInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newPassword = e.target.value;
-        setRealPassword(newPassword);
-
-        // Generate masked password for display
-        const newMaskedPassword = Array.from(newPassword)
-            .map(() => getRandomMaskCharacter())
-            .join('');
-        setMaskedPassword(newMaskedPassword);
-
-        // Call the parent callback
-        if (onPasswordChange) {
-            onPasswordChange(newPassword);
-        }
-    };
-
-    const handleFocus = () => {
-        setHasFocus(true);
-    };
-
-    const handleBlur = () => {
-        setHasFocus(false);
-    };
-
     return (
         <div className="passwordContainer">
-            {/* Hidden real password field for password managers to detect */}
-            <input
-                type="password"
-                ref={hiddenPasswordRef}
-                style={{
-                    position: "absolute",
-                    opacity: 0,
-                    height: 0,
-                    width: 0,
-                    zIndex: -1
-                }}
-                name="password"
-                id="password"
-                value={realPassword}
-                onChange={handleHiddenInputChange}
-                autoComplete="current-password"
-            />
-
-            <input
-                ref={inputRef}
-                type="text"
-                className="form-control"
-                placeholder={placeholder}
-                value={showPassword ? realPassword : maskedPassword}
-                onChange={handleInput}
-                onPaste={handlePaste}
-                onFocus={handleFocus}
-                onBlur={handleBlur}
-                aria-label="Password"
-                style={{ paddingRight: '3rem' }} // Make room for the toggle button
-            />
+            {realPassword.length === 0 ? (
+                <input
+                    type="password"
+                    className="form-control"
+                    onChange={handleInput}
+                    value={realPassword}
+                    placeholder={placeholder}
+                />
+            ) : (
+                <input
+                    ref={inputRef}
+                    type="text"
+                    className="form-control"
+                    placeholder={placeholder}
+                    value={showPassword ? realPassword : maskedPassword}
+                    onChange={handleInput}
+                    onPaste={handlePaste}
+                    autoComplete="true"
+                />
+            )}
 
             {/* Always render the button but conditionally show it */}
             <button
@@ -239,9 +195,9 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
                 }}
             >
                 {showPassword ? (
-                    <i className="fa fa-eye-slash"></i> // Hide icon
+                    <i className="fa fa-eye-slash"></i>
                 ) : (
-                    <i className="fa fa-eye"></i> // Show icon
+                    <i className="fa fa-eye"></i>
                 )}
             </button>
         </div>

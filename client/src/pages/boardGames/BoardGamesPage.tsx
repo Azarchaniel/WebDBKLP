@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IBoardGame, IBookColumnVisibility } from "../../type";
+import { IBoardGame, IBookColumnVisibility, SaveEntity, SaveEntityResult } from "../../type";
 import { getBoardGames, addBoardGame, deleteBoardGame, getBoardGame, countBGchildren } from "../../API";
 import { toast } from "react-toastify";
 import {
@@ -71,51 +71,58 @@ export default function BoardGamesPage() {
             .finally(() => setLoading(false));
     };
 
-    const handleSaveBoardGame = (formData: IBoardGame | IBoardGame[] | object): void => {
+    const handleSaveBoardGame = async (formData: SaveEntity<IBoardGame>): Promise<SaveEntityResult> => {
         setSaveBoardGameSuccess(undefined);
+        const isNewBoardGame = Array.isArray(formData)
+            ? formData.some((bg) => !(bg as IBoardGame)._id)
+            : !(formData as IBoardGame)._id;
 
-        addBoardGame(formData)
-            .then(({ status }) => {
-                if (status !== 201) {
-                    // Handle error based on whether it's a single game or multiple games
-                    if (Array.isArray(formData)) {
-                        toast.error(`Chyba! Spoločenské hry neboli upravené.`);
+        if (Array.isArray(formData) && formData.length > 1) {
+            // Multi-edit support
+            return Promise.all(formData.map(bg => addBoardGame(bg)))
+                .then((results) => {
+                    let message = "";
+                    if (results.length < 5) {
+                        message = `${results.length} spoločenské hry boli úspešne upravené.`;
                     } else {
-                        toast.error(`Chyba! Spoločenská hra ${(formData as IBoardGame)?.title || ''} nebola ${(formData as IBoardGame)._id ? "upravená" : "pridaná"}.`);
+                        message = `${results.length} spoločenských hier bolo úspešne upravených.`;
                     }
-                    throw new Error("Error! Board game was not added/updated!");
-                }
-
-                // Handle success messages
-                if (Array.isArray(formData)) {
-                    const count = formData.length;
-                    if (count === 1) {
-                        // Single game in array
-                        toast.success(`Spoločenská hra ${formData[0]?.title || ''} bola úspešne ${formData[0]._id ? "upravená" : "pridaná"}.`);
-                    } else {
-                        // Multiple games
-                        toast.success(
-                            count < 5
-                                ? `${count} spoločenské hry boli úspešne upravené.`
-                                : `${count} spoločenských hier bolo úspešne upravených.`
-                        );
+                    toast.success(message);
+                    setSaveBoardGameSuccess(true);
+                    fetchBoardGames();
+                    return { success: true, message };
+                })
+                .catch((err) => {
+                    setSaveBoardGameSuccess(false);
+                    const message = "Niektoré spoločenské hry sa nepodarilo uložiť!";
+                    toast.error(message);
+                    console.trace(err);
+                    return { success: false, message };
+                });
+        } else {
+            return addBoardGame(Array.isArray(formData) ? formData[0] : (formData as IBoardGame))
+                .then(({ status, data }) => {
+                    let message = "";
+                    if (status !== 201) {
+                        message = `Chyba! Spoločenská hra ${data?.boardGame?.title || ''} nebola ${!isNewBoardGame ? "upravená" : "pridaná"}.`;
+                        toast.error(message);
+                        setSaveBoardGameSuccess(false);
+                        return { success: false, message };
                     }
-                } else {
-                    // Single game object
-                    toast.success(`Spoločenská hra ${(formData as IBoardGame)?.title || ''} bola úspešne ${(formData as IBoardGame)._id ? "upravená" : "pridaná"}.`);
-                }
-
-                setSaveBoardGameSuccess(true);
-                fetchBoardGames();
-            })
-            .catch((err) => {
-                // Handle specific API errors if they exist
-                if (err.response?.data?.error) {
-                    toast.error(err.response.data.error);
-                }
-                console.trace(err);
-                setSaveBoardGameSuccess(false);
-            });
+                    message = `Spoločenská hra ${data?.boardGame?.title || ''} bola úspešne ${!isNewBoardGame ? "upravená" : "pridaná"}.`;
+                    toast.success(message);
+                    setSaveBoardGameSuccess(true);
+                    fetchBoardGames();
+                    return { success: true, message };
+                })
+                .catch((err) => {
+                    setSaveBoardGameSuccess(false);
+                    const message = "Spoločenská hra sa nepodarilo pridať!";
+                    toast.error(message);
+                    console.trace(err);
+                    return { success: false, message };
+                });
+        }
     };
 
     const handleUpdateBoardGame = (_id?: string): void => {

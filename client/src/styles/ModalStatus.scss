@@ -3,21 +3,21 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    gap: 0.75rem;
     align-items: flex-start;
     flex-wrap: wrap;
-    flex-direction: row;
+    flex-direction: column;
 }
 
 .modal-footer-left {
     flex: 1 1 auto;
     min-width: 200px;
+    width: 100%;
 }
 
 .modal-footer-right {
     display: flex;
-    gap: 0.5rem;
     align-items: center;
+    width: 100%;
 }
 
 .modal-status-message {

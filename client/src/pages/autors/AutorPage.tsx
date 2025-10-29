@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { IAutor, IBookColumnVisibility } from "../../type";
+import { IAutor, IBookColumnVisibility, SaveEntity, SaveEntityResult } from "../../type";
 import { addAutor, deleteAutor, getAutor, getAutorInfo, getAutors, getMultipleAutorsInfo } from "../../API";
 import { toast } from "react-toastify";
 import {
@@ -98,34 +98,38 @@ export default function AutorPage() {
             .finally(() => setLoading(false));
     }
 
-    const handleSaveAutor = (formData: IAutor | object | IAutor[]): void => {
+    const handleSaveAutor = async (formData: SaveEntity<IAutor>): Promise<SaveEntityResult> => {
         setSaveAutorSuccess(undefined);
+        const isNewAutor = Array.isArray(formData)
+            ? formData.some((autor) => !(autor as IAutor)._id)
+            : !(formData as IAutor)._id;
 
-        addAutor(formData)
+        return addAutor(formData)
             .then((res) => {
+                let message = "";
                 if (Array.isArray(formData) && formData.length > 1) {
-                    let message = "";
                     if (res.length < 5) {
                         message = `${res.length} autori boli úspešne upravení.`;
                     } else {
                         message = `${res.length} autorov bolo úspešne upravených.`;
                     }
-
-                    toast.success(message);
                 } else {
-                    toast.success(
-                        `Autor ${Array.isArray(res) ?
-                            stringifyAutors({ autor: res[0].data.autor })[0].autorsFull :
-                            stringifyAutors({ autor: res.data.autor })[0].autorsFull}
-                        bol úspešne ${(formData as IAutor)._id ? "uložený" : "pridaný"}.`);
+                    message = `Autor ${Array.isArray(res) ?
+                        stringifyAutors({ autor: res[0].data.autor })[0].autorsFull :
+                        stringifyAutors({ autor: res.data.autor })[0].autorsFull}
+                        bol úspešne ${!isNewAutor ? "uložený" : "pridaný"}.`;
                 }
+                toast.success(message);
                 setSaveAutorSuccess(true)
                 fetchAutors();
+                return { success: true, message };
             })
             .catch((err) => {
-                toast.error(err.response?.data?.error || "Chyba! Autor nebol uložený!");
+                const message = err.response?.data?.error || "Chyba! Autor nebol uložený!";
+                toast.error(message);
                 console.trace("Error saving autor", err)
                 setSaveAutorSuccess(false);
+                return { success: false, message };
             });
     }
 
@@ -286,7 +290,7 @@ export default function AutorPage() {
 
     // Handle adding a new autor
     const handleAddAutor = () => {
-        openAutorModal([], handleSaveAutor);
+        openAutorModal([], handleSaveAutor, saveAutorSuccess);
     };
 
     return (

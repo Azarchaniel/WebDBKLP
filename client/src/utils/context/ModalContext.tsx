@@ -281,7 +281,6 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         // During active dragging, don't update React state
         if (isDragging) {
-            console.log("Modal is dragging, skipping React state update:", key);
             // Mark this modal as currently being dragged
             activeDragState.activeModalKey = key;
 
@@ -312,7 +311,6 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         // For non-dragging updates (like initial positioning or minimize/maximize),
         // update React state directly but still use requestAnimationFrame for smoothness
-        console.log("Non-dragging position update, updating React state:", key, position);
         const modalData = positionUpdatesRef.current.get(key);
         if (modalData?.rafId) {
             cancelAnimationFrame(modalData.rafId);

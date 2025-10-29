@@ -273,3 +273,10 @@ export interface IBoardGame {
     parent?: IBoardGame[];
     children?: IBoardGame[];
 }
+
+export type SaveEntity<T> = T | T[] | object;
+
+export interface SaveEntityResult {
+    success: boolean;
+    message: string;
+}

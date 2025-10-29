@@ -27,60 +27,21 @@ export const useLPModal = () => {
             : `add-lp-${Date.now()}`;
 
         // Internal state for form data and validation
-        let formData: ILP[] | ILP | object = [];
+        let formData: ILP[] | ILP | object = lps || [];
         let validationErrors: ValidationError[] | undefined = undefined;
 
-        // Handler for form changes
-        const handleChange = (data: ILP[] | ILP | object) => {
-            formData = data;
-        };
+        const getTitle = () => lps.length > 0 && lps[0]._id ? 'Úprava LP' : 'Pridanie LP';
 
-        // Handler for form validation errors
-        const handleError = (errors: ValidationError[] | undefined) => {
-            validationErrors = errors;
-        };
+        // Helper to render the modal with given data
+        const renderModal = (data: ILP[] | ILP | object) => {
+            const dataArray = Array.isArray(data) ? data : [data as ILP];
 
-        // Handler for saving the LP
-        const handleSave = () => {
-            onSave(formData);
-        };
-
-        // Handler for clearing the form
-        const handleClear = () => {
-            // Reset to empty LP
-            formData = [{}] as ILP[];
-
-            // Re-render the modal with updated data
             showModal({
                 customKey: modalKey,
-                title: lps.length > 0 && lps[0]._id ? 'Úprava LP' : 'Pridanie LP',
+                title: getTitle(),
                 body: (
                     <LPsModalBody
-                        data={[]}
-                        onChange={handleChange}
-                        error={handleError}
-                    />
-                ),
-                footer: (
-                    <ModalButtons
-                        onSave={handleSave}
-                        onClear={handleClear}
-                        error={validationErrors}
-                        saveResultSuccess={saveResultSuccess}
-                    />
-                )
-            });
-        };
-
-        // Handler for reverting changes
-        const handleRevert = () => {
-            // Re-render the modal with original data
-            showModal({
-                customKey: modalKey,
-                title: lps.length > 0 && lps[0]._id ? 'Úprava LP' : 'Pridanie LP',
-                body: (
-                    <LPsModalBody
-                        data={lps}
+                        data={dataArray}
                         onChange={handleChange}
                         error={handleError}
                     />
@@ -97,27 +58,38 @@ export const useLPModal = () => {
             });
         };
 
+        // Handler for form changes
+        const handleChange = (data: ILP[] | ILP | object) => {
+            formData = data;
+        };
+
+        // Handler for form validation errors
+        const handleError = (errors: ValidationError[] | undefined) => {
+            validationErrors = errors;
+            renderModal(formData);
+        };
+
+        // Handler for saving the LP
+        const handleSave = () => {
+            return onSave(formData);
+        };
+
+        // Handler for clearing the form
+        const handleClear = () => {
+            formData = [{}] as ILP[];
+            validationErrors = undefined;
+            renderModal(formData);
+        };
+
+        // Handler for reverting changes
+        const handleRevert = () => {
+            formData = lps;
+            validationErrors = undefined;
+            renderModal(lps);
+        };
+
         // Open the modal
-        showModal({
-            customKey: modalKey,
-            title: lps.length > 0 && lps[0]._id ? 'Úprava LP' : 'Pridanie LP',
-            body: (
-                <LPsModalBody
-                    data={lps}
-                    onChange={handleChange}
-                    error={handleError}
-                />
-            ),
-            footer: (
-                <ModalButtons
-                    onSave={handleSave}
-                    onClear={handleClear}
-                    onRevert={handleRevert}
-                    error={validationErrors}
-                    saveResultSuccess={saveResultSuccess}
-                />
-            )
-        });
+        renderModal(lps);
 
         // Return a method to close the modal
         return {

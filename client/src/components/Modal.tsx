@@ -70,6 +70,8 @@ export const Modal: React.FC<ModalProps> = ({
 
     const onMouseDown = useCallback((e: React.MouseEvent) => {
         if (e.button !== 0) return; // Only left mouse button
+        // Only start dragging if clicking directly on the header, not its children (e.g. buttons)
+        if (e.target !== e.currentTarget) return;
 
         if (modalRef.current) {
             const modalRect = modalRef.current.getBoundingClientRect();
@@ -260,7 +262,7 @@ export const Modal: React.FC<ModalProps> = ({
                         <button
                             type="button"
                             className="minimizeModal"
-                            onClick={toggleMinimize}
+                            onClick={e => { e.stopPropagation(); toggleMinimize(); }}
                             title={minimized ? "Maximalizovať okno" : "Minimalizovať okno"}
                         >
                             <FontAwesomeIcon icon={minimized ? faWindowMaximize : faWindowMinimize} />
@@ -268,7 +270,7 @@ export const Modal: React.FC<ModalProps> = ({
                         <button
                             type="button"
                             className="closeModal"
-                            onClick={onClose}
+                            onClick={e => { e.stopPropagation(); if (onClose) onClose(); }}
                             title="Zavrieť okno"
                         >
                             &times;

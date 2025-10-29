@@ -1,4 +1,4 @@
-import { IBookColumnVisibility, ILP } from "../../type";
+import { IBookColumnVisibility, ILP, SaveEntity, SaveEntityResult } from "../../type";
 import { useEffect, useRef, useState } from "react";
 import { addLP, deleteLP, getLPs, getLP } from "../../API";
 import { toast } from "react-toastify";
@@ -77,43 +77,57 @@ export default function LPPage() {
             .finally(() => setLoading(false));
     }
 
-    const handleSaveLP = (formData: ILP[] | ILP | object): void => {
+    const handleSaveLP = async (formData: SaveEntity<ILP>): Promise<SaveEntityResult> => {
         setSaveLpSuccess(undefined);
-        // Multi-edit support
+        const isNewLp = Array.isArray(formData)
+            ? formData.some((lp) => !(lp as ILP)._id)
+            : !(formData as ILP)._id;
+
         if (Array.isArray(formData) && formData.length > 1) {
-            // TODO: Implement batch update API if available, else loop
-            Promise.all(formData.map(lp => addLP(lp)))
+            // Multi-edit support
+            return Promise.all(formData.map(lp => addLP(lp)))
                 .then((results) => {
-                    toast.success(`Uložených ${results.length} LP.`);
+                    let message = "";
+                    if (results.length < 5) {
+                        message = `${results.length} LP boli úspešne upravené.`;
+                    } else {
+                        message = `${results.length} LP bolo úspešne upravených.`;
+                    }
+                    toast.success(message);
                     setSaveLpSuccess(true);
                     fetchLPs();
+                    return { success: true, message };
                 })
                 .catch((err) => {
                     setSaveLpSuccess(false);
-                    toast.error("Niektoré LP sa nepodarilo uložiť!");
+                    const message = "Niektoré LP sa nepodarilo uložiť!";
+                    toast.error(message);
                     console.trace(err);
+                    return { success: false, message };
                 });
         } else {
-            addLP(Array.isArray(formData) ? formData[0] : (formData as ILP))
-                .then(({ status, data }) => {
-                    let isEdit = false;
-                    if (Array.isArray(formData)) {
-                        isEdit = !!formData[0]?._id;
-                    } else if (typeof formData === 'object' && formData !== null && '_id' in formData) {
-                        isEdit = !!(formData as any)._id;
+            return addLP(Array.isArray(formData) ? formData[0] : (formData as ILP))
+                .then((result) => {
+                    console.log(result.status, result.data)
+                    let message = "";
+                    if (result.status !== 201) {
+                        message = `Chyba! LP ${result.data.lp?.title} nebolo ${!isNewLp ? "uložené" : "pridané"}.`;
+                        toast.error(message);
+                        setSaveLpSuccess(false);
+                        return { success: false, message };
                     }
-                    if (status !== 201) {
-                        toast.error(`Chyba! LP ${data.lp?.title} nebolo ${isEdit ? "uložené" : "pridané"}.`)
-                        throw new Error("LP sa nepodarilo pridať!")
-                    }
-                    toast.success(`LP ${data.lp?.title} bolo úspešne ${isEdit ? "uložené" : "pridané"}.`);
+                    message = `LP ${result.data.lp?.title} bolo úspešne ${!isNewLp ? "uložené" : "pridané"}.`;
+                    toast.success(message);
                     setSaveLpSuccess(true);
-                    setLPs(stringifyAutors(data.lps));
+                    setLPs(stringifyAutors(result.data.lps));
+                    return { success: true, message };
                 })
                 .catch((err) => {
                     setSaveLpSuccess(false);
-                    toast.error("LP sa nepodarilo pridať!");
+                    const message = "LP sa nepodarilo pridať!";
+                    toast.error(message);
                     console.trace(err);
+                    return { success: false, message };
                 });
         }
     }

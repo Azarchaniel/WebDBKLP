@@ -34,16 +34,20 @@ export const useBookModal = () => {
         // Version to force remount of body component when clearing/reverting
         let bodyVersion = 0;
 
+        const getTitle = () => isEdit ? 'Úprava knihy' : 'Pridanie knihy';
+
         // Helper to (re)render the modal with provided data
-        const reShow = (dataForBody: IBook[]) => {
-            bodyVersion += 1;
+        const renderModal = (data: IBook[] | IBook | object, forceRemount: boolean = false) => {
+            if (forceRemount) bodyVersion += 1;
+            const dataArray = Array.isArray(data) ? data : [data as IBook];
+
             showModal({
                 customKey: modalKey,
-                title: isEdit ? 'Úprava knihy' : 'Pridanie knihy',
+                title: getTitle(),
                 body: (
                     <BooksModalBody
                         key={`book-body-${modalKey}-${bodyVersion}`}
-                        data={dataForBody}
+                        data={dataArray}
                         onChange={handleChange}
                         error={handleError}
                     />
@@ -68,6 +72,7 @@ export const useBookModal = () => {
         // Handler for form validation errors
         const handleError = (errors: ValidationError[] | undefined) => {
             validationErrors = errors;
+            renderModal(formData);
         };
 
         // Handler for saving the book
@@ -84,13 +89,9 @@ export const useBookModal = () => {
 
             const clearedArray: IBook[] = currentArray.map(() => ({ ...emptyBook } as IBook));
 
-            // Update internal data container
             formData = clearedArray;
-            // Reset validation; BooksModalBody will recompute on mount/update
             validationErrors = undefined;
-
-            // Re-render body with cleared data to propagate change to UI
-            reShow(clearedArray);
+            renderModal(clearedArray, true);
         };
 
         // Handler to revert form to the original object(s)
@@ -102,12 +103,11 @@ export const useBookModal = () => {
 
             formData = revertedArray;
             validationErrors = undefined;
-
-            reShow(revertedArray);
+            renderModal(revertedArray, true);
         };
 
         // Open the modal
-        reShow(books && books.length ? books : [emptyBook]);
+        renderModal(books && books.length ? books : [emptyBook]);
 
         // Return a method to close the modal
         return {

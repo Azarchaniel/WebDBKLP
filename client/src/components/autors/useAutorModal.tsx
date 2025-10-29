@@ -27,60 +27,21 @@ export const useAutorModal = () => {
             : `add-autor-${Date.now()}`;
 
         // Internal state for form data and validation
-        let formData: IAutor[] | object = [];
+        let formData: IAutor[] | object = autors || [];
         let validationErrors: ValidationError[] | undefined = undefined;
 
-        // Handler for form changes
-        const handleChange = (data: IAutor[] | object) => {
-            formData = data;
-        };
+        const getTitle = () => autors.length > 0 && autors[0]._id ? 'Úprava autora' : 'Pridanie autora';
 
-        // Handler for form validation errors
-        const handleError = (errors: ValidationError[] | undefined) => {
-            validationErrors = errors;
-        };
+        // Helper to render the modal with given data
+        const renderModal = (data: IAutor[] | object) => {
+            const dataArray = Array.isArray(data) ? data : [data as IAutor];
 
-        // Handler for saving the autor
-        const handleSave = () => {
-            onSave(formData);
-        };
-
-        // Handler for clearing the form
-        const handleClear = () => {
-            // Reset to empty autor
-            formData = [{}] as IAutor[];
-
-            // Re-render the modal with updated data
             showModal({
                 customKey: modalKey,
-                title: autors.length > 0 && autors[0]._id ? 'Úprava autora' : 'Pridanie autora',
+                title: getTitle(),
                 body: (
                     <AutorsModalBody
-                        data={[]}
-                        onChange={handleChange}
-                        error={handleError}
-                    />
-                ),
-                footer: (
-                    <ModalButtons
-                        onSave={handleSave}
-                        onClear={handleClear}
-                        error={validationErrors}
-                        saveResultSuccess={saveResultSuccess}
-                    />
-                )
-            });
-        };
-
-        // Handler for reverting changes
-        const handleRevert = () => {
-            // Re-render the modal with original data
-            showModal({
-                customKey: modalKey,
-                title: autors.length > 0 && autors[0]._id ? 'Úprava autora' : 'Pridanie autora',
-                body: (
-                    <AutorsModalBody
-                        data={autors}
+                        data={dataArray}
                         onChange={handleChange}
                         error={handleError}
                     />
@@ -97,27 +58,38 @@ export const useAutorModal = () => {
             });
         };
 
+        // Handler for form changes
+        const handleChange = (data: IAutor[] | object) => {
+            formData = data;
+        };
+
+        // Handler for form validation errors
+        const handleError = (errors: ValidationError[] | undefined) => {
+            validationErrors = errors;
+            renderModal(formData);
+        };
+
+        // Handler for saving the autor
+        const handleSave = () => {
+            return onSave(formData);
+        };
+
+        // Handler for clearing the form
+        const handleClear = () => {
+            formData = [{}] as IAutor[];
+            validationErrors = undefined;
+            renderModal(formData);
+        };
+
+        // Handler for reverting changes
+        const handleRevert = () => {
+            formData = autors;
+            validationErrors = undefined;
+            renderModal(autors);
+        };
+
         // Open the modal
-        showModal({
-            customKey: modalKey,
-            title: autors.length > 0 && autors[0]._id ? 'Úprava autora' : 'Pridanie autora',
-            body: (
-                <AutorsModalBody
-                    data={autors}
-                    onChange={handleChange}
-                    error={handleError}
-                />
-            ),
-            footer: (
-                <ModalButtons
-                    onSave={handleSave}
-                    onClear={handleClear}
-                    onRevert={handleRevert}
-                    error={validationErrors}
-                    saveResultSuccess={saveResultSuccess}
-                />
-            )
-        });
+        renderModal(autors);
 
         // Return a method to close the modal
         return {

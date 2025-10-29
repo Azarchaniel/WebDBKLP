@@ -65,7 +65,6 @@ export default function QuotePage() {
         fetchQuotes(books.map((book: IBook) => book._id));
     }
 
-    // ### QUOTES ###
     const fetchQuotes = (books?: string[]): void => {
         setLoading(true);
 
@@ -82,6 +81,8 @@ export default function QuotePage() {
 
     const handleSaveQuote = (formData: IQuote): void => {
         setSaveQuoteSuccess(undefined);
+        const isNewQuote = !formData._id;
+
         addQuote(formData)
             .then(({ status, data }) => {
                 if (status !== 201) {
@@ -89,10 +90,10 @@ export default function QuotePage() {
                 }
                 setSaveQuoteSuccess(true);
                 setFilteredQuotes(data.quotes);
-                toast.success(`Citát bol úspešne ${formData._id ? 'upravený' : 'pridaný.'}`);
+                toast.success(`Citát bol úspešne ${!isNewQuote ? 'upravený' : 'pridaný.'}`);
             })
             .catch((err) => {
-                toast.error(`Citát sa nepodarilo ${formData._id ? 'upraviť' : 'pridať.'}!`);
+                toast.error(`Citát sa nepodarilo ${!isNewQuote ? 'upraviť' : 'pridať.'}!`);
                 console.trace(err);
                 setSaveQuoteSuccess(false);
             })

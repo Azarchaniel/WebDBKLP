@@ -1,4 +1,4 @@
-import { IBook, IBookColumnVisibility } from "../../type";
+import { IBook, IBookColumnVisibility, SaveEntity, SaveEntityResult } from "../../type";
 import { useEffect, useRef, useState } from "react";
 import { addBook, checkBooksUpdated, deleteBook, getBook, getBooks } from "../../API";
 import { toast } from "react-toastify";
@@ -161,38 +161,38 @@ export default function BookPage() {
 
     const { openBookModal } = useBookModal();
 
-    const handleSaveBook = (formData: IBook | object | IBook[]): Promise<{ success: boolean; message: string }> => {
+    const handleSaveBook = async (formData: SaveEntity<IBook>): Promise<SaveEntityResult> => {
         setSaveBookSuccess(undefined);
+        const isNewBook = Array.isArray(formData)
+            ? formData.some((book) => !(book as IBook)._id)
+            : !(formData as IBook)._id;
 
-        return addBook(formData)
-            .then((res) => {
-                let message = "";
-                if (Array.isArray(formData) && formData.length > 1) {
-                    if (res.length < 5) {
-                        message = `${res.length} knihy boli úspešne upravené.`;
-                    } else {
-                        message = `${res.length} kníh bolo úspešne upravených.`;
-                    }
-                    toast.success(message);
+        try {
+            const res = await addBook(formData);
+            let message = "";
+            if (Array.isArray(formData) && formData.length > 1) {
+                if (res.length < 5) {
+                    message = `${res.length} knihy boli úspešne upravené.`;
                 } else {
-                    const bookTitle = Array.isArray(res)
-                        ? res[0].data.book?.title
-                        : res.data.book?.title;
-                    message = `Kniha ${bookTitle} bola úspešne ${(formData as IBook)._id ? "uložená" : "pridaná"}.`;
-                    toast.success(message);
+                    message = `${res.length} kníh bolo úspešne upravených.`;
                 }
-                setSaveBookSuccess(true);
-                fetchBooks();
-                return { success: true, message };
-            })
-            .catch((err) => {
-                const message = err.response?.data?.error || "Chyba! Kniha nebola uložená!";
-                toast.error(message);
-                console.trace("Error saving books", err);
-                setSaveBookSuccess(false);
-                // Resolve with failure object (do not throw so modal can display message)
-                return { success: false, message };
-            });
+            } else {
+                const bookTitle = Array.isArray(res)
+                    ? res[0].data.book?.title
+                    : res.data.book?.title;
+                message = `Kniha ${bookTitle} bola úspešne ${!isNewBook ? "uložená" : "pridaná"}.`;
+            }
+            toast.success(message);
+            setSaveBookSuccess(true);
+            fetchBooks();
+            return { success: true, message };
+        } catch (err: any) {
+            const message = err.response?.data?.error || "Chyba! Kniha nebola uložená!";
+            toast.error(message);
+            console.trace("Error saving books", err);
+            setSaveBookSuccess(false);
+            return { success: false, message };
+        }
     };
 
     const handleUpdateBook = (_id?: string): void => {
