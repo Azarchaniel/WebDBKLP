@@ -108,7 +108,6 @@ export default function LPPage() {
         } else {
             return addLP(Array.isArray(formData) ? formData[0] : (formData as ILP))
                 .then((result) => {
-                    console.log(result.status, result.data)
                     let message = "";
                     if (result.status !== 201) {
                         message = `Chyba! LP ${result.data.lp?.title} nebolo ${!isNewLp ? "uložené" : "pridané"}.`;

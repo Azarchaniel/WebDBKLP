@@ -581,6 +581,7 @@ textarea {
 
   .customModal {
     max-width: 90vw;
+    min-width: unset;
 
     &Body {
       max-width: 90vw;

@@ -1,4 +1,21 @@
-// Styles for modal footer status message
+@media screen and (width <=$mobile-width) {
+    .modal-buttons-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .modal-footer-left,
+    .modal-footer-right {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .modal-footer-right {
+        justify-content: flex-end;
+    }
+}
+
+
 .modal-buttons-wrapper {
     display: flex;
     justify-content: space-between;
@@ -24,9 +41,8 @@
     font-size: 0.85rem;
     padding: 0.4rem 0.6rem;
     border-radius: 4px;
-    margin-top: 0.4rem;
+    margin: 1rem 0;
     line-height: 1.2;
-    max-width: 320px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

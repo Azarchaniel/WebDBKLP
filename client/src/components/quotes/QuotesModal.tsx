@@ -78,7 +78,6 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
     }, [formData])
 
     const handleInputChange = useCallback((input: any) => {
-        console.log("input change", input);
         let name: string, value: string;
 
         if ("target" in input) { // if it is a regular event
