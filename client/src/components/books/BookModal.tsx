@@ -160,7 +160,6 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             errors = errors?.filter((err: ValidationError) => err.target !== "ISBN") ?? errors;
 
             if (!(numberValidations.every(n => n?.valid))) {
-                console.log("Nesprávne číslo: ", numberValidations);
                 numberValidations.filter(n => !(n?.valid))
                     .map((numErr: ValidationError) => ({
                         label: numErr.label + " musí byť číslo!",

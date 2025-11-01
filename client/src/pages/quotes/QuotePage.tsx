@@ -39,6 +39,11 @@ export default function QuotePage() {
     }, [filteredQuotes]);
 
     const groupQuotesByBook = () => {
+        if (!filteredQuotes || !Array.isArray(filteredQuotes)) {
+            setQuoteGroups([]);
+            return;
+        }
+
         const groups: { [bookId: string]: QuoteGroup } = {};
         const baseColors = generateColors(books.length);
         let colorIndex = 0;
@@ -89,7 +94,12 @@ export default function QuotePage() {
                     throw new Error("Citát sa nepodarilo pridať!")
                 }
                 setSaveQuoteSuccess(true);
-                setFilteredQuotes(data.quotes);
+                if (data?.quotes && Array.isArray(data.quotes)) {
+                    setFilteredQuotes(data.quotes);
+                } else {
+                    // If quotes aren't returned, refetch them
+                    fetchQuotes();
+                }
                 toast.success(`Citát bol úspešne ${!isNewQuote ? 'upravený' : 'pridaný.'}`);
             })
             .catch((err) => {

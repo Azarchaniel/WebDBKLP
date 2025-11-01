@@ -104,12 +104,12 @@ export default function BoardGamesPage() {
                 .then(({ status, data }) => {
                     let message = "";
                     if (status !== 201) {
-                        message = `Chyba! Spoločenská hra ${data?.boardGame?.title || ''} nebola ${!isNewBoardGame ? "upravená" : "pridaná"}.`;
+                        message = `Chyba! Spoločenská hra ${data?.title || ''} nebola ${!isNewBoardGame ? "upravená" : "pridaná"}.`;
                         toast.error(message);
                         setSaveBoardGameSuccess(false);
                         return { success: false, message };
                     }
-                    message = `Spoločenská hra ${data?.boardGame?.title || ''} bola úspešne ${!isNewBoardGame ? "upravená" : "pridaná"}.`;
+                    message = `Spoločenská hra ${data?.title || ''} bola úspešne ${!isNewBoardGame ? "upravená" : "pridaná"}.`;
                     toast.success(message);
                     setSaveBoardGameSuccess(true);
                     fetchBoardGames();

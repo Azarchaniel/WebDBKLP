@@ -638,7 +638,7 @@ export const addLP = async (
                 for (let i = 0; i < formData.length; i += BATCH_SIZE) {
                     const batch = formData.slice(i, i + BATCH_SIZE);
                     const batchPromises = batch.map(async (lp: ILP) =>
-                        await axiosInstance.put(`${baseUrl}/add-lp/${lp._id}`, lp)
+                        await axiosInstance.put(`${baseUrl}/edit-lp/${lp._id}`, lp)
                     );
                     const batchResults = await Promise.all(batchPromises);
                     results.push(...batchResults);
@@ -647,7 +647,7 @@ export const addLP = async (
                 return results;
             } else {
                 const updatedLp: AxiosResponse<ApiLPDataType> = await axiosInstance.put(
-                    `${baseUrl}/add-lp/${(formData as unknown as ILP)._id}`,
+                    `${baseUrl}/edit-lp/${(formData as unknown as ILP)._id}`,
                     formData
                 )
                 return updatedLp;
