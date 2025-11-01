@@ -1,4 +1,6 @@
-import React, {ChangeEvent, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, { ChangeEvent, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import "@styles/Autocomplete.scss";
 
 type OptionValue = string | { [key: string]: any };
 
@@ -50,21 +52,21 @@ interface AutocompleteInputProps {
  */
 
 export const LazyLoadMultiselect = React.memo(({
-                                                   value,
-                                                   displayValue = "name", // Default to "name" if not provided
-                                                   placeholder = "Vyhľadaj...",
-                                                   onChange,
-                                                   name,
-                                                   id,
-                                                   selectionLimit,
-                                                   emptyRecordMsg = "Žiaden záznam nenájdený!",
-                                                   customerror,
-                                                   onSearch,
-                                                   reset,
-                                                   onNew,
-                                                   options = [], // Default to empty array if not provided
-                                                   disabled = false, // Default to false
-                                               }: AutocompleteInputProps) => {
+    value,
+    displayValue = "name", // Default to "name" if not provided
+    placeholder = "Vyhľadaj...",
+    onChange,
+    name,
+    id,
+    selectionLimit,
+    emptyRecordMsg = "Žiaden záznam nenájdený!",
+    customerror,
+    onSearch,
+    reset,
+    onNew,
+    options = [], // Default to empty array if not provided
+    disabled = false, // Default to false
+}: AutocompleteInputProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedValues, setSelectedValues] = useState<OptionValue[]>(value || []);
@@ -119,7 +121,7 @@ export const LazyLoadMultiselect = React.memo(({
     useEffect(() => {
         if (reset) {
             setSelectedValues([]);
-            onChange({name, value: []});
+            onChange({ name, value: [] });
             setFilteredOptions([]);
             setCurrentPage(1);
             setSearchQuery("");
@@ -172,7 +174,7 @@ export const LazyLoadMultiselect = React.memo(({
         }
 
         setSelectedValues(newSelectedValues);
-        onChange({name, value: newSelectedValues});
+        onChange({ name, value: newSelectedValues });
         setInputValue('');
         setSearchQuery('');
         setFilteredOptions([]);
@@ -185,7 +187,7 @@ export const LazyLoadMultiselect = React.memo(({
         if (disabled) return;
         const newSelectedValues = selectedValues.filter(item => !areOptionsEqual(item, option));
         setSelectedValues(newSelectedValues);
-        onChange({name, value: newSelectedValues});
+        onChange({ name, value: newSelectedValues });
         if (inputRef.current) inputRef.current.focus();
     }, [selectedValues, onChange, name, areOptionsEqual, disabled]);
 
@@ -267,26 +269,24 @@ export const LazyLoadMultiselect = React.memo(({
         }
     }, [onNew, searchQuery, disabled]);
 
+
+    // Position dropdown using input's bounding rect, for portal rendering
     const adjustDropdownPosition = useCallback(() => {
-        if (menuRef.current && wrapperRef.current) {
-            const menuRect = menuRef.current.getBoundingClientRect();
-            const wrapperRect = wrapperRef.current.getBoundingClientRect();
+        if (wrapperRef.current) {
+            const rect = wrapperRef.current.getBoundingClientRect();
             const windowHeight = window.innerHeight;
-
-            const spaceBelow = windowHeight - wrapperRect.bottom;
-            const spaceAbove = wrapperRect.top;
-
+            const spaceBelow = windowHeight - rect.bottom;
+            const spaceAbove = rect.top;
             const newStyle: React.CSSProperties = {
-                width: wrapperRect.width,
-                left: wrapperRect.left,
+                width: rect.width,
+                left: rect.left,
             };
-
-            if (spaceBelow < menuRect.height && spaceAbove > menuRect.height) {
+            if (spaceBelow < 200 && spaceAbove > 200) { // 200px is approx menu height
                 setDropdownPosition('top');
-                newStyle.bottom = windowHeight - wrapperRect.top;
+                newStyle.top = rect.top - 200; // show above
             } else {
                 setDropdownPosition('bottom');
-                newStyle.top = wrapperRect.bottom;
+                newStyle.top = rect.bottom; // show below
             }
             setDropdownStyle(newStyle);
         }
@@ -295,7 +295,7 @@ export const LazyLoadMultiselect = React.memo(({
     const handleScroll = useCallback(
         debounce(() => {
             if (loadingStatus === "hasMore" && menuRef.current) {
-                const {scrollTop, scrollHeight, clientHeight} = menuRef.current;
+                const { scrollTop, scrollHeight, clientHeight } = menuRef.current;
                 if (scrollTop + clientHeight >= scrollHeight - 20) { // 20px threshold
                     loadMoreOptions();
                 }
@@ -304,17 +304,11 @@ export const LazyLoadMultiselect = React.memo(({
         [loadingStatus, loadMoreOptions]
     );
 
+
     useEffect(() => {
         if (isOpen) {
             adjustDropdownPosition();
-            window.addEventListener('resize', adjustDropdownPosition);
-            window.addEventListener('scroll', adjustDropdownPosition);
         }
-
-        return () => {
-            window.removeEventListener('resize', adjustDropdownPosition);
-            window.removeEventListener('scroll', adjustDropdownPosition);
-        };
     }, [isOpen, adjustDropdownPosition]);
 
     useEffect(() => {
@@ -325,11 +319,10 @@ export const LazyLoadMultiselect = React.memo(({
     }, [isOpen, handleScroll]);
 
     return (
-        <div style={{position: "relative"}}>
+        <div style={{ position: "relative" }}>
             {placeholder && <span
-                className={`autocomplete-label ${
-                    inputValue || selectedValues.length > 0 || isInputFocused ? "active" : ""
-                } ${disabled ? "disabled" : ""}`}
+                className={`autocomplete-label ${inputValue || selectedValues.length > 0 || isInputFocused ? "active" : ""
+                    } ${disabled ? "disabled" : ""}`}
             >
                 {placeholder}
             </span>}
@@ -337,6 +330,7 @@ export const LazyLoadMultiselect = React.memo(({
                 ref={wrapperRef}
                 id={id}
                 className={`chip-multiselect ${customerror ? 'error' : ''} ${disabled ? 'disabled' : ''}`}
+                style={{ position: "relative" }}
             >
                 <div className="input-wrapper">
                     <div className="chip-container">
@@ -349,12 +343,12 @@ export const LazyLoadMultiselect = React.memo(({
                                     handleRemove(item);
                                 }}
                             >
-                            <span>
-                                {getDisplayText(item)}
-                            </span>
+                                <span>
+                                    {getDisplayText(item)}
+                                </span>
                                 <span className="chip-remove">
-                                ×
-                            </span>
+                                    ×
+                                </span>
                             </div>
                         ))}
                         <input
@@ -376,44 +370,50 @@ export const LazyLoadMultiselect = React.memo(({
                         <i className={`fa fa-chevron-${isOpen ? 'up' : 'down'}`}></i>
                     </div>
                 </div>
-                {isOpen && !disabled && (
-                    <div
-                        ref={menuRef}
-                        className={`autocomplete-menu ${dropdownPosition === 'top' ? 'top' : ''}`}
-                        style={{...dropdownStyle, position: "fixed"}}
-                    >
-                        {/* no data */}
-                        {filteredOptionsToDisplay.length === 0 && (
-                            <div className="autocomplete-item empty">
-                                {emptyRecordMsg}
-                            </div>
-                        )}
-                        {/* create new */}
-                        {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && onNew && (
-                            <div className="autocomplete-item create-new" onClick={handleCreateNew}
-                                 title="`Meno Priezvisko` alebo `Priezvisko, Meno` alebo `Priezvisko`">
-                                Vytvoriť "{searchQuery}"
-                            </div>
-                        )}
-                        {/* data and loading more */}
-                        {filteredOptionsToDisplay.length > 0 && (
-                            <>
-                                {filteredOptionsToDisplay.map((option, index) => (
-                                    <div
-                                        key={index}
-                                        className={`autocomplete-item ${selectionLimit && selectedValues?.length >= selectionLimit ? 'disabled' : ''}`}
-                                        onClick={disabled ? undefined : () => handleSelect(option)}
-                                    >
-                                        {getDisplayText(option)}
-                                    </div>
-                                ))}
-                                {loadingStatus === "loading" && (
-                                    <div className="autocomplete-item loading">Načítava sa...</div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                )}
+                {isOpen && !disabled &&
+                    createPortal(
+                        <div
+                            ref={menuRef}
+                            className={`autocomplete-menu ${dropdownPosition === 'top' ? 'top' : ''}`}
+                            style={{
+                                ...dropdownStyle,
+                                borderRadius: dropdownPosition === 'bottom' ? "0 0 8px 8px" : "8px 8px 0 0",
+                                minWidth: dropdownStyle.width,
+                            }}
+                        >
+                            {/* no data */}
+                            {filteredOptionsToDisplay.length === 0 && (
+                                <div className="autocomplete-item empty">
+                                    {emptyRecordMsg}
+                                </div>
+                            )}
+                            {/* create new */}
+                            {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && onNew && (
+                                <div className="autocomplete-item create-new" onClick={handleCreateNew}
+                                    title="`Meno Priezvisko` alebo `Priezvisko, Meno` alebo `Priezvisko`">
+                                    Vytvoriť "{searchQuery}"
+                                </div>
+                            )}
+                            {/* data and loading more */}
+                            {filteredOptionsToDisplay.length > 0 && (
+                                <>
+                                    {filteredOptionsToDisplay.map((option, index) => (
+                                        <div
+                                            key={index}
+                                            className={`autocomplete-item ${selectionLimit && selectedValues?.length >= selectionLimit ? 'disabled' : ''}`}
+                                            onMouseDown={disabled ? undefined : (e) => { e.preventDefault(); handleSelect(option); }}
+                                        >
+                                            {getDisplayText(option)}
+                                        </div>
+                                    ))}
+                                    {loadingStatus === "loading" && (
+                                        <div className="autocomplete-item loading">Načítava sa...</div>
+                                    )}
+                                </>
+                            )}
+                        </div>, document.body
+                    )
+                }
             </div>
         </div>
     );

@@ -91,6 +91,7 @@ router.post('/get-multiple-autors-info', getMultipleAutorsInfo)
 router.get('/quote/:id', getQuote)
 router.get('/quotes', getAllQuotes)
 router.post('/add-quote', addQuote)
+router.put('/edit-quote/:id', addQuote)
 router.post('/delete-quote/:id', deleteQuote)
 
 // ### USERS ###
@@ -101,6 +102,7 @@ router.get('/users', getAllUsers)
 router.get('/lp/:id', getLp)
 router.get('/lps', getAllLps)
 router.post('/add-lp', addLp)
+router.put('/edit-lp/:id', addLp)
 router.post('/delete-lp/:id', deleteLp)
 
 // ### DASHBOARD ###

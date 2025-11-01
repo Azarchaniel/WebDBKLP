@@ -6,7 +6,7 @@ import path from "path";
 
 const app: Express = express()
 
-const PORT: string | number = process.env.PORT || 4000
+const PORT: string | number = process.env.PORT || 4000;
 
 const allowedOrigins = ["http://localhost:3000", "https://webdbklp.onrender.com"];
 app.use(

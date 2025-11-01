@@ -1,4 +1,4 @@
-import React, {useRef, useState} from "react";
+import React, { useRef, useState, useEffect } from "react";
 
 interface PasswordFieldProps {
     maskCharacters?: string[];
@@ -7,14 +7,15 @@ interface PasswordFieldProps {
 }
 
 export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
-                                                                      maskCharacters = ['*', '•', '✦', '✪'], // Default mask characters
-                                                                      onPasswordChange,
-                                                                      placeholder = 'Enter your password',
-                                                                  }) => {
+    maskCharacters = ['*', '•', '✦', '✪'], // Default mask characters
+    onPasswordChange,
+    placeholder = 'Enter your password',
+}) => {
     const [maskedPassword, setMaskedPassword] = useState(''); // Masked display value
     const [realPassword, setRealPassword] = useState(''); // Actual stored password
     const [showPassword, setShowPassword] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+    const hiddenPasswordRef = useRef<HTMLInputElement>(null);
 
     // Randomly selects a masking character from the array
     const getRandomMaskCharacter = () => {
@@ -43,6 +44,11 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
 
             setRealPassword(newRealPassword);
             setMaskedPassword(newMaskedPassword);
+
+            // Update the hidden password field for password managers
+            if (hiddenPasswordRef.current) {
+                hiddenPasswordRef.current.value = newRealPassword;
+            }
 
             // Call the parent callback
             if (onPasswordChange) {
@@ -83,6 +89,11 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
 
             setRealPassword(newRealPassword);
             setMaskedPassword(newMaskedPassword);
+
+            // Update the hidden password field for password managers
+            if (hiddenPasswordRef.current) {
+                hiddenPasswordRef.current.value = newRealPassword;
+            }
 
             // Call the parent callback
             if (onPasswordChange) {
@@ -126,6 +137,11 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
         setRealPassword(newRealPassword);
         setMaskedPassword(newMaskedPassword);
 
+        // Update the hidden password field for password managers
+        if (hiddenPasswordRef.current) {
+            hiddenPasswordRef.current.value = newRealPassword;
+        }
+
         // Call the parent callback
         if (onPasswordChange) {
             setTimeout(() => onPasswordChange(newRealPassword), 0);
@@ -145,18 +161,18 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
         setShowPassword((prev) => !prev); // Toggle the showPassword state
     };
 
-    // the input/password is there to deceive browser to save password
     return (
         <div className="passwordContainer">
-            {realPassword.length === 0 ?
+            {realPassword.length === 0 ? (
                 <input
                     type="password"
                     className="form-control"
                     onChange={handleInput}
                     value={realPassword}
                     placeholder={placeholder}
-                /> :
-                <><input
+                />
+            ) : (
+                <input
                     ref={inputRef}
                     type="text"
                     className="form-control"
@@ -166,19 +182,24 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
                     onPaste={handlePaste}
                     autoComplete="true"
                 />
-                    <button
-                        type="button"
-                        onClick={togglePasswordVisibility}
-                        className="passwordToggle"
-                        title={showPassword ? 'Skry heslo' : 'Zobraz heslo'}
-                    >
-                        {showPassword ? (
-                            <i className="fa fa-eye-slash"></i> // Hide icon
-                        ) : (
-                            <i className="fa fa-eye"></i> // Show icon
-                        )}
-                    </button>
-                </>}
+            )}
+
+            {/* Always render the button but conditionally show it */}
+            <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="passwordToggle"
+                title={showPassword ? 'Skry heslo' : 'Zobraz heslo'}
+                style={{
+                    display: realPassword.length > 0 ? 'flex' : 'none'
+                }}
+            >
+                {showPassword ? (
+                    <i className="fa fa-eye-slash"></i>
+                ) : (
+                    <i className="fa fa-eye"></i>
+                )}
+            </button>
         </div>
     );
 };

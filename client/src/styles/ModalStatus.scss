@@ -1,0 +1,62 @@
+@media screen and (width <=$mobile-width) {
+    .modal-buttons-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .modal-footer-left,
+    .modal-footer-right {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    .modal-footer-right {
+        justify-content: flex-end;
+    }
+}
+
+
+.modal-buttons-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+.modal-footer-left {
+    flex: 1 1 auto;
+    min-width: 200px;
+    width: 100%;
+}
+
+.modal-footer-right {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.modal-status-message {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid transparent;
+}
+
+.modal-status-message.success {
+    background: #e6f9ec;
+    color: #1d7a2e;
+    border-color: #1d7a2e;
+}
+
+.modal-status-message.fail {
+    background: #fdecea;
+    color: #b32020;
+    border-color: #b32020;
+}

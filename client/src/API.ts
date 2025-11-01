@@ -14,6 +14,7 @@ import {
 import { jwtDecode } from "jwt-decode";
 
 const baseUrl: string = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
+const BATCH_SIZE = 5;
 
 const axiosInstance = axios.create({
     baseURL: baseUrl,
@@ -246,7 +247,6 @@ export const addBook = async (
         } else {
             if (Array.isArray(formData)) {
                 // Process in batches of 5 books
-                const BATCH_SIZE = 5;
                 const results = [];
 
                 for (let i = 0; i < formData.length; i += BATCH_SIZE) {
@@ -355,7 +355,6 @@ export const addAutor = async (
         } else {
             if (Array.isArray(formData)) {
                 // Process in batches of 5 autors
-                const BATCH_SIZE = 5;
                 const results = [];
 
                 for (let i = 0; i < formData.length; i += BATCH_SIZE) {
@@ -458,7 +457,6 @@ export const addQuote = async (
     try {
         if (Array.isArray(formData)) {
             // Process in batches of 5 quotes
-            const BATCH_SIZE = 5;
             const results = [];
 
             for (let i = 0; i < formData.length; i += BATCH_SIZE) {
@@ -613,21 +611,28 @@ export const addLP = async (
 ): Promise<any> => {
     try {
         if (
-            (!Array.isArray(formData) && !("id" in formData)) ||
+            (!Array.isArray(formData) && !("_id" in formData)) ||
             (Array.isArray(formData) && !formData[0]?._id)
         ) {
+            // Adding new LP(s)
             const { published, ...lpData } = formData as ILP;
-            formData = {
+            const processedFormData = {
                 ...lpData,
                 published: {
                     ...published,
                     country: published?.country ?? ""
                 },
             };
+
+            const newLP: AxiosResponse<ApiLPDataType> = await axiosInstance.post(
+                `${baseUrl}/add-lp`,
+                processedFormData
+            );
+            return newLP;
         } else {
+            // Updating existing LP(s)
             if (Array.isArray(formData)) {
                 // Process in batches of 5 LPs
-                const BATCH_SIZE = 5;
                 const results = [];
 
                 for (let i = 0; i < formData.length; i += BATCH_SIZE) {
@@ -769,7 +774,6 @@ export const addBoardGame = async (
         } else {
             if (Array.isArray(formData)) {
                 // Process in batches of 5 board games
-                const BATCH_SIZE = 5;
                 const results = [];
 
                 for (let i = 0; i < formData.length; i += BATCH_SIZE) {
