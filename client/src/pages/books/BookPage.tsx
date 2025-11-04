@@ -50,7 +50,7 @@ export default function BookPage() {
         numberOfPages: false,
         height: false,
         width: false,
-        depth: false,
+        thickness: false,
         weight: false,
         edition: false,
         serie: false,

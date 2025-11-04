@@ -104,7 +104,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             dimensions: book.dimensions ? {
                 height: formatDimension(book.dimensions?.height) ?? "",
                 width: formatDimension(book.dimensions?.width) ?? "",
-                depth: formatDimension(book.dimensions?.depth) ?? "",
+                thickness: formatDimension(book.dimensions?.thickness) ?? "",
                 weight: formatDimension(book.dimensions?.weight) ?? "",
             } : undefined,
             language: langCode.filter((lang: ILangCode) => (book?.language as unknown as string[])?.includes(lang.key)),
@@ -126,13 +126,13 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             let n1, n2, n3, n4, n5, n6;
             n1 = n2 = n3 = n4 = n5 = n6 = { valid: true, label: "" } as ValidationError;
 
-            const [height, width, depth, weight] =
-                [book.dimensions?.height, book.dimensions?.width, book.dimensions?.depth, book.dimensions?.weight];
+            const [height, width, thickness, weight] =
+                [book.dimensions?.height, book.dimensions?.width, book.dimensions?.thickness, book.dimensions?.weight];
 
             if (book.dimensions || !(Object.keys(book.dimensions ?? {}).length === 0)) {
                 n1 = { valid: validateNumber(height, { mustBePositive: true }), label: "Výška", target: "dimensions.height" };
                 n2 = { valid: validateNumber(width, { mustBePositive: true }), label: "Šírka", target: "dimensions.width" };
-                n3 = { valid: validateNumber(depth, { mustBePositive: true }), label: "Hrúbka", target: "dimensions.depth" };
+                n3 = { valid: validateNumber(thickness, { mustBePositive: true }), label: "Hrúbka", target: "dimensions.thickness" };
                 n4 = {
                     valid: validateNumber(weight, { mustBePositive: true }),
                     label: "Hmotnosť",
@@ -404,8 +404,8 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 <InputField
                     placeholder='Hrúbka (cm)'
                     onChange={handleInputChange}
-                    customerror={getErrorMsg("dimensions.depth")}
-                    {...getInputParams("dimensions.depth", formData)}
+                    customerror={getErrorMsg("dimensions.thickness")}
+                    {...getInputParams("dimensions.thickness", formData)}
                 />
             </div>
             <div className="b-Hmotnost">

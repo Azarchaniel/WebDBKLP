@@ -1,6 +1,6 @@
 export interface IDimension {
     height: number;
     width: number;
-    depth: number; //TODO: rename to thickness
+    thickness: number;
     weight?: number;
 }

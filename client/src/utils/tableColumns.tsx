@@ -98,8 +98,8 @@ export const getBookTableColumns = (): ColumnDef<IBook, any>[] => [
                 header: "Šírka",
                 sortingFn: "alphanumeric"
             }),
-            columnHelper.accessor(row => row.dimensions?.depth, {
-                id: "depth",
+            columnHelper.accessor(row => row.dimensions?.thickness, {
+                id: "thickness",
                 cell: info => formatDimension(info.getValue()),
                 header: "Hrúbka",
                 sortingFn: "alphanumeric"
@@ -391,7 +391,7 @@ export const ShowHideColumns = <T,>({ columns, shown, setShown }: ShowHideColumn
                             dimensions: !dimensionsHidden,
                             height: !dimensionsHidden,
                             width: !dimensionsHidden,
-                            depth: !dimensionsHidden,
+                            thickness: !dimensionsHidden,
                             weight: !dimensionsHidden
                         }));
                     }} />
@@ -415,7 +415,7 @@ export const ShowHideColumns = <T,>({ columns, shown, setShown }: ShowHideColumn
 
 const selectFields = ['autor', 'editor', 'translator', 'ilustrator', 'owner', 'readBy', "language"];
 const inputFields = ["title", "subtitle", "content", "edition.no", "edition.title", "serie.no", "serie.title", "ISBN", "note", "published.publisher", "published.country", "location.city", "location.shelf"];
-const numberFields = ["dimensions.height", "dimensions.width", "dimensions.depth", "dimensions.weight", "numberOfPages", "published.year"];
+const numberFields = ["dimensions.height", "dimensions.width", "dimensions.thickness", "dimensions.weight", "numberOfPages", "published.year"];
 const checkboxFields = ["exLibris"];
 
 export const mapColumnName = (columnName: string): string => {
@@ -432,7 +432,7 @@ export const mapColumnName = (columnName: string): string => {
         numberOfPages: "numberOfPages",
         height: "dimensions.height",
         width: "dimensions.width",
-        depth: "dimensions.depth",
+        thickness: "dimensions.thickness",
         weight: "dimensions.weight",
         edition: "edition.title",
         serie: "serie.title",

@@ -59,7 +59,7 @@ const normalizeBook = (data: any): IBook => {
         dimensions: {
             height: data.dimensions?.height ? formatMongoDbDecimal(data.dimensions?.height) : undefined,
             width: data.dimensions?.width ? formatMongoDbDecimal(data.dimensions?.width) : undefined,
-            depth: data.dimensions?.depth ? formatMongoDbDecimal(data.dimensions?.depth) : undefined,
+            thickness: data.dimensions?.thickness ? formatMongoDbDecimal(data.dimensions?.thickness) : undefined,
             weight: data.dimensions?.weight ? formatMongoDbDecimal(data.dimensions?.weight) : undefined
         },
         exLibris: data.exLibris,
@@ -605,11 +605,11 @@ const dashboard = {
                                     minWidth: { $min: "$dimensions.width" },
                                     maxWidth: { $max: "$dimensions.width" },
                                     widths: { $push: "$dimensions.width" },
-                                    sumDepth: { $sum: "$dimensions.depth" },
-                                    avgDepth: { $avg: "$dimensions.depth" },
-                                    minDepth: { $min: "$dimensions.depth" },
-                                    maxDepth: { $max: "$dimensions.depth" },
-                                    depths: { $push: "$dimensions.depth" },
+                                    sumThickness: { $sum: "$dimensions.thickness" },
+                                    avgThickness: { $avg: "$dimensions.thickness" },
+                                    minThickness: { $min: "$dimensions.thickness" },
+                                    maxThickness: { $max: "$dimensions.thickness" },
+                                    thickness: { $push: "$dimensions.thickness" },
                                     sumWeight: { $sum: "$dimensions.weight" },
                                     avgWeight: { $avg: "$dimensions.weight" },
                                     minWeight: { $min: "$dimensions.weight" },
@@ -667,15 +667,15 @@ const dashboard = {
                                             }
                                         }
                                     },
-                                    sumDepth: 1,
-                                    avgDepth: 1,
-                                    minDepth: 1,
-                                    maxDepth: 1,
-                                    medianDepth: {
+                                    sumThickness: 1,
+                                    avgThickness: 1,
+                                    minThickness: 1,
+                                    maxThickness: 1,
+                                    medianThickness: {
                                         $let: {
                                             vars: {
-                                                sortedArray: "$depths",
-                                                len: { $size: "$depths" }
+                                                sortedArray: "$thickness",
+                                                len: { $size: "$thickness" }
                                             },
                                             in: {
                                                 $cond: [
@@ -742,15 +742,15 @@ const dashboard = {
                                 }
                             }
                         ],
-                        modeDepth: [
-                            { $match: { "dimensions.depth": { $ne: null } } },
-                            { $group: { _id: "$dimensions.depth", modeDepth: { $sum: 1 } } },
-                            { $sort: { modeDepth: -1 } },
+                        modeThickness: [
+                            { $match: { "dimensions.thickness": { $ne: null } } },
+                            { $group: { _id: "$dimensions.thickness", modeThickness: { $sum: 1 } } },
+                            { $sort: { modeThickness: -1 } },
                             { $limit: 1 },
                             {
                                 $project: {
                                     _id: 0,
-                                    modeDepth: "$_id"
+                                    modeThickness: "$_id"
                                 }
                             }
                         ],
@@ -782,12 +782,12 @@ const dashboard = {
                         maxWidth: "$stats.maxWidth",
                         medianWidth: "$stats.medianWidth",
                         modeWidth: "$modeWidth.modeWidth",
-                        sumDepth: "$stats.sumDepth",
-                        avgDepth: "$stats.avgDepth",
-                        minDepth: "$stats.minDepth",
-                        maxDepth: "$stats.maxDepth",
-                        medianDepth: "$stats.medianDepth",
-                        modeDepth: "$modeDepth.modeDepth",
+                        sumThickness: "$stats.sumThickness",
+                        avgThickness: "$stats.avgThickness",
+                        minThickness: "$stats.minThickness",
+                        maxThickness: "$stats.maxThickness",
+                        medianThickness: "$stats.medianThickness",
+                        modeThickness: "$modeThickness.modeThickness",
                         sumWeight: "$stats.sumWeight",
                         avgWeight: "$stats.avgWeight",
                         minWeight: "$stats.minWeight",
@@ -815,13 +815,13 @@ const dashboard = {
                     mode: result[0].modeWidth[0],
                     median: result[0].medianWidth[0]
                 },
-                depth: {
-                    sum: result[0].sumDepth[0],
-                    avg: result[0].avgDepth[0],
-                    min: result[0].minDepth[0],
-                    max: result[0].maxDepth[0],
-                    mode: result[0].modeDepth[0],
-                    median: result[0].medianDepth[0]
+                thickness: {
+                    sum: result[0].sumThickness[0],
+                    avg: result[0].avgThickness[0],
+                    min: result[0].minThickness[0],
+                    max: result[0].maxThickness[0],
+                    mode: result[0].modeThickness[0],
+                    median: result[0].medianThickness[0]
                 },
                 weight: {
                     sum: result[0].sumWeight[0],
@@ -836,7 +836,7 @@ const dashboard = {
             /*result of this monstrosity looks like this:
             {"height":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10},
             "width":{"sum":10,"avg":10,"min":10,"max":10,"mode":1,"median":10},
-            "depth":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10},
+            "thickness":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10},
             "weight":{"sum":10,"avg":10,"min":10,"max":10,"mode":16,"median":10}}*/
 
             res.status(200).json(formattedResult);

@@ -459,7 +459,7 @@ const fetchGoogleBook = async (isbn: string): Promise<object | boolean> => {
                 dimensions.width = parseFloat(volumeInfo.dimensions.width);
             }
             if (volumeInfo.dimensions.thickness) {
-                dimensions.depth = parseFloat(volumeInfo.dimensions.thickness);
+                dimensions.thickness = parseFloat(volumeInfo.dimensions.thickness);
             }
         }
 

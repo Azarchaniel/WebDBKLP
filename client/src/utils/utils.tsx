@@ -1,13 +1,13 @@
-import {IAutor, ILangCode, ILocation, IUser} from "../type";
-import {cities} from "./constants";
-import {countryCode} from "./locale";
+import { IAutor, ILangCode, ILocation, IUser } from "../type";
+import { cities } from "./constants";
+import { countryCode } from "./locale";
 
 export const shortenStringKeepWord = (text: string, maxLength: number): string => {
 	if (!text) return "";
 	//if the text is longer than maxLength chars, shorten it. ELSE return unchanged
 	if (text.length > maxLength) {
 		//shorten the string but keep the whole word
-		return text.slice(0,maxLength).split(" ").slice(0, -1).join(" ") + "..."
+		return text.slice(0, maxLength).split(" ").slice(0, -1).join(" ") + "..."
 	} else {
 		return text;
 	}
@@ -180,8 +180,8 @@ function isValidISBN13(isbn13: string): boolean {
 }
 
 type ValidationOptions = {
-    mustBePositive?: boolean; // Optional: Ensure the number is greater than 0
-    mustBeInteger?: boolean; // Optional: Ensure the number is an integer
+	mustBePositive?: boolean; // Optional: Ensure the number is greater than 0
+	mustBeInteger?: boolean; // Optional: Ensure the number is an integer
 };
 
 export const validateNumber = (value: any, options?: ValidationOptions): boolean => {
@@ -190,7 +190,7 @@ export const validateNumber = (value: any, options?: ValidationOptions): boolean
 
 	const { mustBePositive = false, mustBeInteger = false } = options || {};
 
-	value = value.toString().replace(",",".");
+	value = value.toString().replace(",", ".");
 
 	// Check if the value is a number
 	const numberValue = Number(value);
@@ -235,14 +235,15 @@ export const getBookLocation = (location: ILocation): string => {
 }
 
 export const formatDimension = (dimension: any) => {
+	console.log(dimension);
 	if (dimension === undefined || dimension === null) return undefined;
 
 	if (typeof dimension === 'object' && "$numberDecimal" in dimension)
 		return parseFloat(dimension.$numberDecimal)
 			.toLocaleString("cs-CZ",
-				{minimumFractionDigits: 1, maximumFractionDigits: 1}) as unknown as number;
+				{ minimumFractionDigits: 1, maximumFractionDigits: 1 }) as unknown as number;
 
-	return parseFloat(dimension).toLocaleString("cs-CZ", {minimumFractionDigits: 1}) as unknown as number;
+	return parseFloat(dimension).toLocaleString("cs-CZ", { minimumFractionDigits: 1 }) as unknown as number;
 }
 
 export const getPublishedCountry = (publishedCountry: any): ILangCode | undefined => {

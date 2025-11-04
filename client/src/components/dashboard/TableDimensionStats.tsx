@@ -5,14 +5,14 @@ interface Props {
 }
 
 export const DashboardTableStats = ({ dimensionStats }: Props) => {
-	// if no data, then it is: { height: {}, width: {}, depth: {}, weight: {} }
+	// if no data, then it is: { height: {}, width: {}, thickness: {}, weight: {} }
 	if (!dimensionStats || Object.values(dimensionStats).every((v: any) => Object.keys(v).length === 0)) return <>Žiadne dáta</>;
 
 	//TEMPORARY: until translation
 	const translationMap: Record<string, string> = {
 		height: "Výška (cm)",
 		width: "Šírka (cm)",
-		depth: "Hrúbka (cm)",
+		thickness: "Hrúbka (cm)",
 		weight: "Hmotnosť (g)",
 		sum: "Suma",
 		avg: "Priemer",

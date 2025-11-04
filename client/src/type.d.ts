@@ -127,7 +127,7 @@ interface IPublished {
 export interface IDimension {
     height: number;
     width: number;
-    depth: number;
+    thickness: number;
     weight?: number;
 }
 
@@ -171,7 +171,7 @@ interface IDimensionStat {
 export interface IDimensionsStatistics {
     height: IDimension;
     width: IDimension;
-    depth: IDimension;
+    thickness: IDimension;
     weight: IDimension;
 }
 
@@ -209,7 +209,7 @@ export interface IUniqueFilterValues {
     numberOfPages?: any[];
     "dimensions.height"?: any[];
     "dimensions.width"?: any[];
-    "dimensions.depth"?: any[];
+    "dimensions.thickness"?: any[];
     "dimensions.weight"?: any[];
     exLibris?: any[];
     "published.publisher"?: any[];
@@ -240,7 +240,7 @@ export interface IUniqueFilterValues {
     numberOfPages?: any[];
     "dimensions.height"?: any[];
     "dimensions.width"?: any[];
-    "dimensions.depth"?: any[];
+    "dimensions.thickness"?: any[];
     "dimensions.weight"?: any[];
     exLibris?: any[];
     "published.publisher"?: any[];

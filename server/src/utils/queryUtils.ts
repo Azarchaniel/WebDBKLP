@@ -1,4 +1,4 @@
-import {PipelineStage, Types} from "mongoose";
+import { PipelineStage, Types } from "mongoose";
 import diacritics from "diacritics";
 
 interface SortParam {
@@ -33,7 +33,7 @@ export const parseSorting = (sorting: string | SortParam[] | undefined): { [key:
 
     const sortOptions: { [key: string]: 1 | -1 } = {};
     if (sortParams.length > 0) {
-        const dimensions = ["height", "width", "depth", "weight"];
+        const dimensions = ["height", "width", "thickness", "weight"];
 
         sortParams.forEach((param) => {
             if (dimensions.includes(param.id)) param.id = "dimensions." + param.id;
@@ -56,9 +56,9 @@ export const buildPaginationPipeline = (page: number, pageSize: number, sortOpti
     [key: string]: 1 | -1
 }): PipelineStage[] => {
     return [
-        {$sort: sortOptions},
-        {$skip: (page - 1) * pageSize},
-        {$limit: pageSize},
+        { $sort: sortOptions },
+        { $skip: (page - 1) * pageSize },
+        { $limit: pageSize },
     ];
 };
 
@@ -84,15 +84,15 @@ export const buildSearchQuery = (search: string, searchFields: string[]): Record
 
 const buildFilterCondition = (field: string, value: any, operator?: string): any => {
     if (!operator || operator === '=') {
-        return {[field]: value};
+        return { [field]: value };
     } else if (operator === '<') {
-        return {[field]: {$lt: value}};
+        return { [field]: { $lt: value } };
     } else if (operator === '>') {
-        return {[field]: {$gt: value}};
+        return { [field]: { $gt: value } };
     }
 
     // Default case - exact match
-    return {[field]: value};
+    return { [field]: value };
 };
 
 const isMongoId = (value: string): boolean => /^[a-f\d]{24}$/i.test(value);
@@ -111,7 +111,7 @@ const buildFilterQuery = (filters: {
     if (!filters || filters.length === 0) return {};
 
     const filterQuery: Record<string, any> = {};
-    filters.forEach(({id, value, operator}) => {
+    filters.forEach(({ id, value, operator }) => {
         if (value !== undefined && value !== null && value !== '') {
             if (id === "exLibris") {
                 filterQuery[id] = value === 'Y';
@@ -132,7 +132,7 @@ const buildFilterQuery = (filters: {
                 const strValue = value || ""; // Ensure value is a string
                 filterQuery[id] = isMongoId(strValue)
                     ? new Types.ObjectId(strValue)
-                    : {$regex: diacritics.remove(String(strValue)).replace(/-/g, ""), $options: "i"};
+                    : { $regex: diacritics.remove(String(strValue)).replace(/-/g, ""), $options: "i" };
             }
         }
     });
@@ -146,7 +146,7 @@ const buildFilterQuery = (filters: {
  * @returns {Record<string, any>} - The MongoDB default query.
  */
 export const buildDefaultQuery = (): Record<string, any> => {
-    return {deletedAt: {$eq: null}};
+    return { deletedAt: { $eq: null } };
 };
 
 /**
@@ -164,18 +164,18 @@ export const fetchDataWithPagination = async (
     lookupStages: PipelineStage[] = [],
     additionalQuery: Record<string, any> = {},
 ): Promise<{ data: any[], count: number, latestUpdate?: Date | undefined }> => {
-    const {page = "1", pageSize = "10_000", search = "", sorting, dataFrom, searchFields = [], filters = []} = options;
+    const { page = "1", pageSize = "10_000", search = "", sorting, dataFrom, searchFields = [], filters = [] } = options;
 
     const latestUpdate: {
         updatedAt: Date | undefined
-    } = await model.findOne().sort({updatedAt: -1}).select('updatedAt').lean() as unknown as {
+    } = await model.findOne().sort({ updatedAt: -1 }).select('updatedAt').lean() as unknown as {
         updatedAt: Date | undefined
     };
 
     // Check if dataFrom is provided and if it's more recent than the latest update
     if (dataFrom && latestUpdate?.updatedAt && new Date(dataFrom as string) >= new Date(latestUpdate.updatedAt)) {
         // No new data, send 204 No Content and return
-        return {data: [], count: 0, latestUpdate: latestUpdate?.updatedAt};
+        return { data: [], count: 0, latestUpdate: latestUpdate?.updatedAt };
     }
 
     const sortOptions = parseSorting(sorting);
@@ -192,7 +192,7 @@ export const fetchDataWithPagination = async (
     };
 
     const pipeline: PipelineStage[] = [
-        {$match: query},
+        { $match: query },
         ...lookupStages
     ];
 
@@ -203,5 +203,5 @@ export const fetchDataWithPagination = async (
     });
     const count = (await model.aggregate(pipeline)).length;
 
-    return {data, count, latestUpdate: latestUpdate?.updatedAt};
+    return { data, count, latestUpdate: latestUpdate?.updatedAt };
 };

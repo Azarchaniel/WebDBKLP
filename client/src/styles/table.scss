@@ -252,7 +252,7 @@
   }
 
   .TSP {
-    &exLibris, &height, &width, &depth, &numberOfPages, &createdAt, &updatedAt, &countLp, &speed, &dateOfBirth, &dateOfDeath {
+    &exLibris, &height, &width, &thickness, &numberOfPages, &createdAt, &updatedAt, &countLp, &speed, &dateOfBirth, &dateOfDeath {
       display: table-cell;
       text-align: center;
     }

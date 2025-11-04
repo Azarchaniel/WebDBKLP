@@ -44,7 +44,7 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
                             <td>Šírka: {formatDimension(dimensions.width) ?? "-"} cm</td>
                         </tr>
                         <tr>
-                            <td>Hrúbka: {formatDimension(dimensions.depth) ?? "-"} cm</td>
+                            <td>Hrúbka: {formatDimension(dimensions.thickness) ?? "-"} cm</td>
                             <td>
                                 {dimensions.weight && `Hmotnosť: ${formatDimension(dimensions.weight) ?? "-"} g`}
                             </td>
