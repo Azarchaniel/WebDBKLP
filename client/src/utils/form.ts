@@ -55,11 +55,14 @@ export const getInputParams = (name: string, formData: any, placeholder?: string
  *
  * @param obj - The object from which to retrieve the nested value.
  * @param keys - An array of strings representing the path of keys to traverse.
- * @returns The value found at the nested path, or `undefined` if any key is missing.
+ * @returns The value found at the nested path, or empty string if any key is missing.
  */
 export const getNestedValues = (obj: any, keys: string[]): any => {
     return keys.reduce((current, key) => {
-        if (current && typeof current === "object" && key in current) {
+        if (current === undefined || current === null) {
+            return ""; // Return empty string if parent is undefined/null
+        }
+        if (typeof current === "object" && key in current) {
             return current[key];
         }
         return ""; // Return empty string if value is missing

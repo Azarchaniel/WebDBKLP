@@ -99,12 +99,12 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 country: countryCode.filter((country: ILangCode) =>
                     (book.published?.country as unknown as string[])?.includes(country.key))
             },
-            dimensions: {
+            dimensions: book.dimensions ? {
                 height: formatDimension(book.dimensions?.height) ?? "",
                 width: formatDimension(book.dimensions?.width) ?? "",
                 depth: formatDimension(book.dimensions?.depth) ?? "",
                 weight: formatDimension(book.dimensions?.weight) ?? "",
-            },
+            } : undefined,
             language: langCode.filter((lang: ILangCode) => (book?.language as unknown as string[])?.includes(lang.key)),
             readBy: formPersonsFullName(book.readBy),
             owner: formPersonsFullName(book.owner),
