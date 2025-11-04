@@ -1,9 +1,9 @@
-import React, {useState} from "react";
-import {IQuote} from "../../type";
-import AddQuote from "./AddQuote";
-import {formPersonsFullName, stringifyUsers} from "@utils";
-import {Wysiwyg} from "@components/Wysiwyg";
-import {useAuth} from "@utils/context";
+import React, { useState } from "react";
+import { IQuote } from "../../type";
+import { formPersonsFullName, stringifyUsers } from "@utils";
+import { Wysiwyg } from "@components/Wysiwyg";
+import { useAuth } from "@utils/context";
+import { useQuoteModal } from "@components/quotes/useQuoteModal";
 
 interface QuoteProps {
     quote: IQuote;
@@ -13,9 +13,9 @@ interface QuoteProps {
     saveResultSuccess?: boolean;
 }
 
-const Quote: React.FC<QuoteProps> = ({quote, bcgrClr, deleteQuote, saveQuote, saveResultSuccess}) => {
-    const {isLoggedIn} = useAuth();
-    const [isEditing, setIsEditing] = useState<boolean>(false);
+const Quote: React.FC<QuoteProps> = ({ quote, bcgrClr, deleteQuote, saveQuote, saveResultSuccess }) => {
+    const { isLoggedIn } = useAuth();
+    const { openQuoteModal } = useQuoteModal();
 
     const makeImgClickable = (text: string): string => {
         if (!text || text.substring(0, 4) !== "<img") {
@@ -60,15 +60,11 @@ const Quote: React.FC<QuoteProps> = ({quote, bcgrClr, deleteQuote, saveQuote, sa
     };
 
     const handleEdit = (): void => {
-        setIsEditing(true);
-    };
-
-    const handleCloseEdit = (): void => {
-        setIsEditing(false);
+        openQuoteModal(quote, saveQuote, saveResultSuccess);
     };
 
     return (
-        <div className="Quote" style={{backgroundColor: bcgrClr}}>
+        <div className="Quote" style={{ backgroundColor: bcgrClr }}>
             <div className="text">
                 {renderBookTitle()}
 
@@ -89,9 +85,9 @@ const Quote: React.FC<QuoteProps> = ({quote, bcgrClr, deleteQuote, saveQuote, sa
 
                 {quote.owner && (
                     <p>
-						<span className="quoteOwner">
-						  Pridal: {stringifyUsers(quote.owner, false)}
-						</span>
+                        <span className="quoteOwner">
+                            Pridal: {stringifyUsers(quote.owner, false)}
+                        </span>
                     </p>
                 )}
 
@@ -104,23 +100,13 @@ const Quote: React.FC<QuoteProps> = ({quote, bcgrClr, deleteQuote, saveQuote, sa
 
             {isLoggedIn && (
                 <div className="card-btn-wrapper">
-                    <i className="fas fa-pen" onClick={handleEdit}/>
+                    <i className="fas fa-pen" onClick={handleEdit} />
                     &nbsp;&nbsp;&nbsp;
                     <i
                         className="fas fa-trash"
                         onClick={() => deleteQuote(quote._id)}
                     />
                 </div>
-            )}
-
-            {isEditing && (
-                <AddQuote
-                    key={quote._id}
-                    saveQuote={saveQuote}
-                    quote={quote}
-                    onClose={handleCloseEdit}
-                    saveResultSuccess={saveResultSuccess}
-                />
             )}
         </div>
     );

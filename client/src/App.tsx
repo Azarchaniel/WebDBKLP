@@ -1,16 +1,19 @@
 import React from "react";
 import "react-toastify/dist/ReactToastify.css";
 import "./index.scss"
-import {AuthProvider} from "@utils/context";
+import { AuthProvider } from "@utils/context";
+import { ModalProvider } from "@utils/context/ModalContext";
 import Layout from "./Layout";
-import {Outlet} from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 const App: React.FC = () => {
     return (
         <AuthProvider>
-            <Layout>
-               <Outlet />
-            </Layout>
+            <ModalProvider>
+                <Layout>
+                    <Outlet />
+                </Layout>
+            </ModalProvider>
         </AuthProvider>
     )
 };

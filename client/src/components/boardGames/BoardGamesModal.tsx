@@ -23,57 +23,20 @@ const getInitialExpansions = (data: IBoardGame | object): boolean | undefined =>
     return undefined;
 };
 
+
 export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
     const [formData, setFormData] = useState(
-        Array.isArray(data) && data.length > 0
-            ? data
-            : [emptyBoardGame]
+        Array.isArray(data) && data.length > 0 ? data : [emptyBoardGame]
     );
     const [errors, setErrors] = useState<ValidationError[]>([
-        { label: "Názov musí obsahovať aspoň jeden znak!", target: "title" },
+        { label: "Názov musí obsahovať aspoň jeden znak!", target: "title" }
     ]);
     const [expansions, setExpansions] = useState<boolean | undefined>(getInitialExpansions(formData));
 
-    // send form data to parent
-    useEffect(() => {
-        onChange(formData);
-    }, [formData]);
-
-    // clear form btn
-    useEffect(() => {
-        if (formData && JSON.stringify(data) !== JSON.stringify(formData)) {
-            setFormData(normalizeBGData(data));
-        }
-    }, [data]);
-
-    // edit bg
-    useEffect(() => {
-        if (!data || !Array.isArray(data) || data.length === 0) return;
-
-        const modifiedBG = normalizeBGData(data);
-        setFormData(modifiedBG);
-    }, []);
-
-    useEffect(() => {
-        if (!formData || !Array.isArray(formData) || formData.length === 0) return;
-        const data = formData[0] as IBoardGame;
-
-        let localErrors: ValidationError[] = [];
-
-        if (!data.title?.trim()) {
-            localErrors.push({ label: "Názov musí obsahovať aspoň jeden znak!", target: "title" });
-        } else {
-            localErrors = localErrors.filter((err) => err.target !== "title");
-        }
-
-        setErrors(localErrors);
-        error(localErrors);
-    }, [formData]);
-
-    const normalizeBGData = (boardGame: any[]): IBoardGame[] => {
-        return (Array.isArray(boardGame) ? boardGame : [boardGame]).map((data: IBoardGame) => {
+    // Normalize board game data (like BookModal)
+    const normalizeBGData = (boardGameArr: any[]): IBoardGame[] => {
+        return (Array.isArray(boardGameArr) ? boardGameArr : [boardGameArr]).map((data: IBoardGame) => {
             if (!data) return emptyBoardGame;
-
             const modified: IBoardGame = {
                 ...data,
                 published: {
@@ -82,18 +45,84 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                         (data.published?.country as unknown as string[])?.includes(country.key))
                 }
             };
-
             return {
                 ...emptyBoardGame,
                 ...data,
                 ...modified
+            };
+        });
+    };
+
+    // Unified input change handler (like BookModal)
+    const handleInputChange = (input: any) => {
+        let name: string, value: any;
+        if (typeof input === 'object' && "target" in input) {
+            const { name: targetName, value: targetValue } = input.target;
+            name = targetName;
+            value = targetValue;
+        } else {
+            name = input.name;
+            value = input.value;
+        }
+        setFormData((prevData: any) => {
+            const keys = name.split(".");
+            // Helper to set nested value
+            const setNestedValue = (obj: any, keys: string[], value: any): any => {
+                if (keys.length === 0) return value;
+                const [first, ...rest] = keys;
+                return {
+                    ...obj,
+                    [first]: setNestedValue(obj?.[first] ?? {}, rest, value)
+                };
+            };
+            if (Array.isArray(prevData)) {
+                // Update all items (or target specific index if needed)
+                const updatedArray = prevData.map((item: any) => setNestedValue(item, [...keys], value));
+                return updatedArray;
+            } else {
+                return setNestedValue(prevData, [...keys], value);
             }
         });
     };
 
-    const changeFormData = useCallback((input: any) => {
-        setFormData((prevData: any) => handleInputChange(input, prevData));
-    }, []);
+    // Send form data to parent
+    useEffect(() => {
+        onChange(formData);
+    }, [formData]);
+
+    // Reset formData if incoming data changes (like BookModal)
+    useEffect(() => {
+        if (data && Array.isArray(data) && data.length > 0 && JSON.stringify(data) !== JSON.stringify(formData)) {
+            setFormData(normalizeBGData(data));
+        }
+    }, [data]);
+
+    // Error handling (like BookModal)
+    useEffect(() => {
+        if (!formData) return;
+        let localErrors: ValidationError[] = [];
+        const validateBG = (bg: IBoardGame) => {
+            let errors: ValidationError[] = [];
+            if (!bg.title?.trim()) {
+                errors.push({ label: "Názov musí obsahovať aspoň jeden znak!", target: "title" });
+            } else {
+                errors = errors.filter((err) => err.target !== "title");
+            }
+            return errors;
+        };
+        if (Array.isArray(formData)) {
+            const allErrors = (formData as IBoardGame[]).flatMap(validateBG);
+            localErrors = allErrors;
+        } else {
+            localErrors = validateBG(formData as IBoardGame);
+        }
+        setErrors(localErrors);
+        error(localErrors);
+    }, [formData]);
+
+    const getErrorMsg = (name: string): string => {
+        return errors.find(err => err.target === name)?.label || "";
+    };
 
     return (
         <form>
@@ -101,115 +130,104 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                 <div className="bg-title">
                     <InputField
                         placeholder="*Názov"
-                        onChange={changeFormData}
-                        customerror={errors.find((err) => err.target === "title")?.label || ""}
+                        onChange={handleInputChange}
+                        customerror={getErrorMsg("title")}
                         {...getInputParams("title", formData, "Názov")}
                     />
                 </div>
-
                 <div className="bg-autor">
                     <LazyLoadMultiselect
                         displayValue="fullName"
                         placeholder="Autor"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         onSearch={fetchAutors}
                         onNew={(autorString) => createNewAutor(autorString, AutorRole.BOARDGAME_AUTOR, setFormData, "autor")}
                         {...getInputParams("autor", formData, "Autor")}
                     />
                 </div>
-
                 <div className="bg-publisher">
                     <InputField
                         placeholder="Vydavateľ"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("published.publisher", formData, "Vydavateľ")}
                     />
                 </div>
-
                 <div className="bg-year-published">
                     <InputField
                         placeholder="Rok vydania"
                         type="number"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("published.year", formData, "Rok vydania")}
                     />
                 </div>
-
                 <div className="bg-country-published">
                     <LazyLoadMultiselect
                         selectionLimit={1}
                         options={countryCode}
                         displayValue="value"
                         placeholder="Krajina vydania"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("published.country", formData, "Krajina vydania")}
                     />
                 </div>
-
                 <div className="bg-no-players">
                     <InputField
                         placeholder="Počet hráčov od"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("noPlayers.from", formData, "Počet hráčov od")}
                     />
                     <InputField
                         placeholder="Počet hráčov do"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("noPlayers.to", formData, "Počet hráčov do")}
                     />
                 </div>
-
                 <div className="bg-play-time">
                     <InputField
                         placeholder="Čas hrania od"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("playTime.from", formData, "Čas hrania od")}
                     />
                     <InputField
                         placeholder="Čas hrania do"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("playTime.to", formData, "Čas hrania do")}
                     />
                 </div>
-
                 <div className="bg-age-recommendation">
                     <InputField
                         placeholder="Veková kategória od"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("ageRecommendation.from", formData, "Veková kategória od")}
                     />
                     <InputField
                         placeholder="Veková kategória do"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("ageRecommendation.to", formData, "Veková kategória do")}
                     />
                 </div>
-
                 <div className="bg-picture">
                     <InputField
                         placeholder="Obrázok"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("picture", formData, "Obrázok")}
                     />
                 </div>
-
                 <div className="bg-url">
                     <InputField
                         placeholder="URL"
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("url", formData, "URL")}
                     />
                 </div>
-
                 <div className="bg-note">
                     <TextArea
                         placeholder="Poznámka"
                         rows={1}
-                        onChange={changeFormData}
+                        onChange={handleInputChange}
                         {...getInputParams("note", formData, "Poznámka")}
                     />
                 </div>
-
                 <div className="bg-expansions row">
                     <div className="col">
                         <ThreeStateToggleSwitch
@@ -227,7 +245,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                                 disabled={expansions === undefined}
                                 displayValue="title"
                                 placeholder="Má rozšírenia (deti)"
-                                onChange={changeFormData}
+                                onChange={handleInputChange}
                                 onSearch={fetchBoardGames}
                                 {...getInputParams("children", formData, "Má rozšírenia (deti)")}
                             /> :
@@ -236,7 +254,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                                 selectionLimit={1}
                                 displayValue="title"
                                 placeholder="Patrí k hre (rodičovi)"
-                                onChange={changeFormData}
+                                onChange={handleInputChange}
                                 onSearch={fetchBoardGames}
                                 {...getInputParams("parent", formData, "Patrí k hre (rodičovi)")}
                             />}

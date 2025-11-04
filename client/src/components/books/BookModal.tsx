@@ -47,7 +47,9 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
 
     // clear form btn
     useEffect(() => {
-        if (formData && JSON.stringify(data) !== JSON.stringify(formData)) {
+        // Only reset formData if data is not empty and different from current formData
+        if (data && Array.isArray(data) && data.length > 0 &&
+            formData && JSON.stringify(data) !== JSON.stringify(formData)) {
             setFormData(normalizeBookData(data));
         }
     }, [data]);
@@ -158,7 +160,6 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             errors = errors?.filter((err: ValidationError) => err.target !== "ISBN") ?? errors;
 
             if (!(numberValidations.every(n => n?.valid))) {
-                console.log("Nesprávne číslo: ", numberValidations);
                 numberValidations.filter(n => !(n?.valid))
                     .map((numErr: ValidationError) => ({
                         label: numErr.label + " musí byť číslo!",

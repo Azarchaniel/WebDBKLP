@@ -7,6 +7,7 @@
   "scripts": {
     "build": "npm install --legacy-peer-deps && tsc",
     "start": "concurrently \"tsc -w\" \"nodemon dist/js/app.js\"",
+    "debug": "concurrently \"tsc -w\" \"nodemon --inspect dist/js/app.js\"",
     "startProduction": "nodemon dist/js/app.js",
     "runImport": "node migrations/v1__import_from_csv.tsx"
   },

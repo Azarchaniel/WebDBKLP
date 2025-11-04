@@ -1,8 +1,7 @@
-import { IBook, IBookColumnVisibility } from "../../type";
+import { IBook, IBookColumnVisibility, SaveEntity, SaveEntityResult } from "../../type";
 import { useEffect, useRef, useState } from "react";
 import { addBook, checkBooksUpdated, deleteBook, getBook, getBooks } from "../../API";
 import { toast } from "react-toastify";
-import AddBook from "./AddBook";
 import {
     DEFAULT_PAGINATION,
     stringifyAutors,
@@ -15,6 +14,7 @@ import {
     isMobile,
     shortenStringKeepWord
 } from "@utils";
+import { useBookModal } from "@components/books/useBookModal";
 import { openConfirmDialog } from "@components/ConfirmDialog";
 import ServerPaginationTable from "@components/table/TableSP";
 import BookDetail from "./BookDetail";
@@ -36,7 +36,6 @@ export default function BookPage() {
     });
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
-    const [updateBooks, setUpdateBooks] = useState<IBook[] | undefined>();
     const [showColumn, setShowColumn] = useState<IBookColumnVisibility>({
         control: false,
         autorsFull: true,
@@ -160,36 +159,41 @@ export default function BookPage() {
         };
     }, [pagination, currentUser, isAuthLoading]);
 
-    const handleSaveBook = (formData: IBook | object | IBook[]): void => {
+    const { openBookModal } = useBookModal();
+
+    const handleSaveBook = async (formData: SaveEntity<IBook>): Promise<SaveEntityResult> => {
         setSaveBookSuccess(undefined);
+        const isNewBook = Array.isArray(formData)
+            ? formData.some((book) => !(book as IBook)._id)
+            : !(formData as IBook)._id;
 
-        addBook(formData)
-            .then((res) => {
-                if (Array.isArray(formData) && formData.length > 1) {
-                    let message = "";
-                    if (res.length < 5) {
-                        message = `${res.length} knihy boli úspešne upravené.`;
-                    } else {
-                        message = `${res.length} kníh bolo úspešne upravených.`;
-                    }
-
-                    toast.success(message);
+        try {
+            const res = await addBook(formData);
+            let message = "";
+            if (Array.isArray(formData) && formData.length > 1) {
+                if (res.length < 5) {
+                    message = `${res.length} knihy boli úspešne upravené.`;
                 } else {
-                    toast.success(
-                        `Kniha ${Array.isArray(res) ?
-                            res[0].data.book?.title :
-                            res.data.book?.title
-                        } bola úspešne ${(formData as IBook)._id ? "uložená" : "pridaná"}.`);
+                    message = `${res.length} kníh bolo úspešne upravených.`;
                 }
-                setSaveBookSuccess(true);
-                fetchBooks()
-            })
-            .catch((err) => {
-                toast.error(err.response?.data?.error || "Chyba! Kniha nebola uložená!");
-                console.trace("Error saving books", err)
-                setSaveBookSuccess(false);
-            })
-    }
+            } else {
+                const bookTitle = Array.isArray(res)
+                    ? res[0].data.book?.title
+                    : res.data.book?.title;
+                message = `Kniha ${bookTitle} bola úspešne ${!isNewBook ? "uložená" : "pridaná"}.`;
+            }
+            toast.success(message);
+            setSaveBookSuccess(true);
+            fetchBooks();
+            return { success: true, message };
+        } catch (err: any) {
+            const message = err.response?.data?.error || "Chyba! Kniha nebola uložená!";
+            toast.error(message);
+            console.trace("Error saving books", err);
+            setSaveBookSuccess(false);
+            return { success: false, message };
+        }
+    };
 
     const handleUpdateBook = (_id?: string): void => {
         setSaveBookSuccess(undefined);
@@ -198,11 +202,23 @@ export default function BookPage() {
             const bookToUpdate = clonedBooks.find((book: IBook) => book._id === _id);
 
             if (bookToUpdate) {
-                setUpdateBooks([bookToUpdate]);
+                // Use the persistent modal for a single book
+                openBookModal(
+                    [bookToUpdate],
+                    handleSaveBook,
+                    saveBookSuccess
+                );
             } else {
                 getBook(_id)
                     .then(({ data }) => {
-                        if (data.book) setUpdateBooks([data.book]);
+                        if (data.book) {
+                            // Use the persistent modal for fetched book
+                            openBookModal(
+                                [data.book],
+                                handleSaveBook,
+                                saveBookSuccess
+                            );
+                        }
                     })
                     .catch((err) => {
                         toast.error(err.response.data.error || "Chyba! Kniha nebola nájdená!");
@@ -212,9 +228,12 @@ export default function BookPage() {
         }
         if (selectedBooks.length > 0) {
             const selectedBooksData = clonedBooks.filter((book: IBook) => selectedBooks.includes(book._id));
-
-            setUpdateBooks(selectedBooksData);
-
+            // Use the persistent modal for multiple selected books
+            openBookModal(
+                selectedBooksData,
+                handleSaveBook,
+                saveBookSuccess
+            );
         }
     }
 
@@ -305,13 +324,13 @@ export default function BookPage() {
         setPagination(prevState => ({ ...prevState, page: page }));
     };
 
+    // Handle the add book button click
+    const handleAddBook = () => {
+        openBookModal([], handleSaveBook, saveBookSuccess);
+    };
+
     return (
         <>
-            {isLoggedIn && <AddBook
-                saveBook={handleSaveBook}
-                onClose={() => setUpdateBooks(undefined)}
-                saveResultSuccess={saveBookSuccess}
-            />}
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
                 <ShowHideColumns columns={getBookTableColumns()} shown={showColumn} setShown={setShowColumn} />
             </div>
@@ -378,6 +397,15 @@ export default function BookPage() {
                                 </button>
                             </div>
                         </div>
+                        {/* Add book button for authenticated users */}
+                        {isLoggedIn && (
+                            <button
+                                type="button"
+                                className="addBtnTable"
+                                onClick={handleAddBook}
+                                title="Pridať novú knihu"
+                            />
+                        )}
                         <i
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
@@ -411,13 +439,6 @@ export default function BookPage() {
                 expandedElement={(data) => <BookDetail data={data} />}
                 selectedChanged={(ids) => setSelectedBooks(ids)}
             />
-            {Boolean(updateBooks) &&
-                <AddBook
-                    saveBook={handleSaveBook}
-                    books={updateBooks}
-                    onClose={() => setUpdateBooks(undefined)}
-                    saveResultSuccess={saveBookSuccess}
-                />}
         </>
     );
 }

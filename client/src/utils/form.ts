@@ -44,6 +44,7 @@ export const getInputParams = (name: string, formData: any, placeholder?: string
     return {
         name: name,
         value: getNestedValues(formData, keys),
+        placeholder: placeholder
     };
 }
 

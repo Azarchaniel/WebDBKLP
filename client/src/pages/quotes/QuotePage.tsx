@@ -1,4 +1,3 @@
-import AddQuote from "./AddQuote";
 import { IBook, IQuote } from "../../type";
 import QuoteItem from "./QuoteItem";
 import React, { useEffect, useState } from "react";
@@ -11,6 +10,7 @@ import { openConfirmDialog } from "@components/ConfirmDialog";
 import { LazyLoadMultiselect } from "@components/inputs";
 import "@styles/QuotePage.scss";
 import { useAuth } from "@utils/context";
+import { useQuoteModal } from "@components/quotes/useQuoteModal";
 
 interface QuoteGroup {
     bookId: string;
@@ -28,6 +28,7 @@ export default function QuotePage() {
     const [loading, setLoading] = useState(true);
     const [saveQuoteSuccess, setSaveQuoteSuccess] = useState<boolean | undefined>(undefined);
     const [quoteGroups, setQuoteGroups] = useState<QuoteGroup[]>([]);
+    const { openQuoteModal } = useQuoteModal();
 
     useEffect(() => {
         fetchQuotes();
@@ -38,6 +39,11 @@ export default function QuotePage() {
     }, [filteredQuotes]);
 
     const groupQuotesByBook = () => {
+        if (!filteredQuotes || !Array.isArray(filteredQuotes)) {
+            setQuoteGroups([]);
+            return;
+        }
+
         const groups: { [bookId: string]: QuoteGroup } = {};
         const baseColors = generateColors(books.length);
         let colorIndex = 0;
@@ -64,7 +70,6 @@ export default function QuotePage() {
         fetchQuotes(books.map((book: IBook) => book._id));
     }
 
-    // ### QUOTES ###
     const fetchQuotes = (books?: string[]): void => {
         setLoading(true);
 
@@ -81,17 +86,24 @@ export default function QuotePage() {
 
     const handleSaveQuote = (formData: IQuote): void => {
         setSaveQuoteSuccess(undefined);
+        const isNewQuote = !formData._id;
+
         addQuote(formData)
             .then(({ status, data }) => {
                 if (status !== 201) {
                     throw new Error("Citát sa nepodarilo pridať!")
                 }
                 setSaveQuoteSuccess(true);
-                setFilteredQuotes(data.quotes);
-                toast.success(`Citát bol úspešne ${formData._id ? 'upravený' : 'pridaný.'}`);
+                if (data?.quotes && Array.isArray(data.quotes)) {
+                    setFilteredQuotes(data.quotes);
+                } else {
+                    // If quotes aren't returned, refetch them
+                    fetchQuotes();
+                }
+                toast.success(`Citát bol úspešne ${!isNewQuote ? 'upravený' : 'pridaný.'}`);
             })
             .catch((err) => {
-                toast.error(`Citát sa nepodarilo ${formData._id ? 'upraviť' : 'pridať.'}!`);
+                toast.error(`Citát sa nepodarilo ${!isNewQuote ? 'upraviť' : 'pridať.'}!`);
                 console.trace(err);
                 setSaveQuoteSuccess(false);
             })
@@ -124,13 +136,22 @@ export default function QuotePage() {
         window.scroll(0, 0)
     }
 
+    // Handle the add quote button click
+    const handleAddQuote = () => {
+        setSaveQuoteSuccess(undefined);
+        openQuoteModal(undefined, handleSaveQuote, saveQuoteSuccess);
+    };
+
     return (
         <>
-            {isLoggedIn && <AddQuote
-                saveQuote={handleSaveQuote}
-                onClose={() => { }}
-                saveResultSuccess={saveQuoteSuccess} />
-            }
+            {isLoggedIn && (
+                <button
+                    type="button"
+                    className="addQuote"
+                    onClick={handleAddQuote}
+                    data-tip="Pridaj citát"
+                />
+            )}
             <div>
                 {loading ? <LoadingBooks /> : <></>}
             </div>

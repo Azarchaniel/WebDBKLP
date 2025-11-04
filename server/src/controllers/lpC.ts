@@ -1,13 +1,13 @@
-import {Response, Request} from 'express';
-import {ILp} from '../types';
+import { Response, Request } from 'express';
+import { ILp } from '../types';
 import Lp from '../models/lp';
-import {optionFetchAllExceptDeleted} from '../utils/constants';
-import {createLookupStage} from "../utils/utils";
-import {fetchDataWithPagination} from "../utils/queryUtils";
+import { optionFetchAllExceptDeleted } from '../utils/constants';
+import { createLookupStage } from "../utils/utils";
+import { fetchDataWithPagination } from "../utils/queryUtils";
 
 const getAllLps = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {page = "1", pageSize = "10_000", search = "", sorting} = req.query;
+        const { page = "1", pageSize = "10_000", search = "", sorting } = req.query;
 
         const searchFields = [
             "title",
@@ -23,7 +23,7 @@ const getAllLps = async (req: Request, res: Response): Promise<void> => {
         const parsedPage = parseInt(page as string, 10);
         const parsedPageSize = parseInt(pageSize as string, 10);
 
-        const {data, count} = await fetchDataWithPagination(
+        const { data, count } = await fetchDataWithPagination(
             Lp,
             {
                 page: isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage,
@@ -35,7 +35,7 @@ const getAllLps = async (req: Request, res: Response): Promise<void> => {
             lookupStages
         );
 
-        res.status(200).json({lps: data, count: count})
+        res.status(200).json({ lps: data, count: count })
     } catch (error) {
         throw error
     }
@@ -46,13 +46,13 @@ const getLp = async (req: Request, res: Response): Promise<void> => {
         const lp = await Lp
             .findById(req.params.id)
             .populate([
-                {path: 'autor', model: 'Autor'},
+                { path: 'autor', model: 'Autor' },
             ])
             .exec();
         const allLps: ILp[] = await Lp.find().populate([
-            {path: 'autor', model: 'Autor'},
+            { path: 'autor', model: 'Autor' },
         ]).exec()
-        res.status(200).json({lp: lp, lps: allLps})
+        res.status(200).json({ lp: lp, lps: allLps })
     } catch (err) {
         throw err;
     }
@@ -65,7 +65,9 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
         } = req.body;
 
         const languageNormalized = language?.map((lang: { key: string; value: string }) => lang.key);
-        const publishedCountryNormalized = Array.isArray(published.country) ? published.country?.[0] : published.country;
+        const publishedCountryNormalized = published?.country ?
+            Array.isArray(published.country) ? published.country?.[0]?.value : published.country
+            : null;
 
         if (!_id) {
             const lp: ILp = new Lp({
@@ -87,21 +89,21 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
 
             const newLp: ILp = await lp.save()
             const allLps: ILp[] = await Lp.find(optionFetchAllExceptDeleted).populate([
-                {path: 'autor', model: 'Autor'},
+                { path: 'autor', model: 'Autor' },
             ]).exec()
 
-            res.status(201).json({message: 'Lp added', lp: newLp, lps: allLps})
+            res.status(201).json({ message: 'Lp added', lp: newLp, lps: allLps })
         } else {
             const updateLp: ILp | null = await Lp.findByIdAndUpdate(
-                {_id: _id},
+                { _id: _id },
                 {
                     ...req.body,
                     language: languageNormalized,
-                    published: {...published, country: publishedCountryNormalized}
+                    published: { ...published, country: publishedCountryNormalized }
                 }
             )
             const allLps: ILp[] = await Lp.find().populate([
-                {path: 'autor', model: 'Autor'},
+                { path: 'autor', model: 'Autor' },
             ]).exec()
 
             res.status(201).json({
@@ -119,18 +121,18 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
 const deleteLp = async (req: Request, res: Response): Promise<void> => {
     try {
         const {
-            params: {id},
+            params: { id },
             body,
         } = req
         const deletedLp: ILp | null = await Lp.findByIdAndUpdate(
-            {_id: id},
+            { _id: id },
             {
                 ...body,
                 deletedAt: new Date()
             }
         )
         const allLps: ILp[] = await Lp.find().populate([
-            {path: 'autor', model: 'Autor'},
+            { path: 'autor', model: 'Autor' },
         ]).exec()
 
         res.status(200).json({
@@ -142,4 +144,4 @@ const deleteLp = async (req: Request, res: Response): Promise<void> => {
         throw error
     }
 }
-export {getAllLps, addLp, deleteLp, getLp}
+export { getAllLps, addLp, deleteLp, getLp }
