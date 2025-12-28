@@ -141,7 +141,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                         placeholder="Autor"
                         onChange={handleInputChange}
                         onSearch={fetchAutors}
-                        onNew={(autorString) => createNewAutor(autorString, AutorRole.BOARDGAME_AUTOR, setFormData, "autor")}
+                        onNew={async (autorString) => await createNewAutor(autorString, AutorRole.BOARDGAME_AUTOR, setFormData, "autor")}
                         {...getInputParams("autor", formData, "Autor")}
                     />
                 </div>

@@ -235,7 +235,6 @@ export const getBookLocation = (location: ILocation): string => {
 }
 
 export const formatDimension = (dimension: any) => {
-	console.log(dimension);
 	if (dimension === undefined || dimension === null) return undefined;
 
 	if (typeof dimension === 'object' && "$numberDecimal" in dimension)

@@ -250,7 +250,9 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder="Autor"
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
-                    onNew={(autorString) => createNewAutor(autorString, AutorRole.AUTOR, setFormData)}
+                    onNew={async (autorString) => {
+                        await createNewAutor(autorString, AutorRole.AUTOR, setFormData);
+                    }}
                     {...getInputParams("autor", formData)}
                 />
             </div>
@@ -281,7 +283,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder="Prekladateľ"
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
-                    onNew={(autorString) => createNewAutor(autorString, AutorRole.TRANSLATOR, setFormData)}
+                    onNew={async (autorString) => await createNewAutor(autorString, AutorRole.TRANSLATOR, setFormData)}
                     {...getInputParams("translator", formData)}
                 />
             </div>
@@ -291,7 +293,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder="Editor"
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
-                    onNew={(autorString) => createNewAutor(autorString, AutorRole.EDITOR, setFormData)}
+                    onNew={async (autorString) => await createNewAutor(autorString, AutorRole.EDITOR, setFormData)}
                     {...getInputParams("editor", formData)}
                 />
             </div>
@@ -301,7 +303,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     placeholder="Ilustrátor"
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
-                    onNew={(autorString) => createNewAutor(autorString, AutorRole.ILUSTRATOR, setFormData)}
+                    onNew={async (autorString) => await createNewAutor(autorString, AutorRole.ILUSTRATOR, setFormData)}
                     {...getInputParams("ilustrator", formData)}
                 />
             </div>
@@ -490,3 +492,4 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
         </div>
     </form>)
 }
+

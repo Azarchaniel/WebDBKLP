@@ -4,10 +4,6 @@ import "@styles/Autocomplete.scss";
 
 type OptionValue = string | { [key: string]: any };
 
-interface Option {
-    [key: string]: any;
-}
-
 type LoadingStatus = "idle" | "loading" | "hasMore" | "noMore";
 
 interface AutocompleteInputProps {
@@ -73,10 +69,10 @@ export const LazyLoadMultiselect = React.memo(({
     const [inputValue, setInputValue] = useState('');
     const [filteredOptions, setFilteredOptions] = useState<OptionValue[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const wrapperRef = useRef<HTMLDivElement>(null);
-    const inputRef = useRef<HTMLInputElement>(null);
+    const wrapperRef = useRef<HTMLDivElement | null>(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
     const [loadingStatus, setLoadingStatus] = useState<LoadingStatus>("idle");
-    const menuRef = useRef<HTMLDivElement>(null);
+    const menuRef = useRef<HTMLDivElement | null>(null);
     const [dropdownPosition, setDropdownPosition] = useState<'top' | 'bottom'>('bottom');
     const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
     const [isInputFocused, setIsInputFocused] = useState(false); // Track input focus
@@ -138,7 +134,7 @@ export const LazyLoadMultiselect = React.memo(({
     // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node) && (!menuRef.current || !menuRef.current.contains(event.target as Node))) {
                 setIsOpen(false);
             }
         };
@@ -278,8 +274,10 @@ export const LazyLoadMultiselect = React.memo(({
             const spaceBelow = windowHeight - rect.bottom;
             const spaceAbove = rect.top;
             const newStyle: React.CSSProperties = {
+                position: 'absolute',
                 width: rect.width,
                 left: rect.left,
+                zIndex: 9999,
             };
             if (spaceBelow < 200 && spaceAbove > 200) { // 200px is approx menu height
                 setDropdownPosition('top');
@@ -292,17 +290,14 @@ export const LazyLoadMultiselect = React.memo(({
         }
     }, []);
 
-    const handleScroll = useCallback(
-        debounce(() => {
-            if (loadingStatus === "hasMore" && menuRef.current) {
-                const { scrollTop, scrollHeight, clientHeight } = menuRef.current;
-                if (scrollTop + clientHeight >= scrollHeight - 20) { // 20px threshold
-                    loadMoreOptions();
-                }
+    const handleScroll = useCallback(() => {
+        if (loadingStatus === "hasMore" && menuRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = menuRef.current;
+            if (scrollTop + clientHeight >= scrollHeight - 20) { // 20px threshold
+                loadMoreOptions();
             }
-        }, 200),
-        [loadingStatus, loadMoreOptions]
-    );
+        }
+    }, [loadingStatus, loadMoreOptions]);
 
 
     useEffect(() => {
@@ -387,13 +382,6 @@ export const LazyLoadMultiselect = React.memo(({
                                     {emptyRecordMsg}
                                 </div>
                             )}
-                            {/* create new */}
-                            {filteredOptionsToDisplay.length === 0 && searchQuery.length > 0 && onNew && (
-                                <div className="autocomplete-item create-new" onClick={handleCreateNew}
-                                    title="`Meno Priezvisko` alebo `Priezvisko, Meno` alebo `Priezvisko`">
-                                    Vytvoriť "{searchQuery}"
-                                </div>
-                            )}
                             {/* data and loading more */}
                             {filteredOptionsToDisplay.length > 0 && (
                                 <>
@@ -410,6 +398,13 @@ export const LazyLoadMultiselect = React.memo(({
                                         <div className="autocomplete-item loading">Načítava sa...</div>
                                     )}
                                 </>
+                            )}
+                            {/* create new */}
+                            {searchQuery.length > 0 && onNew && (
+                                <div className="autocomplete-item create-new" onClick={handleCreateNew}
+                                    title="`Meno Priezvisko` alebo `Priezvisko, Meno` alebo `Priezvisko`">
+                                    Vytvoriť "{searchQuery}"
+                                </div>
                             )}
                         </div>, document.body
                     )

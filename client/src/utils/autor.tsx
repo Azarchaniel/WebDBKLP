@@ -11,12 +11,12 @@ export enum AutorRole {
     BOARDGAME_AUTOR = "boardGameAutor",
 }
 
-export const createNewAutor = (
+export const createNewAutor = async (
     name: string,
     role?: string,
     setFormData?: (callback: (prevData: any) => any) => void,
     formDataParamName?: string,
-) => {
+): Promise<any> => {
     let firstName, lastName;
 
     if (name.includes(",")) {
@@ -33,61 +33,61 @@ export const createNewAutor = (
         lastName = name.trim();
     }
 
-    addAutor([{ firstName, lastName, role: [{ value: role }] }])
-        .then((res) => {
-            if (res.status === 201 && res.data?.autor?._id) {
-                toast.success("Autor úspešne vytvorený");
+    try {
+        const res = await addAutor([{ firstName, lastName, role: [{ value: role }] }]);
+        if (res.status === 201 && res.data?.autor?._id) {
+            toast.success("Autor úspešne vytvorený");
+            if (setFormData) {
+                setFormData((prevData: any) => {
+                    // Check if prevData is an array (BookModal) or object (other forms)
+                    if (Array.isArray(prevData)) {
+                        // Handle array case (like in BookModal)
+                        // For arrays, we need to update specific fields based on role
+                        const updatedArray = prevData.map(item => {
+                            const roleField = role || "autor";
+                            const fieldToUpdate = formDataParamName || roleField;
 
-                if (setFormData) {
-                    setFormData((prevData: any) => {
-                        // Check if prevData is an array (BookModal) or object (other forms)
-                        if (Array.isArray(prevData)) {
-                            // Handle array case (like in BookModal)
-                            // For arrays, we need to update specific fields based on role
-                            const updatedArray = prevData.map(item => {
-                                const roleField = role || "autor";
-                                const fieldToUpdate = formDataParamName || roleField;
+                            // Create a new object with the updated field
+                            return {
+                                ...item,
+                                [fieldToUpdate]: [...(item[fieldToUpdate] || []), res.data?.autor]
+                            };
+                        });
 
-                                // Create a new object with the updated field
-                                return {
-                                    ...item,
-                                    [fieldToUpdate]: [...(item[fieldToUpdate] || []), res.data?.autor]
-                                };
-                            });
-
-                            return updatedArray;
+                        return updatedArray;
+                    } else {
+                        // Handle object case (original behavior)
+                        let currentRole;
+                        if (formDataParamName) {
+                            currentRole = formDataParamName;
                         } else {
-                            // Handle object case (original behavior)
-                            let currentRole;
-                            if (formDataParamName) {
-                                currentRole = formDataParamName;
-                            } else {
-                                currentRole = role || "autor";
-                            }
+                            currentRole = role || "autor";
+                        }
 
-                            const currentRoleData = prevData?.[currentRole];
+                        const currentRoleData = prevData?.[currentRole];
 
-                            // Check if currentRole exists in prevData
-                            if (!prevData || !prevData.hasOwnProperty(currentRole)) {
-                                return {
-                                    ...prevData,
-                                    [currentRole]: [res.data?.autor],
-                                };
-                            }
-
+                        // Check if currentRole exists in prevData
+                        if (!prevData || !prevData.hasOwnProperty(currentRole)) {
                             return {
                                 ...prevData,
-                                [currentRole]: [...(currentRoleData ?? []), res.data?.autor],
+                                [currentRole]: [res.data?.autor],
                             };
                         }
-                    });
-                }
-            } else {
-                throw Error();
+
+                        return {
+                            ...prevData,
+                            [currentRole]: [...(currentRoleData ?? []), res.data?.autor],
+                        };
+                    }
+                });
             }
-        })
-        .catch((err) => {
-            toast.error("Autora sa nepodarilo vytvoriť!");
-            console.error(err);
-        });
+            return res.data.autor;
+        } else {
+            throw new Error();
+        }
+    } catch (err) {
+        toast.error("Autora sa nepodarilo vytvoriť!");
+        console.error(err);
+        return undefined;
+    }
 };
