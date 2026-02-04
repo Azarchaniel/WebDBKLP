@@ -1,6 +1,6 @@
 import { IBook, ILangCode, ValidationError } from "../../type";
 import React, { useCallback, useEffect, useState } from "react";
-import { getInfoAboutBook } from "../../API";
+import { getInfoAboutBook, getUniqueFieldValues } from "../../API";
 import { toast } from "react-toastify";
 import {
     formatDimension,
@@ -39,6 +39,16 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
         label: "Názov knihy musí obsahovať aspoň jeden znak!",
         target: "title"
     }]);
+    const [uniqueValues, setUniqueValues] = useState<Record<string, any[]>>({});
+
+    // Fetch unique values on mount
+    useEffect(() => {
+        getUniqueFieldValues().then(res => {
+            setUniqueValues(res.data);
+        }).catch(err => {
+            console.error('Error fetching unique values:', err);
+        });
+    }, []);
 
     // send form data to parent
     useEffect(() => {
@@ -91,27 +101,33 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
     }
 
     const normalizeBookData = (book: any[]): IBook[] => {
+        if (!book) return [];
         // Map each book in the array to the modified structure
-        return book?.map((book: IBook) => ({
-            ...emptyBook,
-            ...book,
-            location: { city: cities.filter(c => c.value === book?.location?.city) },
-            published: {
-                ...book.published,
-                country: countryCode.filter((country: ILangCode) =>
-                    (book.published?.country as unknown as string[])?.includes(country.key))
-            },
-            dimensions: book.dimensions ? {
-                height: formatDimension(book.dimensions?.height) ?? "",
-                width: formatDimension(book.dimensions?.width) ?? "",
-                thickness: formatDimension(book.dimensions?.thickness) ?? "",
-                weight: formatDimension(book.dimensions?.weight) ?? "",
-            } : undefined,
-            language: langCode.filter((lang: ILangCode) => (book?.language as unknown as string[])?.includes(lang.key)),
-            readBy: formPersonsFullName(book.readBy),
-            owner: formPersonsFullName(book.owner),
-            exLibris: book.exLibris,
-        }) as IBook);
+        return book.filter(Boolean).map((book: IBook): IBook => {
+            const readByData = formPersonsFullName(book.readBy);
+            const ownerData = formPersonsFullName(book.owner);
+
+            return {
+                ...emptyBook,
+                ...book,
+                location: { city: cities.filter(c => c.value === book?.location?.city) },
+                published: {
+                    ...book.published,
+                    country: countryCode.filter((country: ILangCode) =>
+                        (book.published?.country as unknown as string[])?.includes(country.key))
+                },
+                dimensions: book.dimensions ? {
+                    height: (formatDimension(book.dimensions?.height) as any) ?? undefined,
+                    width: (formatDimension(book.dimensions?.width) as any) ?? undefined,
+                    thickness: (formatDimension(book.dimensions?.thickness) as any) ?? undefined,
+                    weight: (formatDimension(book.dimensions?.weight) as any) ?? undefined,
+                } : undefined,
+                language: langCode.filter((lang: ILangCode) => (book?.language as unknown as string[])?.includes(lang.key)),
+                readBy: Array.isArray(readByData) ? readByData : [],
+                owner: Array.isArray(ownerData) ? ownerData : [],
+                exLibris: book.exLibris,
+            };
+        });
     }
 
     //error handling
@@ -308,10 +324,14 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 />
             </div>
             <div className="b-Name">
-                <InputField
-                    placeholder='Názov edície'
-                    onChange={handleInputChange}
-                    {...getInputParams("edition.title", formData)}
+                <LazyLoadMultiselect
+                    selectionLimit={1}
+                    options={uniqueValues['edition.title'] || []}
+                    value={formData[0]?.edition?.title ? [formData[0].edition.title] : []}
+                    onChange={(data) => handleInputChange({ name: 'edition.title', value: data.value[0] || '' })}
+                    onNew={(val) => handleInputChange({ name: 'edition.title', value: val })}
+                    placeholder="Názov edície"
+                    name="edition.title"
                 />
             </div>
             <div className="b-No">
@@ -322,10 +342,14 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 />
             </div>
             <div className="b-NameS">
-                <InputField
-                    placeholder='Názov série'
-                    onChange={handleInputChange}
-                    {...getInputParams("serie.title", formData)}
+                <LazyLoadMultiselect
+                    selectionLimit={1}
+                    options={uniqueValues['serie.title'] || []}
+                    value={formData[0]?.serie?.title ? [formData[0].serie.title] : []}
+                    onChange={(data) => handleInputChange({ name: 'serie.title', value: data.value[0] || '' })}
+                    onNew={(val) => handleInputChange({ name: 'serie.title', value: val })}
+                    placeholder="Názov série"
+                    name="serie.title"
                 />
             </div>
             <div className="b-NoS">
@@ -336,10 +360,14 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 />
             </div>
             <div className="b-Vydavatel">
-                <InputField
-                    placeholder='Vydavateľ'
-                    onChange={handleInputChange}
-                    {...getInputParams("published.publisher", formData)}
+                <LazyLoadMultiselect
+                    selectionLimit={1}
+                    options={uniqueValues['published.publisher'] || []}
+                    value={formData[0]?.published?.publisher ? [formData[0].published.publisher] : []}
+                    onChange={(data) => handleInputChange({ name: 'published.publisher', value: data.value[0] || '' })}
+                    onNew={(val) => handleInputChange({ name: 'published.publisher', value: val })}
+                    placeholder="Vydavateľ"
+                    name="published.publisher"
                 />
             </div>
             <div className="b-Rok">
@@ -371,10 +399,14 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 />
             </div>
             <div className="b-Police">
-                <InputField
-                    placeholder='Polica'
-                    onChange={handleInputChange}
-                    {...getInputParams("location.shelf", formData)}
+                <LazyLoadMultiselect
+                    selectionLimit={1}
+                    options={uniqueValues['location.shelf'] || []}
+                    value={formData[0]?.location?.shelf ? [formData[0].location.shelf] : []}
+                    onChange={(data) => handleInputChange({ name: 'location.shelf', value: data.value[0] || '' })}
+                    onNew={(val) => handleInputChange({ name: 'location.shelf', value: val })}
+                    placeholder="Polica"
+                    name="location.shelf"
                 />
             </div>
             <div className="b-language">

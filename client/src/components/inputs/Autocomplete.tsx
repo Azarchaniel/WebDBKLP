@@ -10,6 +10,7 @@ interface AutocompleteInputProps {
     value: OptionValue[];
     displayValue?: string; // Now optional since it's not needed for string arrays
     placeholder?: string;
+    hoverLabel?: string; // Tooltip label shown on input hover
     onChange: (data: { name: string; value: OptionValue[] }) => void;
     name: string;
     id?: string;
@@ -51,6 +52,7 @@ export const LazyLoadMultiselect = React.memo(({
     value,
     displayValue = "name", // Default to "name" if not provided
     placeholder = "Vyhľadaj...",
+    hoverLabel = "Vyber položku zo zoznamu, alebo napíš a potvrď Enterom.",
     onChange,
     name,
     id,
@@ -159,7 +161,8 @@ export const LazyLoadMultiselect = React.memo(({
         if (disabled) return;
         let newSelectedValues;
 
-        if (selectionLimit && selectedValues.length >= selectionLimit) {
+        // Allow toggling off even when selection limit is reached; only block adding new beyond the limit
+        if (selectionLimit && selectedValues.length >= selectionLimit && !selectedValues.some(item => areOptionsEqual(item, option))) {
             return;
         }
 
@@ -191,7 +194,12 @@ export const LazyLoadMultiselect = React.memo(({
         debounce(async (query: string, page: number) => {
             if (onSearch) {
                 setLoadingStatus("loading"); // Start loading
-                const newOptions = await onSearch(query, page);
+                const newOptionsRaw = await onSearch(query, page);
+                // Filter out empty options (empty strings or empty display values)
+                const newOptions = newOptionsRaw.filter((option) => {
+                    const text = getDisplayText(option);
+                    return !!text && text.trim().length > 0;
+                });
                 setFilteredOptions((prevOptions) => {
                     if (page === 1) {
                         return newOptions;
@@ -203,8 +211,9 @@ export const LazyLoadMultiselect = React.memo(({
             } else {
                 // Client-side filtering
                 const filtered = options.filter(option => {
-                    const text = getDisplayText(option)?.toLowerCase();
-                    return text?.includes(query?.toLowerCase());
+                    const text = getDisplayText(option);
+                    if (!text || text.trim().length === 0) return false; // filter empty options
+                    return text.toLowerCase().includes(query.toLowerCase());
                 });
                 setFilteredOptions(filtered);
                 setLoadingStatus("noMore"); // No more items to load
@@ -230,6 +239,14 @@ export const LazyLoadMultiselect = React.memo(({
             handleRemove(selectedValues[selectedValues.length - 1]);
         } else if (e.key === 'Escape') {
             setIsOpen(false);
+        } else if (e.key === 'Enter') {
+            // On Enter: select first option if available, otherwise create new when allowed
+            e.preventDefault();
+            if (filteredOptionsToDisplay.length > 0) {
+                handleSelect(filteredOptionsToDisplay[0]);
+            } else if (onNew && inputValue.trim().length > 0) {
+                handleCreateNew();
+            }
         }
     };
 
@@ -355,6 +372,8 @@ export const LazyLoadMultiselect = React.memo(({
                             onFocus={handleInputFocus}
                             onBlur={handleInputBlur}
                             placeholder=""
+                            title={hoverLabel}
+                            aria-label={hoverLabel}
                             className="chip-input"
                             onClick={handleInputClick}
                             disabled={disabled}
