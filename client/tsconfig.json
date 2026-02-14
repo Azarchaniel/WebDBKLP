@@ -29,17 +29,27 @@
     "rootDir": "./",
     "baseUrl": "./src",
     "paths": {
-      "@styles/*": ["styles/*"],
-      "@components/*": ["components/*"],
-      "@components": ["components"],
-      "@utils": ["utils"],
-      "@utils/*": ["utils/*"],
-      "@hooks": ["utils/hooks/index.ts"]
+      "@styles/*": [
+        "styles/*"
+      ],
+      "@components/*": [
+        "components/*"
+      ],
+      "@components": [
+        "components"
+      ],
+      "@utils": [
+        "utils"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@hooks": [
+        "utils/hooks/index.ts"
+      ]
     },
     "types": [
-      "node",
-      "../node_modules/@types",
-      "./src/type.d.ts"
+      "node"
     ]
   },
   "include": [
