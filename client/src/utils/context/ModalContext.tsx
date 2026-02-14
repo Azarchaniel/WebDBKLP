@@ -97,7 +97,10 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                             isOpen: true,
                             // Only restore to non-minimized if it was previously closed
                             // If it was just minimized, keep it minimized
-                            minimized: modal.isOpen ? modal.minimized : false
+                            minimized: modal.isOpen ? modal.minimized : false,
+                            // When reopening a closed modal, reset position so it re-centers cleanly
+                            position: modal.isOpen ? modal.position : { x: null, y: null },
+                            previousPosition: modal.isOpen ? modal.previousPosition : undefined
                         }
                         : modal
                 );
@@ -277,6 +280,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (modalElement) {
             modalElement.style.left = `${position.x}px`;
             modalElement.style.top = `${position.y}px`;
+            modalElement.style.transform = 'none';
         }
 
         // During active dragging, don't update React state
