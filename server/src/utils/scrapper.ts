@@ -1,7 +1,7 @@
 import axios from 'axios';
 import xml2js from 'xml2js';
 import Autor from '../models/autor';
-import { chromium } from 'playwright';
+import puppeteer, { Page } from 'puppeteer';
 
 enum GoodReadsRoles {
     AUTHOR = "",
@@ -202,165 +202,162 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
     }
 };
 
-const DATABAZE_KNIH_TIMEOUT_MS = 8000; // 8 seconds
-
-/**
- * Helper to get text content from a Playwright locator with timeout
- * Uses shorter timeout (500ms) since elements should be present after page load
- */
-const getTextContent = async (page: any, selector: string, timeout: number = 500): Promise<string | null> => {
-    return await page.locator(selector).first().textContent({ timeout }).catch(() => null);
-};
-
-/**
- * Helper to try multiple selectors and return the first successful text content
- * Only tries next selector if current one doesn't exist (faster than waiting for timeout)
- */
-const getTextContentWithFallback = async (page: any, selectors: string[], timeout: number = 500): Promise<string | null> => {
-    for (const selector of selectors) {
-        // First check if element exists (fast)
-        const count = await page.locator(selector).count();
-        if (count > 0) {
-            const text = await getTextContent(page, selector, timeout);
-            if (text) return text;
-        }
-    }
-    return null;
-};
-
-const fetchDatabazeKnih = async (isbn: string): Promise<object | boolean> => {
-    let browser;
+const getContentFromElement = async (
+    page: Page,
+    selector: string,
+    optional: boolean = false
+): Promise<string | undefined> => {
     try {
-        console.info("DK called ", isbn);
+        const element = await page.$(selector);
+        if (!element) {
+            return optional ? undefined : '';
+        }
+        const text = await page.evaluate(el => el?.textContent?.trim() || '', element);
+        return text || undefined;
+    } catch (error) {
+        if (optional) return undefined;
+        console.log(`Selector ${selector} not found`);
+        return undefined;
+    }
+};
 
-        browser = await chromium.launch({
+const getNumberFromString = (str: string | undefined): string => str?.match(/\d+/)?.shift() ?? "";
+
+/**
+ * If there is no direct selector, find by text label and take the next sibling
+ */
+const extractLabeledData = async (page: Page, labelText: string): Promise<string | null> => {
+    try {
+        const data = await page.evaluate((label) => {
+            const spans = Array.from(document.querySelectorAll('span.category'));
+            const labelElement = spans.find(span => span.textContent?.includes(label));
+            if (labelElement && labelElement.nextElementSibling) {
+                return labelElement.nextElementSibling.textContent?.trim() || null;
+            }
+            return null;
+        }, labelText);
+        return data;
+    } catch {
+        return null;
+    }
+};
+
+// Helper function to extract year from text content
+const extractYearFromText = async (page: Page): Promise<string | null> => {
+    try {
+        const yearText = await page.evaluate(() => {
+            const text = document.body.textContent || '';
+            const yearMatch = text.match(/Vydáno:\s*(\d{4})/);
+            return yearMatch ? yearMatch[1] : null;
+        });
+        return yearText;
+    } catch {
+        return null;
+    }
+};
+
+const databazeKnih = async (isbn: string): Promise<object | boolean> => {
+    try {
+        console.log("DK called ", isbn);
+        const browser = await puppeteer.launch({
             headless: true,
-            timeout: DATABAZE_KNIH_TIMEOUT_MS
+            args: ['--no-sandbox'],
+            timeout: 0
         });
 
-        const context = await browser.newContext();
-        const page = await context.newPage();
-        page.setDefaultTimeout(DATABAZE_KNIH_TIMEOUT_MS);
-        page.setDefaultNavigationTimeout(DATABAZE_KNIH_TIMEOUT_MS);
-
-        // Navigate to search page
-        try {
-            await page.goto(`https://www.databazeknih.cz/search?q=${isbn}`, {
-                waitUntil: 'domcontentloaded',
-                timeout: DATABAZE_KNIH_TIMEOUT_MS
-            });
-        } catch (navErr: any) {
-            if (navErr?.name === 'TimeoutError') {
-                console.error(`databazeKnih navigation timed out after ${DATABAZE_KNIH_TIMEOUT_MS}ms for ISBN ${isbn}`);
-            } else {
-                console.error(`databazeKnih navigation error for ISBN ${isbn}`, navErr);
-            }
-            await browser.close();
-            return false;
-        }
+        const page: Page = await browser.newPage();
+        await page.goto('https://www.databazeknih.cz/search?q=' + isbn);
 
         // Check if no book was found
-        const noBookFound = await page.locator('h1.oddown').first().textContent({ timeout: 3000 }).catch(() => null);
+        const noBookFound = await getContentFromElement(page, "h1[class='oddown']", true);
         if (noBookFound) {
             console.error(`Book ${isbn} not found.`);
             await browser.close();
             return false;
         }
 
-        // Try to click "více info..." if it exists
+        // Click on the first book result - need to find the correct link
+        // Usually the first result is in a link that goes to the book detail page
         try {
-            const viceInfoLink = page.locator('a:has-text("více info")').first();
-            const viceInfoCount = await viceInfoLink.count();
-            if (viceInfoCount > 0) {
-                await viceInfoLink.click();
-                await page.waitForTimeout(1500);
-            }
+            await page.waitForSelector('a[href*="/knihy/"]', { timeout: 5000 });
+            await page.click('a[href*="/knihy/"]');
         } catch (error) {
-            console.log(`JavaScript approach for 'více info...' failed`);
+            await page.waitForSelector('a[href*="/prehled-knihy/"]', { timeout: 5000 });
+            await page.click('a[href*="/prehled-knihy/"]');
         }
 
-        // Extract book data using Playwright locators with helper functions
-        const titleRaw = await getTextContentWithFallback(page, ['h1', 'h1.oddown_five']);
-        const title = titleRaw?.replace(' přehled', '').trim() || '';
+        // Alternative approach for "více info..." - look for JavaScript link or specific selectors
+        try {
+            await page.evaluate(() => {
+                const links = Array.from(document.querySelectorAll('a'));
+                const viceInfoLink = links.find(link =>
+                    link.textContent?.includes('více info') ||
+                    link.textContent?.includes('více info...')
+                );
+                if (viceInfoLink) {
+                    viceInfoLink.click();
+                }
+            });
+            await new Promise(r => setTimeout(r, 1500));
+        } catch (error) {
+            console.log("JavaScript approach for 'více info...' failed");
+        }
 
-        const autor = await getTextContentWithFallback(page, ['span.author', 'a[href*="/autori/"]']);
+        // Extract book data - using more robust selectors
+        const title = await getContentFromElement(page, "h1") ||
+            await getContentFromElement(page, "h1[class*='od']");
 
-        const translator = await getTextContent(page, 'span[itemprop="translator"]');
-        const ilustrator = await getTextContent(page, 'span[itemprop="ilustrator"]');
+        const autor = await getContentFromElement(page, "span[class='author']") ||
+            await getContentFromElement(page, "a[href*='/autori/']");
 
-        // Batch extract data using a single evaluate call for performance
-        const extractedData = await page.evaluate(() => {
-            // Extract year from body text
-            const text = document.body.textContent || '';
-            const yearMatch = text.match(/Vydáno:\s*(\d{4})/);
-            const bodyYear = yearMatch ? yearMatch[1] : null;
+        const translator = await getContentFromElement(page, "span[itemprop='translator']");
+        const ilustrator = await getContentFromElement(page, "span[itemprop='ilustrator']");
 
-            // Extract ISBN from body text
-            const isbnMatch = text.match(/ISBN:?\s*([0-9-]{10,17})/i);
-            const bodyIsbn = isbnMatch ? isbnMatch[1] : null;
+        // Year and publisher - may be in different formats
+        const yearOfPublish = await getContentFromElement(page, "span[itemprop='datePublished']") ||
+            await extractYearFromText(page);
 
-            // Extract language from labeled data
-            const langLabel = Array.from(document.querySelectorAll('span.category'))
-                .find(span => span.textContent?.includes('Jazyk vydání:'));
-            const labeledLanguage = langLabel && langLabel.nextElementSibling
-                ? langLabel.nextElementSibling.textContent?.trim() || null
-                : null;
+        const publisher = await getContentFromElement(page, "span[itemprop='publisher']") ||
+            await getContentFromElement(page, "a[href*='/nakladatelstvi/']");
 
-            // Extract edition from labeled data
-            const editionLabel = Array.from(document.querySelectorAll('span.category'))
-                .find(span => span.textContent?.includes('Edice:'));
-            const labeledEdition = editionLabel && editionLabel.nextElementSibling
-                ? editionLabel.nextElementSibling.textContent?.trim() || null
-                : null;
+        const noPages = await getContentFromElement(page, "span[itemprop='numberOfPages']");
 
-            return {
-                bodyYear,
-                bodyIsbn,
-                labeledLanguage,
-                labeledEdition
-            };
-        }).catch(() => ({ bodyYear: null, bodyIsbn: null, labeledLanguage: null, labeledEdition: null }));
+        let isbnFound = await getContentFromElement(page, "span[itemprop='isbn']");
+        if (!isbnFound) {
+            // Alternative: look for ISBN in text content using regex
+            isbnFound = await page.evaluate(() => {
+                const bodyText = document.body.textContent || '';
+                const isbnMatch = bodyText.match(/ISBN:?\s*([0-9-]{10,17})/i);
+                return isbnMatch ? isbnMatch[1] : undefined;
+            });
+        }
 
-        // Year and publisher
-        const yearOfPublish = await getTextContent(page, 'span[itemprop="datePublished"]') || extractedData.bodyYear;
-        const publisher = await getTextContentWithFallback(page, ['span[itemprop="publisher"]', 'a[href*="/nakladatelstvi/"]']);
-        const noPages = await getTextContent(page, 'span[itemprop="numberOfPages"]');
-
-        // ISBN
-        const isbnFound = await getTextContent(page, 'span[itemprop="isbn"]') || extractedData.bodyIsbn;
-
-        // Language
-        const language = await getTextContent(page, 'span[itemprop="language"]') || extractedData.labeledLanguage;
+        const language = await extractLabeledData(page, "Jazyk vydání:") || await getContentFromElement(page, "span[itemprop='language']");
 
         // Series information
-        const serieTitle = await getTextContentWithFallback(page, ['a.odright_pet', 'a[href*="/serie/"]']);
-        const serieNoText = await getTextContent(page, 'span.odright_pet');
-        const serieNo = serieNoText?.match(/\d+/)?.shift() ?? "";
+        const serieTitle = await getContentFromElement(page, "a[class='odright_pet']") ||
+            await getContentFromElement(page, "a[href*='/serie/']");
+        const serieNo = getNumberFromString(await getContentFromElement(page, "span[class='odright_pet']"));
 
         // Edition information
-        const editionTitle = extractedData.labeledEdition;
-        const editionNoText = await getTextContent(page, 'em.info.st_normal');
-        const editionNo = editionNoText?.match(/\d+/)?.shift() ?? "";
+        const editionTitle = await extractLabeledData(page, "Edice:");
+        const editionNo = getNumberFromString(await getContentFromElement(page, "em[class='info st_normal']"));
 
         const urlDB = page.url();
 
         // Image extraction with fallbacks
         let imgHref = '';
         try {
-            const imgLocator = page.locator('img[alt*="Obálka knihy "]').first();
-            if (await imgLocator.count() > 0) {
-                imgHref = await imgLocator.getAttribute('src') || '';
-            }
+            imgHref = await page.$eval("img[class*='kniha_img']", el => (el as HTMLImageElement).src);
         } catch {
             try {
-                const coverLocator = page.locator('img[class*="cover"]').first();
-                if (await coverLocator.count() > 0) {
-                    imgHref = await coverLocator.getAttribute('src') || '';
-                }
+                imgHref = await page.$eval("img[class*='cover']", el => (el as HTMLImageElement).src);
             } catch {
                 console.log("Book cover image not found");
             }
         }
+
+        await browser.close();
 
         const book = {
             title: title?.replace(" přehled", "").trim(),
@@ -389,17 +386,9 @@ const fetchDatabazeKnih = async (isbn: string): Promise<object | boolean> => {
 
         return book;
 
-    } catch (error: any) {
-        if (error?.name === 'TimeoutError') {
-            console.error(`databazeKnih timed out (global catch) after ${DATABAZE_KNIH_TIMEOUT_MS}ms`);
-            return false;
-        }
+    } catch (error) {
         console.error("Error in databazeKnih", error);
-        return false;
-    } finally {
-        if (browser) {
-            await browser.close().catch((err) => console.error('Error closing browser:', err));
-        }
+        return {};
     }
 };
 
@@ -502,7 +491,7 @@ export const webScrapper = async (isbn: string): Promise<any> => {
     let dkBook: any, googleBook: any;
 
     // Promise.allSettled runs both in parallel but won't fail if one fails
-    const results = await Promise.allSettled([fetchDatabazeKnih(isbn), fetchGoogleBook(isbn)]);
+    const results = await Promise.allSettled([databazeKnih(isbn), fetchGoogleBook(isbn)]);
 
     dkBook = results[0].status === 'fulfilled' ? results[0].value : null;
     googleBook = results[1].status === 'fulfilled' ? results[1].value : null;

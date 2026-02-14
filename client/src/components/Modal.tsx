@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useState, useEffect, useRef } from "react";
+import React, { ReactElement, useCallback, useState, useEffect, useRef, useLayoutEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle, faWindowMinimize, faWindowMaximize } from "@fortawesome/free-solid-svg-icons";
 import { ValidationError } from "type";
@@ -50,6 +50,8 @@ export const Modal: React.FC<ModalProps> = ({
     // Use either external state from context or local state
     const minimized = externalMinimized !== undefined ? externalMinimized : localMinimized;
     const position = externalPosition || localPosition;
+    const hasExplicitPosition = position.x !== null && position.y !== null;
+    const [initialized, setInitialized] = useState(hasExplicitPosition);
 
     /**
      * Function to update position - either via callback or local state
@@ -193,6 +195,27 @@ export const Modal: React.FC<ModalProps> = ({
         };
     }, [dragging, onMouseMove, onMouseUp]);
 
+    // After first paint, replace the centering transform with explicit pixel coordinates
+    // so dragging starts from the on-screen position without the translate jump.
+    useLayoutEffect(() => {
+        if (hasExplicitPosition) return;
+        if (!modalRef.current) return;
+
+        const rect = modalRef.current.getBoundingClientRect();
+        const centeredX = Math.max(PADDING, (window.innerWidth - rect.width) / 2);
+        const centeredY = Math.max(PADDING, (window.innerHeight - rect.height) / 2);
+
+        setPosition({ x: centeredX, y: centeredY });
+        setInitialized(true);
+    }, [hasExplicitPosition, setPosition]);
+
+    // If an explicit position arrives later (e.g., from context), mark initialized
+    useEffect(() => {
+        if (hasExplicitPosition && !initialized) {
+            setInitialized(true);
+        }
+    }, [hasExplicitPosition, initialized]);
+
     // Handle minimizing/maximizing the modal
     const toggleMinimize = useCallback(() => {
         // If external control is provided, use it
@@ -217,8 +240,6 @@ export const Modal: React.FC<ModalProps> = ({
         }
     }, [minimized, position, previousPosition, onMinimizeToggle]);
 
-    const hasExplicitPosition = position.x !== null && position.y !== null;
-
     const modalStyle: React.CSSProperties = {
         ...overrideStyle,
         position: "fixed",
@@ -229,9 +250,11 @@ export const Modal: React.FC<ModalProps> = ({
         zIndex: 1010,
         width: minimized ? "100px" : undefined,
         // Remove transition during drag to prevent visual lag
-        transition: dragging ? "none" : "all 0.2s ease",
+        transition: dragging ? "none" : hasExplicitPosition ? "all 0.2s ease" : "none",
         maxHeight: minimized ? "50px" : "80vh",
         boxShadow: minimized ? "0 2px 10px rgba(0, 0, 0, 0.3)" : undefined,
+        opacity: initialized ? 1 : 0,
+        pointerEvents: initialized ? undefined : "none",
     };
 
     // Direct render instead of using portal since the context will handle the portal
