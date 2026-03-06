@@ -1,6 +1,6 @@
 @import "variables";
 
-@media screen and (width <= $mobile-width) {
+@media screen and (width <=$mobile-width) {
   .expanded-mobile-row {
     width: 100%;
     background: var(--background);
@@ -36,7 +36,9 @@
     width: 100%;
     margin-bottom: 6rem;
 
-    thead, tbody, tr {
+    thead,
+    tbody,
+    tr {
       display: block;
       width: 100%;
       height: unset !important;
@@ -180,7 +182,8 @@
     }
 
     // it's here becuase of Dimensions
-    th[colspan]:not([colspan="1"]) { // select element that has colspan and it is not 1
+    th[colspan]:not([colspan="1"]) {
+      // select element that has colspan and it is not 1
       vertical-align: middle;
       text-align: center;
       height: 1rem !important;
@@ -190,6 +193,7 @@
     th[colspan]:not([colspan="1"]) {
       height: 1rem !important;
       position: relative;
+
       div {
         position: absolute;
         top: 1.25rem;
@@ -252,7 +256,18 @@
   }
 
   .TSP {
-    &exLibris, &height, &width, &thickness, &numberOfPages, &createdAt, &updatedAt, &countLp, &speed, &dateOfBirth, &dateOfDeath {
+
+    &exLibris,
+    &height,
+    &width,
+    &thickness,
+    &numberOfPages,
+    &createdAt,
+    &updatedAt,
+    &countLp,
+    &speed,
+    &dateOfBirth,
+    &dateOfDeath {
       display: table-cell;
       text-align: center;
     }
@@ -305,9 +320,9 @@
     cursor: default;
   }
 
-    &:hover {
-        color: var(--anchor);
-    }
+  &:hover {
+    color: var(--anchor);
+  }
 }
 
 .tableNavigationRow {
@@ -407,9 +422,10 @@ button:focus {
   .searchBtns {
     position: absolute;
     right: 0.5rem;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
+    bottom: 0;
     display: flex;
+    align-items: center;
     gap: 0.3rem;
 
     button,
@@ -471,12 +487,12 @@ button:focus {
 
 .actions-animated-td {
   overflow: visible;
-  transition: min-width 0.3s cubic-bezier(0.4,0,0.2,1), max-width 0.3s cubic-bezier(0.4,0,0.2,1);
+  transition: min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .actions-animated-td {
   overflow: visible;
-  transition: min-width 0.3s cubic-bezier(0.4,0,0.2,1), max-width 0.3s cubic-bezier(0.4,0,0.2,1);
+  transition: min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   .actions-ellipsis {
     font-size: 2rem;
@@ -499,10 +515,10 @@ button:focus {
     pointer-events: none;
     white-space: nowrap;
     background: var(--background); // Use your table's background variable or color
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     border-radius: 4px 0 0 4px;
     padding: 0.5rem 0;
-    transition: width 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
     z-index: 3;
     overflow: hidden;
     display: flex;
@@ -517,6 +533,7 @@ button:focus {
       pointer-events: auto;
       padding: 0.5rem 1rem;
     }
+
     .actions-ellipsis {
       color: #333;
     }

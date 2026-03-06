@@ -1,4 +1,5 @@
 import { formatDimension } from "../../utils/utils";
+import { NoData } from "./NoData";
 
 interface Props {
 	dimensionStats: any;
@@ -6,7 +7,8 @@ interface Props {
 
 export const DashboardTableStats = ({ dimensionStats }: Props) => {
 	// if no data, then it is: { height: {}, width: {}, thickness: {}, weight: {} }
-	if (!dimensionStats || Object.values(dimensionStats).every((v: any) => Object.keys(v).length === 0)) return <>Žiadne dáta</>;
+	if (!dimensionStats || Object.values(dimensionStats).every((v: any) => Object.keys(v).length === 0))
+		return <NoData />;
 
 	//TEMPORARY: until translation
 	const translationMap: Record<string, string> = {
@@ -26,7 +28,7 @@ export const DashboardTableStats = ({ dimensionStats }: Props) => {
 	const columns: any[] = Object.keys(dimensionStats.height);
 
 	return (
-		<div>
+		<>
 			<div className="phone-table">
 				{columns.map((column) => (
 					<div key={column} className="mobile-section">
@@ -68,6 +70,6 @@ export const DashboardTableStats = ({ dimensionStats }: Props) => {
 				</tbody>
 			</table>
 			<div style={{ height: "1rem" }} />
-		</div>
+		</>
 	);
 };
