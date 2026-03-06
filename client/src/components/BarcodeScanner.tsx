@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserMultiFormatReader, DecodeHintType, Result, NotFoundException } from '@zxing/library';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBarcode, faBan, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faBarcode, faBan, faTimes, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { Modal, showError } from './Modal';
 
 interface BarcodeScannerButtonProps {
     onBarcodeDetected: (barcode: string) => void;
@@ -14,6 +15,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
 }) => {
     const [isScanning, setIsScanning] = useState<boolean>(false);
     const [showNotFoundIcon, setShowNotFoundIcon] = useState<boolean>(false);
+    const [showWarningTimeout, setShowWarningTimeout] = useState<boolean>(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,6 +23,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
     // Track interval for cleanup
     const drawIntervalRef = useRef<NodeJS.Timeout | null>(null);
     const barcodeLostTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const warningTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         const cleanup = () => {
@@ -64,6 +67,13 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                 drawScanAreaRect(!!result);
                 if (result) {
                     setShowNotFoundIcon(false);
+                    setShowWarningTimeout(false);
+
+                    // Clear the warning timeout if a barcode is detected
+                    if (warningTimeoutRef.current) {
+                        clearTimeout(warningTimeoutRef.current);
+                        warningTimeoutRef.current = null;
+                    }
 
                     setTimeout(() => {
                         setIsScanning(false);
@@ -75,6 +85,13 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
 
                     if (error instanceof NotFoundException) {
                         setShowNotFoundIcon(true);
+
+                        // Show warning after 5 seconds of no detection
+                        if (!warningTimeoutRef.current) {
+                            warningTimeoutRef.current = setTimeout(() => {
+                                setShowWarningTimeout(true);
+                            }, 5000);
+                        }
                     } else {
                         setShowNotFoundIcon(false);
                         if (onError) onError(error);
@@ -132,6 +149,11 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
             clearTimeout(barcodeLostTimeoutRef.current);
             barcodeLostTimeoutRef.current = null;
         }
+        // Cancel warning timeout
+        if (warningTimeoutRef.current) {
+            clearTimeout(warningTimeoutRef.current);
+            warningTimeoutRef.current = null;
+        }
         if (codeReaderRef.current) {
             try {
                 codeReaderRef.current.reset();
@@ -152,6 +174,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
 
         }
         setShowNotFoundIcon(false);
+        setShowWarningTimeout(false);
         if (canvasRef.current) {
             const ctx = canvasRef.current.getContext('2d');
             if (ctx) ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
@@ -180,43 +203,52 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                 <FontAwesomeIcon icon={faBarcode} />
             </button>
             {isScanning && (
-                <div className="videoWrapper">
-                    <video
-                        ref={videoRef}
-                        style={{ display: 'block', width: '100%', height: 'auto' }}
-                        autoPlay
-                        playsInline
-                        muted
-                    />
-                    {/* Canvas overlay for scan area rectangle */}
-                    <canvas
-                        ref={canvasRef}
-                        style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            pointerEvents: 'none',
-                        }}
-                    />
-                    <button
-                        onClick={handleCloseClick}
-                        type="button"
-                        title="Close Scanner"
-                        className="closeScannerBtn"
-                    >
-                        <FontAwesomeIcon icon={faTimes} />
-                    </button>
-                    {showNotFoundIcon && (
-                        <div className="videoErrorIconWrapper">
-                            <span className="fa-stack fa-lg">
-                                <FontAwesomeIcon icon={faBarcode} className="fa-stack-1x" style={{ color: 'white' }} />
-                                <FontAwesomeIcon icon={faBan} className="fa-stack-1x" />
-                            </span>
+                <Modal
+                    customKey="barcode-scanner"
+                    title="Skener čiarových kódov"
+                    onClose={handleCloseClick}
+                    overrideStyle={{ minWidth: '600px', maxWidth: '800px' }}
+                    body={
+                        <div className="barcodeScannerModalBody">
+                            <div className="videoWrapper">
+                                <video
+                                    ref={videoRef}
+                                    style={{ display: 'block', width: '100%', height: 'auto' }}
+                                    autoPlay
+                                    playsInline
+                                    muted
+                                />
+                                {/* Canvas overlay for scan area rectangle */}
+                                <canvas
+                                    ref={canvasRef}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        pointerEvents: 'none',
+                                    }}
+                                />
+                                {showNotFoundIcon && (
+                                    <div className="videoErrorIconWrapper">
+                                        <span className="fa-stack fa-lg">
+                                            <FontAwesomeIcon icon={faBarcode} className="fa-stack-1x" style={{ color: 'white' }} />
+                                            <FontAwesomeIcon icon={faBan} className="fa-stack-1x" />
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    )}
-                </div>
+                    }
+                    footer={
+                        showWarningTimeout ? (
+                            <div className="alert alert-danger">
+                                <FontAwesomeIcon icon={faExclamationTriangle} /> Žiadny čiarový kód nebol rozpoznaný. Prosím, skúste znova.
+                            </div>
+                        ) : undefined
+                    }
+                />
             )}
         </>
     );

@@ -242,6 +242,8 @@ export const Modal: React.FC<ModalProps> = ({
 
     const modalStyle: React.CSSProperties = {
         ...overrideStyle,
+        display: "flex",
+        flexDirection: "column",
         position: "fixed",
         left: hasExplicitPosition ? position.x! : "50%",
         top: hasExplicitPosition ? position.y! : "50%",

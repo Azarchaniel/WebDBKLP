@@ -1,10 +1,10 @@
 import "chart.js/auto"; //for react-chart
-import {Pie} from "react-chartjs-2";
-import {chartColors, chartLabels} from "../../utils/constants";
-import {useEffect} from "react";
+import { Pie } from "react-chartjs-2";
+import { chartColors, chartLabels } from "../../utils/constants";
+import { NoData } from "./NoData";
 
-export const DashboardPieChart = (props: {data: any[]}) => {
-	if (!props.data || props.data.every(stat => stat.count === 0)) return <>Žiadne dáta</>;
+export const DashboardPieChart = (props: { data: any[] }) => {
+	if (!props.data || props.data.every(stat => stat.count === 0)) return <NoData />;
 
 	const data = {
 		labels: props.data.length ? props.data.filter(c => c.owner !== null).map(c => c.owner === "" ? "Bez majiteľa" : c.owner) : [],
@@ -33,6 +33,6 @@ export const DashboardPieChart = (props: {data: any[]}) => {
 	}
 
 	return (
-		<Pie data={data} options={chartOptions}/>
+		<Pie data={data} options={chartOptions} />
 	)
 }

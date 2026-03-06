@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import '../../styles/DashboardPage.scss';
 import { countBooks, getDimensionsStatistics, getLanguageStatistics, getReadBy, getSizeGroups } from "../../API";
 import { DashboardPieChart } from "@components/dashboard/DashboardPieChart";
 import { DashboardTableStats } from "@components/dashboard/TableDimensionStats";
@@ -9,6 +10,7 @@ import { Tab, Tabs } from "@components/Tabs";
 import { ReadByChart } from "@components/dashboard/ReadByChart";
 import { useAuth } from "@utils/context";
 import { LoadingBooks } from "@components/LoadingBooks";
+import { NoData } from "@components/dashboard/NoData";
 
 export default function DashboardPage() {
     const { currentUser, isLoading: isAuthLoading } = useAuth();
@@ -23,21 +25,18 @@ export default function DashboardPage() {
     const [isLoadingData, setIsLoadingData] = useState(true);
 
     useEffect(() => {
-        // Don't fetch if auth is still loading or if user is not logged in
         if (isAuthLoading || !currentUser) {
-            // Optional: Clear previous data if user logs out
             setCountAllBooks([]);
             setDimensionStats(undefined);
             setSizeGroups(undefined);
             setLangStats(undefined);
             setReadBy(undefined);
-            setIsLoadingData(false); // Not loading dashboard data if no user
+            setIsLoadingData(false);
             return;
         }
 
-        setIsLoadingData(true); // Start loading dashboard data
+        setIsLoadingData(true);
 
-        // Use Promise.all for concurrent fetching
         Promise.all([
             countBooks(),
             getDimensionsStatistics(),
@@ -52,15 +51,14 @@ export default function DashboardPage() {
             setReadBy(readByResult.data);
         }).catch((err) => {
             console.error("Error fetching dashboard data:", err);
-            // Handle errors appropriately, maybe show a message
         }).finally(() => {
-            setIsLoadingData(false); // Finish loading dashboard data
+            setIsLoadingData(false);
         });
     }, [currentUser, isAuthLoading]);
 
     const getTabsForReadByStats = (): any => {
         const isDataEmpty = readBy?.every(userStat => userStat.stats.every(stat => stat.count === 0));
-        if (!readBy || isDataEmpty) return <span>Žiadne dáta</span>;
+        if (!readBy || isDataEmpty) return <NoData />;
 
         return (
             <Tabs>
@@ -77,10 +75,10 @@ export default function DashboardPage() {
     return (
         <div className="dashboardContainer">
             {isLoadingData && <LoadingBooks />}
-            <div className="dashboardItem" style={{ padding: 0 }}>
+            <div className="dashboardItem">
                 <DashboardPieChart data={countAllBooks} />
             </div>
-            <div className="dashboardItem" style={{ padding: 0 }}>
+            <div className="dashboardItem">
                 {getTabsForReadByStats()}
             </div>
             <div className="dashboardItem">
