@@ -1,6 +1,7 @@
 import React from "react";
 import { IAutor, IBook, ILangCode, IUser } from "../../type";
 import { formatDimension, getPublishedCountry, langCode, cities } from "@utils";
+import { useTranslation } from "react-i18next";
 
 interface IExtendedBook extends IBook {
     autorsFull?: string | null;
@@ -14,19 +15,19 @@ interface Props {
 }
 
 const BookDetail: React.FC<Props> = React.memo(({ data }) => {
+    const { t } = useTranslation();
     // Helper functions
     const renderContributorRow = (
         contributors: keyof IExtendedBook,
         contributorsText: keyof IExtendedBook,
-        singularLabel: string,
-        pluralLabel: string
+        labelKey: string
     ) => {
         if (!data[contributors] || !data[contributorsText]) return null;
 
         const count = (data[contributors] as IAutor[]).length;
-        const label = count === 1 ? singularLabel : pluralLabel;
+        const label = t(labelKey, { count });
 
-        return <p>{`${label} ${data[contributorsText]}`}</p>;
+        return <p>{`${label}: ${data[contributorsText]}`}</p>;
     };
 
     const renderDimensions = () => {
@@ -36,17 +37,17 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
 
         return (
             <>
-                <p>Rozmery: </p>
+                <p>{t("bookDetail.dimensions")}: </p>
                 <table className="bookDimensions">
                     <tbody>
                         <tr>
-                            <td>Výška: {formatDimension(dimensions.height) ?? "-"} cm</td>
-                            <td>Šírka: {formatDimension(dimensions.width) ?? "-"} cm</td>
+                            <td>{t("bookDetail.height")}: {formatDimension(dimensions.height, t('common.locale')) ?? "-"} cm</td>
+                            <td>{t("bookDetail.width")}: {formatDimension(dimensions.width, t('common.locale')) ?? "-"} cm</td>
                         </tr>
                         <tr>
-                            <td>Hrúbka: {formatDimension(dimensions.thickness) ?? "-"} cm</td>
+                            <td>{t("bookDetail.thickness")}: {formatDimension(dimensions.thickness, t('common.locale')) ?? "-"} cm</td>
                             <td>
-                                {dimensions.weight && `Hmotnosť: ${formatDimension(dimensions.weight) ?? "-"} g`}
+                                {dimensions.weight && `${t("bookDetail.weight")}: ${formatDimension(dimensions.weight, t('common.locale')) ?? "-"} g`}
                             </td>
                         </tr>
                     </tbody>
@@ -68,7 +69,7 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
                 .join(", ")
             : data.language;
 
-        return <p>Jazyk: {languageText}</p>;
+        return <p>{t("bookDetail.language")}: {languageText}</p>;
     };
 
     const renderPublisherInfo = () => {
@@ -80,7 +81,7 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
         const yearText = year ? `, ${year}` : "";
         const countryText = country ? `, ${getPublishedCountry(country)?.value ?? ""}` : "";
 
-        return <p>Vydavateľ: {publisherText}{yearText}{countryText}</p>;
+        return <p>{t("bookDetail.publisher")}: {publisherText}{yearText}{countryText}</p>;
     };
 
     const renderLocation = () => {
@@ -92,7 +93,7 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
             .join(", ");
         const shelf = data.location.shelf ?? "";
 
-        return <p>Umiestnenie: {`${cityName} ${shelf}`}</p>;
+        return <p>{t("bookDetail.location")}: {`${cityName} ${shelf}`}</p>;
     };
 
     const renderPeopleList = (people: IUser[] | undefined, label: string) => {
@@ -136,11 +137,11 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
         return (
             <div>
                 {data.picture ? (
-                    <img src={data.picture} alt="titulka" />
+                    <img src={data.picture} alt={t("bookDetail.coverAlt")} />
                 ) : (
                     <img
                         src="img/no_thumbnail.svg"
-                        alt="no_thumbnail"
+                        alt={t("bookDetail.noCoverAlt")}
                     />
                 )}
             </div>
@@ -159,23 +160,23 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
                 <h1>{data.title}</h1>
                 {data.subtitle && <h4>{data.subtitle}</h4>}
 
-                <h3>{renderContributorRow("autor", "autorsFull", "Autor: ", "Autori: ")}</h3>
-                {renderContributorRow("editor", "editorsFull", "Editor: ", "Editori: ")}
-                {renderContributorRow("ilustrator", "illustratorsFull", "Ilustrátor: ", "Ilustrátori: ")}
-                {renderContributorRow("translator", "translatorsFull", "Prekladateľ: ", "Prekladatelia: ")}
+                <h3>{renderContributorRow("autor", "autorsFull", "bookDetail.authors")}</h3>
+                {renderContributorRow("editor", "editorsFull", "bookDetail.editors")}
+                {renderContributorRow("ilustrator", "illustratorsFull", "bookDetail.illustrators")}
+                {renderContributorRow("translator", "translatorsFull", "bookDetail.translators")}
 
                 {renderLanguage()}
                 {data.ISBN && <p>ISBN: {data.ISBN}</p>}
-                {data.numberOfPages && <p>Počet strán: {data.numberOfPages}</p>}
+                {data.numberOfPages && <p>{t("bookDetail.pages")}: {data.numberOfPages}</p>}
                 {renderPublisherInfo()}
                 {renderLocation()}
-                {renderPeopleList(data.owner, "Majiteľ")}
-                {renderPeopleList(data.readBy, "Prečítané")}
+                {renderPeopleList(data.owner, t("bookDetail.owner"))}
+                {renderPeopleList(data.readBy, t("bookDetail.readBy"))}
                 {renderDimensions()}
-                {data.note && <p>Poznámka: {data.note}</p>}
+                {data.note && <p>{t("bookDetail.note")}: {data.note}</p>}
 
                 <p>
-                    Ex Libris: {data.exLibris ?
+                    {t("common.exLibris")}: {data.exLibris ?
                         <span className="trueMark" /> :
                         <span className="falseMark" />
                     }

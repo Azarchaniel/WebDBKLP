@@ -16,8 +16,10 @@ import { useClickOutside } from "@hooks";
 import "@styles/LpPage.scss";
 import { useAuth } from "@utils/context";
 import { InputField } from "@components/inputs";
+import { useTranslation } from "react-i18next";
 
 export default function LPPage() {
+    const { t } = useTranslation();
     const { isLoggedIn, currentUser } = useAuth();
     const [LPs, setLPs] = useState<ILP[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
@@ -89,9 +91,9 @@ export default function LPPage() {
                 .then((results) => {
                     let message = "";
                     if (results.length < 5) {
-                        message = `${results.length} LP boli úspešne upravené.`;
+                        message = t("lp.saveManySuccess", { count: results.length });
                     } else {
-                        message = `${results.length} LP bolo úspešne upravených.`;
+                        message = t("lp.saveManySuccess", { count: results.length });
                     }
                     toast.success(message);
                     setSaveLpSuccess(true);
@@ -100,7 +102,7 @@ export default function LPPage() {
                 })
                 .catch((err) => {
                     setSaveLpSuccess(false);
-                    const message = "Niektoré LP sa nepodarilo uložiť!";
+                    const message = t("lp.saveManyError");
                     toast.error(message);
                     console.trace(err);
                     return { success: false, message };
@@ -110,12 +112,18 @@ export default function LPPage() {
                 .then((result) => {
                     let message = "";
                     if (result.status !== 201) {
-                        message = `Chyba! LP ${result.data.lp?.title} nebolo ${!isNewLp ? "uložené" : "pridané"}.`;
+                        message = t("lp.saveErrorSingle", {
+                            title: result.data.lp?.title,
+                            action: !isNewLp ? t("lp.actionSaved") : t("lp.actionAdded")
+                        });
                         toast.error(message);
                         setSaveLpSuccess(false);
                         return { success: false, message };
                     }
-                    message = `LP ${result.data.lp?.title} bolo úspešne ${!isNewLp ? "uložené" : "pridané"}.`;
+                    message = t("lp.saveSuccessSingle", {
+                        title: result.data.lp?.title,
+                        action: !isNewLp ? t("lp.actionSaved") : t("lp.actionAdded")
+                    });
                     toast.success(message);
                     setSaveLpSuccess(true);
                     setLPs(stringifyAutors(result.data.lps));
@@ -123,7 +131,7 @@ export default function LPPage() {
                 })
                 .catch((err) => {
                     setSaveLpSuccess(false);
-                    const message = "LP sa nepodarilo pridať!";
+                    const message = t("lp.saveError");
                     toast.error(message);
                     console.trace(err);
                     return { success: false, message };
@@ -188,7 +196,7 @@ export default function LPPage() {
             idsToDelete.push(_id);
         } else {
             // If there's no _id and no selection, show error
-            toast.error("Vyber aspoň jedno LP na vymazanie!");
+            toast.error(t("lp.deleteSelectError"));
             return;
         }
 
@@ -200,14 +208,14 @@ export default function LPPage() {
 
             let message = "";
             if (lps.length > 1) {
-                message = `Naozaj chceš vymazať ${lps.length} LP?\n\n ${titles}`;
+                message = t("lp.deleteConfirmMany", { count: lps.length, titles });
             } else {
-                message = `Naozaj chceš vymazať LP ${titles}?`;
+                message = t("lp.deleteConfirmSingle", { title: titles });
             }
 
             openConfirmDialog({
                 text: message,
-                title: lps.length > 1 ? "Vymazať LP?" : "Vymazať LP?",
+                title: t("lp.deleteTitle"),
                 onOk: () => {
                     Promise.all(idsToDelete.filter((id): id is string => typeof id === "string" && id !== undefined)
                         .map(id => deleteLP(id)))
@@ -216,13 +224,13 @@ export default function LPPage() {
                             if (successCount === 0) throw new Error("Error! LPs not deleted");
                             toast.success(
                                 successCount > 1
-                                    ? `${successCount} LP bolo úspešne vymazaných.`
-                                    : `LP ${lps[0].title} bolo úspešne vymazané.`
+                                    ? t("lp.deleteSuccessMany", { count: successCount })
+                                    : t("lp.deleteSuccessSingle", { title: lps[0].title })
                             );
                             fetchLPs();
                         })
                         .catch((err) => {
-                            toast.error(err.response?.data?.error || "Došlo k chybe pri mazaní!");
+                            toast.error(err.response?.data?.error || t("lp.deleteError"));
                             console.trace(err);
                         });
                 },
@@ -242,7 +250,7 @@ export default function LPPage() {
             }))
                 .then((lps) => proceedDelete(lps.filter(Boolean) as ILP[]))
                 .catch((err) => {
-                    toast.error(err.response?.data?.error || "Chyba pri načítaní LP!");
+                    toast.error(err.response?.data?.error || t("lp.deleteError"));
                     console.trace(err);
                 });
         }
@@ -261,12 +269,12 @@ export default function LPPage() {
     return (
         <>
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
-                <ShowHideColumns columns={getLPTableColumns()} shown={showColumn} setShown={setShowColumn} />
+                <ShowHideColumns columns={getLPTableColumns(t)} shown={showColumn} setShown={setShowColumn} />
             </div>
             <ServerPaginationTable
-                title={`LP (${countAll})`}
+                title={t("lp.title", { count: countAll })}
                 data={LPs}
-                columns={getLPTableColumns()}
+                columns={getLPTableColumns(t)}
                 pageChange={(page) => setPagination(prevState => ({ ...prevState, page: page }))}
                 pageSizeChange={handlePageSizeChange}
                 sortingChange={(sorting) => setPagination(prevState => ({ ...prevState, sorting: sorting }))}
@@ -281,7 +289,7 @@ export default function LPPage() {
                             <InputField
                                 className="form-control"
                                 style={{ paddingRight: "2rem" }}
-                                placeholder="Vyhľadaj LP"
+                                placeholder={t("lp.searchPlaceholder")}
                                 value={pagination.search}
                                 onChange={(e) =>
                                     setPagination(prevState => ({
@@ -305,26 +313,26 @@ export default function LPPage() {
                                 type="button"
                                 className="addBtnTable"
                                 onClick={handleAddLP}
-                                title="Pridať nové LP"
+                                title={t("lp.addNew")}
                             />
                         )}
                         <i
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
-                            title="Zobraz/skry stĺpce"
+                            title={t("books.showHideColumns")}
                             onClick={() => setShowColumn({ ...showColumn, control: !showColumn.control })}
                         />
                     </div>
                 }
                 rowActions={isLoggedIn ? (_id) => (
-                    <div className="actionsRow" style={{ pointerEvents: "auto" }}>
+                    <div className="actionsRow">
                         <button
-                            title="¨Vymazať"
+                            title={t("common.delete")}
                             onClick={() => handleDeleteLP(_id)}
                             className="fa fa-trash"
                         />
                         <button
-                            title="Upraviť"
+                            title={t("common.edit")}
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateLp(_id)}
                         />

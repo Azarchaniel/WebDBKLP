@@ -4,6 +4,7 @@ import { formPersonsFullName, stringifyUsers } from "@utils";
 import { Wysiwyg } from "@components/Wysiwyg";
 import { useAuth } from "@utils/context";
 import { useQuoteModal } from "@components/quotes/useQuoteModal";
+import { useTranslation } from "react-i18next";
 
 interface QuoteProps {
     quote: IQuote;
@@ -14,6 +15,7 @@ interface QuoteProps {
 }
 
 const Quote: React.FC<QuoteProps> = ({ quote, bcgrClr, deleteQuote, saveQuote, saveResultSuccess }) => {
+    const { t } = useTranslation();
     const { isLoggedIn } = useAuth();
     const { openQuoteModal } = useQuoteModal();
 
@@ -70,7 +72,7 @@ const Quote: React.FC<QuoteProps> = ({ quote, bcgrClr, deleteQuote, saveQuote, s
 
                 {quote.fromBook?.autor && (
                     <p>
-                        <span className="quoteOwner">{renderAuthorName()}</span>
+                        <span className="secondaryText">{renderAuthorName()}</span>
                     </p>
                 )}
 
@@ -85,15 +87,15 @@ const Quote: React.FC<QuoteProps> = ({ quote, bcgrClr, deleteQuote, saveQuote, s
 
                 {quote.owner && (
                     <p>
-                        <span className="quoteOwner">
-                            Pridal: {stringifyUsers(quote.owner, false)}
+                        <span className="secondaryText">
+                            {t("quotes.added")}{stringifyUsers(quote.owner, false)}
                         </span>
                     </p>
                 )}
 
                 {quote.note && (
                     <p>
-                        <span className="quoteOwner">Poznámka: {quote.note}</span>
+                        <span className="secondaryText">{t("quotes.note")}{quote.note}</span>
                     </p>
                 )}
             </div>

@@ -1,8 +1,10 @@
 import "../styles/bookLoading.scss";
-import React, {useEffect, useState} from "react";
-import {createRoot, Root} from "react-dom/client";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { createRoot, Root } from "react-dom/client";
 
 export const LoadingBooks: React.FC = () => {
+    const { t } = useTranslation();
     const [hidden, setHidden] = useState(true);
 
     useEffect(() => {
@@ -12,18 +14,18 @@ export const LoadingBooks: React.FC = () => {
     }, []);
 
     return (
-        <div className="backdrop" style={{display: hidden ? "none" : "block"}}>
+        <div className="backdrop" style={{ display: hidden ? "none" : "block" }}>
             <div className="bookshelf_wrapper">
                 <ul className="books_list">
-                    <li className="book_item first"/>
-                    <li className="book_item second"/>
-                    <li className="book_item third"/>
-                    <li className="book_item fourth"/>
-                    <li className="book_item fifth"/>
-                    <li className="book_item sixth"/>
+                    <li className="book_item first" />
+                    <li className="book_item second" />
+                    <li className="book_item third" />
+                    <li className="book_item fourth" />
+                    <li className="book_item fifth" />
+                    <li className="book_item sixth" />
                 </ul>
-                <div className="shelf"/>
-                <p className="textPatience">Trpezlivosť, prosím...</p>
+                <div className="shelf" />
+                <p className="textPatience">{t("loading.patience")}</p>
             </div>
         </div>
     )
@@ -39,7 +41,7 @@ export const openLoadingBooks = (show: boolean) => {
             document.body.appendChild(container);
             root = createRoot(container);
         }
-        root?.render(<LoadingBooks/>);
+        root?.render(<LoadingBooks />);
     } else {
         if (root && container) {
             root.unmount();

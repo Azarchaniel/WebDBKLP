@@ -5,6 +5,7 @@ import { IAutor, ValidationError } from "../../type";
 import { Modal } from "@components/Modal";
 import { AutorsModalBody } from "@components/autors/AutorsModal";
 import { ModalButtons } from "@components/Modal";
+import { useTranslation } from "react-i18next";
 
 type Props = {
     saveAutor: (formData: IAutor[] | object) => void;
@@ -14,10 +15,11 @@ type Props = {
 }
 
 const AddAutor: React.FC<Props> = ({ saveAutor, autors, onClose, saveResultSuccess }: Props) => {
+    const { t } = useTranslation();
     const [showModal, setShowModal] = useState<boolean>(Boolean(autors));
     const [autorData, setAutorData] = useState<IAutor[] | undefined>(autors);
     const [error, setError] = useState<ValidationError[] | undefined>([{
-        label: "Priezvisko autora musí obsahovať aspoň jeden znak!",
+        label: t("validation.authorLastNameRequired"),
         target: "lastName"
     }]);
     const [outline, setOutline] = useState<React.CSSProperties>();
@@ -42,7 +44,7 @@ const AddAutor: React.FC<Props> = ({ saveAutor, autors, onClose, saveResultSucce
             {showModal &&
                 <Modal
                     customKey={autors?.[0]?._id || "new"}
-                    title={(autors ? "Uprav" : "Pridaj") + " autora"}
+                    title={autors ? t("autors.editTitle") : t("autors.addTitle")}
                     onClose={() => {
                         setShowModal(false);
                         onClose();

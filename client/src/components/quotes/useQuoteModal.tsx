@@ -3,11 +3,13 @@ import { useModal } from '@utils/context/ModalContext';
 import { IQuote, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { QuotesModalBody } from './QuotesModal';
+import { useTranslation } from "react-i18next";
 
 /**
  * Custom hook for managing Quote modals with persistence across navigation
  */
 export const useQuoteModal = () => {
+    const { t } = useTranslation();
     const { showModal, hideModal } = useModal();
 
     /**
@@ -57,7 +59,7 @@ export const useQuoteModal = () => {
             requestAnimationFrame(() => {
                 showModal({
                     customKey: modalKey,
-                    title: quote?._id ? 'Uprav citát' : 'Pridaj citát',
+                    title: quote?._id ? t("quotes.editTitle") : t("quotes.addTitle"),
                     body: (
                         <QuotesModalBody
                             data={{}}
@@ -103,7 +105,7 @@ export const useQuoteModal = () => {
         requestAnimationFrame(() => {
             showModal({
                 customKey: modalKey,
-                title: quote?._id ? 'Uprav citát' : 'Pridaj citát',
+                title: quote?._id ? t("quotes.editTitle") : t("quotes.addTitle"),
                 body: <ModalBodyComponent />,
                 footer: <ModalFooterComponent />
             });

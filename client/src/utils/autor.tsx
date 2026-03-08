@@ -1,5 +1,6 @@
 import { addAutor } from "../API";
 import { toast } from "react-toastify";
+import i18n from "../i18n";
 
 //cannot be in types.d.ts
 export enum AutorRole {
@@ -36,7 +37,7 @@ export const createNewAutor = async (
     try {
         const res = await addAutor([{ firstName, lastName, role: [{ value: role }] }]);
         if (res.status === 201 && res.data?.autor?._id) {
-            toast.success("Autor úspešne vytvorený");
+            toast.success(i18n.t("autors.createdSuccess"));
             if (setFormData) {
                 setFormData((prevData: any) => {
                     // Check if prevData is an array (BookModal) or object (other forms)
@@ -86,7 +87,7 @@ export const createNewAutor = async (
             throw new Error();
         }
     } catch (err) {
-        toast.error("Autora sa nepodarilo vytvoriť!");
+        toast.error(i18n.t("autors.createError"));
         console.error(err);
         return undefined;
     }

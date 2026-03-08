@@ -11,8 +11,10 @@ import { ReadByChart } from "@components/dashboard/ReadByChart";
 import { useAuth } from "@utils/context";
 import { LoadingBooks } from "@components/LoadingBooks";
 import { NoData } from "@components/dashboard/NoData";
+import { useTranslation } from "react-i18next";
 
 export default function DashboardPage() {
+    const { t } = useTranslation();
     const { currentUser, isLoading: isAuthLoading } = useAuth();
     const [countAllBooks, setCountAllBooks] = useState<{
         owner: { id: string, firstName: string, lastName: string } | null,
@@ -85,10 +87,10 @@ export default function DashboardPage() {
                 <TableLanguageStats languageStats={langStats} />
             </div>
             <div className="dashboardItem">
-                <TableCountRatio data={sizeGroups?.height} title="Výška (cm)" />
+                <TableCountRatio data={sizeGroups?.height} title={t("dashboard.heightCm")} />
             </div>
             <div className="dashboardItem">
-                <TableCountRatio data={sizeGroups?.width} title="Šírka (cm)" />
+                <TableCountRatio data={sizeGroups?.width} title={t("dashboard.widthCm")} />
             </div>
             <div className="dashboardItem">
                 <DashboardTableStats dimensionStats={dimensionStats} />

@@ -3,11 +3,13 @@ import { IBook, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { BooksModalBody } from './BookModal';
 import { emptyBook } from '@utils';
+import { useTranslation } from "react-i18next";
 
 /**
  * Custom hook for managing Book modals with persistence across navigation
  */
 export const useBookModal = () => {
+    const { t } = useTranslation();
     const { showModal, hideModal } = useModal();
 
     /**
@@ -34,7 +36,7 @@ export const useBookModal = () => {
         // Version to force remount of body component when clearing/reverting
         let bodyVersion = 0;
 
-        const getTitle = () => isEdit ? 'Úprava knihy' : 'Pridanie knihy';
+        const getTitle = () => isEdit ? t("books.editTitle") : t("books.addTitle");
 
         // Helper to (re)render the modal with provided data
         const renderModal = (data: IBook[] | IBook | object, forceRemount: boolean = false) => {

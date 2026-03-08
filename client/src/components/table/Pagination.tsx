@@ -1,8 +1,9 @@
-import React, {useState} from "react";
-import {PAGE_SIZE_OPTIONS} from "../../utils/constants";
-import {getPageByStartingLetter} from "../../API";
-import {IUser} from "../../type";
-import {useReadLocalStorage} from "usehooks-ts";
+import React, { useState } from "react";
+import { PAGE_SIZE_OPTIONS } from "../../utils/constants";
+import { getPageByStartingLetter } from "../../API";
+import { IUser } from "../../type";
+import { useReadLocalStorage } from "usehooks-ts";
+import { useTranslation } from "react-i18next";
 
 type PaginationProps = {
     currentPage: number;
@@ -13,12 +14,13 @@ type PaginationProps = {
 };
 
 const Pagination: React.FC<PaginationProps> = ({
-                                                   currentPage,
-                                                   pageSize,
-                                                   totalPages,
-                                                   onPageChange,
-                                                   onPageSizeChange
-                                               }) => {
+    currentPage,
+    pageSize,
+    totalPages,
+    onPageChange,
+    onPageSizeChange
+}) => {
+    const { t } = useTranslation();
     const [inputPage, setInputPage] = useState<string>(currentPage.toString());
     const activeUsers: IUser[] | null = useReadLocalStorage("activeUsers");
 
@@ -47,7 +49,7 @@ const Pagination: React.FC<PaginationProps> = ({
         if (event.key === 'Enter') {
             const value = (event.target as HTMLInputElement).value.toUpperCase();
 
-            const {data} =
+            const { data } =
                 await getPageByStartingLetter(
                     value,
                     pageSize,
@@ -61,7 +63,7 @@ const Pagination: React.FC<PaginationProps> = ({
     return (
         <div className="tableNavigationRow">
             <div className="otherTableControl">
-                <span className="pageSelectorLabel">Záznamov na stranu: </span>
+                <span className="pageSelectorLabel">{t("pagination.recordsPerPage")}</span>
                 <select
                     value={pageSize}
                     onChange={(e) => onPageSizeChange(Number(e.target.value))}
@@ -80,7 +82,7 @@ const Pagination: React.FC<PaginationProps> = ({
                     onBlur={handleInputBlur}
                     onKeyDown={handleInputKeyDown}
                     className="pageInput form-control"
-                    title="Skoč na stranu"
+                    title={t("pagination.jumpToPage")}
                 />
                 <input
                     type="text"
@@ -88,7 +90,7 @@ const Pagination: React.FC<PaginationProps> = ({
                     maxLength={1}
                     onKeyDown={handleLetterChangeKeyDown}
                     className="pageInput form-control"
-                    title="Skoč na písmeno"
+                    title={t("pagination.jumpToLetter")}
                 />
             </div>
             <div className="pageControl">
@@ -98,10 +100,10 @@ const Pagination: React.FC<PaginationProps> = ({
                     disabled={currentPage <= 1}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                         className="lucide lucide-chevron-first">
-                        <path d="m17 18-6-6 6-6"/>
-                        <path d="M7 6v12"/>
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        className="lucide lucide-chevron-first">
+                        <path d="m17 18-6-6 6-6" />
+                        <path d="M7 6v12" />
                     </svg>
                 </button>
                 <button
@@ -110,29 +112,29 @@ const Pagination: React.FC<PaginationProps> = ({
                     disabled={currentPage <= 1}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                         className="lucide lucide-chevron-left">
-                        <path d="m15 18-6-6 6-6"/>
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        className="lucide lucide-chevron-left">
+                        <path d="m15 18-6-6 6-6" />
                     </svg>
                 </button>
                 <span className="pageSelector"
-                      onClick={() => onPageChange(currentPage - 2)}>{currentPage > 2 ? currentPage - 2 : null}</span>
+                    onClick={() => onPageChange(currentPage - 2)}>{currentPage > 2 ? currentPage - 2 : null}</span>
                 <span className="pageSelector"
-                      onClick={() => onPageChange(currentPage - 1)}>{currentPage > 1 ? currentPage - 1 : null}</span>
+                    onClick={() => onPageChange(currentPage - 1)}>{currentPage > 1 ? currentPage - 1 : null}</span>
                 <span className="pageSelector current">{currentPage}</span>
                 <span className="pageSelector"
-                      onClick={() => onPageChange(currentPage + 1)}>{(currentPage + 1) <= totalPages ? currentPage + 1 : null}</span>
+                    onClick={() => onPageChange(currentPage + 1)}>{(currentPage + 1) <= totalPages ? currentPage + 1 : null}</span>
                 <span className="pageSelector"
-                      onClick={() => onPageChange(currentPage + 2)}>{(currentPage + 2) <= totalPages ? currentPage + 2 : null}</span>
+                    onClick={() => onPageChange(currentPage + 2)}>{(currentPage + 2) <= totalPages ? currentPage + 2 : null}</span>
                 <button
                     className="tabNav next"
                     onClick={() => onPageChange(currentPage + 1)}
                     disabled={currentPage >= totalPages}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                         className="lucide lucide-chevron-right">
-                        <path d="m9 18 6-6-6-6"/>
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                        className="lucide lucide-chevron-right">
+                        <path d="m9 18 6-6-6-6" />
                     </svg>
                 </button>
                 <button
@@ -141,9 +143,9 @@ const Pagination: React.FC<PaginationProps> = ({
                     disabled={currentPage >= totalPages}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m7 18 6-6-6-6"/>
-                        <path d="M17 6v12"/>
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="m7 18 6-6-6-6" />
+                        <path d="M17 6v12" />
                     </svg>
                 </button>
             </div>

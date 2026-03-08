@@ -1,26 +1,28 @@
 import React from "react";
-import {IBoardGame} from "../../type";
-import {formatBoardGameRange} from "@utils";
+import { IBoardGame } from "../../type";
+import { formatBoardGameRange } from "@utils";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     data: IBoardGame;
 }
 
-const BoardGameDetail: React.FC<Props> = React.memo(({data}) => {
+const BoardGameDetail: React.FC<Props> = React.memo(({ data }) => {
+    const { t } = useTranslation();
     const renderAuthors = () => {
         if (!data.autor || data.autor.length === 0) return null;
         // @ts-ignore
         const autorList = data.autor.map((a: any) => a.fullName || `${a.firstName ? a.firstName + ' ' : ''}${a.lastName}`).join("; ");
-        return <p>Autor: {autorList}</p>;
+        return <p>{t("common.author")}: {autorList}</p>;
     };
 
     const renderPublished = () => {
         if (!data.published) return null;
-        const {publisher, year, country} = data.published;
+        const { publisher, year, country } = data.published;
         if (!publisher && !year && !country) return null;
         return (
             <p>
-                Vydavateľ: {publisher ?? "-"}
+                {t("common.publisher")}: {publisher ?? "-"}
                 {year ? `, ${year}` : ""}
                 {country ? `, ${country}` : ""}
             </p>
@@ -30,9 +32,9 @@ const BoardGameDetail: React.FC<Props> = React.memo(({data}) => {
     const renderPicture = () => (
         <div>
             {data.picture ? (
-                <img src={data.picture} alt="cover"/>
+                <img src={data.picture} alt={t("bookDetail.coverAlt")} />
             ) : (
-                <img src="img/no_thumbnail.svg" alt="no_thumbnail"/>
+                <img src="img/no_thumbnail.svg" alt={t("bookDetail.noCoverAlt")} />
             )}
         </div>
     );
@@ -42,7 +44,7 @@ const BoardGameDetail: React.FC<Props> = React.memo(({data}) => {
         return (
             <p>
                 <a href={data.url} target="_blank" rel="noopener noreferrer">
-                    Odkaz na hru
+                    {t("boardGames.link")}
                 </a>
             </p>
         );
@@ -52,9 +54,9 @@ const BoardGameDetail: React.FC<Props> = React.memo(({data}) => {
         return (
             <>
                 {Boolean(data.parent?.length) &&
-                    <p>Patrí k hre: {(data.parent as IBoardGame[]).map((bg: IBoardGame) => bg.title).join(", ")}</p>}
+                    <p>{t("boardGames.belongsTo")}: {(data.parent as IBoardGame[]).map((bg: IBoardGame) => bg.title).join(", ")}</p>}
                 {Boolean(data.children?.length) &&
-                    <p>Má rozšírenia: {(data.children as IBoardGame[]).map((bg: IBoardGame) => bg.title).join(", ")}</p>}
+                    <p>{t("boardGames.hasExpansions")}: {(data.children as IBoardGame[]).map((bg: IBoardGame) => bg.title).join(", ")}</p>}
             </>
         );
     };
@@ -67,12 +69,12 @@ const BoardGameDetail: React.FC<Props> = React.memo(({data}) => {
             <div>
                 <h1>{data.title}</h1>
                 {renderAuthors()}
-                {data.noPlayers && <p>Počet hráčov: {formatBoardGameRange(data.noPlayers)}</p>}
-                {data.playTime && <p>Čas hry: {formatBoardGameRange(data.playTime, "min")}</p>}
+                {data.noPlayers && <p>{t("table.boardGames.players")}: {formatBoardGameRange(data.noPlayers, t("units.players"))}</p>}
+                {data.playTime && <p>{t("table.boardGames.playTime")}: {formatBoardGameRange(data.playTime, t("units.minutes"))}</p>}
                 {data.ageRecommendation &&
-                    <p>Odporúčaný vek: {formatBoardGameRange(data.ageRecommendation, "rokov")}</p>}
+                    <p>{t("table.boardGames.ageRecommendation")}: {formatBoardGameRange(data.ageRecommendation, t("units.years"))}</p>}
                 {renderPublished()}
-                {data.note && <p>Poznámka: {data.note}</p>}
+                {data.note && <p>{t("common.note")}: {data.note}</p>}
                 {renderParentChildren()}
 
                 {renderUrl()}

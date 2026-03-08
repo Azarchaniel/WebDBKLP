@@ -1,27 +1,28 @@
 import { formatDimension } from "../../utils/utils";
 import { NoData } from "./NoData";
+import { useTranslation } from "react-i18next";
 
 interface Props {
 	dimensionStats: any;
 }
 
 export const DashboardTableStats = ({ dimensionStats }: Props) => {
+	const { t } = useTranslation();
 	// if no data, then it is: { height: {}, width: {}, thickness: {}, weight: {} }
 	if (!dimensionStats || Object.values(dimensionStats).every((v: any) => Object.keys(v).length === 0))
 		return <NoData />;
 
-	//TEMPORARY: until translation
 	const translationMap: Record<string, string> = {
-		height: "Výška (cm)",
-		width: "Šírka (cm)",
-		thickness: "Hrúbka (cm)",
-		weight: "Hmotnosť (g)",
-		sum: "Suma",
-		avg: "Priemer",
-		min: "Min",
-		max: "Max",
-		mode: "Modus",
-		median: "Medián"
+		height: t("dashboard.heightCm"),
+		width: t("dashboard.widthCm"),
+		thickness: t("fields.thicknessCm"),
+		weight: t("fields.weightG"),
+		sum: t("stats.sum"),
+		avg: t("stats.avg"),
+		min: t("stats.min"),
+		max: t("stats.max"),
+		mode: t("stats.mode"),
+		median: t("stats.median")
 	};
 
 	const rows: any[] = Object.keys(dimensionStats);
@@ -40,7 +41,7 @@ export const DashboardTableStats = ({ dimensionStats }: Props) => {
 								{rows.map((row) => (
 									<tr key={row}>
 										<td><b>{translationMap[row]}</b></td>
-										<td>{formatDimension(dimensionStats[row][column])}</td>
+										<td>{formatDimension(dimensionStats[row][column], t('common.locale'))}</td>
 									</tr>
 								))}
 							</tbody>
@@ -63,7 +64,7 @@ export const DashboardTableStats = ({ dimensionStats }: Props) => {
 						<tr key={row}>
 							<td><b>{translationMap[row]}</b></td>
 							{columns.map((column) => (
-								<td key={column}>{formatDimension(dimensionStats[row][column])}</td>
+								<td key={column}>{formatDimension(dimensionStats[row][column], t('common.locale'))}</td>
 							))}
 						</tr>
 					))}

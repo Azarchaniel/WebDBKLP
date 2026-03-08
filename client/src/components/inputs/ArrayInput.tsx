@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import "@styles/Autocomplete.scss";
 import "@styles/ArrayInput.scss";
+import { useTranslation } from "react-i18next";
 
 interface ArrayInputProps {
     name: string;
@@ -21,9 +22,11 @@ export const ArrayInput: React.FC<ArrayInputProps> = React.memo(({
     name,
     value,
     onChange,
-    placeholder = "Pridaj záznam...",
+    placeholder,
     className,
 }) => {
+    const { t } = useTranslation();
+    const resolvedPlaceholder = placeholder ?? t("inputs.addRecord");
     const [inputValue, setInputValue] = useState("");
     const [chips, setChips] = useState<string[]>(value || []);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -92,7 +95,7 @@ export const ArrayInput: React.FC<ArrayInputProps> = React.memo(({
                     />
                 </div>
             </div>
-            {placeholder && <span className={`array-floating-label${shouldFloat ? " float" : ""}`}>{placeholder}</span>}
+            {resolvedPlaceholder && <span className={`array-floating-label${shouldFloat ? " float" : ""}`}>{resolvedPlaceholder}</span>}
         </div>
     );
 });

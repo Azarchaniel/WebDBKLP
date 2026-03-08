@@ -7,12 +7,6 @@ I'm using **MERN stack**.
 cd ./server; npm run start
 cd ./client; npx run start
 
-### TODO
-- [ ] better granulating - what is possible, move to components
-- [ ] in BookTable, when clicking on property, filter the value of property
-- [ ] (in far future) localization 
-- [ ] allow user to add tags - "fantasy", "read2012"
-
 ### Known problems and how to fix it
 
 `SyntaxError: Unexpected token '??='`

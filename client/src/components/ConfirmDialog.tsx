@@ -1,6 +1,7 @@
 import React, { FC, useCallback } from "react";
 import { Modal } from "./Modal";
 import { createRoot } from "react-dom/client";
+import { useTranslation } from "react-i18next";
 
 interface ConfirmDialogProps {
 	text: string;
@@ -10,11 +11,12 @@ interface ConfirmDialogProps {
 }
 
 const ConfirmDialog: FC<ConfirmDialogProps> = React.memo(({
-															  text,
-															  title,
-															  onOk,
-															  onCancel
-														  }: ConfirmDialogProps) => {
+	text,
+	title,
+	onOk,
+	onCancel
+}: ConfirmDialogProps) => {
+	const { t } = useTranslation();
 	const handleOk = useCallback(() => {
 		if (onOk) onOk();
 	}, [onOk]);
@@ -32,14 +34,14 @@ const ConfirmDialog: FC<ConfirmDialogProps> = React.memo(({
 				className="btn btn-secondary"
 				onClick={handleCancel}
 			>
-				Zrušiť
+				{t("common.cancel")}
 			</button>
 			<button
 				type="submit"
 				onClick={handleOk}
 				className="btn btn-success"
 			>
-				Potvrdiť
+				{t("common.confirm")}
 			</button>
 		</div>
 	);
