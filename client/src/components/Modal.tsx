@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle, faWindowMinimize, faWindowMaximize } from "@fortawesome/free-solid-svg-icons";
 import { ValidationError } from "type";
 import LoadingSpinner from "./LoadingSpinner";
+import { useTranslation } from "react-i18next";
 
 interface ModalProps {
     customKey: string;
@@ -346,9 +347,10 @@ export const ModalButtons: React.FC<ModalButtonsProps> = ({
     onRevert,
     error,
     saveResultSuccess,
-    saveLabel = "Uložiť",
-    clearLabel = "Vymazať polia"
+    saveLabel,
+    clearLabel
 }) => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState<boolean>(false);
     const [statusMessage, setStatusMessage] = useState<{ success: boolean; message: string } | null>(null);
     const startRef = useRef<number | null>(null);
@@ -436,10 +438,10 @@ export const ModalButtons: React.FC<ModalButtonsProps> = ({
                     type="button"
                     className="btn btn-secondary"
                     onClick={onRevert}
-                >Vrátiť zmeny
+                >{t("common.revertChanges")}
                 </button>
                 <button type="button" className="btn btn-secondary" onClick={() => { onClear(); setStatusMessage(null); }}>
-                    {clearLabel}
+                    {clearLabel || t("common.clearFields")}
                 </button>
                 <button
                     type="submit"
@@ -447,7 +449,7 @@ export const ModalButtons: React.FC<ModalButtonsProps> = ({
                     onClick={handleSave}
                     className="btn btn-success"
                 >
-                    {loading ? <LoadingSpinner color="white" size={50} marginTop={1} /> : saveLabel}
+                    {loading ? <LoadingSpinner color="white" size={50} marginTop={1} /> : (saveLabel || t("common.save"))}
                 </button>
             </div>
         </div>

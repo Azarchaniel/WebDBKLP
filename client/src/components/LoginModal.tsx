@@ -5,15 +5,17 @@ import { loginUser, logoutUser } from "@utils";
 import { useAuth } from "@utils/context";
 import { IUser } from "../type";
 import { CustomPasswordField } from "./inputs";
+import { useTranslation } from "react-i18next";
 
 const LoginModal: React.FC = () => {
+    const { t } = useTranslation();
     const { login, isLoggedIn, currentUser, checkTokenValidity } = useAuth();
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState({
         email: "",
         password: ""
     });
-    const [error, setError] = useState("Zadaj užívateľský email!");
+    const [errorKey, setErrorKey] = useState("auth.enterEmail");
 
     // Verify token validity on component render and periodically
     useEffect(() => {
@@ -32,15 +34,15 @@ const LoginModal: React.FC = () => {
         const { email, password } = form;
 
         const getErrorMessage = (fieldId: string) => {
-            return fieldId === "email" ? "Zadaj užívateľský email!" : "Zadaj heslo!";
+            return fieldId === "email" ? "auth.enterEmail" : "auth.enterPassword";
         };
 
         if (!email) {
-            setError(getErrorMessage("email"));
+            setErrorKey(getErrorMessage("email"));
         } else if (!password) {
-            setError(getErrorMessage("password"));
+            setErrorKey(getErrorMessage("password"));
         } else {
-            setError("");
+            setErrorKey("");
         }
     }
 
@@ -58,12 +60,12 @@ const LoginModal: React.FC = () => {
             .then((user: IUser | undefined) => {
                 setShowModal(false);
                 login(user!);
-                toast.success("Prihlásenie úspešné!")
+                toast.success(t("auth.loginSuccess"));
             })
             .catch(err => {
                 console.error(err.message);
-                toast.error("Nepodarilo sa prihlásiť!");
-                setError("Prihlásenie sa nepodarilo, skús znova.");
+                toast.error(t("auth.loginFailed"));
+                setErrorKey("auth.loginFailedRetry");
             });
     }
 
@@ -76,7 +78,7 @@ const LoginModal: React.FC = () => {
             <div
                 className={`${isLoggedIn && currentUser ? "loggedIn" : ""} customLink loginBtn`}
                 onClick={() => setShowModal(true)}
-                title={isLoggedIn ? "Odhlásiť sa" : "Prihlásiť sa"}
+                title={isLoggedIn ? t("auth.logoutTooltip") : t("auth.loginTooltip")}
             >
                 {isLoggedIn && currentUser ? currentUser.firstName : ""}
                 <i className="fa fa-user-circle" />
@@ -84,7 +86,7 @@ const LoginModal: React.FC = () => {
             {showModal && !isLoggedIn &&
                 <Modal
                     customKey="login"
-                    title="Prihlásenie"
+                    title={t("auth.loginTitle")}
                     onClose={() => setShowModal(false)}
                     body={<form
                         className="column"
@@ -96,11 +98,11 @@ const LoginModal: React.FC = () => {
                             }
                         }}
                     >
-                        <input type="email" placeholder="Email" className="form-control" id="email"
+                        <input type="email" placeholder={t("auth.emailPlaceholder")} className="form-control" id="email"
                             onChange={(e) => updateForm(e)} autoComplete="email"
                         />
                         <CustomPasswordField
-                            placeholder="Heslo"
+                            placeholder={t("auth.passwordPlaceholder")}
                             maskCharacters={["ᛆ", "ᛒ", "ᛍ", "ᛋ", "ᛏ", "ᛁ", "ᚴ", "ᛚ", "ᛘ", "ᚾ", "ᚦ", "ᛓ", "ᛂ", "ᚠ", "ᚢ"]}
                             onPasswordChange={(value: string) =>
                                 updateForm({
@@ -113,15 +115,15 @@ const LoginModal: React.FC = () => {
 
                     </form>}
                     footer={<div className="column">
-                        <div>{showError(error)}</div>
+                        <div>{showError(errorKey ? t(errorKey) : "")}</div>
                         <div className="buttons">
                             <button type="button" className="btn btn-secondary"
-                                onClick={() => setShowModal(false)}>Zrušiť
+                                onClick={() => setShowModal(false)}>{t("common.cancel")}
                             </button>
                             <button type="submit"
-                                disabled={Boolean(error?.length)}
+                                disabled={Boolean(errorKey?.length)}
                                 onClick={() => sendLogin()}
-                                className="btn btn-success">Prihlásiť
+                                className="btn btn-success">{t("auth.login")}
                             </button>
                         </div>
                     </div>}
@@ -131,17 +133,17 @@ const LoginModal: React.FC = () => {
             {showModal && isLoggedIn &&
                 <Modal
                     customKey="logout"
-                    title="Odhlásenie"
+                    title={t("auth.logoutTitle")}
                     onClose={() => setShowModal(false)}
-                    body={<p>Skutočne sa chceš odhlásiť?</p>}
+                    body={<p>{t("auth.confirmLogout")}</p>}
                     footer={
                         <div className="buttons">
                             <button type="button" className="btn btn-secondary"
-                                onClick={() => setShowModal(false)}>Zrušiť
+                                onClick={() => setShowModal(false)}>{t("common.cancel")}
                             </button>
                             <button type="submit"
                                 onClick={() => sendLogout()}
-                                className="btn btn-success">Odhlásiť
+                                className="btn btn-success">{t("auth.logout")}
                             </button>
                         </div>
                     }

@@ -1,3 +1,5 @@
+import i18n from "../i18n";
+
 interface IReturnInputParams {
     name: string;
     value: any;
@@ -36,7 +38,9 @@ export const getInputParams = (name: string, formData: any, placeholder?: string
             return {
                 name,
                 value: "",
-                placeholder: placeholder ? placeholder + " (viacero hodnôt)" : "Viacero hodnôt",
+                placeholder: placeholder
+                    ? `${placeholder} (${i18n.t("common.multipleValues")})`
+                    : i18n.t("common.multipleValues"),
             };
         }
     }

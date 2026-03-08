@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Modal } from "@components/Modal";
 import { LPsModalBody } from "@components/lps/LPsModal";
 import { ModalButtons } from "@components/Modal";
+import { useTranslation } from "react-i18next";
 
 
 type Props = {
@@ -13,10 +14,11 @@ type Props = {
 }
 
 const AddLp: React.FC<Props> = ({ saveLp, lps, onClose, saveResultSuccess }: Props) => {
+    const { t } = useTranslation();
     const [showModal, setShowModal] = useState<boolean>(Boolean(lps));
     const [lpData, setLpData] = useState<ILP[] | ILP | object | undefined>(lps);
     const [error, setError] = useState<ValidationError[] | undefined>([{
-        label: "Názov LP musí obsahovať aspoň jeden znak!",
+        label: t("validation.lpTitleRequired"),
         target: "title"
     }]);
     const [outline, setOutline] = useState<React.CSSProperties>();
@@ -45,7 +47,11 @@ const AddLp: React.FC<Props> = ({ saveLp, lps, onClose, saveResultSuccess }: Pro
             {showModal &&
                 <Modal
                     customKey={lps?.[0]?._id || "new"}
-                    title={(lps ? "Uprav" : "Pridaj") + (Array.isArray(lps) && lps.length > 1 ? ` ${lps.length} LP` : " LP")}
+                    title={lps
+                        ? (Array.isArray(lps) && lps.length > 1
+                            ? `${t("lp.editTitle")} (${lps.length})`
+                            : t("lp.editTitle"))
+                        : t("lp.addTitle")}
                     onClose={() => {
                         setShowModal(false);
                         onClose();

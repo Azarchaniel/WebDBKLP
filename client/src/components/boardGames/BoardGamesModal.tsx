@@ -6,6 +6,7 @@ import { createNewAutor, AutorRole } from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
 import { ThreeStateToggleSwitch } from "@components/ToggleSwitch";
 import { getInputParams, handleInputChange } from "@utils/form";
+import { useTranslation } from "react-i18next";
 
 interface BodyProps {
     data: IBoardGame[];
@@ -25,11 +26,12 @@ const getInitialExpansions = (data: IBoardGame | object): boolean | undefined =>
 
 
 export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState(
         Array.isArray(data) && data.length > 0 ? data : [emptyBoardGame]
     );
     const [errors, setErrors] = useState<ValidationError[]>([
-        { label: "Názov musí obsahovať aspoň jeden znak!", target: "title" }
+        { label: t("validation.boardGameTitleRequired"), target: "title" }
     ]);
     const [expansions, setExpansions] = useState<boolean | undefined>(getInitialExpansions(formData));
 
@@ -104,7 +106,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
         const validateBG = (bg: IBoardGame) => {
             let errors: ValidationError[] = [];
             if (!bg.title?.trim()) {
-                errors.push({ label: "Názov musí obsahovať aspoň jeden znak!", target: "title" });
+                errors.push({ label: t("validation.boardGameTitleRequired"), target: "title" });
             } else {
                 errors = errors.filter((err) => err.target !== "title");
             }
@@ -129,35 +131,35 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
             <div className="bg-container">
                 <div className="bg-title">
                     <InputField
-                        placeholder="*Názov"
+                        placeholder={t("fields.titleRequired")}
                         onChange={handleInputChange}
                         customerror={getErrorMsg("title")}
-                        {...getInputParams("title", formData, "Názov")}
+                        {...getInputParams("title", formData, t("common.title"))}
                     />
                 </div>
                 <div className="bg-autor">
                     <LazyLoadMultiselect
                         displayValue="fullName"
-                        placeholder="Autor"
+                        placeholder={t("common.author")}
                         onChange={handleInputChange}
                         onSearch={fetchAutors}
                         onNew={async (autorString) => await createNewAutor(autorString, AutorRole.BOARDGAME_AUTOR, setFormData, "autor")}
-                        {...getInputParams("autor", formData, "Autor")}
+                        {...getInputParams("autor", formData, t("common.author"))}
                     />
                 </div>
                 <div className="bg-publisher">
                     <InputField
-                        placeholder="Vydavateľ"
+                        placeholder={t("common.publisher")}
                         onChange={handleInputChange}
-                        {...getInputParams("published.publisher", formData, "Vydavateľ")}
+                        {...getInputParams("published.publisher", formData, t("common.publisher"))}
                     />
                 </div>
                 <div className="bg-year-published">
                     <InputField
-                        placeholder="Rok vydania"
+                        placeholder={t("fields.yearPublished")}
                         type="number"
                         onChange={handleInputChange}
-                        {...getInputParams("published.year", formData, "Rok vydania")}
+                        {...getInputParams("published.year", formData, t("fields.yearPublished"))}
                     />
                 </div>
                 <div className="bg-country-published">
@@ -165,67 +167,67 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                         selectionLimit={1}
                         options={countryCode}
                         displayValue="value"
-                        placeholder="Krajina vydania"
+                        placeholder={t("fields.countryPublished")}
                         onChange={handleInputChange}
-                        {...getInputParams("published.country", formData, "Krajina vydania")}
+                        {...getInputParams("published.country", formData, t("fields.countryPublished"))}
                     />
                 </div>
                 <div className="bg-no-players">
                     <InputField
-                        placeholder="Počet hráčov od"
+                        placeholder={t("fields.numberPlayersFrom")}
                         onChange={handleInputChange}
-                        {...getInputParams("noPlayers.from", formData, "Počet hráčov od")}
+                        {...getInputParams("noPlayers.from", formData, t("fields.numberPlayersFrom"))}
                     />
                     <InputField
-                        placeholder="Počet hráčov do"
+                        placeholder={t("fields.numberPlayersTo")}
                         onChange={handleInputChange}
-                        {...getInputParams("noPlayers.to", formData, "Počet hráčov do")}
+                        {...getInputParams("noPlayers.to", formData, t("fields.numberPlayersTo"))}
                     />
                 </div>
                 <div className="bg-play-time">
                     <InputField
-                        placeholder="Čas hrania od"
+                        placeholder={t("fields.playTimeFrom")}
                         onChange={handleInputChange}
-                        {...getInputParams("playTime.from", formData, "Čas hrania od")}
+                        {...getInputParams("playTime.from", formData, t("fields.playTimeFrom"))}
                     />
                     <InputField
-                        placeholder="Čas hrania do"
+                        placeholder={t("fields.playTimeTo")}
                         onChange={handleInputChange}
-                        {...getInputParams("playTime.to", formData, "Čas hrania do")}
+                        {...getInputParams("playTime.to", formData, t("fields.playTimeTo"))}
                     />
                 </div>
                 <div className="bg-age-recommendation">
                     <InputField
-                        placeholder="Veková kategória od"
+                        placeholder={t("fields.ageFrom")}
                         onChange={handleInputChange}
-                        {...getInputParams("ageRecommendation.from", formData, "Veková kategória od")}
+                        {...getInputParams("ageRecommendation.from", formData, t("fields.ageFrom"))}
                     />
                     <InputField
-                        placeholder="Veková kategória do"
+                        placeholder={t("fields.ageTo")}
                         onChange={handleInputChange}
-                        {...getInputParams("ageRecommendation.to", formData, "Veková kategória do")}
+                        {...getInputParams("ageRecommendation.to", formData, t("fields.ageTo"))}
                     />
                 </div>
                 <div className="bg-picture">
                     <InputField
-                        placeholder="Obrázok"
+                        placeholder={t("fields.image")}
                         onChange={handleInputChange}
-                        {...getInputParams("picture", formData, "Obrázok")}
+                        {...getInputParams("picture", formData, t("fields.image"))}
                     />
                 </div>
                 <div className="bg-url">
                     <InputField
-                        placeholder="URL"
+                        placeholder={t("common.url")}
                         onChange={handleInputChange}
-                        {...getInputParams("url", formData, "URL")}
+                        {...getInputParams("url", formData, t("common.url"))}
                     />
                 </div>
                 <div className="bg-note">
                     <TextArea
-                        placeholder="Poznámka"
+                        placeholder={t("common.note")}
                         rows={1}
                         onChange={handleInputChange}
-                        {...getInputParams("note", formData, "Poznámka")}
+                        {...getInputParams("note", formData, t("common.note"))}
                     />
                 </div>
                 <div className="bg-expansions row">
@@ -235,8 +237,8 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                             name="expansions"
                             state={expansions}
                             onChange={(state: boolean | undefined) => setExpansions(state)}
-                            optionLabels={["Má rozšírenia (deti)", "Žiadne rozšírenia", "Patrí k hre (rodičovi)"]}
-                            {...getInputParams("expansions", formData, "Rozšírenia")}
+                            optionLabels={[t("fields.expansionsChildren"), t("fields.expansionsNone"), t("fields.expansionsParent")]}
+                            {...getInputParams("expansions", formData, t("fields.expansions"))}
                         />
                     </div>
                     <div className="col">
@@ -244,19 +246,19 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                             <LazyLoadMultiselect
                                 disabled={expansions === undefined}
                                 displayValue="title"
-                                placeholder="Má rozšírenia (deti)"
+                                placeholder={t("fields.expansionsChildren")}
                                 onChange={handleInputChange}
                                 onSearch={fetchBoardGames}
-                                {...getInputParams("children", formData, "Má rozšírenia (deti)")}
+                                {...getInputParams("children", formData, t("fields.expansionsChildren"))}
                             /> :
                             <LazyLoadMultiselect
                                 disabled={expansions === undefined}
                                 selectionLimit={1}
                                 displayValue="title"
-                                placeholder="Patrí k hre (rodičovi)"
+                                placeholder={t("fields.expansionsParent")}
                                 onChange={handleInputChange}
                                 onSearch={fetchBoardGames}
-                                {...getInputParams("parent", formData, "Patrí k hre (rodičovi)")}
+                                {...getInputParams("parent", formData, t("fields.expansionsParent"))}
                             />}
                     </div>
                 </div>

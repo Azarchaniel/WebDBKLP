@@ -4,6 +4,7 @@ import { Modal } from "@components/Modal";
 import { BooksModalBody } from "@components/books/BookModal";
 import { ModalButtons } from "@components/Modal";
 import { emptyBook } from "@utils";
+import { useTranslation } from "react-i18next";
 
 type Props = {
     saveBook: (formData: IBook | object | IBook[]) => void;
@@ -13,10 +14,11 @@ type Props = {
 }
 
 const AddBook: React.FC<Props> = ({ saveBook, books, onClose, saveResultSuccess }: Props) => {
+    const { t } = useTranslation();
     const [showModal, setShowModal] = useState<boolean>(Boolean(books));
     const [bookData, setBookData] = useState<IBook[] | undefined>(books);
     const [error, setError] = useState<ValidationError[] | undefined>([{
-        label: "Názov knihy musí obsahovať aspoň jeden znak!",
+        label: t("validation.bookTitleRequired"),
         target: "title"
     }]);
     const [outline, setOutline] = useState<React.CSSProperties>();
@@ -41,7 +43,7 @@ const AddBook: React.FC<Props> = ({ saveBook, books, onClose, saveResultSuccess 
             {showModal &&
                 <Modal
                     customKey={books?.[0]?._id || "new"}
-                    title={(books ? "Uprav" : "Pridaj") + " knihu"}
+                    title={books ? t("books.editTitle") : t("books.addTitle")}
                     onClose={() => {
                         setShowModal(false);
                         onClose();

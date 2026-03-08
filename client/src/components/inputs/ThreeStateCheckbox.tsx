@@ -1,5 +1,6 @@
 import { FC } from "react";
 import "@styles/ThreeStateCheckbox.scss";
+import { useTranslation } from "react-i18next";
 
 type ThreeStateCheckboxProps = {
     selectedAmount: number,
@@ -16,6 +17,7 @@ export const ThreeStateCheckbox: FC<ThreeStateCheckboxProps> = ({
     className = "",
     disabled = false
 }) => {
+    const { t } = useTranslation();
     const isIndeterminate = selectedAmount > 0 && totalAmount > 0 && selectedAmount < totalAmount;
     const isChecked = totalAmount > 0 && selectedAmount === totalAmount;
 
@@ -39,7 +41,11 @@ export const ThreeStateCheckbox: FC<ThreeStateCheckboxProps> = ({
                     el.indeterminate = isIndeterminate;
                 }
             }}
-            title={isIndeterminate ? `Čiastočne vybrané: ${selectedAmount}` : isChecked ? "Vybrané" : "Nevybrané"}
+            title={isIndeterminate
+                ? t("table.selection.partial", { count: selectedAmount })
+                : isChecked
+                    ? t("table.selection.selected")
+                    : t("table.selection.none")}
         />
     )
 }

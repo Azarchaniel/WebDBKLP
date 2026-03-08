@@ -1,7 +1,9 @@
-import { toPercentage } from "../../utils/utils";
+import { useTranslation } from "react-i18next";
+import { formatDimension, toPercentage } from "../../utils/utils";
 import { NoData } from "./NoData";
 
 export const TableCountRatio = ({ data, title }: { data: any[], title: string }) => {
+	const { t } = useTranslation();
 	if (!data || data?.length === 0) return <NoData />;
 
 	const dimensionGroups = [
@@ -48,8 +50,8 @@ export const TableCountRatio = ({ data, title }: { data: any[], title: string })
 			<thead>
 				<tr>
 					<th>{title}</th>
-					<th>Počet</th>
-					<th>Pomer</th>
+					<th>{t("common.count")}</th>
+					<th>{t("common.ratio")}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -57,9 +59,9 @@ export const TableCountRatio = ({ data, title }: { data: any[], title: string })
 					<tr key={group}>
 						<td><b>{group}</b></td>
 						<td style={getBarStyleHorizontal(getCountForGroup(group))}>
-							{data?.find((sg) => sg.group === group)?.count ?? "-"}
+							{formatDimension(data?.find((sg) => sg.group === group)?.count ?? "-", t('common.locale'))}
 						</td>
-						<td>{toPercentage(data?.find((sg) => sg.group === group)?.ratio) ?? "-"}</td>
+						<td>{toPercentage(data?.find((sg) => sg.group === group)?.ratio, t('common.locale')) ?? "-"}</td>
 					</tr>
 				))}
 			</tbody>
@@ -76,18 +78,18 @@ export const TableCountRatio = ({ data, title }: { data: any[], title: string })
 			</thead>
 			<tbody>
 				<tr>
-					<td><b>Počet</b></td>
+					<td><b>{t("common.count")}</b></td>
 					{dimensionGroups.map((column) => (
 						<td key={column} style={getBarStyleVertical(getCountForGroup(column), "top")}>
-							{data?.find((sg: any) => sg.group === column)?.count ?? "-"}
+							{formatDimension(data?.find((sg: any) => sg.group === column)?.count ?? "-", t('common.locale'))}
 						</td>
 					))}
 				</tr>
 				<tr>
-					<td><b>Pomer</b></td>
+					<td><b>{t("common.ratio")}</b></td>
 					{dimensionGroups.map((column) => (
 						<td key={column} style={getBarStyleVertical(getCountForGroup(column), "bottom")}>
-							{toPercentage(data?.find((sg: any) => sg.group === column)?.ratio) ?? "-"}
+							{toPercentage(data?.find((sg: any) => sg.group === column)?.ratio, t('common.locale')) ?? "-"}
 						</td>
 					))}
 				</tr>

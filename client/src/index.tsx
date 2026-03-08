@@ -9,6 +9,7 @@ import { AuthProvider } from "@utils/context";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import App from "./App";
 import UtilPage from "pages/utils/outside-utils";
+import "./i18n";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 

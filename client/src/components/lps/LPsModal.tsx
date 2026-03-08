@@ -7,6 +7,7 @@ import "@styles/LpPage.scss";
 import { createNewAutor, AutorRole } from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
 import { getInputParams } from "@utils/form";
+import { useTranslation } from "react-i18next";
 
 interface BodyProps {
     data: ILP[];
@@ -17,11 +18,12 @@ interface BodyProps {
 
 
 export const LPsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState(
         Array.isArray(data) && data.length > 0 ? data : [{}]
     );
     const [errors, setErrors] = useState<ValidationError[]>([
-        { label: "Názov LP musí obsahovať aspoň jeden znak!", target: "title" }
+        { label: t("validation.lpTitleRequired"), target: "title" }
     ]);
 
     // Normalize LP data (like BookModal)
@@ -88,7 +90,7 @@ export const LPsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: Bod
         const validateLP = (lp: ILP) => {
             let errors: ValidationError[] = [];
             if (!(lp?.title && lp.title.trim().length > 0)) {
-                errors.push({ label: "Názov LP musí obsahovať aspoň jeden znak!", target: "title" });
+                errors.push({ label: t("validation.lpTitleRequired"), target: "title" });
             } else {
                 errors = errors?.filter((err: ValidationError) => err.target !== "title") ?? errors;
             }
@@ -112,48 +114,48 @@ export const LPsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: Bod
         <form className="l-form-grid">
             <div className="l-title">
                 <InputField
-                    placeholder='*Názov'
+                    placeholder={t("fields.titleRequired")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("title")}
-                    {...getInputParams('title', formData)}
+                    {...getInputParams('title', formData, t("fields.titleRequired"))}
                 />
             </div>
             <div className="l-subtitle">
                 <InputField
-                    placeholder='Podnázov'
+                    placeholder={t("fields.subtitle")}
                     onChange={handleInputChange}
-                    {...getInputParams('subtitle', formData)}
+                    {...getInputParams('subtitle', formData, t("fields.subtitle"))}
                 />
             </div>
             <div className="l-autor">
                 <LazyLoadMultiselect
                     displayValue="fullName"
-                    placeholder="Autor"
+                    placeholder={t("common.author")}
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
                     onNew={(autorString) => createNewAutor(autorString, AutorRole.MUSICIAN, setFormData, "autor")}
-                    {...getInputParams('autor', formData)}
+                    {...getInputParams('autor', formData, t("common.author"))}
                 />
             </div>
             <div className="l-speed">
                 <InputField
-                    placeholder='Počet otáčok'
+                    placeholder={t("fields.speed")}
                     onChange={handleInputChange}
-                    {...getInputParams('speed', formData)}
+                    {...getInputParams('speed', formData, t("fields.speed"))}
                 />
             </div>
             <div className="l-countLp">
                 <InputField
-                    placeholder='Počet platní'
+                    placeholder={t("fields.countLp")}
                     onChange={handleInputChange}
-                    {...getInputParams('countLp', formData)}
+                    {...getInputParams('countLp', formData, t("fields.countLp"))}
                 />
             </div>
             <div className="l-year">
                 <InputField
-                    placeholder='Rok vydania'
+                    placeholder={t("fields.yearPublished")}
                     onChange={handleInputChange}
-                    {...getInputParams('published.year', formData)}
+                    {...getInputParams('published.year', formData, t("fields.yearPublished"))}
                 />
             </div>
             <div className="l-country">
@@ -161,16 +163,16 @@ export const LPsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: Bod
                     selectionLimit={1}
                     options={countryCode}
                     displayValue="value"
-                    placeholder="Krajina vydania"
+                    placeholder={t("fields.countryPublished")}
                     onChange={handleInputChange}
-                    {...getInputParams('published.country', formData)}
+                    {...getInputParams('published.country', formData, t("fields.countryPublished"))}
                 />
             </div>
             <div className="l-publisher">
                 <InputField
-                    placeholder='Vydavateľ'
+                    placeholder={t("common.publisher")}
                     onChange={handleInputChange}
-                    {...getInputParams('published.publisher', formData)}
+                    {...getInputParams('published.publisher', formData, t("common.publisher"))}
                 />
             </div>
             <div className="l-language">
@@ -178,20 +180,20 @@ export const LPsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: Bod
                     selectionLimit={1}
                     options={langCode}
                     displayValue="value"
-                    placeholder="Jazyk"
+                    placeholder={t("common.language")}
                     onChange={handleInputChange}
-                    {...getInputParams('language', formData)}
+                    {...getInputParams('language', formData, t("common.language"))}
                 />
             </div>
             <div className="l-note">
                 <TextArea
                     id='note'
-                    placeholder='Poznámka'
+                    placeholder={t("common.note")}
                     className="form-control"
                     autoComplete="off"
                     rows={1}
                     onChange={handleInputChange}
-                    {...getInputParams('note', formData)}
+                    {...getInputParams('note', formData, t("common.note"))}
                 />
             </div>
         </form>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
+import { useTranslation } from "react-i18next";
 
 export const TooltipedText = (elementText: string, tooltipText: string) => {
 	return (
@@ -14,7 +15,8 @@ export const TooltipedText = (elementText: string, tooltipText: string) => {
 	)
 }
 
-export const ScrollToTopBtn = ({scrollToTop = () => {}}) => {
+export const ScrollToTopBtn = ({ scrollToTop = () => { } }) => {
+	const { t } = useTranslation();
 	const [showScrollToTop, setShowScrollToTop] = useState<boolean>(false);
 	const handleScroll = () => {
 		setShowScrollToTop(window.scrollY !== 0);
@@ -29,6 +31,6 @@ export const ScrollToTopBtn = ({scrollToTop = () => {}}) => {
 	}, []);
 
 	return (
-		showScrollToTop ? <button title="Skrolovať navrch" className="scrollToTop" onClick={() => scrollToTop()}/> : <></>
+		showScrollToTop ? <button title={t("common.scrollTop")} className="scrollToTop" onClick={() => scrollToTop()} /> : <></>
 	)
 }

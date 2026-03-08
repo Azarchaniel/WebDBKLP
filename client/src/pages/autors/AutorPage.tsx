@@ -18,8 +18,10 @@ import { useClickOutside } from "@hooks";
 import "@styles/AutorPage.scss";
 import { useAuth } from "@utils/context";
 import { InputField } from "@components/inputs";
+import { useTranslation } from "react-i18next";
 
 export default function AutorPage() {
+    const { t } = useTranslation();
     const { isLoggedIn, currentUser } = useAuth();
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
@@ -109,15 +111,18 @@ export default function AutorPage() {
                 let message = "";
                 if (Array.isArray(formData) && formData.length > 1) {
                     if (res.length < 5) {
-                        message = `${res.length} autori boli úspešne upravení.`;
+                        message = t("autors.saveManySuccess", { count: res.length });
                     } else {
-                        message = `${res.length} autorov bolo úspešne upravených.`;
+                        message = t("autors.saveManySuccess", { count: res.length });
                     }
                 } else {
-                    message = `Autor ${Array.isArray(res) ?
-                        stringifyAutors({ autor: res[0].data.autor })[0].autorsFull :
-                        stringifyAutors({ autor: res.data.autor })[0].autorsFull}
-                        bol úspešne ${!isNewAutor ? "uložený" : "pridaný"}.`;
+                    const autorName = Array.isArray(res)
+                        ? stringifyAutors({ autor: res[0].data.autor })[0].autorsFull
+                        : stringifyAutors({ autor: res.data.autor })[0].autorsFull;
+                    message = t("autors.saveSuccessSingle", {
+                        name: autorName,
+                        action: !isNewAutor ? t("autors.actionSaved") : t("autors.actionAdded")
+                    });
                 }
                 toast.success(message);
                 setSaveAutorSuccess(true)
@@ -125,7 +130,7 @@ export default function AutorPage() {
                 return { success: true, message };
             })
             .catch((err) => {
-                const message = err.response?.data?.error || "Chyba! Autor nebol uložený!";
+                const message = err.response?.data?.error || t("autors.saveError");
                 toast.error(message);
                 console.trace("Error saving autor", err)
                 setSaveAutorSuccess(false);
@@ -159,7 +164,7 @@ export default function AutorPage() {
                         }
                     })
                     .catch((err) => {
-                        toast.error(err.response?.data?.error || "Chyba! Autor nebol nájdený!");
+                        toast.error(err.response?.data?.error || t("autors.notFound"));
                         console.trace(err)
                     })
             }
@@ -193,7 +198,7 @@ export default function AutorPage() {
                 idsToDelete.push(_id);
             } else {
                 // If there's no _id and no selection, show error
-                toast.error("Vyber aspoň jedného autora na vymazanie!");
+                toast.error(t("autors.deleteSelectError"));
                 return;
             }
 
@@ -209,33 +214,33 @@ export default function AutorPage() {
                 if (books.length === 0) {
                     warningText = ""
                 } else if (books.length === 1) {
-                    warningText = "Tento autor má k sebe priradenú " + books.length + " knihu"
+                    warningText = t("autors.warningBooks", { count: books.length });
                 } else if (books.length > 1 && books.length < 5) {
-                    warningText = "Tento autor má k sebe priradené " + books.length + " knihy"
+                    warningText = t("autors.warningBooks", { count: books.length });
                 } else {
-                    warningText = "Tento autor má k sebe priradených " + books.length + " kníh"
+                    warningText = t("autors.warningBooks", { count: books.length });
                 }
 
                 if (lps.length > 0) {
-                    warningText += " a " + lps.length + " LP";
+                    warningText += " " + t("autors.warningLps", { count: lps.length });
                 }
 
                 if (books.length > 0 || lps.length > 0) warningText += "!";
 
                 openConfirmDialog({
-                    title: "Vymazať autora?",
-                    text: `Naozaj chceš vymazať autora ${autorToDelete?.fullName}?\n${warningText}`,
+                    title: t("autors.deleteTitleSingle"),
+                    text: `${t("autors.deleteConfirmSingle", { name: autorToDelete?.fullName })}\n${warningText}`,
                     onOk: () => {
                         deleteAutor(idsToDelete[0])
                             .then(({ status }) => {
                                 if (status !== 200) {
                                     throw new Error("Error! Autor not deleted")
                                 }
-                                toast.success(`Autor ${autorToDelete?.fullName} bol úspešne vymazaný.`);
+                                toast.success(t("autors.deleteSuccessSingle", { name: autorToDelete?.fullName }));
                                 fetchAutors();
                             })
                             .catch((err) => {
-                                toast.error("Chyba! Autora nemožno vymazať!");
+                                toast.error(t("autors.deleteError"));
                                 console.trace(err);
                             })
                     },
@@ -249,30 +254,20 @@ export default function AutorPage() {
                 // Compose list: "firstname lastname: number of books"
                 const list = autorsInfo.map((info: any) => {
                     const booksCount = info.books?.length || 0;
-
-                    let bookWarning = "";
-                    if (booksCount === 1) {
-                        bookWarning = " kniha";
-                    } else if (booksCount > 1 && booksCount < 5) {
-                        bookWarning = " knihy";
-                    } else if (booksCount >= 5 || booksCount === 0) {
-                        bookWarning = " kníh";
-                    }
-
                     const autor = autors.find(a => a._id === info.id);
-                    return `${autor?.firstName || ""} ${autor?.lastName || ""}: ${booksCount}${bookWarning}`.trim();
+                    return `${autor?.firstName || ""} ${autor?.lastName || ""}: ${t("books.countShort", { count: booksCount })}`.trim();
                 }).join("\n");
 
                 openConfirmDialog({
-                    title: "Vymazať autorov?",
-                    text: `Naozaj chceš vymazať ${autors.length} autorov?\n\n${list}`,
+                    title: t("autors.deleteTitleMany"),
+                    text: `${t("autors.deleteConfirmMany", { count: autors.length })}\n\n${list}`,
                     onOk: async () => {
                         try {
                             await Promise.all(idsToDelete.map(id => deleteAutor(id)));
-                            toast.success("Autori boli úspešne vymazaní.");
+                            toast.success(t("autors.deleteSuccessMany"));
                             fetchAutors();
                         } catch (err) {
-                            toast.error("Chyba! Niektorých autorov nemožno vymazať!");
+                            toast.error(t("autors.deleteErrorMany"));
                         }
                     },
                     onCancel: () => { }
@@ -296,12 +291,12 @@ export default function AutorPage() {
     return (
         <>
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
-                <ShowHideColumns columns={getAutorTableColumns()} shown={showColumn} setShown={setShowColumn} />
+                <ShowHideColumns columns={getAutorTableColumns(t)} shown={showColumn} setShown={setShowColumn} />
             </div>
             <ServerPaginationTable
-                title={`Autori (${countAll})`}
+                title={t("autors.pageTitle", { count: countAll })}
                 data={autors}
-                columns={getAutorTableColumns()}
+                columns={getAutorTableColumns(t)}
                 pageChange={(page) => setPagination(prevState => ({ ...prevState, page: page }))}
                 pageSizeChange={handlePageSizeChange}
                 sortingChange={(sorting) => setPagination(prevState => ({ ...prevState, sorting: sorting }))}
@@ -315,7 +310,7 @@ export default function AutorPage() {
                             <InputField
                                 className="form-control"
                                 style={{ paddingRight: "2rem" }}
-                                placeholder="Vyhľadaj autora"
+                                placeholder={t("autors.searchPlaceholder")}
                                 value={pagination.search}
                                 onChange={(e) =>
                                     /* reset pagination on search*/
@@ -340,32 +335,32 @@ export default function AutorPage() {
                                 type="button"
                                 className="addBtnTable"
                                 onClick={handleAddAutor}
-                                title="Pridať nového autora"
+                                title={t("autors.addNew")}
                             />
                         )}
                         <i
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
-                            title="Zobraz/skry stĺpce"
+                            title={t("books.showHideColumns")}
                             onClick={() => setShowColumn({ ...showColumn, control: !showColumn.control })}
                         />
                     </div>
                 }
-                rowActions={isLoggedIn ? (_id, expandRow) => (
-                    <div className="actionsRow" style={{ pointerEvents: "auto" }}>
+                rowActions={isLoggedIn ? (_id, expandRow, isExpanded) => (
+                    <div className="actionsRow">
                         <button
-                            title="¨Vymazať"
+                            title={t("common.delete")}
                             onClick={() => handleDeleteAutor(_id)}
                             className="fa fa-trash"
                         />
                         <button
-                            title="Upraviť"
+                            title={t("common.edit")}
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateAutor(_id)}
                         />
                         <button
-                            title="Detaily"
-                            className="fa fa-chevron-down"
+                            title={t("common.details")}
+                            className={`fa ${isExpanded ? "fa-chevron-up" : "fa-chevron-down"}`}
                             onClick={() => expandRow()}
                         />
                     </div>

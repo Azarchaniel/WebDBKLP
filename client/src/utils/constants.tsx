@@ -1,5 +1,6 @@
 import { SortingState } from "@tanstack/react-table";
 import { IAutor, IBoardGame, IBook, ILP } from "type";
+import { formatNumberLocale } from "./utils";
 
 export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
@@ -9,23 +10,25 @@ export const cities = [
     { value: "bruchotin", showValue: "Břuchotín" }
 ];
 
-export const chartLabels = {
-    generateLabels(chart: any) {
-        const data = chart.data;
-        return data.labels.map((label: any, i: number) => {
-            const meta = chart.getDatasetMeta(0);
-            const style = meta.controller.getStyle(i);
+export const chartLabels = (locale: string = 'en') => {
+    return {
+        generateLabels(chart: any) {
+            const data = chart.data;
+            return data.labels.map((label: any, i: number) => {
+                const meta = chart.getDatasetMeta(0);
+                const style = meta.controller.getStyle(i);
 
-            return {
-                text: `${label} (${chart.data.datasets[0].data[i] ?? 0})`,
-                fillStyle: style.backgroundColor,
-                strokeStyle: style.borderColor,
-                lineWidth: style.borderWidth,
-                hidden: !chart.getDataVisibility(i),
-                index: i
-            };
-        });
-    }
+                return {
+                    text: `${label} (${formatNumberLocale(chart.data.datasets[0].data[i] ?? 0, locale)})`,
+                    fillStyle: style.backgroundColor,
+                    strokeStyle: style.borderColor,
+                    lineWidth: style.borderWidth,
+                    hidden: !chart.getDataVisibility(i),
+                    index: i
+                };
+            });
+        }
+    };
 };
 
 export const chartColors = [
@@ -33,12 +36,12 @@ export const chartColors = [
 ]
 
 export const autorRoles = [
-    { value: "autor", showValue: "Autor" },
-    { value: "editor", showValue: "Editor" },
-    { value: "ilustrator", showValue: "Ilustrátor" },
-    { value: "translator", showValue: "Prekladateľ" },
-    { value: "musician", showValue: "Hudobník" },
-    { value: "boardGameAutor", showValue: "Autor spol. hier" }
+    { value: "autor", showValue: "autors.roleAutor" },
+    { value: "editor", showValue: "autors.roleEditor" },
+    { value: "ilustrator", showValue: "autors.roleIlustrator" },
+    { value: "translator", showValue: "autors.roleTranslator" },
+    { value: "musician", showValue: "autors.roleMusician" },
+    { value: "boardGameAutor", showValue: "autors.roleBoardGameAutor" }
 ];
 
 interface IPagination {

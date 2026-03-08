@@ -1,6 +1,7 @@
 import React, { ChangeEvent, KeyboardEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import "@styles/Autocomplete.scss";
+import { useTranslation } from "react-i18next";
 
 type OptionValue = string | { [key: string]: any };
 
@@ -51,13 +52,13 @@ interface AutocompleteInputProps {
 export const LazyLoadMultiselect = React.memo(({
     value,
     displayValue = "name", // Default to "name" if not provided
-    placeholder = "Vyhľadaj...",
-    hoverLabel = "Vyber položku zo zoznamu, alebo napíš a potvrď Enterom.",
+    placeholder,
+    hoverLabel,
     onChange,
     name,
     id,
     selectionLimit,
-    emptyRecordMsg = "Žiaden záznam nenájdený!",
+    emptyRecordMsg,
     customerror,
     onSearch,
     reset,
@@ -65,6 +66,10 @@ export const LazyLoadMultiselect = React.memo(({
     options = [], // Default to empty array if not provided
     disabled = false, // Default to false
 }: AutocompleteInputProps) => {
+    const { t } = useTranslation();
+    const resolvedPlaceholder = placeholder ?? t("inputs.searchPlaceholder");
+    const resolvedHoverLabel = hoverLabel ?? t("inputs.selectOrType");
+    const resolvedEmptyRecordMsg = emptyRecordMsg ?? t("inputs.emptyRecord");
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedValues, setSelectedValues] = useState<OptionValue[]>(value || []);
@@ -332,11 +337,11 @@ export const LazyLoadMultiselect = React.memo(({
 
     return (
         <div style={{ position: "relative" }}>
-            {placeholder && <span
+            {resolvedPlaceholder && <span
                 className={`autocomplete-label ${inputValue || selectedValues.length > 0 || isInputFocused ? "active" : ""
                     } ${disabled ? "disabled" : ""}`}
             >
-                {placeholder}
+                {resolvedPlaceholder}
             </span>}
             <div
                 ref={wrapperRef}
@@ -372,8 +377,8 @@ export const LazyLoadMultiselect = React.memo(({
                             onFocus={handleInputFocus}
                             onBlur={handleInputBlur}
                             placeholder=""
-                            title={hoverLabel}
-                            aria-label={hoverLabel}
+                            title={resolvedHoverLabel}
+                            aria-label={resolvedHoverLabel}
                             className="chip-input"
                             onClick={handleInputClick}
                             disabled={disabled}
@@ -398,7 +403,7 @@ export const LazyLoadMultiselect = React.memo(({
                             {/* no data */}
                             {filteredOptionsToDisplay.length === 0 && (
                                 <div className="autocomplete-item empty">
-                                    {emptyRecordMsg}
+                                    {resolvedEmptyRecordMsg}
                                 </div>
                             )}
                             {/* data and loading more */}
@@ -414,15 +419,15 @@ export const LazyLoadMultiselect = React.memo(({
                                         </div>
                                     ))}
                                     {loadingStatus === "loading" && (
-                                        <div className="autocomplete-item loading">Načítava sa...</div>
+                                        <div className="autocomplete-item loading">{t("loading.patience")}</div>
                                     )}
                                 </>
                             )}
                             {/* create new */}
                             {searchQuery.length > 0 && onNew && (
                                 <div className="autocomplete-item create-new" onClick={handleCreateNew}
-                                    title="`Meno Priezvisko` alebo `Priezvisko, Meno` alebo `Priezvisko`">
-                                    Vytvoriť "{searchQuery}"
+                                    title={t("inputs.selectOrType")}>
+                                    {t("common.add")} "{searchQuery}"
                                 </div>
                             )}
                         </div>, document.body

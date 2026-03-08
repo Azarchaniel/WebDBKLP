@@ -23,8 +23,10 @@ import BarcodeScannerButton from "@components/BarcodeScanner";
 import { useClickOutside } from "@hooks";
 import { useAuth } from "@utils/context";
 import { InputField } from "@components/inputs";
+import { useTranslation } from "react-i18next";
 
 export default function BookPage() {
+    const { t } = useTranslation();
     const { currentUser, isLoading: isAuthLoading, isLoggedIn } = useAuth();
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
     const [pagination, setPagination] = useState({
@@ -172,22 +174,25 @@ export default function BookPage() {
             let message = "";
             if (Array.isArray(formData) && formData.length > 1) {
                 if (res.length < 5) {
-                    message = `${res.length} knihy boli úspešne upravené.`;
+                    message = t("books.saveManySuccess", { count: res.length });
                 } else {
-                    message = `${res.length} kníh bolo úspešne upravených.`;
+                    message = t("books.saveManySuccess", { count: res.length });
                 }
             } else {
                 const bookTitle = Array.isArray(res)
                     ? res[0].data.book?.title
                     : res.data.book?.title;
-                message = `Kniha ${bookTitle} bola úspešne ${!isNewBook ? "uložená" : "pridaná"}.`;
+                message = t("books.saveSuccessSingle", {
+                    title: bookTitle,
+                    action: !isNewBook ? t("books.actionSaved") : t("books.actionAdded")
+                });
             }
             toast.success(message);
             setSaveBookSuccess(true);
             fetchBooks();
             return { success: true, message };
         } catch (err: any) {
-            const message = err.response?.data?.error || "Chyba! Kniha nebola uložená!";
+            const message = err.response?.data?.error || t("books.saveError");
             toast.error(message);
             console.trace("Error saving books", err);
             setSaveBookSuccess(false);
@@ -221,7 +226,7 @@ export default function BookPage() {
                         }
                     })
                     .catch((err) => {
-                        toast.error(err.response.data.error || "Chyba! Kniha nebola nájdená!");
+                        toast.error(err.response.data.error || t("books.notFound"));
                         console.trace(err);
                     })
             }
@@ -254,7 +259,7 @@ export default function BookPage() {
             idsToDelete.push(_id);
         } else {
             // If there's no _id and no selection, show error
-            toast.error("Vyber aspoň jednu knihu na vymazanie!");
+            toast.error(t("books.deleteSelectError"));
             return;
         }
 
@@ -266,16 +271,16 @@ export default function BookPage() {
 
             let message = "";
             if (books.length > 1 && books.length < 5) {
-                message = `Naozaj chceš vymazať ${books.length} knihy?\n\n ${titles}`;
+                message = t("books.deleteConfirmMany", { count: books.length }) + `\n\n ${titles}`;
             } else if (books.length >= 5) {
-                message = `Naozaj chceš vymazať ${books.length} kníh?\n\n ${titles}`;
+                message = t("books.deleteConfirmMany", { count: books.length }) + `\n\n ${titles}`;
             } else {
-                message = `Naozaj chceš vymazať knihu ${titles}?`;
+                message = t("books.deleteConfirmSingle", { title: titles });
             }
 
             openConfirmDialog({
                 text: message,
-                title: books.length > 1 ? "Vymazať knihy?" : "Vymazať knihu?",
+                title: books.length > 1 ? t("books.deleteTitleMany") : t("books.deleteTitleSingle"),
                 onOk: () => {
                     Promise.all(idsToDelete.filter((id): id is string => typeof id === "string" && id !== undefined).map(id => deleteBook(id)))
                         .then((results) => {
@@ -283,8 +288,8 @@ export default function BookPage() {
                             if (successCount === 0) throw new Error("Error! Books not deleted");
                             toast.success(
                                 successCount > 1
-                                    ? `${successCount} kníh bolo úspešne vymazaných.`
-                                    : `Kniha ${books[0].title} bola úspešne vymazaná.`
+                                    ? t("books.deleteSuccessMany", { count: successCount })
+                                    : t("books.deleteSuccessSingle", { title: books[0].title })
                             );
                             fetchBooks();
                         })
@@ -332,12 +337,17 @@ export default function BookPage() {
     return (
         <>
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
-                <ShowHideColumns columns={getBookTableColumns()} shown={showColumn} setShown={setShowColumn} />
+                <ShowHideColumns
+                    columns={getBookTableColumns(t)}
+                    shown={showColumn}
+                    setShown={setShowColumn}
+                    dimensionsLabel={t("table.books.dimensions")}
+                />
             </div>
             <ServerPaginationTable
-                title={`Knihy (${countAll})`}
+                title={t("books.pageTitle", { count: countAll })}
                 data={clonedBooks}
-                columns={getBookTableColumns()}
+                columns={getBookTableColumns(t)}
                 pageChange={handlePageChange}
                 pageSizeChange={handlePageSizeChange}
                 sortingChange={(sorting) => {
@@ -361,7 +371,7 @@ export default function BookPage() {
                     <div key="actions" className="tableActionsRight">
                         <div className="searchTableWrapper">
                             <InputField
-                                placeholder="Vyhľadaj knihu"
+                                placeholder={t("books.searchPlaceholder")}
                                 className="form-control searchBookInput"
                                 value={pagination.search}
                                 onChange={(e) =>
@@ -403,35 +413,35 @@ export default function BookPage() {
                                 type="button"
                                 className="addBtnTable"
                                 onClick={handleAddBook}
-                                title="Pridať novú knihu"
+                                title={t("books.addNew")}
                             />
                         )}
                         <i
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
-                            title="Zobraz/skry stĺpce"
+                            title={t("books.showHideColumns")}
                             onClick={() => setShowColumn({ ...showColumn, control: !showColumn.control })}
                         />
                     </div>
                 }
-                rowActions={isLoggedIn ? (_id, expandRow) => (
-                    <div key={_id} className="actionsRow" style={{ pointerEvents: "auto" }}>
+                rowActions={isLoggedIn ? (_id, expandRow, isExpanded) => (
+                    <div key={_id} className="actionsRow">
                         <button
                             key={`delete-${_id}`}
-                            title="¨Vymazať"
+                            title={t("common.delete")}
                             onClick={() => handleDeleteBook(_id)}
                             className="fa fa-trash"
                         />
                         <button
                             key={`edit-${_id}`}
-                            title="Upraviť"
+                            title={t("common.edit")}
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateBook(_id)}
                         />
                         <button
                             key={`detail-${_id}`}
-                            title="Detaily"
-                            className="fa fa-chevron-down"
+                            title={t("common.details")}
+                            className={`fa ${isExpanded ? "fa-chevron-up" : "fa-chevron-down"}`}
                             onClick={() => expandRow()}
                         />
                     </div>

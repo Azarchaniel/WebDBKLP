@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { BrowserMultiFormatReader, DecodeHintType, Result, NotFoundException } from '@zxing/library';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBarcode, faBan, faTimes, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
-import { Modal, showError } from './Modal';
+import { faBarcode, faBan, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { Modal } from './Modal';
+import { useTranslation } from "react-i18next";
 
 interface BarcodeScannerButtonProps {
     onBarcodeDetected: (barcode: string) => void;
@@ -13,6 +14,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
     onBarcodeDetected,
     onError,
 }) => {
+    const { t } = useTranslation();
     const [isScanning, setIsScanning] = useState<boolean>(false);
     const [showNotFoundIcon, setShowNotFoundIcon] = useState<boolean>(false);
     const [showWarningTimeout, setShowWarningTimeout] = useState<boolean>(false);
@@ -199,13 +201,13 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
 
     return (
         <>
-            <button onClick={toggleScanning} type="button" className="isbnScanner" title="Naskenuj ISBN">
+            <button onClick={toggleScanning} type="button" className="isbnScanner" title={t("books.scanIsbn")}>
                 <FontAwesomeIcon icon={faBarcode} />
             </button>
             {isScanning && (
                 <Modal
                     customKey="barcode-scanner"
-                    title="Skener čiarových kódov"
+                    title={t("barcode.title")}
                     onClose={handleCloseClick}
                     overrideStyle={{ minWidth: '600px', maxWidth: '800px' }}
                     body={
@@ -244,7 +246,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                     footer={
                         showWarningTimeout ? (
                             <div className="alert alert-danger">
-                                <FontAwesomeIcon icon={faExclamationTriangle} /> Žiadny čiarový kód nebol rozpoznaný. Prosím, skúste znova.
+                                <FontAwesomeIcon icon={faExclamationTriangle} /> {t("barcode.notFound")}
                             </div>
                         ) : undefined
                     }

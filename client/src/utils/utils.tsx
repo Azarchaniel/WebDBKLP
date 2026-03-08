@@ -1,6 +1,8 @@
 import { IAutor, ILangCode, ILocation, IUser } from "../type";
 import { cities } from "./constants";
 import { countryCode } from "./locale";
+import i18n from "../i18n";
+import { format } from "path";
 
 export const shortenStringKeepWord = (text: string, maxLength: number): string => {
 	if (!text) return "";
@@ -215,9 +217,9 @@ export const isNumberOrEmpty = (num: any) => {
 	return (!isNaN(num) || num === "" || num === undefined);
 }
 
-export const toPercentage = (value: number) => {
+export const toPercentage = (value: number, locale: string = "cs-CZ") => {
 	if (!value) return;
-	return ((value * 100).toFixed(1)) + "%";
+	return (formatNumberLocale(value * 100, locale, 1)) + "%";
 }
 
 export const randomMinMax = (min: number, max: number, integer?: boolean): number => {
@@ -234,15 +236,18 @@ export const getBookLocation = (location: ILocation): string => {
 	return `${cities.find(city => city.value === location.city)?.showValue}${location.shelf ? ', ' + location.shelf : ""}`
 }
 
-export const formatDimension = (dimension: any) => {
+export const formatDimension = (dimension: any, locale: string = "cs-CZ") => {
 	if (dimension === undefined || dimension === null) return undefined;
 
 	if (typeof dimension === 'object' && "$numberDecimal" in dimension)
-		return parseFloat(dimension.$numberDecimal)
-			.toLocaleString("cs-CZ",
-				{ minimumFractionDigits: 1, maximumFractionDigits: 1 }) as unknown as number;
+		return formatNumberLocale(parseFloat(dimension.$numberDecimal), locale, 1) as unknown as number;
 
-	return parseFloat(dimension).toLocaleString("cs-CZ", { minimumFractionDigits: 1 }) as unknown as number;
+	return formatNumberLocale(dimension, locale, 1) as unknown as number;
+}
+
+export const formatNumberLocale = (num: number, locale: string = "cs-CZ", decimalPlaces: number = 0) => {
+	if (num === undefined || num === null) return undefined;
+	return parseFloat(num.toString()).toLocaleString(locale, { minimumFractionDigits: decimalPlaces, maximumFractionDigits: decimalPlaces });
 }
 
 export const getPublishedCountry = (publishedCountry: any): ILangCode | undefined => {
@@ -268,9 +273,9 @@ export const isMobile = (): boolean => {
 
 
 export const formatBoardGameRange = (range?: { from?: number; to?: number }, unit = "") => {
-	if (!range) return "-";
-	if (range.from && range.to) return `${range.from} až ${range.to} ${unit}`.trim();
-	if (range.from) return `od ${range.from} ${unit}`.trim();
-	if (range.to) return `do ${range.to} ${unit}`.trim();
-	return "-";
+	if (!range) return i18n.t("range.unknown");
+	if (range.from && range.to) return i18n.t("range.between", { from: range.from, to: range.to, unit }).trim();
+	if (range.from) return i18n.t("range.from", { from: range.from, unit }).trim();
+	if (range.to) return i18n.t("range.to", { to: range.to, unit }).trim();
+	return i18n.t("range.unknown");
 };

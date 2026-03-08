@@ -5,6 +5,7 @@ import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import { Wysiwyg } from "../Wysiwyg";
 import { fetchBooks, fetchUsers, formPersonsFullName } from "@utils";
 import TextArea from "@components/inputs/TextArea";
+import { useTranslation } from "react-i18next";
 
 interface BodyProps {
     data: IQuote | object;
@@ -21,10 +22,11 @@ interface ButtonsProps {
 }
 
 export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState<IQuote | any>(data);
     const [errors, setErrors] = useState<ValidationError[]>([
-        { label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text" },
-        { label: "Musí byť vybraná kniha!", target: "fromBook" }
+        { label: t("validation.quoteTextRequired"), target: "text" },
+        { label: t("validation.quoteBookRequired"), target: "fromBook" }
     ]);
 
     useEffect(() => {
@@ -62,13 +64,13 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
         let localErrors: ValidationError[] = [];
 
         if (!(data?.text?.trim().length > 0)) {
-            localErrors.push({ label: "Text citátu musí obsahovať aspoň jeden znak!", target: "text" });
+            localErrors.push({ label: t("validation.quoteTextRequired"), target: "text" });
         } else {
             localErrors = localErrors?.filter((err: ValidationError) => err.target !== "text") ?? localErrors;
         }
 
         if (!data?.fromBook) {
-            localErrors.push({ label: "Musí byť vybraná kniha!", target: "fromBook" });
+            localErrors.push({ label: t("validation.quoteBookRequired"), target: "fromBook" });
         } else {
             localErrors = localErrors?.filter((err: ValidationError) => err.target !== "fromBook") ?? localErrors;
         }
@@ -130,7 +132,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     displayValue="showName"
                     onChange={handleInputChange}
                     name="fromBook"
-                    placeholder="*Z knihy"
+                    placeholder={t("inputs.fromBook")}
                     onSearch={fetchBooks}
                 //customerror={getErrorMsg("fromBook")}
                 />
@@ -138,7 +140,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
             <div>
                 <InputField
                     value={formData?.pageNo || ""}
-                    placeholder='Strana'
+                    placeholder={t("inputs.page")}
                     name="pageNo"
                     onChange={handleInputChange}
                 />
@@ -150,7 +152,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
             <LazyLoadMultiselect
                 value={formData?.owner || []}
                 displayValue="fullName"
-                placeholder="Vlastník"
+                placeholder={t("common.owner")}
                 onChange={handleInputChange}
                 name="owner"
                 onSearch={fetchUsers}
@@ -161,7 +163,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
         <div className="full-width">
             <TextArea
                 id='note'
-                placeholder='Poznámka'
+                placeholder={t("common.note")}
                 className="form-control"
                 name="note"
                 autoComplete="off"
@@ -174,6 +176,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
 }
 
 export const QuotesModalButtons = ({ saveQuote, cleanFields, error, saveResultSuccess }: ButtonsProps) => {
+    const { t } = useTranslation();
     const [loadingResult, setLoadingResult] = useState<boolean | undefined>(false);
 
     useEffect(() => {
@@ -192,12 +195,12 @@ export const QuotesModalButtons = ({ saveQuote, cleanFields, error, saveResultSu
 
         <div className="buttons">
             <button type="button" className="btn btn-secondary"
-                onClick={cleanFields}>Vymazať polia
+                onClick={cleanFields}>{t("common.clearFields")}
             </button>
             <button type="submit"
                 disabled={Boolean(error?.length)}
                 onClick={saveQuoteHandler}
-                className="btn btn-success">Uložiť citát
+                className="btn btn-success">{t("common.save")}
             </button>
         </div>
     </div>)
