@@ -1,6 +1,11 @@
 @import "variables";
 
+// ============================================================================
+// MOBILE STYLES
+// ============================================================================
 @media screen and (width <=$mobile-width) {
+
+  // Expanded row on mobile
   .expanded-mobile-row {
     width: 100%;
     background: var(--background);
@@ -10,6 +15,7 @@
     display: block;
   }
 
+  // Header adjustments
   .headerTitleAction {
     position: relative;
     flex-direction: column !important;
@@ -31,6 +37,7 @@
     top: 9rem;
   }
 
+  // Mobile table layout
   .serverPaginationTable {
     display: block;
     width: 100%;
@@ -92,12 +99,9 @@
     .TSPtitle {
       min-width: 100%;
     }
-
-    .actionsRow button {
-      font-size: 1.5rem !important;
-    }
   }
 
+  // Navigation row mobile
   .tableNavigationRow {
     flex-direction: column !important;
     height: 6rem !important;
@@ -122,6 +126,7 @@
     }
   }
 
+  // Actions animation mobile
   .actions-animated-td {
     min-width: 3rem !important;
     max-width: 20rem !important;
@@ -147,9 +152,11 @@
   }
 }
 
+// ============================================================================
+// GENERAL TABLE STYLES (DESKTOP)
+// ============================================================================
 
-/* General styles for the table */
-
+// No data message
 .no-data {
   display: flex;
   justify-content: center;
@@ -160,15 +167,18 @@
   color: black;
 }
 
+// Main table component
 .serverPaginationTable {
   color: black;
   width: 100%;
 
+  // Colspan and empty header cells
   th[colspan]:not([colspan="1"]):not([colspan="2"]),
   th:empty {
     height: 1rem !important;
   }
 
+  // Table header
   .tableHeader {
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
@@ -181,14 +191,14 @@
       height: 4rem;
     }
 
-    // it's here becuase of Dimensions
+    // Colspan headers (e.g., Dimensions)
     th[colspan]:not([colspan="1"]) {
-      // select element that has colspan and it is not 1
       vertical-align: middle;
       text-align: center;
       height: 1rem !important;
     }
 
+    // Empty and colspan header positioning
     th:empty,
     th[colspan]:not([colspan="1"]) {
       height: 1rem !important;
@@ -202,6 +212,7 @@
       }
     }
 
+    // Column-specific widths
     .TSP {
       &autorsFull {
         min-width: 12rem;
@@ -211,16 +222,13 @@
         min-width: 15rem;
       }
 
-      &autorsFull {
-        min-width: 12rem;
-      }
-
       &actionsRow {
         width: 1rem;
       }
     }
   }
 
+  // Table rows
   tr {
     pointer-events: auto;
 
@@ -229,12 +237,14 @@
       box-shadow: inset 1000rem 1em rgba(255, 255, 255, 0.6);
     }
 
-    .expanded-row:hover {
-      background-color: inherit !important;
-      box-shadow: none !important;
+    // Disable hover on expanded detail panel
+    &.expanded-row:hover {
+      background-color: inherit;
+      box-shadow: none;
     }
   }
 
+  // Table cells
   td {
     height: 4rem;
     border-bottom: 2px solid lightgray;
@@ -242,8 +252,8 @@
     position: relative;
     pointer-events: auto;
 
+    // Cell separator line
     &:not(:first-child)::after {
-      //line in the middle of the cell
       content: '';
       position: absolute;
       height: 1.8rem;
@@ -255,6 +265,7 @@
     }
   }
 
+  // Center-aligned columns
   .TSP {
 
     &exLibris,
@@ -274,6 +285,11 @@
   }
 }
 
+// ============================================================================
+// HEADER & ACTIONS
+// ============================================================================
+
+// Table header with title and actions
 .headerTitleAction {
   display: flex;
   flex-direction: row;
@@ -302,12 +318,48 @@
   }
 }
 
+// Action buttons container
 .tableActionsRight {
   display: flex;
   flex-direction: row;
   justify-content: center;
 }
 
+// Row actions (edit, delete, expand)
+.actionsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: auto;
+
+  button {
+    border: none;
+    background: none;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--anchor);
+    }
+  }
+}
+
+// Three-dot menu button
+.bookTableAction {
+  transform: rotate(90deg);
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--anchor);
+  }
+}
+
+// ============================================================================
+// PAGINATION & NAVIGATION
+// ============================================================================
+
+// Page selector buttons
 .pageSelector {
   color: black;
   font-size: 1.25rem;
@@ -325,6 +377,7 @@
   }
 }
 
+// Bottom navigation bar
 .tableNavigationRow {
   display: flex;
   flex-direction: row;
@@ -368,10 +421,7 @@
   }
 }
 
-button:focus {
-  outline: none !important;
-}
-
+// Navigation button
 .tabNav {
   color: var(--anchor);
   border: none;
@@ -380,8 +430,6 @@ button:focus {
   display: flex;
   justify-content: center;
   align-items: center;
-  -webkit-transition: background 0.2s, color 0.2s;
-  -moz-transition: background 0.2s, color 0.2s;
   transition: background 0.2s, color 0.2s;
 
   &:hover {
@@ -397,6 +445,10 @@ button:focus {
     cursor: not-allowed;
   }
 }
+
+// ============================================================================
+// SEARCH & FILTERS
+// ============================================================================
 
 .searchWrapper {
   border: 1px solid #ccc;
@@ -415,7 +467,7 @@ button:focus {
   .searchBookInput {
     width: 100%;
     border-radius: 4px;
-    padding: 5px 5rem 5px 10px; // space for buttons
+    padding: 5px 5rem 5px 10px;
     box-shadow: none;
   }
 
@@ -443,40 +495,6 @@ button:focus {
   }
 }
 
-.bookTableAction {
-  transform: rotate(90deg);
-  font-size: 1.5rem;
-  cursor: pointer;
-
-  &:hover {
-    color: var(--anchor);
-  }
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.select-none {
-  user-select: none;
-}
-
-.actionsRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  button {
-    border: none;
-    background: none;
-    cursor: pointer;
-
-    &:hover {
-      color: var(--anchor);
-    }
-  }
-}
-
 .filter-header {
   min-width: 10rem;
 }
@@ -485,14 +503,14 @@ button:focus {
   display: flex;
 }
 
-.actions-animated-td {
-  overflow: visible;
-  transition: min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+// ============================================================================
+// ANIMATED ROW ACTIONS
+// ============================================================================
 
 .actions-animated-td {
   overflow: visible;
-  transition: min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
   .actions-ellipsis {
     font-size: 2rem;
@@ -514,21 +532,26 @@ button:focus {
     opacity: 0;
     pointer-events: none;
     white-space: nowrap;
-    background: var(--background); // Use your table's background variable or color
+    background: var(--background);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     border-radius: 4px 0 0 4px;
     padding: 0.5rem 0;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.3s;
     z-index: 3;
     overflow: hidden;
     display: flex;
     align-items: center;
+
+    .checkBox {
+      margin-left: 0.5rem;
+    }
   }
 
   &:hover,
   &:focus-within {
     .actions-content {
-      width: 7rem;
+      width: 9rem;
       opacity: 1;
       pointer-events: auto;
       padding: 0.5rem 1rem;
@@ -538,4 +561,20 @@ button:focus {
       color: #333;
     }
   }
+}
+
+// ============================================================================
+// UTILITY CLASSES
+// ============================================================================
+
+button:focus {
+  outline: none !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.select-none {
+  user-select: none;
 }

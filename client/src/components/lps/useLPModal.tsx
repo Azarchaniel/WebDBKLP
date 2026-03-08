@@ -3,11 +3,13 @@ import { useModal } from '@utils/context/ModalContext';
 import { ILP, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { LPsModalBody } from './LPsModal';
+import { useTranslation } from "react-i18next";
 
 /**
  * Custom hook for managing LP modals with persistence across navigation
  */
 export const useLPModal = () => {
+    const { t } = useTranslation();
     const { showModal, hideModal } = useModal();
 
     /**
@@ -30,7 +32,7 @@ export const useLPModal = () => {
         let formData: ILP[] | ILP | object = lps || [];
         let validationErrors: ValidationError[] | undefined = undefined;
 
-        const getTitle = () => lps.length > 0 && lps[0]._id ? 'Úprava LP' : 'Pridanie LP';
+        const getTitle = () => lps.length > 0 && lps[0]._id ? t("lp.editTitle") : t("lp.addTitle");
 
         // Helper to render the modal with given data
         const renderModal = (data: ILP[] | ILP | object) => {

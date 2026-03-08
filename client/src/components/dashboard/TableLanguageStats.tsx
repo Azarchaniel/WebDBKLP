@@ -1,30 +1,32 @@
 import { ILanguageStatistics } from "../../type";
 import { ReactElement } from "react";
 import { NoData } from "./NoData";
+import { useTranslation } from "react-i18next";
 
 interface Props {
 	languageStats: ILanguageStatistics[] | undefined;
 }
 
 export const TableLanguageStats = ({ languageStats }: Props): ReactElement => {
+	const { t } = useTranslation();
 	if (!languageStats || languageStats?.length === 0) return <NoData />;
 
-	//TEMPORARY: until translation
 	const translationMap: Record<string, string> = {
-		language: "Jazyk",
-		count: "Počet"
+		language: t("common.language"),
+		count: t("common.count")
 	};
 
 	const languageNameMap: Record<string, string> = {
-		cz: "Čeština",
-		sk: "Slovenčina",
-		en: "Angličtina",
-		de: "Nemčina",
-		fr: "Francúzština",
-		es: "Španielština",
-		sv: "Švédština",
-		gd: "Galština",
-		ru: "Ruština",
+		sk: t("language.sk"),
+		cs: t("language.cs"),
+		cz: t("language.cs"),
+		en: t("language.en"),
+		fr: t("language.fr"),
+		de: t("language.de"),
+		es: t("language.es"),
+		sv: t("language.sv"),
+		ru: t("language.ru"),
+		gd: t("language.gd"),
 	};
 
 	const chartBlue = "rgb(54, 162, 235)";
@@ -49,8 +51,8 @@ export const TableLanguageStats = ({ languageStats }: Props): ReactElement => {
 			<table className="phone-table" border={1} cellPadding="8" cellSpacing="0" style={{ width: "100%", textAlign: "center" }}>
 				<thead>
 					<tr>
-						<th style={{ width: "35%" }}>Jazyk</th>
-						<th>Počet</th>
+						<th style={{ width: "35%" }}>{t("common.language")}</th>
+						<th>{t("common.count")}</th>
 					</tr>
 				</thead>
 				<tbody>

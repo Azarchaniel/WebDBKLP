@@ -1,14 +1,16 @@
-import React, {useEffect, useState} from "react";
-import {getAutorInfo} from "../../API";
-import {IBook, ILP} from "../../type";
-import {autorRoles} from "../../utils/constants";
-import {countryCode} from "../../utils/locale";
+import React, { useEffect, useState } from "react";
+import { getAutorInfo } from "../../API";
+import { IBook, ILP } from "../../type";
+import { autorRoles } from "../../utils/constants";
+import { countryCode } from "../../utils/locale";
+import { useTranslation } from "react-i18next";
 
 type Props = {
     data: any;
 }
 
-const AutorDetail: React.FC<Props> = React.memo(({data}) => {
+const AutorDetail: React.FC<Props> = React.memo(({ data }) => {
+    const { t, i18n } = useTranslation();
     const [books, setBooks] = useState<IBook[] | null>(null);
     const [lps, setLps] = useState<ILP[] | null>(null);
 
@@ -31,80 +33,80 @@ const AutorDetail: React.FC<Props> = React.memo(({data}) => {
                 <div>
                     <table className="autorDetailTable">
                         <tbody>
-                        <tr>
-                            <td>Meno:</td>
-                            <td>{data?.firstName} {data?.lastName} <span className="hiddenId">{data?._id}</span></td>
-                        </tr>
-                        <tr>
-                            <td>Národnosť:</td>
-                            <td>{data?.nationality ? countryCode.filter(cc => cc.key === data?.nationality).map(cc => cc.value) : "-"}</td>
-                        </tr>
-                        <tr>
-                            <td>Dátum narodenia:</td>
-                            <td>{data?.dateOfBirth ? new Date(data?.dateOfBirth as Date).toLocaleDateString("sk-SK") : "-"}</td>
-                        </tr>
-                        <tr>
-                            <td>Dátum úmrtia:</td>
-                            <td>{data?.dateOfDeath ? new Date(data?.dateOfDeath as Date).toLocaleDateString("sk-SK") : "-"}</td>
-                        </tr>
-                        <tr>
-                            <td>Role:</td>
-                            <td>{data?.role?.map((role: string) =>
-                                autorRoles.find(ar => ar.value === role)?.showValue)
-                                .join(", ")}</td>
-                        </tr>
-                        <tr>
-                            <td>Počet kníh:</td>
-                            <td>{books?.length}</td>
-                        </tr>
-                        <tr>
-                            <td>Počet LP:</td>
-                            <td>{lps?.length}</td>
-                        </tr>
+                            <tr>
+                                <td>{t("autors.detailName")}:</td>
+                                <td>{data?.firstName} {data?.lastName} <span className="hiddenId">{data?._id}</span></td>
+                            </tr>
+                            <tr>
+                                <td>{t("fields.nationality")}:</td>
+                                <td>{data?.nationality ? countryCode.filter(cc => cc.key === data?.nationality).map(cc => cc.value) : "-"}</td>
+                            </tr>
+                            <tr>
+                                <td>{t("fields.birthDate")}:</td>
+                                <td>{data?.dateOfBirth ? new Date(data?.dateOfBirth as Date).toLocaleDateString(i18n.language) : "-"}</td>
+                            </tr>
+                            <tr>
+                                <td>{t("fields.deathDate")}:</td>
+                                <td>{data?.dateOfDeath ? new Date(data?.dateOfDeath as Date).toLocaleDateString(i18n.language) : "-"}</td>
+                            </tr>
+                            <tr>
+                                <td>{t("common.role")}:</td>
+                                <td>{data?.role?.map((role: string) =>
+                                    t(autorRoles.find(ar => ar.value === role)?.showValue || ""))
+                                    .join(", ")}</td>
+                            </tr>
+                            <tr>
+                                <td>{t("autors.detailBookCount")}:</td>
+                                <td>{books?.length}</td>
+                            </tr>
+                            <tr>
+                                <td>{t("autors.detailLpCount")}:</td>
+                                <td>{lps?.length}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
                 <div>
-                    {Boolean(books?.length) && <><h5>Knihy</h5>
+                    {Boolean(books?.length) && <><h5>{t("nav.books")}</h5>
                         <table className="autorDetailTable">
                             <thead>
-                            <tr>
-                                <th>Názov</th>
-                                <th>ISBN</th>
-                                <th>Vydané</th>
-                            </tr>
+                                <tr>
+                                    <th>{t("table.books.title")}</th>
+                                    <th>{t("table.books.isbn")}</th>
+                                    <th>{t("table.books.published")}</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            {books?.map((book, index) => (
-                                <tr key={index}>
-                                    <td>{book.title}<span className="hiddenId">{book._id}</span></td>
-                                    <td>{book.ISBN}</td>
-                                    <td>
-                                        {book.published?.publisher} {book.published?.year ? "(" + book.published?.year + ")" : ""}
-                                    </td>
-                                </tr>
-                            ))}
+                                {books?.map((book, index) => (
+                                    <tr key={index}>
+                                        <td>{book.title}<span className="hiddenId">{book._id}</span></td>
+                                        <td>{book.ISBN}</td>
+                                        <td>
+                                            {book.published?.publisher} {book.published?.year ? "(" + book.published?.year + ")" : ""}
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </>}
 
-                    {Boolean(lps?.length) && <><h5>LP</h5>
+                    {Boolean(lps?.length) && <><h5>{t("nav.lps")}</h5>
                         <table className="autorDetailTable">
                             <thead>
-                            <tr>
-                                <th>Názov</th>
-                                <th>Vydané</th>
-                            </tr>
+                                <tr>
+                                    <th>{t("table.lp.title")}</th>
+                                    <th>{t("table.lp.published")}</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            {lps?.map((lp, index) => (
-                                <tr key={index}>
-                                    <td>{lp.title}<span className="hiddenId">{lp._id}</span></td>
-                                    <td>
-                                        {lp.published?.publisher} {lp.published?.year ? "(" + lp.published?.year + ")" : ""}
-                                    </td>
-                                </tr>
-                            ))}
+                                {lps?.map((lp, index) => (
+                                    <tr key={index}>
+                                        <td>{lp.title}<span className="hiddenId">{lp._id}</span></td>
+                                        <td>
+                                            {lp.published?.publisher} {lp.published?.year ? "(" + lp.published?.year + ")" : ""}
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </>}

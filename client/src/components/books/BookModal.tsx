@@ -21,6 +21,7 @@ import BarcodeScannerButton from "@components/BarcodeScanner";
 import { createNewAutor, AutorRole } from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
 import { getInputParams } from "@utils/form";
+import { useTranslation } from "react-i18next";
 
 interface BodyProps {
     data: IBook[];
@@ -30,13 +31,14 @@ interface BodyProps {
 }
 
 export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState(
         Array.isArray(data) && data.length > 0
             ? data
             : [emptyBook]
     );
     const [errors, setErrors] = useState<ValidationError[]>([{
-        label: "Názov knihy musí obsahovať aspoň jeden znak!",
+        label: t("validation.bookTitleRequired"),
         target: "title"
     }]);
     const [uniqueValues, setUniqueValues] = useState<Record<string, any[]>>({});
@@ -146,31 +148,39 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 [book.dimensions?.height, book.dimensions?.width, book.dimensions?.thickness, book.dimensions?.weight];
 
             if (book.dimensions || !(Object.keys(book.dimensions ?? {}).length === 0)) {
-                n1 = { valid: validateNumber(height, { mustBePositive: true }), label: "Výška", target: "dimensions.height" };
-                n2 = { valid: validateNumber(width, { mustBePositive: true }), label: "Šírka", target: "dimensions.width" };
-                n3 = { valid: validateNumber(thickness, { mustBePositive: true }), label: "Hrúbka", target: "dimensions.thickness" };
+                n1 = { valid: validateNumber(height, { mustBePositive: true }), label: t("common.height"), target: "dimensions.height" };
+                n2 = { valid: validateNumber(width, { mustBePositive: true }), label: t("common.width"), target: "dimensions.width" };
+                n3 = { valid: validateNumber(thickness, { mustBePositive: true }), label: t("common.thickness"), target: "dimensions.thickness" };
                 n4 = {
                     valid: validateNumber(weight, { mustBePositive: true }),
-                    label: "Hmotnosť",
+                    label: t("common.weight"),
                     target: "dimensions.weight"
                 };
             }
             n5 = {
                 valid: validateNumber(book.numberOfPages, { mustBeInteger: true, mustBePositive: true }),
-                label: "Počet strán",
+                label: t("common.pages"),
                 target: "numberOfPages"
             };
             if (book.published || !(Object.keys(book.published ?? {}).length === 0))
                 n6 = {
                     valid: validateNumber(book.published?.year, { mustBeInteger: true, mustBePositive: true }),
-                    label: "Rok vydania",
+                    label: t("fields.yearPublished"),
                     target: "published.year"
                 };
 
             const numberValidations = [n1, n2, n3, n4, n5, n6];
+            const numberTargets = [
+                "dimensions.height",
+                "dimensions.width",
+                "dimensions.thickness",
+                "dimensions.weight",
+                "numberOfPages",
+                "published.year"
+            ];
 
             if (!("title" in book && book?.title?.trim().length > 0)) {
-                errors.push({ label: "Názov knihy musí obsahovať aspoň jeden znak!", target: "title" });
+                errors.push({ label: t("validation.bookTitleRequired"), target: "title" });
             }
 
             errors = errors?.filter((err: ValidationError) => err.target !== "ISBN") ?? errors;
@@ -178,12 +188,12 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             if (!(numberValidations.every(n => n?.valid))) {
                 numberValidations.filter(n => !(n?.valid))
                     .map((numErr: ValidationError) => ({
-                        label: numErr.label + " musí byť číslo!",
+                        label: t("validation.numberField", { field: numErr.label }),
                         target: numErr.target || ""
                     }))
                     .forEach(err => errors.push(err));
             } else {
-                errors = errors?.filter((err: ValidationError) => !err.label.includes(" musí byť číslo!")) ?? errors;
+                errors = errors?.filter((err: ValidationError) => !numberTargets.includes(err.target ?? "")) ?? errors;
             }
 
             return errors;
@@ -247,37 +257,37 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
         <div className="b-container">
             <div className="b-Nazov">
                 <InputField
-                    placeholder='*Názov'
+                    placeholder={t("fields.titleRequired")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("title")}
-                    {...getInputParams("title", formData)}
+                    {...getInputParams("title", formData, t("fields.titleRequired"))}
                 />
             </div>
             <div className="b-Podnazov">
                 <InputField
-                    placeholder='Podnázov'
+                    placeholder={t("fields.subtitle")}
                     onChange={handleInputChange}
-                    {...getInputParams("subtitle", formData)}
+                    {...getInputParams("subtitle", formData, t("fields.subtitle"))}
                 />
             </div>
             <div className="b-Autor">
                 <LazyLoadMultiselect
                     displayValue="fullName"
-                    placeholder="Autor"
+                    placeholder={t("common.author")}
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
                     onNew={async (autorString) => {
                         await createNewAutor(autorString, AutorRole.AUTOR, setFormData);
                     }}
-                    {...getInputParams("autor", formData)}
+                    {...getInputParams("autor", formData, t("common.author"))}
                 />
             </div>
             <div className="b-ISBN">
                 <InputField
-                    placeholder='ISBN'
+                    placeholder={t("table.books.isbn")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("ISBN")}
-                    {...getInputParams("ISBN", formData)}
+                    {...getInputParams("ISBN", formData, t("table.books.isbn"))}
                 />
                 <BarcodeScannerButton
                     onBarcodeDetected={(code) => handleInputChange({ name: "ISBN", value: code })}
@@ -285,7 +295,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 />
                 <button
                     className="isbnLookup"
-                    title="Vyhľadať podľa ISBN"
+                    title={t("books.scanIsbn")}
                     onClick={getBookFromISBN}
                 >
                     <FontAwesomeIcon
@@ -296,31 +306,31 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             <div className="b-Translator">
                 <LazyLoadMultiselect
                     displayValue="fullName"
-                    placeholder="Prekladateľ"
+                    placeholder={t("table.books.translator")}
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
                     onNew={async (autorString) => await createNewAutor(autorString, AutorRole.TRANSLATOR, setFormData)}
-                    {...getInputParams("translator", formData)}
+                    {...getInputParams("translator", formData, t("table.books.translator"))}
                 />
             </div>
             <div className="b-Editor">
                 <LazyLoadMultiselect
                     displayValue="fullName"
-                    placeholder="Editor"
+                    placeholder={t("table.books.editor")}
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
                     onNew={async (autorString) => await createNewAutor(autorString, AutorRole.EDITOR, setFormData)}
-                    {...getInputParams("editor", formData)}
+                    {...getInputParams("editor", formData, t("table.books.editor"))}
                 />
             </div>
             <div className="b-Ilustrator">
                 <LazyLoadMultiselect
                     displayValue="fullName"
-                    placeholder="Ilustrátor"
+                    placeholder={t("table.books.illustrator")}
                     onChange={handleInputChange}
                     onSearch={fetchAutors}
                     onNew={async (autorString) => await createNewAutor(autorString, AutorRole.ILUSTRATOR, setFormData)}
-                    {...getInputParams("ilustrator", formData)}
+                    {...getInputParams("ilustrator", formData, t("table.books.illustrator"))}
                 />
             </div>
             <div className="b-Name">
@@ -330,15 +340,15 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     value={formData[0]?.edition?.title ? [formData[0].edition.title] : []}
                     onChange={(data) => handleInputChange({ name: 'edition.title', value: data.value[0] || '' })}
                     onNew={(val) => handleInputChange({ name: 'edition.title', value: val })}
-                    placeholder="Názov edície"
+                    placeholder={t("fields.editionTitle")}
                     name="edition.title"
                 />
             </div>
             <div className="b-No">
                 <InputField
-                    placeholder='Číslo edície'
+                    placeholder={t("fields.editionNumber")}
                     onChange={handleInputChange}
-                    {...getInputParams("edition.no", formData)}
+                    {...getInputParams("edition.no", formData, t("fields.editionNumber"))}
                 />
             </div>
             <div className="b-NameS">
@@ -348,15 +358,15 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     value={formData[0]?.serie?.title ? [formData[0].serie.title] : []}
                     onChange={(data) => handleInputChange({ name: 'serie.title', value: data.value[0] || '' })}
                     onNew={(val) => handleInputChange({ name: 'serie.title', value: val })}
-                    placeholder="Názov série"
+                    placeholder={t("fields.serieTitle")}
                     name="serie.title"
                 />
             </div>
             <div className="b-NoS">
                 <InputField
-                    placeholder='Číslo série'
+                    placeholder={t("fields.serieNumber")}
                     onChange={handleInputChange}
-                    {...getInputParams("serie.no", formData)}
+                    {...getInputParams("serie.no", formData, t("fields.serieNumber"))}
                 />
             </div>
             <div className="b-Vydavatel">
@@ -366,16 +376,16 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     value={formData[0]?.published?.publisher ? [formData[0].published.publisher] : []}
                     onChange={(data) => handleInputChange({ name: 'published.publisher', value: data.value[0] || '' })}
                     onNew={(val) => handleInputChange({ name: 'published.publisher', value: val })}
-                    placeholder="Vydavateľ"
+                    placeholder={t("common.publisher")}
                     name="published.publisher"
                 />
             </div>
             <div className="b-Rok">
                 <InputField
-                    placeholder='Rok vydania'
+                    placeholder={t("fields.yearPublished")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("published.year")}
-                    {...getInputParams("published.year", formData)}
+                    {...getInputParams("published.year", formData, t("fields.yearPublished"))}
                 />
             </div>
             <div className="b-Krajina">
@@ -383,9 +393,9 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     selectionLimit={1}
                     options={countryCode}
                     displayValue="value"
-                    placeholder="Krajina vydania"
+                    placeholder={t("fields.countryPublished")}
                     onChange={handleInputChange}
-                    {...getInputParams("published.country", formData)}
+                    {...getInputParams("published.country", formData, t("fields.countryPublished"))}
                 />
             </div>
             <div className="b-Mesto">
@@ -393,9 +403,9 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     selectionLimit={1}
                     options={cities}
                     displayValue="showValue"
-                    placeholder="Mesto"
+                    placeholder={t("fields.city")}
                     onChange={handleInputChange}
-                    {...getInputParams("location.city", formData)}
+                    {...getInputParams("location.city", formData, t("fields.city"))}
                 />
             </div>
             <div className="b-Police">
@@ -405,7 +415,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     value={formData[0]?.location?.shelf ? [formData[0].location.shelf] : []}
                     onChange={(data) => handleInputChange({ name: 'location.shelf', value: data.value[0] || '' })}
                     onNew={(val) => handleInputChange({ name: 'location.shelf', value: val })}
-                    placeholder="Polica"
+                    placeholder={t("fields.shelf")}
                     name="location.shelf"
                 />
             </div>
@@ -413,83 +423,83 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 <LazyLoadMultiselect
                     options={langCode}
                     displayValue="value"
-                    placeholder="Jazyk"
+                    placeholder={t("common.language")}
                     onChange={handleInputChange}
-                    {...getInputParams("language", formData)}
+                    {...getInputParams("language", formData, t("common.language"))}
                 />
             </div>
             <div className="b-Vyska">
                 <InputField
-                    placeholder='Výška (cm)'
+                    placeholder={t("dashboard.heightCm")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.height")}
-                    {...getInputParams("dimensions.height", formData)}
+                    {...getInputParams("dimensions.height", formData, t("dashboard.heightCm"))}
                 />
             </div>
             <div className="b-Sirka">
                 <InputField
-                    placeholder='Šírka (cm)'
+                    placeholder={t("dashboard.widthCm")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.width")}
-                    {...getInputParams("dimensions.width", formData)}
+                    {...getInputParams("dimensions.width", formData, t("dashboard.widthCm"))}
                 />
             </div>
             <div className="b-Hrubka">
                 <InputField
-                    placeholder='Hrúbka (cm)'
+                    placeholder={t("fields.thicknessCm")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.thickness")}
-                    {...getInputParams("dimensions.thickness", formData)}
+                    {...getInputParams("dimensions.thickness", formData, t("fields.thicknessCm"))}
                 />
             </div>
             <div className="b-Hmotnost">
                 <InputField
-                    placeholder='Hmotnosť (g)'
+                    placeholder={t("fields.weightG")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.weight")}
-                    {...getInputParams("dimensions.weight", formData)}
+                    {...getInputParams("dimensions.weight", formData, t("fields.weightG"))}
                 />
             </div>
             <div className="b-Page-no">
                 <InputField
-                    placeholder='Počet strán'
+                    placeholder={t("common.pages")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("numberOfPages")}
-                    {...getInputParams("numberOfPages", formData)}
+                    {...getInputParams("numberOfPages", formData, t("common.pages"))}
                 />
             </div>
             <div className="b-Obsah">
                 <ArrayInput
                     onChange={handleInputChange}
-                    {...getInputParams("content", formData)}
-                    placeholder="Obsah"
+                    {...getInputParams("content", formData, t("table.books.content"))}
+                    placeholder={t("table.books.content")}
                 />
             </div>
             <div className="b-Poznamka">
-                <TextArea id='note' placeholder='Poznámka'
+                <TextArea id='note' placeholder={t("common.note")}
                     className="form-control"
                     autoComplete="off"
                     rows={1}
                     onChange={handleInputChange}
-                    {...getInputParams("note", formData)}
+                    {...getInputParams("note", formData, t("common.note"))}
                 />
             </div>
             <div className="b-Precitane">
                 <LazyLoadMultiselect
                     displayValue="fullName"
-                    placeholder="Prečítané"
+                    placeholder={t("common.readBy")}
                     onChange={handleInputChange}
                     onSearch={fetchUsers}
-                    {...getInputParams("readBy", formData)}
+                    {...getInputParams("readBy", formData, t("common.readBy"))}
                 />
             </div>
             <div className="b-Vlastnik">
                 <LazyLoadMultiselect
                     displayValue="fullName"
-                    placeholder="Majiteľ"
+                    placeholder={t("common.owner")}
                     onChange={handleInputChange}
                     onSearch={fetchUsers}
-                    {...getInputParams("owner", formData)}
+                    {...getInputParams("owner", formData, t("common.owner"))}
                 />
             </div>
             <div className="b-Ex-Libris">
@@ -498,27 +508,27 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     className="checkBox"
                     checked={formData?.[0]?.exLibris}
                     onChange={(e) => handleInputChange({ name: "exLibris", value: e.target.checked })}
-                />Ex Libris</label>
+                />{t("common.exLibris")}</label>
             </div>
             <div className="b-pic">
                 <InputField
-                    placeholder='Obrázok'
+                    placeholder={t("fields.image")}
                     onChange={handleInputChange}
-                    {...getInputParams("picture", formData)}
+                    {...getInputParams("picture", formData, t("fields.image"))}
                 />
             </div>
             <div className="b-DK">
                 <InputField
-                    placeholder='URL Databáze knih'
+                    placeholder={t("fields.urlDatabazeKnih")}
                     onChange={handleInputChange}
-                    {...getInputParams("hrefDatabazeKnih", formData)}
+                    {...getInputParams("hrefDatabazeKnih", formData, t("fields.urlDatabazeKnih"))}
                 />
             </div>
             <div className="b-GR">
                 <InputField
-                    placeholder='URL GoodReads'
+                    placeholder={t("fields.urlGoodreads")}
                     onChange={handleInputChange}
-                    {...getInputParams("hrefGoodReads", formData)}
+                    {...getInputParams("hrefGoodReads", formData, t("fields.urlGoodreads"))}
                 />
             </div>
         </div>

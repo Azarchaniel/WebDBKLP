@@ -13,6 +13,7 @@ import { getUniqueFieldValues } from "../../API";
 import { isMobile, mapBookColumnsToFilterTypes, mapColumnName } from "@utils";
 import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import ThreeStateCheckbox from "@components/inputs/ThreeStateCheckbox";
+import { useTranslation } from "react-i18next";
 
 type PropsMT = {
     title: string;
@@ -25,7 +26,7 @@ type PropsMT = {
     selectedChanged?: (selected: any) => void;
     totalCount: number;
     actions?: ReactElement;
-    rowActions?: (_id: string, expandRow: () => void) => ReactElement;
+    rowActions?: (_id: string, expandRow: () => void, isExpanded: boolean) => ReactElement;
     detailPanel?: any;
     loading?: boolean;
     pagination?: {
@@ -56,6 +57,7 @@ const ServerPaginationTable: FC<PropsMT> =
         expandedElement,
         selectedChanged
     }) => {
+        const { t } = useTranslation();
         const [currentPage, setCurrentPage] = useState(pagination.page);
         const [currentPageSize, setCurrentPageSize] = useState(pagination.pageSize);
         const [sorting, setSorting] = useState<SortingState>(pagination.sorting);
@@ -236,8 +238,8 @@ const ServerPaginationTable: FC<PropsMT> =
                             }}
                         >
                             <option value=""></option>
-                            <option value="Y">Áno</option>
-                            <option value="N">Nie</option>
+                            <option value="Y">{t("common.yes")}</option>
+                            <option value="N">{t("common.no")}</option>
                         </select>
                     );
                 case "number":
@@ -306,11 +308,11 @@ const ServerPaginationTable: FC<PropsMT> =
                                 value={currentNumFilter.operator}
                                 onChange={handleOperatorChange}
                                 style={{ width: "40px", flex: "0 0 auto", padding: "0 4px" }}
-                                title="Zvoľte operátor porovnania"
+                                title={t("table.filters.operator")}
                             >
-                                <option value="=" title="má rovnako">=</option>
-                                <option value="<" title="má menej než">{"<"}</option>
-                                <option value=">" title="má viac než">{">"}</option>
+                                <option value="=" title={t("table.filters.eq")}>=</option>
+                                <option value="<" title={t("table.filters.lt")}>{"<"}</option>
+                                <option value=">" title={t("table.filters.gt")}>{">"}</option>
                             </select>
                             <InputField
                                 className="form-control"
@@ -371,7 +373,7 @@ const ServerPaginationTable: FC<PropsMT> =
                                     }
                                 }}
                             >
-                                <i className="fas fa-filter" title="Filtre" />
+                                <i className="fas fa-filter" title={t("table.filters.title")} />
                             </button>}
                     </div>
                 </div>
@@ -401,10 +403,10 @@ const ServerPaginationTable: FC<PropsMT> =
                                                                 title={
                                                                     header.column.getCanSort()
                                                                         ? header.column.getNextSortingOrder() === 'asc'
-                                                                            ? 'Radiť vzostupne'
+                                                                            ? t("table.sort.asc")
                                                                             : header.column.getNextSortingOrder() === 'desc'
-                                                                                ? 'Radiť zostupne'
-                                                                                : "Reset"
+                                                                                ? t("table.sort.desc")
+                                                                                : t("table.sort.reset")
                                                                         : undefined
                                                                 }
                                                             >
@@ -424,13 +426,11 @@ const ServerPaginationTable: FC<PropsMT> =
                                                 ))}
                                                 {rowActions && (
                                                     <th key={`${headerGroup.id}-actions`} className="TSPactionsRow">
-                                                        <>
-                                                            <ThreeStateCheckbox
-                                                                selectedAmount={Object.keys(selectedRows).length}
-                                                                totalAmount={table.getRowModel()?.rows?.length || 0}
-                                                                onChange={(selectAll) => selectAll ? table.toggleAllRowsSelected() : table.resetRowSelection()}
-                                                            />
-                                                        </>
+                                                        <ThreeStateCheckbox
+                                                            selectedAmount={Object.keys(selectedRows).length}
+                                                            totalAmount={table.getRowModel()?.rows?.length || 0}
+                                                            onChange={(selectAll) => selectAll ? table.toggleAllRowsSelected() : table.resetRowSelection()}
+                                                        />
                                                     </th>)}
                                             </tr>
                                             {showFilters && index === table.getHeaderGroups().length - 1 && (
@@ -467,7 +467,7 @@ const ServerPaginationTable: FC<PropsMT> =
                                                         {/* This is the three-vertical-dots-button for row actions, like edit, delete, etc. */}
                                                         <span className="actions-ellipsis">&#x2807;</span>
                                                         <span className="actions-content">
-                                                            {rowActions && rowActions(row.original._id, () => row.toggleExpanded())}
+                                                            {rowActions && rowActions(row.original._id, () => row.toggleExpanded(), row.getIsExpanded())}
                                                             <input type="checkbox" className="checkBox"
                                                                 checked={selectedRows[row.id]}
                                                                 onChange={() => {
@@ -481,7 +481,7 @@ const ServerPaginationTable: FC<PropsMT> =
                                                                         return newSelection;
                                                                     });
                                                                 }}
-                                                                title="Vybrať riadok" />
+                                                                title={t("table.selectRow")} />
                                                         </span>
                                                     </td>
                                                 }
@@ -505,7 +505,7 @@ const ServerPaginationTable: FC<PropsMT> =
                             </table>
                             {data.length === 0 && (
                                 <div className="no-data">
-                                    Žiadne dáta
+                                    {t("dashboard.noData")}
                                 </div>
                             )}
                             <Pagination

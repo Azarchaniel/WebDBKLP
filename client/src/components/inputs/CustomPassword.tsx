@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface PasswordFieldProps {
     maskCharacters?: string[];
@@ -9,8 +10,10 @@ interface PasswordFieldProps {
 export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
     maskCharacters = ['*', '•', '✦', '✪'], // Default mask characters
     onPasswordChange,
-    placeholder = 'Enter your password',
+    placeholder,
 }) => {
+    const { t } = useTranslation();
+    const inputPlaceholder = placeholder ?? t("auth.passwordPlaceholder");
     const [maskedPassword, setMaskedPassword] = useState(''); // Masked display value
     const [realPassword, setRealPassword] = useState(''); // Actual stored password
     const [showPassword, setShowPassword] = useState(false);
@@ -169,14 +172,14 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
                     className="form-control"
                     onChange={handleInput}
                     value={realPassword}
-                    placeholder={placeholder}
+                    placeholder={inputPlaceholder}
                 />
             ) : (
                 <input
                     ref={inputRef}
                     type="text"
                     className="form-control"
-                    placeholder={placeholder}
+                    placeholder={inputPlaceholder}
                     value={showPassword ? realPassword : maskedPassword}
                     onChange={handleInput}
                     onPaste={handlePaste}
@@ -189,7 +192,7 @@ export const CustomPasswordField: React.FC<PasswordFieldProps> = ({
                 type="button"
                 onClick={togglePasswordVisibility}
                 className="passwordToggle"
-                title={showPassword ? 'Skry heslo' : 'Zobraz heslo'}
+                title={showPassword ? t("password.hide") : t("password.show")}
                 style={{
                     display: realPassword.length > 0 ? 'flex' : 'none'
                 }}

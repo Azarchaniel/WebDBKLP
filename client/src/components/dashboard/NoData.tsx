@@ -1,7 +1,10 @@
+import { useTranslation } from "react-i18next";
+
 export const NoData = () => {
+    const { t } = useTranslation();
     return (
         <div className="noData">
-            <span>Žiadne dáta</span>
+            <span>{t("dashboard.noData")}</span>
         </div>
     );
 }

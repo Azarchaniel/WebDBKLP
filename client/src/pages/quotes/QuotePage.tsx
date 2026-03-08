@@ -11,6 +11,7 @@ import { LazyLoadMultiselect } from "@components/inputs";
 import "@styles/QuotePage.scss";
 import { useAuth } from "@utils/context";
 import { useQuoteModal } from "@components/quotes/useQuoteModal";
+import { useTranslation } from "react-i18next";
 
 interface QuoteGroup {
     bookId: string;
@@ -19,6 +20,7 @@ interface QuoteGroup {
 }
 
 export default function QuotePage() {
+    const { t } = useTranslation();
     const { isLoggedIn, currentUser } = useAuth();
     const [books, setBooks] = useState<IBook[]>([]);
     const [booksToFilter, setBooksToFilter] = useState<IBook[]>([]);
@@ -91,7 +93,7 @@ export default function QuotePage() {
         addQuote(formData)
             .then(({ status, data }) => {
                 if (status !== 201) {
-                    throw new Error("Citát sa nepodarilo pridať!")
+                    throw new Error(t("quotes.saveError", { action: t("quotes.actionAdded") }))
                 }
                 setSaveQuoteSuccess(true);
                 if (data?.quotes && Array.isArray(data.quotes)) {
@@ -100,10 +102,14 @@ export default function QuotePage() {
                     // If quotes aren't returned, refetch them
                     fetchQuotes();
                 }
-                toast.success(`Citát bol úspešne ${!isNewQuote ? 'upravený' : 'pridaný.'}`);
+                toast.success(t("quotes.saveSuccess", {
+                    action: !isNewQuote ? t("quotes.actionEdited") : t("quotes.actionAdded")
+                }));
             })
             .catch((err) => {
-                toast.error(`Citát sa nepodarilo ${!isNewQuote ? 'upraviť' : 'pridať.'}!`);
+                toast.error(t("quotes.saveError", {
+                    action: !isNewQuote ? t("quotes.actionEdited") : t("quotes.actionAdded")
+                }));
                 console.trace(err);
                 setSaveQuoteSuccess(false);
             })
@@ -111,19 +117,19 @@ export default function QuotePage() {
 
     const handleDeleteQuote = (_id: string): void => {
         openConfirmDialog({
-            text: "Naozaj chceš vymazať citát?",
-            title: "Vymazať citát?",
+            text: t("quotes.deleteConfirm"),
+            title: t("quotes.deleteTitle"),
             onOk: () => {
                 deleteQuote(_id)
                     .then(res => {
                         if (res.status !== 200) {
                             throw new Error("Error! Quote not deleted")
                         }
-                        toast.success("Citát bol úspešne vymazaný.");
+                        toast.success(t("quotes.deleteSuccess"));
                         fetchQuotes();
                     })
                     .catch((err) => {
-                        toast.error("Chyba! Citát nemožno vymazať!");
+                        toast.error(t("quotes.deleteError"));
                         console.trace(err);
                     });
             },
@@ -149,45 +155,49 @@ export default function QuotePage() {
                     type="button"
                     className="addQuote"
                     onClick={handleAddQuote}
-                    data-tip="Pridaj citát"
+                    data-tip={t("quotes.add")}
                 />
             )}
             <div>
                 {loading ? <LoadingBooks /> : <></>}
             </div>
-            <h6 className="h6MaterialClone">Citáty ({countAll})</h6>
-            <div className="quoteBookSearch">
-                <LazyLoadMultiselect
-                    value={booksToFilter}
-                    onSearch={(query: string, page: number) =>
-                        fetchQuotedBooks(query, page, books.map((book: IBook) => book._id))
-                    }
-                    displayValue="showName"
-                    placeholder="Z knih"
-                    onChange={({ value }) => updateFilteredBooks(value as IBook[])}
-                    name="fromBook"
-                />
-            </div>
-            <div className="quote_container">
-                {quoteGroups.length > 0 ? (
-                    <>
-                        {quoteGroups.map((group) => (
-                            <React.Fragment key={group.bookId}>
-                                {group.quotes.map((quote) => (
-                                    <QuoteItem
-                                        key={quote._id}
-                                        deleteQuote={handleDeleteQuote}
-                                        saveQuote={handleSaveQuote}
-                                        quote={quote}
-                                        bcgrClr={getRandomShade(group.baseColor)}
-                                    />
-                                ))}
-                            </React.Fragment>
-                        ))}
-                    </>
-                ) : (
-                    <span style={{ color: "black" }}>Žiadne citáty neboli nájdené!</span>
-                )}
+            <div className="p-4">
+                <div className="headerTitleAction">
+                    <h4 className="ml-4 mb-3" style={{ color: "black" }}>{t("quotes.title", { count: countAll })}</h4>
+                </div>
+                <div className="quoteBookSearch">
+                    <LazyLoadMultiselect
+                        value={booksToFilter}
+                        onSearch={(query: string, page: number) =>
+                            fetchQuotedBooks(query, page, books.map((book: IBook) => book._id))
+                        }
+                        displayValue="showName"
+                        placeholder={t("quotes.fromBookPlaceholder")}
+                        onChange={({ value }) => updateFilteredBooks(value as IBook[])}
+                        name="fromBook"
+                    />
+                </div>
+                <div className="quote_container">
+                    {quoteGroups.length > 0 ? (
+                        <>
+                            {quoteGroups.map((group) => (
+                                <React.Fragment key={group.bookId}>
+                                    {group.quotes.map((quote) => (
+                                        <QuoteItem
+                                            key={quote._id}
+                                            deleteQuote={handleDeleteQuote}
+                                            saveQuote={handleSaveQuote}
+                                            quote={quote}
+                                            bcgrClr={getRandomShade(group.baseColor)}
+                                        />
+                                    ))}
+                                </React.Fragment>
+                            ))}
+                        </>
+                    ) : (
+                        <span style={{ color: "black" }}>{t("quotes.noneFound")}</span>
+                    )}
+                </div>
             </div>
             <ScrollToTopBtn scrollToTop={scrollToTopOfPage} />
         </>

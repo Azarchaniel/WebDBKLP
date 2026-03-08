@@ -30,7 +30,11 @@
     }
   }
 
-  .quoteOwner {
+  .rsw-editor {
+    margin-bottom: 1rem;
+  }
+
+  .secondaryText {
     font-size: 0.85rem;
     filter: brightness(0.85);
   }
@@ -123,6 +127,7 @@ form {
 
 /* Media query for mobile layout */
 @media screen and (max-width: 768px) {
+
   /* Book and page fields stack on mobile */
   .book-page-row {
     grid-template-columns: 1fr;

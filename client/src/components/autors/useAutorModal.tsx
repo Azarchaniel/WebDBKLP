@@ -3,11 +3,13 @@ import { useModal } from '@utils/context/ModalContext';
 import { IAutor, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { AutorsModalBody } from './AutorsModal';
+import { useTranslation } from "react-i18next";
 
 /**
  * Custom hook for managing Autor modals with persistence across navigation
  */
 export const useAutorModal = () => {
+    const { t } = useTranslation();
     const { showModal, hideModal } = useModal();
 
     /**
@@ -30,7 +32,7 @@ export const useAutorModal = () => {
         let formData: IAutor[] | object = autors || [];
         let validationErrors: ValidationError[] | undefined = undefined;
 
-        const getTitle = () => autors.length > 0 && autors[0]._id ? 'Úprava autora' : 'Pridanie autora';
+        const getTitle = () => autors.length > 0 && autors[0]._id ? t("autors.editTitle") : t("autors.addTitle");
 
         // Helper to render the modal with given data
         const renderModal = (data: IAutor[] | object) => {

@@ -4,14 +4,17 @@ import "../styles/sidebar.scss";
 import { ISideMenuItems } from "../type";
 import { Link, useLocation } from "react-router-dom";
 import { useClickOutside } from "@hooks";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 interface HamburgerToXProps {
     onClick: () => void;
     className: string;
     activeEl: boolean;
+    label: string;
 }
 
-const HamburgerToX = forwardRef<HTMLDivElement, HamburgerToXProps>(({ onClick, className, activeEl }, ref) => {
+const HamburgerToX = forwardRef<HTMLDivElement, HamburgerToXProps>(({ onClick, className, activeEl, label }, ref) => {
     const [active, setActive] = useState<boolean>(activeEl);
 
     useEffect(() => {
@@ -24,13 +27,14 @@ const HamburgerToX = forwardRef<HTMLDivElement, HamburgerToXProps>(({ onClick, c
                 setActive(!active);
                 onClick()
             }}>
-                <a className={"main-nav-toggle" + (active ? " active-menu" : "")}><i>Menu</i></a>
+                <a className={"main-nav-toggle" + (active ? " active-menu" : "")}><i>{label}</i></a>
             </div>
         </div>
     )
 });
 
 const Sidebar = () => {
+    const { t } = useTranslation();
     const location = useLocation();
     const [sidebarOpened, setSidebarOpened] = useState<boolean>(false);
     const popRef = useRef<HTMLDivElement>(null);
@@ -42,27 +46,27 @@ const Sidebar = () => {
 
     const content: ISideMenuItems[] = [
         {
-            title: "Knihy",
+            title: t("nav.books"),
             icon: "fas fa-book",
             route: "/books",
         },
         {
-            title: "Autori",
+            title: t("nav.autors"),
             icon: "fas fa-feather-alt",
             route: "/autors",
         },
         {
-            title: "LP",
+            title: t("nav.lps"),
             icon: "fas fa-record-vinyl",
             route: "/lp",
         },
         {
-            title: "Úryvky",
+            title: t("nav.quotes"),
             icon: "fas fa-pen-nib",
             route: "/quotes",
         },
         {
-            title: "Spoločenské hry",
+            title: t("nav.boardGames"),
             icon: "fas fa-chess",
             route: "/board-games",
         }
@@ -76,6 +80,7 @@ const Sidebar = () => {
                     onClick={() => setSidebarOpened(!sidebarOpened)}
                     ref={exceptRef}
                     activeEl={sidebarOpened}
+                    label={t("common.menu")}
                 />
                 {content.map(item => (
                     <Link to={item.route} key={item.route} className={location.pathname === item.route ? "active" : ""}>
@@ -84,15 +89,16 @@ const Sidebar = () => {
                     </Link>
                 ))}
                 <div style={{ display: "flex", alignItems: "center", flexGrow: 1 }}>{/* Empty space */}</div>
+                <LanguageSwitcher sidebarOpened={sidebarOpened} />
                 <a
-                    title="O autorovi"
+                    title={t("nav.aboutAuthor")}
                     href="https://github.com/Azarchaniel"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="github-link"
                 >
                     <i className="fab fa-github" />
-                    {sidebarOpened && <span>O autorovi</span>}
+                    {sidebarOpened && <span>{t("nav.aboutAuthor")}</span>}
                 </a>
             </nav>
         </>

@@ -7,6 +7,7 @@ import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import { sk } from "date-fns/locale/sk";
 import TextArea from "@components/inputs/TextArea";
 import { getInputParams } from "@utils/form";
+import { useTranslation } from "react-i18next";
 
 registerLocale('sk', sk)
 
@@ -18,11 +19,12 @@ interface BodyProps {
 
 
 export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
+    const { t } = useTranslation();
     const [formData, setFormData] = useState(
         Array.isArray(data) && data.length > 0 ? data : [emptyAutor]
     );
     const [errors, setErrors] = useState<ValidationError[]>([
-        { label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName" }
+        { label: t("validation.authorLastNameRequired"), target: "lastName" }
     ]);
 
     // Normalize autor data (like BookModal)
@@ -102,14 +104,14 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
             let errors: ValidationError[] = [];
             const autorsLastNameLength = data.lastName?.trim().length > 0;
             if (!autorsLastNameLength) {
-                errors.push({ label: "Priezvisko autora musí obsahovať aspoň jeden znak!", target: "lastName" });
+                errors.push({ label: t("validation.authorLastNameRequired"), target: "lastName" });
             } else {
                 errors = errors?.filter((err: ValidationError) => err.target !== "lastName") ?? errors;
             }
             if (data.dateOfBirth && data.dateOfDeath) {
                 const dates = data.dateOfBirth! < data.dateOfDeath!;
                 if (!dates) {
-                    errors.push({ label: "Dátum smrti nemôže byť skôr, než dátum narodenia!", target: "dateOfDeath" });
+                    errors.push({ label: t("validation.dateOrderInvalid"), target: "dateOfDeath" });
                 } else {
                     errors = errors?.filter((err: ValidationError) => err.target !== "dateOfDeath") ?? errors;
                 }
@@ -140,15 +142,15 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                 <InputField
                     placeholder='Krstné meno'
                     onChange={handleInputChange}
-                    {...getInputParams("firstName", formData, "Krstné meno")}
+                    {...getInputParams("firstName", formData, t("fields.firstName"))}
                 />
             </div>
             <div className="a-last-name">
                 <InputField
-                    placeholder='*Priezvisko'
+                    placeholder={t("fields.lastNameRequired")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("lastName")}
-                    {...getInputParams("lastName", formData, "*Priezvisko")}
+                    {...getInputParams("lastName", formData, t("fields.lastNameRequired"))}
                 />
             </div>
             <div className="a-birth-date a-date-picker-container">
@@ -170,7 +172,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     })))}
                     locale="sk"
                     dateFormat='dd.MM.yyyy'
-                    placeholderText={getInputParams("dateOfBirth", formData, "Dátum narodenia").placeholder}
+                    placeholderText={getInputParams("dateOfBirth", formData, t("fields.birthDate")).placeholder}
                     maxDate={new Date()}
                     autoComplete="off"
                 />
@@ -198,7 +200,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     })))}
                     locale="sk"
                     dateFormat='dd.MM.yyyy'
-                    placeholderText={getInputParams("dateOfDeath", formData, "Dátum smrti").placeholder}
+                    placeholderText={getInputParams("dateOfDeath", formData, t("fields.deathDate")).placeholder}
                     maxDate={new Date()}
                     autoComplete="off"
                 />
@@ -216,29 +218,29 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                     selectionLimit={1}
                     options={countryCode}
                     displayValue="value"
-                    placeholder="Národnosť"
+                    placeholder={t("fields.nationality")}
                     onChange={handleInputChange}
-                    {...getInputParams("nationality", formData, "Národnosť")}
+                    {...getInputParams("nationality", formData, t("fields.nationality"))}
                 />
             </div>
             <div className="a-role">
                 <LazyLoadMultiselect
-                    options={autorRoles}
+                    options={autorRoles.map(role => ({ ...role, showValue: t(role.showValue) }))}
                     displayValue="showValue"
-                    placeholder="Role"
+                    placeholder={t("common.role")}
                     onChange={handleInputChange}
-                    {...getInputParams("role", formData, "Role")}
+                    {...getInputParams("role", formData, t("common.role"))}
                 />
             </div>
             <div className="a-note">
                 <TextArea
                     id='note'
-                    placeholder='Poznámka'
+                    placeholder={t("common.note")}
                     className="form-control"
                     autoComplete="off"
                     rows={1}
                     onChange={handleInputChange}
-                    {...getInputParams("note", formData, "Poznámka")}
+                    {...getInputParams("note", formData, t("common.note"))}
                 />
             </div>
         </form>

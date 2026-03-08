@@ -91,6 +91,33 @@
       text-overflow: ellipsis;
     }
   }
+
+  .language-switcher {
+    display: flex;
+    flex-direction: column;
+    margin: 0.5rem 0 1rem;
+    width: 100%;
+
+    button {
+      background: transparent;
+      border: none;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      cursor: pointer;
+
+      &:hover {
+        color: var(--anchor);
+      }
+
+      span.lang-label {
+        margin-left: 0.5rem;
+        font-size: 1.3rem;
+      }
+    }
+  }
 }
 
 .opened {

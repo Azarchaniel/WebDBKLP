@@ -3,11 +3,13 @@ import { useModal } from '@utils/context/ModalContext';
 import { IBoardGame, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { BoardGamesModalBody } from './BoardGamesModal';
+import { useTranslation } from "react-i18next";
 
 /**
  * Custom hook for managing BoardGame modals with persistence across navigation
  */
 export const useBoardGameModal = () => {
+    const { t } = useTranslation();
     const { showModal, hideModal } = useModal();
 
     /**
@@ -30,7 +32,7 @@ export const useBoardGameModal = () => {
         let formData: IBoardGame[] | object = boardGames || [];
         let validationErrors: ValidationError[] | undefined = undefined;
 
-        const getTitle = () => boardGames.length > 0 && boardGames[0]._id ? 'Uprav spoločenskú hru' : 'Pridaj spoločenskú hru';
+        const getTitle = () => boardGames.length > 0 && boardGames[0]._id ? t("boardGames.editTitle") : t("boardGames.addTitle");
 
         // Helper to render the modal with given data
         const renderModal = (data: IBoardGame[] | object, includeRevert: boolean = true) => {

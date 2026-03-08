@@ -18,8 +18,10 @@ import "@styles/BoardGamesPage.scss";
 import { InputField } from "@components/inputs";
 import BoardGameDetail from "./BoardGameDetail";
 import { useBoardGameModal } from "@components/boardGames/useBoardGameModal";
+import { useTranslation } from "react-i18next";
 
 export default function BoardGamesPage() {
+    const { t } = useTranslation();
     const { isLoggedIn } = useAuth();
     const [boardGames, setBoardGames] = useState([]);
     const [countAll, setCountAll] = useState<number>(0);
@@ -83,9 +85,9 @@ export default function BoardGamesPage() {
                 .then((results) => {
                     let message = "";
                     if (results.length < 5) {
-                        message = `${results.length} spoločenské hry boli úspešne upravené.`;
+                        message = t("boardGames.saveManySuccess", { count: results.length });
                     } else {
-                        message = `${results.length} spoločenských hier bolo úspešne upravených.`;
+                        message = t("boardGames.saveManySuccess", { count: results.length });
                     }
                     toast.success(message);
                     setSaveBoardGameSuccess(true);
@@ -94,7 +96,7 @@ export default function BoardGamesPage() {
                 })
                 .catch((err) => {
                     setSaveBoardGameSuccess(false);
-                    const message = "Niektoré spoločenské hry sa nepodarilo uložiť!";
+                    const message = t("boardGames.saveManyError");
                     toast.error(message);
                     console.trace(err);
                     return { success: false, message };
@@ -104,12 +106,18 @@ export default function BoardGamesPage() {
                 .then(({ status, data }) => {
                     let message = "";
                     if (status !== 201) {
-                        message = `Chyba! Spoločenská hra ${data?.title || ''} nebola ${!isNewBoardGame ? "upravená" : "pridaná"}.`;
+                        message = t("boardGames.saveErrorSingle", {
+                            title: data?.title || "",
+                            action: !isNewBoardGame ? t("boardGames.actionEdited") : t("boardGames.actionAdded")
+                        });
                         toast.error(message);
                         setSaveBoardGameSuccess(false);
                         return { success: false, message };
                     }
-                    message = `Spoločenská hra ${data?.title || ''} bola úspešne ${!isNewBoardGame ? "upravená" : "pridaná"}.`;
+                    message = t("boardGames.saveSuccessSingle", {
+                        title: data?.title || "",
+                        action: !isNewBoardGame ? t("boardGames.actionEdited") : t("boardGames.actionAdded")
+                    });
                     toast.success(message);
                     setSaveBoardGameSuccess(true);
                     fetchBoardGames();
@@ -117,7 +125,7 @@ export default function BoardGamesPage() {
                 })
                 .catch((err) => {
                     setSaveBoardGameSuccess(false);
-                    const message = "Spoločenská hra sa nepodarilo pridať!";
+                    const message = t("boardGames.saveError");
                     toast.error(message);
                     console.trace(err);
                     return { success: false, message };
@@ -151,7 +159,7 @@ export default function BoardGamesPage() {
                         }
                     })
                     .catch((err) => {
-                        toast.error(err.response?.data?.error || "Chyba! Spoločenská hra nebola nájdená!");
+                        toast.error(err.response?.data?.error || t("boardGames.notFound"));
                         console.trace(err);
                     });
             }
@@ -189,22 +197,22 @@ export default function BoardGamesPage() {
 
             let warningText = "";
             if (totalExpansions === 1) {
-                warningText = "Vybraná hra má k sebe priradené 1 rozšírenie!";
+                warningText = t("boardGames.expansionsWarning", { count: totalExpansions });
             } else if (totalExpansions > 1 && totalExpansions < 5) {
-                warningText = `Vybrané hry majú k sebe priradené ${totalExpansions} rozšírenia!`;
+                warningText = t("boardGames.expansionsWarning", { count: totalExpansions });
             } else if (totalExpansions >= 5) {
-                warningText = `Vybrané hry majú k sebe priradených ${totalExpansions} rozšírení!`;
+                warningText = t("boardGames.expansionsWarning", { count: totalExpansions });
             }
 
             const titles = games.map(g => g.title).join("\n ");
 
             let message = "";
             if (games.length > 1 && games.length < 5) {
-                message = `Naozaj chceš vymazať ${games.length} hry:\n\n ${titles}?`;
+                message = t("boardGames.deleteConfirmMany", { count: games.length, titles });
             } else if (games.length >= 5) {
-                message = `Naozaj chceš vymazať ${games.length} hier:\n\n ${titles}?`;
+                message = t("boardGames.deleteConfirmMany", { count: games.length, titles });
             } else {
-                message = `Naozaj chceš vymazať hru ${titles}?`;
+                message = t("boardGames.deleteConfirmSingle", { title: titles });
             }
 
             if (totalExpansions > 0) {
@@ -213,7 +221,7 @@ export default function BoardGamesPage() {
 
             openConfirmDialog({
                 text: message,
-                title: games.length > 1 ? "Vymazať spoločenské hry?" : "Vymazať spoločenskú hru?",
+                title: games.length > 1 ? t("boardGames.deleteTitleMany") : t("boardGames.deleteTitleSingle"),
                 onOk: () => {
                     Promise.all(idsToDelete.filter((id): id is string => typeof id === "string" && id !== undefined).map(id => deleteBoardGame(id)))
                         .then((results) => {
@@ -221,13 +229,13 @@ export default function BoardGamesPage() {
                             if (successCount === 0) throw new Error("Error! Board games not deleted");
                             toast.success(
                                 successCount > 1
-                                    ? `${successCount} ${successCount < 5 ? 'hry boli' : 'hier bolo'} úspešne vymazaných.`
-                                    : `Hra ${games[0].title} bola úspešne vymazaná.`
+                                    ? t("boardGames.deleteSuccessMany", { count: successCount })
+                                    : t("boardGames.deleteSuccessSingle", { title: games[0].title })
                             );
                             fetchBoardGames();
                         })
                         .catch((err) => {
-                            toast.error(err.response?.data?.error || "Chyba pri mazaní hier!");
+                            toast.error(err.response?.data?.error || t("boardGames.deleteError"));
                             console.trace(err);
                         });
                 },
@@ -247,7 +255,7 @@ export default function BoardGamesPage() {
             }))
                 .then((games) => proceedDelete(games.filter(Boolean)))
                 .catch((err) => {
-                    toast.error(err.response?.data?.error || "Chyba pri načítaní hier!");
+                    toast.error(err.response?.data?.error || t("boardGames.deleteLoadError"));
                     console.trace(err);
                 });
         }
@@ -270,12 +278,12 @@ export default function BoardGamesPage() {
                 <button type="button" className="addBtnTable" onClick={handleAddBoardGame} />
             }
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
-                <ShowHideColumns columns={getBoardGameTableColumns()} shown={showColumn} setShown={setShowColumn} />
+                <ShowHideColumns columns={getBoardGameTableColumns(t)} shown={showColumn} setShown={setShowColumn} />
             </div>
             <ServerPaginationTable
-                title={`Spoločenské hry (${countAll})`}
+                title={t("boardGames.title", { count: countAll })}
                 data={boardGames}
-                columns={getBoardGameTableColumns()}
+                columns={getBoardGameTableColumns(t)}
                 pageChange={(page) => setPagination(prevState => ({ ...prevState, page: page }))}
                 pageSizeChange={handlePageSizeChange}
                 sortingChange={(sorting) => setPagination(prevState => ({ ...prevState, sorting: sorting }))}
@@ -289,7 +297,7 @@ export default function BoardGamesPage() {
                             <InputField
                                 className="form-control"
                                 style={{ paddingRight: "2rem" }}
-                                placeholder="Vyhľadaj hru"
+                                placeholder={t("boardGames.searchPlaceholder")}
                                 value={pagination.search}
                                 onChange={(e) =>
                                     setPagination(prevState => ({
@@ -311,27 +319,27 @@ export default function BoardGamesPage() {
                         <i
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
-                            title="Zobraz/skry stĺpce"
+                            title={t("books.showHideColumns")}
                             onClick={() => setShowColumn({ ...showColumn, control: !showColumn.control })}
                         />
                     </div>
                 }
-                rowActions={isLoggedIn ? (_id, expandRow) => (
-                    <div className="actionsRow" style={{ pointerEvents: "auto" }}>
+                rowActions={isLoggedIn ? (_id, expandRow, isExpanded) => (
+                    <div className="actionsRow">
                         <button
-                            title="Vymazať"
+                            title={t("common.delete")}
                             onClick={() => handleDeleteBoardGame(_id)}
                             className="fa fa-trash"
                         />
                         <button
-                            title="Upraviť"
+                            title={t("common.edit")}
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateBoardGame(_id)}
                         />
                         <button
                             key={`detail-${_id}`}
-                            title="Detaily"
-                            className="fa fa-chevron-down"
+                            title={t("common.details")}
+                            className={`fa ${isExpanded ? "fa-chevron-up" : "fa-chevron-down"}`}
                             onClick={() => expandRow()}
                         />
                     </div>
