@@ -5,11 +5,6 @@ interface LanguageSwitcherProps {
     sidebarOpened?: boolean;
 }
 
-// remove brightness and then invert
-const svgToWhiteStyle = {
-    filter: 'brightness(0) invert(1)'
-};
-
 const iconSize = 35; //px
 
 const SlovakIcon = () => (
@@ -18,7 +13,6 @@ const SlovakIcon = () => (
         alt="Slovak Flag"
         width={iconSize}
         height={iconSize}
-        style={svgToWhiteStyle}
     />
 );
 
@@ -28,7 +22,6 @@ const CzechIcon = () => (
         alt="Czech Flag"
         width={iconSize}
         height={iconSize}
-        style={svgToWhiteStyle}
     />
 );
 
@@ -38,7 +31,6 @@ const UnionJackIcon = () => (
         alt="Union Jack"
         width={iconSize}
         height={iconSize}
-        style={svgToWhiteStyle}
     />
 );
 
@@ -57,7 +49,7 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ sidebarOpened = fal
     const nextLang = languages[nextLangIndex];
 
     const displayLabel = sidebarOpened
-        ? `${t("common.currentLanguage")} ${currentLang.label}`
+        ? currentLang.label
         : "";
 
     const tooltip = `${t("common.currentLanguage")} ${currentLang.label} → ${t("language.changeTo")} ${nextLang.label}`;
