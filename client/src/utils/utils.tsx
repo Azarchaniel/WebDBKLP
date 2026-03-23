@@ -1,8 +1,7 @@
 import { IAutor, ILangCode, ILocation, IUser } from "../type";
-import { cities } from "./constants";
+import { CITIES } from "./constants";
 import { countryCode } from "./locale";
 import i18n from "../i18n";
-import { format } from "path";
 
 export const shortenStringKeepWord = (text: string, maxLength: number): string => {
 	if (!text) return "";
@@ -15,7 +14,6 @@ export const shortenStringKeepWord = (text: string, maxLength: number): string =
 	}
 }
 
-//TODO: refactor these 3
 export const stringifyAutors = (
 	data: any
 ): any => {
@@ -126,10 +124,6 @@ export const getRandomShade = (hexColor: string): string => {
 	return darkenLightenColor(hexColor, randomMinMax(30, -30, true));
 };
 
-export const getCssPropertyValue = (propertyName: string) => {
-	return getComputedStyle(document.body).getPropertyValue(propertyName);
-}
-
 export function checkIsbnValidity(isbn: string): boolean {
 	if (!isbn) return true;
 	// Remove any hyphens or spaces
@@ -213,10 +207,6 @@ export const validateNumber = (value: any, options?: ValidationOptions): boolean
 	return true;
 };
 
-export const isNumberOrEmpty = (num: any) => {
-	return (!isNaN(num) || num === "" || num === undefined);
-}
-
 export const toPercentage = (value: number, locale: string = "cs-CZ") => {
 	if (!value) return;
 	return (formatNumberLocale(value * 100, locale, 1)) + "%";
@@ -233,16 +223,19 @@ export const randomMinMax = (min: number, max: number, integer?: boolean): numbe
 
 export const getBookLocation = (location: ILocation): string => {
 	if (!location || !location.city) return "";
-	return `${cities.find(city => city.value === location.city)?.showValue}${location.shelf ? ', ' + location.shelf : ""}`
+	return `${CITIES.find(city => city.value === location.city)?.showValue}${location.shelf ? ', ' + location.shelf : ""}`
 }
 
-export const formatDimension = (dimension: any, locale: string = "cs-CZ") => {
-	if (dimension === undefined || dimension === null) return undefined;
+export const formatDimension = (dimension: any, locale: string = "cs-CZ", decimalPlaces: number = 1) => {
+	if (dimension === undefined || dimension === null) return "-";
 
 	if (typeof dimension === 'object' && "$numberDecimal" in dimension)
-		return formatNumberLocale(parseFloat(dimension.$numberDecimal), locale, 1) as unknown as number;
+		return formatNumberLocale(parseFloat(dimension.$numberDecimal), locale, decimalPlaces) as unknown as number;
 
-	return formatNumberLocale(dimension, locale, 1) as unknown as number;
+	// if it is not an object number and not a number, return "-"
+	if (isNaN(dimension)) return 0;
+
+	return formatNumberLocale(dimension, locale, decimalPlaces) as unknown as number;
 }
 
 export const formatNumberLocale = (num: number, locale: string = "cs-CZ", decimalPlaces: number = 0) => {

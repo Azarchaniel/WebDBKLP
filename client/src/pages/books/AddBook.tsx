@@ -3,7 +3,7 @@ import { IBook, ValidationError } from "../../type";
 import { Modal } from "@components/Modal";
 import { BooksModalBody } from "@components/books/BookModal";
 import { ModalButtons } from "@components/Modal";
-import { emptyBook } from "@utils";
+import { EMPTY_BOOK } from "@utils";
 import { useTranslation } from "react-i18next";
 
 type Props = {
@@ -65,11 +65,11 @@ const AddBook: React.FC<Props> = ({ saveBook, books, onClose, saveResultSuccess 
                     footer={<ModalButtons
                         onSave={() => saveBook(bookData as IBook[])}
                         onClear={() => {
-                            setBookData([emptyBook]);
+                            setBookData([EMPTY_BOOK]);
                             setOutline({ outline: "none" });
                         }}
                         onRevert={() => {
-                            setBookData(books ?? [emptyBook]);
+                            setBookData(books ?? [EMPTY_BOOK]);
                             setOutline({ outline: "none" });
                         }}
                         error={error}

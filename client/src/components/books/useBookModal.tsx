@@ -2,7 +2,7 @@ import { useModal } from '@utils/context/ModalContext';
 import { IBook, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { BooksModalBody } from './BookModal';
-import { emptyBook } from '@utils';
+import { EMPTY_BOOK } from '@utils';
 import { useTranslation } from "react-i18next";
 
 /**
@@ -31,7 +31,7 @@ export const useBookModal = () => {
 
         // Internal mutable container for form data and validation (kept outside React state – updates trigger manual re-showModal)
         // Initialize with original books (if any) so that an immediate save without edits preserves original data.
-        let formData: IBook[] | IBook | object = books && books.length ? books : [emptyBook];
+        let formData: IBook[] | IBook | object = books && books.length ? books : [EMPTY_BOOK];
         let validationErrors: ValidationError[] | undefined = undefined;
         // Version to force remount of body component when clearing/reverting
         let bodyVersion = 0;
@@ -89,7 +89,7 @@ export const useBookModal = () => {
                 ? (formData as IBook[])
                 : [(formData as IBook)];
 
-            const clearedArray: IBook[] = currentArray.map(() => ({ ...emptyBook } as IBook));
+            const clearedArray: IBook[] = currentArray.map(() => ({ ...EMPTY_BOOK } as IBook));
 
             formData = clearedArray;
             validationErrors = undefined;
@@ -98,7 +98,7 @@ export const useBookModal = () => {
 
         // Handler to revert form to the original object(s)
         const handleRevert = () => {
-            const originalArray: IBook[] = (books && books.length ? books : [emptyBook]) as IBook[];
+            const originalArray: IBook[] = (books && books.length ? books : [EMPTY_BOOK]) as IBook[];
 
             // Deep copy to decouple from any references
             const revertedArray: IBook[] = JSON.parse(JSON.stringify(originalArray));
@@ -109,7 +109,7 @@ export const useBookModal = () => {
         };
 
         // Open the modal
-        renderModal(books && books.length ? books : [emptyBook]);
+        renderModal(books && books.length ? books : [EMPTY_BOOK]);
 
         // Return a method to close the modal
         return {

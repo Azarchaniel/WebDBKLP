@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { countryCode, autorRoles, emptyAutor } from "@utils";
+import { countryCode, AUTOR_ROLES, EMPTY_AUTOR } from "@utils";
 import { IAutor, ILangCode, ValidationError } from "../../type";
 import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import { sk } from "date-fns/locale/sk";
@@ -21,7 +21,7 @@ interface BodyProps {
 export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
     const { t } = useTranslation();
     const [formData, setFormData] = useState(
-        Array.isArray(data) && data.length > 0 ? data : [emptyAutor]
+        Array.isArray(data) && data.length > 0 ? data : [EMPTY_AUTOR]
     );
     const [errors, setErrors] = useState<ValidationError[]>([
         { label: t("validation.authorLastNameRequired"), target: "lastName" }
@@ -30,10 +30,10 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
     // Normalize autor data (like BookModal)
     const normalizeAutorData = (autor: any[]): IAutor[] => {
         return (Array.isArray(autor) ? autor : [autor]).map(item => {
-            if (!item) return emptyAutor;
+            if (!item) return EMPTY_AUTOR;
             let role: any[] = [];
             if ("role" in item) {
-                role = autorRoles.filter(obj => (item?.role as string[]).includes(obj?.value));
+                role = AUTOR_ROLES.filter(obj => (item?.role as string[]).includes(obj?.value));
             } else {
                 role = [];
             }
@@ -45,7 +45,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                 dateOfDeath: item?.dateOfDeath ? new Date(item?.dateOfDeath as string | number | Date) : undefined
             } as IAutor;
             return {
-                ...emptyAutor,
+                ...EMPTY_AUTOR,
                 ...item,
                 ...modified
             };
@@ -225,7 +225,7 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
             </div>
             <div className="a-role">
                 <LazyLoadMultiselect
-                    options={autorRoles.map(role => ({ ...role, showValue: t(role.showValue) }))}
+                    options={AUTOR_ROLES.map(role => ({ ...role, showValue: t(role.showValue) }))}
                     displayValue="showValue"
                     placeholder={t("common.role")}
                     onChange={handleInputChange}
