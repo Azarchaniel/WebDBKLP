@@ -12,8 +12,7 @@ import {
 } from "../utils/utils";
 import mongoose, { PipelineStage, Types } from 'mongoose';
 import { optionFetchAllExceptDeleted, populateOptionsBook } from "../utils/constants";
-import diacritics from "diacritics";
-import { buildPaginationPipeline, fetchDataWithPagination } from "../utils/queryUtils";
+import { buildPaginationPipeline, buildSearchQuery, fetchDataWithPagination } from "../utils/queryUtils";
 import Autor from "../models/autor";
 import Lp from "../models/lp";
 
@@ -149,6 +148,9 @@ const checkBooksUpdated = async (req: Request, res: Response): Promise<void> => 
 const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
     try {
         let { ids, search = "", page = "1", pageSize = "10" } = req.query;
+        const searchFields = [
+            "autor", "editor", "ilustrator", "translator", "title", "subtitle", "content", "edition", "serie", "note", "published", "ISBN"
+        ];
 
         // Validate and parse query parameters
         const parsedIds = Array.isArray(ids) ? ids : typeof ids === "string" ? [ids] : [];
@@ -164,13 +166,7 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
             _id: { $in: parsedIds.map((id) => new Types.ObjectId(id as string)) }
         };
 
-        // Add search condition if a search term is provided
-        // Remove diacritics and special chars from the search term before performing the search
-        if (search) {
-            query.$or = [
-                { "title": { $regex: diacritics.remove(search as string)?.replace(/[^a-zA-Z0-9\s]/g, ''), $options: "i" } }
-            ];
-        }
+        Object.assign(query, buildSearchQuery(search as string, searchFields));
 
         // Aggregation pipeline
         const pipeline: PipelineStage[] = [
@@ -1092,6 +1088,180 @@ const dashboard = {
         } catch (error) {
             console.error('Error calculating reading statistics:', error);
             res.status(500).json({ error: "Chyba pri získavaní štatistík čítania! " + error });
+        }
+    },
+    getOldestBooks: async (_: Request, res: Response): Promise<void> => {
+        try {
+            const books = await Book
+                .find({ deletedAt: undefined, "published.year": { $ne: null } })
+                .sort({ "published.year": 1, title: 1 })
+                .select("title published.year picture autor")
+                .populate({ path: "autor", select: "firstName lastName" })
+                .lean();
+
+            const groupedByYear = new Map<number, { year: number; books: any[]; count: number }>();
+
+            for (const book of books as any[]) {
+                const year = Number(book?.published?.year);
+                if (!Number.isFinite(year)) continue;
+
+                if (!groupedByYear.has(year)) {
+                    if (groupedByYear.size >= 10) continue;
+                    groupedByYear.set(year, { year, books: [], count: 0 });
+                }
+
+                const group = groupedByYear.get(year)!;
+                group.count += 1;
+
+                if (group.books.length < 10) {
+                    const authorDoc = Array.isArray(book.autor) ? book.autor[0] : book.autor;
+                    group.books.push({
+                        _id: book._id,
+                        title: book.title,
+                        year,
+                        picture: book.picture ?? null,
+                        author: authorDoc ? stringifyName(authorDoc) : ""
+                    });
+                }
+            }
+
+            res.status(200).json(Array.from(groupedByYear.values()));
+        } catch (error) {
+            console.error("Error fetching oldest books:", error);
+            res.status(500).json({ error: "Chyba pri získavaní najstarších kníh! " + error });
+        }
+    },
+    getNewestBooks: async (_: Request, res: Response): Promise<void> => {
+        try {
+            const books = await Book
+                .find({ deletedAt: undefined })
+                .sort({ createdAt: -1 })
+                .limit(10)
+                .select("title createdAt picture autor")
+                .populate({ path: "autor", select: "firstName lastName" })
+                .lean();
+
+            const formattedBooks = (books as any[]).map((book) => {
+                const authorDoc = Array.isArray(book.autor) ? book.autor[0] : book.autor;
+                return {
+                    _id: book._id,
+                    title: book.title,
+                    createdAt: book.createdAt,
+                    picture: book.picture ?? null,
+                    author: authorDoc ? stringifyName(authorDoc) : ""
+                };
+            });
+
+            res.status(200).json(formattedBooks);
+        } catch (error) {
+            console.error("Error fetching newest books:", error);
+            res.status(500).json({ error: "Chyba pri získavaní najnovších kníh! " + error });
+        }
+    },
+    getBiggestBooks: async (req: Request, res: Response): Promise<void> => {
+        try {
+            const { dimension = "height" } = req.query as { dimension?: string };
+            const allowedDimensions = ["height", "width", "thickness", "weight", "square"];
+            const safeDimension = allowedDimensions.includes(dimension) ? dimension : "height";
+
+            if (safeDimension === "square") {
+                const squareBooks = await Book.aggregate([
+                    {
+                        $match: {
+                            deletedAt: undefined,
+                            "dimensions.height": { $ne: null },
+                            "dimensions.width": { $ne: null }
+                        }
+                    },
+                    {
+                        $addFields: {
+                            heightDouble: { $toDouble: "$dimensions.height" },
+                            widthDouble: { $toDouble: "$dimensions.width" }
+                        }
+                    },
+                    {
+                        $addFields: {
+                            squareDelta: { $abs: { $subtract: ["$heightDouble", "$widthDouble"] } }
+                        }
+                    },
+                    {
+                        $match: {
+                            squareDelta: 0
+                        }
+                    },
+                    {
+                        $sort: { squareDelta: 1, title: 1 }
+                    },
+                    {
+                        $lookup: {
+                            from: "autors",
+                            localField: "autor",
+                            foreignField: "_id",
+                            as: "autor"
+                        }
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            title: 1,
+                            picture: 1,
+                            height: "$heightDouble",
+                            width: "$widthDouble",
+                            value: "$squareDelta",
+                            autor: { $slice: ["$autor", 1] }
+                        }
+                    }
+                ]);
+
+                const formattedSquareBooks = (squareBooks as any[]).map((book) => {
+                    const authorDoc = Array.isArray(book.autor) ? book.autor[0] : book.autor;
+                    const numericValue = Number(book.value);
+                    return {
+                        _id: book._id,
+                        title: book.title,
+                        value: Number.isFinite(numericValue) ? numericValue : null,
+                        height: Number.isFinite(Number(book.height)) ? Number(book.height) : null,
+                        width: Number.isFinite(Number(book.width)) ? Number(book.width) : null,
+                        picture: book.picture ?? null,
+                        author: authorDoc ? stringifyName(authorDoc) : ""
+                    };
+                });
+
+                res.status(200).json(formattedSquareBooks);
+                return;
+            }
+
+            const dimensionField = `dimensions.${safeDimension}`;
+            const books = await Book
+                .find({ deletedAt: undefined, [dimensionField]: { $ne: null } })
+                .sort({ [dimensionField]: -1 })
+                .limit(10)
+                .select(`title ${dimensionField} picture autor`)
+                .populate({ path: "autor", select: "firstName lastName" })
+                .lean();
+
+            const formattedBooks = (books as any[]).map((book) => {
+                const dimValue = book.dimensions?.[safeDimension as keyof typeof book.dimensions];
+                let numValue: number | null = null;
+                if (dimValue !== null && dimValue !== undefined) {
+                    const numericValue = Number(dimValue);
+                    numValue = Number.isFinite(numericValue) ? numericValue : null;
+                }
+
+                const authorDoc = Array.isArray(book.autor) ? book.autor[0] : book.autor;
+                return {
+                    _id: book._id,
+                    title: book.title,
+                    value: numValue,
+                    picture: book.picture ?? null,
+                    author: authorDoc ? stringifyName(authorDoc) : ""
+                };
+            });
+
+            res.status(200).json(formattedBooks);
+        } catch (error) {
+            console.error("Error fetching biggest books:", error);
+            res.status(500).json({ error: "Chyba pri získavaní najväčších kníh! " + error });
         }
     }
 }

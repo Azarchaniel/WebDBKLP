@@ -111,6 +111,9 @@ router.get('/get-dimensions-statistics', dashboard.getDimensionsStatistics)
 router.get('/get-language-statistics', dashboard.getLanguageStatistics)
 router.get('/get-size-groups', dashboard.getSizesGroups)
 router.get('/get-read-by', dashboard.getReadBy)
+router.get('/get-oldest-books', dashboard.getOldestBooks)
+router.get('/get-newest-books', dashboard.getNewestBooks)
+router.get('/get-biggest-books', dashboard.getBiggestBooks)
 
 // ### BOARD GAMES ###
 router.get('/boardgames', getAllBoardGames)
