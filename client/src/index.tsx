@@ -9,6 +9,7 @@ import { AuthProvider } from "@utils/context";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import App from "./App";
 import UtilPage from "pages/utils/outside-utils";
+import KzpPage from "pages/utils/KzpPage";
 import "./i18n";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
@@ -26,6 +27,7 @@ root.render(
                     <Route path="/board-games" element={<BoardGamesPage />} />
                 </Route>
                 <Route path="/utils" element={<UtilPage />} />
+                <Route path="/kzp" element={<KzpPage />} />
             </Routes>
         </BrowserRouter>
     </AuthProvider>

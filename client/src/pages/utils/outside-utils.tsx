@@ -17,6 +17,10 @@ export default function UtilPage() {
 
             <p>This page contains various utility functions and tools that do not fit into the main categories of WebDBKLP.</p>
 
+            <h3>Counter for <b>Kámen, zbraně, papír</b></h3>
+            Click to redirect to <Link to='/kzp' style={{ textDecoration: 'none', color: 'blue' }}>Kámen, zbraně, papír counter</Link> - a simple tool to keep track of resources.
+
+            <div style={{ height: "50px" }} />
             <h3>Fix Slovak/Czech language</h3>
 
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginTop: 12 }}>
