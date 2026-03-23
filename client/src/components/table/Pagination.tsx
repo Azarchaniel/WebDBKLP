@@ -82,7 +82,8 @@ const Pagination: React.FC<PaginationProps> = ({
                     onBlur={handleInputBlur}
                     onKeyDown={handleInputKeyDown}
                     className="pageInput form-control"
-                    title={t("pagination.jumpToPage")}
+                    data-tooltip-id="global-tooltip"
+                    data-tooltip-content={t("pagination.jumpToPage")}
                 />
                 <input
                     type="text"
@@ -90,7 +91,8 @@ const Pagination: React.FC<PaginationProps> = ({
                     maxLength={1}
                     onKeyDown={handleLetterChangeKeyDown}
                     className="pageInput form-control"
-                    title={t("pagination.jumpToLetter")}
+                    data-tooltip-id="global-tooltip"
+                    data-tooltip-content={t("pagination.jumpToLetter")}
                 />
             </div>
             <div className="pageControl">

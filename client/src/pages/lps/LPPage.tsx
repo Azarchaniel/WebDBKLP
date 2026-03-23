@@ -312,14 +312,16 @@ export default function LPPage() {
                             <button
                                 type="button"
                                 className="addBtnTable"
+                                data-tooltip-id="global-tooltip"
+                                data-tooltip-content={t("lp.addNew")}
                                 onClick={handleAddLP}
-                                title={t("lp.addNew")}
                             />
                         )}
                         <i
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
-                            title={t("books.showHideColumns")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("books.showHideColumns")}
                             onClick={() => setShowColumn({ ...showColumn, control: !showColumn.control })}
                         />
                     </div>
@@ -327,12 +329,14 @@ export default function LPPage() {
                 rowActions={isLoggedIn ? (_id) => (
                     <div className="actionsRow">
                         <button
-                            title={t("common.delete")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.delete")}
                             onClick={() => handleDeleteLP(_id)}
                             className="fa fa-trash"
                         />
                         <button
-                            title={t("common.edit")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.edit")}
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateLp(_id)}
                         />
