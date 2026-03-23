@@ -8,13 +8,14 @@ import {
 	Separator,
 	Toolbar
 } from "react-simple-wysiwyg";
-import React, {useEffect} from "react";
+import React, { useEffect } from "react";
 
 interface Props extends EditorProps {
-    style?: React.CSSProperties;
+	style?: React.CSSProperties;
 	hidetoolbar?: string;
 	customerror?: string;
 	id?: string;
+	placeholder?: string;
 }
 
 export const Wysiwyg: React.FC<Props> = props => {
@@ -27,7 +28,8 @@ export const Wysiwyg: React.FC<Props> = props => {
 				inputElement.style.borderBottomLefttRadius = "4px";
 			} else {
 				inputElement.style.border = "none";
-			}}
+			}
+		}
 
 	}, [props.customerror]);
 

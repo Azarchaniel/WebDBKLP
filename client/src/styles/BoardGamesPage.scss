@@ -77,15 +77,26 @@
 
 .bg-expansions {
   grid-area: 6 / 1 / 6 / 13;
-}
-
-.bg-no-players, .bg-age-recommendation, .bg-play-time {
   display: flex;
   flex-direction: row;
   gap: 5px;
 }
 
-@media screen and (width <= $mobile-width) {
+.bg-expansions-toggle,
+.bg-expansions-select {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.bg-no-players,
+.bg-age-recommendation,
+.bg-play-time {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+@media screen and (width <=$mobile-width) {
   .boardGameDetail {
     flex-direction: column;
 
@@ -99,12 +110,17 @@
   }
 
   form {
-    grid-template-columns: 1fr; /* Single column on mobile */
+    grid-template-columns: 1fr;
+    /* Single column on mobile */
   }
 
   /* Make all items span the single column on mobile */
-  form > div {
+  form>div {
     grid-column: 1;
     grid-area: unset !important; //has to be important, because it's less specific than classes above
+  }
+
+  .bg-expansions {
+    flex-direction: column;
   }
 }

@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from "react";
+import React, { useEffect, useRef } from "react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     customerror?: string;
@@ -31,7 +31,7 @@ export const InputField = React.memo((props: InputProps) => {
                 placeholder=""
                 ref={inputRef}
                 className="form-control" autoComplete="off"
-                lang="cs-CZ"
+                lang={props.lang || "cs-CZ"}
             />
             {props.placeholder && <span className="floating-label">{props.placeholder}</span>}
         </div>

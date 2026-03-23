@@ -3,7 +3,7 @@ import QuoteItem from "./QuoteItem";
 import React, { useEffect, useState } from "react";
 import { addQuote, deleteQuote, getQuotes } from "../../API";
 import { toast } from "react-toastify";
-import { generateColors, getRandomShade, ScrollToTopBtn, fetchQuotedBooks } from "@utils";
+import { generateColors, getRandomShade, ScrollToTopBtn } from "@utils";
 import { LoadingBooks } from "@components/LoadingBooks";
 import { useReadLocalStorage } from "usehooks-ts";
 import { openConfirmDialog } from "@components/ConfirmDialog";
@@ -19,11 +19,24 @@ interface QuoteGroup {
     baseColor: string;
 }
 
+interface QuoteBookOption {
+    _id: string;
+    showName: string;
+}
+
+const toQuoteBookOption = (book: IBook): QuoteBookOption => ({
+    _id: book._id,
+    showName: `${book.title}
+                        ${book.autor && book.autor[0] && book.autor[0].firstName ? "/ " + book.autor[0].firstName : ""}
+                        ${book.autor && book.autor[0] && book.autor[0].lastName ? book.autor[0].lastName : ""}
+                        ${book.published && book.published?.year ? "/ " + book.published?.year : ""}`
+});
+
 export default function QuotePage() {
     const { t } = useTranslation();
     const { isLoggedIn, currentUser } = useAuth();
-    const [books, setBooks] = useState<IBook[]>([]);
-    const [booksToFilter, setBooksToFilter] = useState<IBook[]>([]);
+    const [books, setBooks] = useState<QuoteBookOption[]>([]);
+    const [booksToFilter, setBooksToFilter] = useState<QuoteBookOption[]>([]);
     const [filteredQuotes, setFilteredQuotes] = useState<IQuote[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const activeUser = useReadLocalStorage("activeUsers") as string[];
@@ -67,9 +80,9 @@ export default function QuotePage() {
         setQuoteGroups(Object.values(groups));
     };
 
-    const updateFilteredBooks = (books: IBook[]): void => {
+    const updateFilteredBooks = (books: QuoteBookOption[]): void => {
         setBooksToFilter(books);
-        fetchQuotes(books.map((book: IBook) => book._id));
+        fetchQuotes(books.map((book: QuoteBookOption) => book._id));
     }
 
     const fetchQuotes = (books?: string[]): void => {
@@ -80,7 +93,7 @@ export default function QuotePage() {
                 setFilteredQuotes(quotes);
                 setCountAll(count);
                 //only overwrite books if this is init call
-                if (!books) setBooks(onlyQuotedBooks);
+                if (!books) setBooks((onlyQuotedBooks ?? []).map(toQuoteBookOption));
             })
             .catch((err: Error) => console.trace(err))
             .finally(() => setLoading(false))
@@ -155,7 +168,8 @@ export default function QuotePage() {
                     type="button"
                     className="addQuote"
                     onClick={handleAddQuote}
-                    data-tip={t("quotes.add")}
+                    data-tooltip-id="global-tooltip"
+                    data-tooltip-content={t("quotes.add")}
                 />
             )}
             <div>
@@ -168,12 +182,10 @@ export default function QuotePage() {
                 <div className="quoteBookSearch">
                     <LazyLoadMultiselect
                         value={booksToFilter}
-                        onSearch={(query: string, page: number) =>
-                            fetchQuotedBooks(query, page, books.map((book: IBook) => book._id))
-                        }
+                        options={books}
                         displayValue="showName"
                         placeholder={t("quotes.fromBookPlaceholder")}
-                        onChange={({ value }) => updateFilteredBooks(value as IBook[])}
+                        onChange={({ value }) => updateFilteredBooks(value as QuoteBookOption[])}
                         name="fromBook"
                     />
                 </div>

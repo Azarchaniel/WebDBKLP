@@ -29,6 +29,7 @@ const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
 
         const quotes: IQuote[] = await Quote.find(query)
             .populate(populateOptions)
+            .sort({ createdAt: -1 })
             .exec();
 
         const count = await Quote.countDocuments(query);
