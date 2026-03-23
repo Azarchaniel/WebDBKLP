@@ -1,16 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useTranslation } from "react-i18next";
 
-export const TooltipedText = (elementText: string, tooltipText: string) => {
+interface TooltipedTextProps {
+	elementText: string;
+	tooltipText: string;
+	spanClass?: string;
+}
+
+export const TooltipedText = ({ elementText, tooltipText, spanClass }: TooltipedTextProps) => {
+	const tooltipId = useId();
+
 	return (
 		<div>
-			<span data-tip>
+			<span data-tooltip-id={tooltipId} data-tooltip-content={tooltipText} className={spanClass}>
 				{elementText}
 			</span>
-			<ReactTooltip place="bottom" className="tooltipA">
-				<span>{tooltipText}</span>
-			</ReactTooltip>
+			<ReactTooltip id={tooltipId} place="bottom" className="tooltipA" />
 		</div>
 	)
 }
@@ -31,6 +37,6 @@ export const ScrollToTopBtn = ({ scrollToTop = () => { } }) => {
 	}, []);
 
 	return (
-		showScrollToTop ? <button title={t("common.scrollTop")} className="scrollToTop" onClick={() => scrollToTop()} /> : <></>
+		showScrollToTop ? <button data-tooltip-id="global-tooltip" data-tooltip-content={t("common.scrollTop")} className="scrollToTop" onClick={() => scrollToTop()} /> : <></>
 	)
 }

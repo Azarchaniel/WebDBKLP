@@ -13,10 +13,10 @@ export const DashboardTableStats = ({ dimensionStats }: Props) => {
 		return <NoData />;
 
 	const translationMap: Record<string, string> = {
-		height: t("dashboard.heightCm"),
-		width: t("dashboard.widthCm"),
-		thickness: t("fields.thicknessCm"),
-		weight: t("fields.weightG"),
+		height: t("dashboard.height") + " (cm)",
+		width: t("dashboard.width") + " (cm)",
+		thickness: t("dashboard.thickness") + " (cm)",
+		weight: t("dashboard.weight") + " (g)",
 		sum: t("stats.sum"),
 		avg: t("stats.avg"),
 		min: t("stats.min"),
@@ -25,23 +25,23 @@ export const DashboardTableStats = ({ dimensionStats }: Props) => {
 		median: t("stats.median")
 	};
 
-	const rows: any[] = Object.keys(dimensionStats);
-	const columns: any[] = Object.keys(dimensionStats.height);
+	const dimensions: string[] = Object.keys(dimensionStats);
+	const metrics: string[] = Object.keys(dimensionStats.height);
 
 	return (
-		<>
-			<div className="phone-table">
-				{columns.map((column) => (
-					<div key={column} className="mobile-section">
+		<div className="dashboardCardScrollBody dashboardDimensionStats">
+			<div className="phone-table dashboardStatsMobile">
+				{dimensions.map((dimension) => (
+					<div key={dimension} className="mobile-section">
 						<div className="section-title">
-							{translationMap[column]}
+							{translationMap[dimension]}
 						</div>
-						<table className="responsive-table" border={1} cellPadding="8" cellSpacing="0" style={{ width: "100%", textAlign: "center" }}>
+						<table className="responsive-table dashboardStatsTable dashboardStatsTable--mobile">
 							<tbody>
-								{rows.map((row) => (
-									<tr key={row}>
-										<td><b>{translationMap[row]}</b></td>
-										<td>{formatDimension(dimensionStats[row][column], t('common.locale'))}</td>
+								{metrics.map((metric) => (
+									<tr key={metric}>
+										<td><b>{translationMap[metric]}</b></td>
+										<td>{formatDimension(dimensionStats[dimension][metric], t('common.locale'))}</td>
 									</tr>
 								))}
 							</tbody>
@@ -50,27 +50,26 @@ export const DashboardTableStats = ({ dimensionStats }: Props) => {
 				))}
 			</div>
 
-			<table className="desktop-table" border={1} cellPadding="10" cellSpacing="0" style={{ width: "100%", textAlign: "center" }}>
+			<table className="desktop-table dashboardStatsTable dashboardStatsTable--desktop">
 				<thead>
 					<tr>
 						<th className="firstCell" />
-						{columns.map((column) => (
-							<th key={column}>{translationMap[column]}</th>
+						{dimensions.map((dimension) => (
+							<th key={dimension}>{translationMap[dimension]}</th>
 						))}
 					</tr>
 				</thead>
 				<tbody>
-					{rows.map((row: string) => (
-						<tr key={row}>
-							<td><b>{translationMap[row]}</b></td>
-							{columns.map((column) => (
-								<td key={column}>{formatDimension(dimensionStats[row][column], t('common.locale'))}</td>
+					{metrics.map((metric: string) => (
+						<tr key={metric}>
+							<td><b>{translationMap[metric]}</b></td>
+							{dimensions.map((dimension) => (
+								<td key={dimension}>{formatDimension(dimensionStats[dimension][metric], t('common.locale'))}</td>
 							))}
 						</tr>
 					))}
 				</tbody>
 			</table>
-			<div style={{ height: "1rem" }} />
-		</>
+		</div>
 	);
 };

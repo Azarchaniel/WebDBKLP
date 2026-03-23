@@ -2,6 +2,7 @@ import { ILanguageStatistics } from "../../type";
 import { ReactElement } from "react";
 import { NoData } from "./NoData";
 import { useTranslation } from "react-i18next";
+import { formatNumberLocale } from "@utils";
 
 interface Props {
 	languageStats: ILanguageStatistics[] | undefined;
@@ -10,11 +11,6 @@ interface Props {
 export const TableLanguageStats = ({ languageStats }: Props): ReactElement => {
 	const { t } = useTranslation();
 	if (!languageStats || languageStats?.length === 0) return <NoData />;
-
-	const translationMap: Record<string, string> = {
-		language: t("common.language"),
-		count: t("common.count")
-	};
 
 	const languageNameMap: Record<string, string> = {
 		sk: t("language.sk"),
@@ -29,12 +25,9 @@ export const TableLanguageStats = ({ languageStats }: Props): ReactElement => {
 		gd: t("language.gd"),
 	};
 
-	const chartBlue = "rgb(54, 162, 235)";
+	const chartBlue = "#00ADB5";
 	const sortedStats = [...languageStats].sort((a, b) => b.count - a.count);
 	const totalCount = sortedStats.reduce((sum, stat) => sum + stat.count, 0);
-
-	const rows: any[] = Object.keys(sortedStats);
-	const columns: any[] = Object.keys(sortedStats[0] || {}).sort().reverse(); // reverse alphabetical order
 
 	const getLanguageName = (languageCode: string) =>
 		languageNameMap[languageCode.toLowerCase()] ?? languageCode;
@@ -47,65 +40,21 @@ export const TableLanguageStats = ({ languageStats }: Props): ReactElement => {
 	};
 
 	return (
-		<>
-			<table className="phone-table" border={1} cellPadding="8" cellSpacing="0" style={{ width: "100%", textAlign: "center" }}>
-				<thead>
-					<tr>
-						<th style={{ width: "35%" }}>{t("common.language")}</th>
-						<th>{t("common.count")}</th>
-					</tr>
-				</thead>
-				<tbody>
-					{sortedStats.map((stat, index) => (
-						<tr key={index}>
-							<td style={{ width: "35%" }}>{getLanguageName(stat.language)}</td>
-							<td style={getBarStyle(stat.count)}>{stat.count}</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-
-			<table className="desktop-table" border={1} cellPadding="10" cellSpacing="0" style={{ width: "100%", textAlign: "center" }}>
-				<thead>
-					<tr>
-						{columns.map((column: string) => (
-							<th key={column} style={column === "language" ? { width: "35%" } : undefined}>
-								{translationMap[column]}
-							</th>
-						))}
-					</tr>
-				</thead>
-				<tbody>
-					{rows.map((row: string) => (
-						<tr key={row}>
-							{columns.map((column: string) => {
-								const stat = sortedStats[parseInt(row)];
-								if (column === "language") {
-									return (
-										<td key={column} style={{ width: "35%" }}>
-											{getLanguageName(stat.language)}
-										</td>
-									);
-								}
-
-								if (column === "count") {
-									return (
-										<td key={column} style={getBarStyle(stat.count)}>
-											{stat.count}
-										</td>
-									);
-								}
-
-								return (
-									<td key={column}>
-										{stat[column as keyof ILanguageStatistics]}
-									</td>
-								);
-							})}
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</>
+		<div className="dashboardTabbedCardContent">
+			<h5 className="dashboardTitle">{t("dashboard.languageStats")}</h5>
+			<div className="dashboardCardScrollBody">
+				{sortedStats.map((stat) => (
+					<div className="flex col" style={{ marginTop: "1.25rem", marginBottom: "1.25rem" }} key={stat.language}>
+						<div className="langStats">
+							<span>{getLanguageName(stat.language)}</span>
+							<span>{stat.count}</span>
+						</div>
+						<div className="langBar">
+							<div className="langBarFill" style={getBarStyle(stat.count)}></div>
+						</div>
+					</div>
+				))}
+			</div>
+		</div>
 	)
 }

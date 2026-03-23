@@ -102,10 +102,12 @@ const Quote: React.FC<QuoteProps> = ({ quote, bcgrClr, deleteQuote, saveQuote, s
 
             {isLoggedIn && (
                 <div className="card-btn-wrapper">
-                    <i className="fas fa-pen" onClick={handleEdit} />
+                    <i className="fas fa-pen" onClick={handleEdit} data-tooltip-id="global-tooltip" data-tooltip-content={t("quotes.edit")} />
                     &nbsp;&nbsp;&nbsp;
                     <i
                         className="fas fa-trash"
+                        data-tooltip-id="global-tooltip"
+                        data-tooltip-content={t("quotes.delete")}
                         onClick={() => deleteQuote(quote._id)}
                     />
                 </div>

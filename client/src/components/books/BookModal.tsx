@@ -8,10 +8,10 @@ import {
     validateNumber,
     countryCode,
     langCode,
-    cities,
+    CITIES,
     fetchAutors,
     fetchUsers,
-    emptyBook
+    EMPTY_BOOK
 } from "@utils";
 import { ArrayInput, InputField, LazyLoadMultiselect } from "@components/inputs";
 import { openLoadingBooks } from "../LoadingBooks";
@@ -35,7 +35,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
     const [formData, setFormData] = useState(
         Array.isArray(data) && data.length > 0
             ? data
-            : [emptyBook]
+            : [EMPTY_BOOK]
     );
     const [errors, setErrors] = useState<ValidationError[]>([{
         label: t("validation.bookTitleRequired"),
@@ -110,9 +110,9 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             const ownerData = formPersonsFullName(book.owner);
 
             return {
-                ...emptyBook,
+                ...EMPTY_BOOK,
                 ...book,
-                location: { city: cities.filter(c => c.value === book?.location?.city) },
+                location: { city: CITIES.filter(c => c.value === book?.location?.city) },
                 published: {
                     ...book.published,
                     country: countryCode.filter((country: ILangCode) =>
@@ -295,7 +295,8 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 />
                 <button
                     className="isbnLookup"
-                    title={t("books.scanIsbn")}
+                    data-tooltip-id="global-tooltip"
+                    data-tooltip-content={t("books.scanIsbn")}
                     onClick={getBookFromISBN}
                 >
                     <FontAwesomeIcon
@@ -401,7 +402,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             <div className="b-Mesto">
                 <LazyLoadMultiselect
                     selectionLimit={1}
-                    options={cities}
+                    options={CITIES}
                     displayValue="showValue"
                     placeholder={t("fields.city")}
                     onChange={handleInputChange}
@@ -430,18 +431,18 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
             </div>
             <div className="b-Vyska">
                 <InputField
-                    placeholder={t("dashboard.heightCm")}
+                    placeholder={t("fields.heightCm")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.height")}
-                    {...getInputParams("dimensions.height", formData, t("dashboard.heightCm"))}
+                    {...getInputParams("dimensions.height", formData, t("fields.heightCm"))}
                 />
             </div>
             <div className="b-Sirka">
                 <InputField
-                    placeholder={t("dashboard.widthCm")}
+                    placeholder={t("fields.widthCm")}
                     onChange={handleInputChange}
                     customerror={getErrorMsg("dimensions.width")}
-                    {...getInputParams("dimensions.width", formData, t("dashboard.widthCm"))}
+                    {...getInputParams("dimensions.width", formData, t("fields.widthCm"))}
                 />
             </div>
             <div className="b-Hrubka">

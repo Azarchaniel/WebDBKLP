@@ -57,6 +57,8 @@ export default function BookPage() {
         edition: false,
         serie: false,
         published: !isMobile(),
+        "published.publisher": !isMobile(),
+        "published.year": !isMobile(),
         exLibris: !isMobile(),
         readBy: !isMobile(),
         note: !isMobile(),
@@ -342,6 +344,7 @@ export default function BookPage() {
                     shown={showColumn}
                     setShown={setShowColumn}
                     dimensionsLabel={t("table.books.dimensions")}
+                    publishedLabel={t("table.books.published")}
                 />
             </div>
             <ServerPaginationTable
@@ -412,14 +415,16 @@ export default function BookPage() {
                             <button
                                 type="button"
                                 className="addBtnTable"
+                                data-tooltip-id="global-tooltip"
+                                data-tooltip-content={t("books.addNew")}
                                 onClick={handleAddBook}
-                                title={t("books.addNew")}
                             />
                         )}
                         <i
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
-                            title={t("books.showHideColumns")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("books.showHideColumns")}
                             onClick={() => setShowColumn({ ...showColumn, control: !showColumn.control })}
                         />
                     </div>
@@ -428,19 +433,22 @@ export default function BookPage() {
                     <div key={_id} className="actionsRow">
                         <button
                             key={`delete-${_id}`}
-                            title={t("common.delete")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.delete")}
                             onClick={() => handleDeleteBook(_id)}
                             className="fa fa-trash"
                         />
                         <button
                             key={`edit-${_id}`}
-                            title={t("common.edit")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.edit")}
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateBook(_id)}
                         />
                         <button
                             key={`detail-${_id}`}
-                            title={t("common.details")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.details")}
                             className={`fa ${isExpanded ? "fa-chevron-up" : "fa-chevron-down"}`}
                             onClick={() => expandRow()}
                         />

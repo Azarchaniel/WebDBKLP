@@ -1,41 +1,42 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface TabsProps {
-    children: any | any[];
+	children: any | any[];
+	className?: string;
 }
 
 interface TabProps {
-    children: React.ReactNode;
-    label: string;
+	children: React.ReactNode;
+	label: string;
 }
 
-const Tabs = ({ children }: TabsProps) => {
+const Tabs = ({ children, className = "" }: TabsProps) => {
 	if (!Array.isArray(children)) {
 		children = [children];
 	}
 
 	const [activeTab, setActiveTab] = useState(children[0]?.props.label || "");
+	const headerRef = useRef<HTMLDivElement | null>(null);
 
-	const invertWheelScroll = (e: WheelEvent, header: Element | null) => {
+	const invertWheelScroll = (e: React.WheelEvent<HTMLDivElement>) => {
+		const header = headerRef.current;
 		if (!header) return;
-		if ((e.target as Element).matches(".tab-button")) {
-			if (e.deltaY > 0) header.scrollLeft += 30;
-			else header.scrollLeft -= 30;
+
+		if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+			e.preventDefault();
+			header.scrollLeft += e.deltaY;
 		}
-	}
+	};
 
 	useEffect(() => {
-		//find .tabs-header on page and if you have hover over tabs, scroll horizontally
-		const header = document.querySelector(".tabs-header");
-		window.addEventListener("wheel", (e) => invertWheelScroll(e, header));
-		return () => {
-			document.removeEventListener("wheel", (e) => invertWheelScroll(e, header));
-		};
-	}, []);
+		if (!children.find((child: any) => child.props.label === activeTab)) {
+			setActiveTab(children[0]?.props.label || "");
+		}
+	}, [children, activeTab]);
 
 	return (
-		<div className="tabs-container">
-			<div className="tabs-header">
+		<div className={`tabs-container ${className}`.trim()}>
+			<div className="tabs-header" ref={headerRef} onWheel={invertWheelScroll}>
 				{children.map((child: any) => (
 					<button
 						key={child.props.label}
@@ -60,7 +61,7 @@ const Tabs = ({ children }: TabsProps) => {
 };
 
 const Tab = ({ label, children }: TabProps) => {
-	return <div dadta-label={label}>{children}</div>;
+	return <div data-label={label}>{children}</div>;
 };
 
 export { Tabs, Tab };

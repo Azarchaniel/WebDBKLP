@@ -18,15 +18,6 @@
     "autors": {
         "actionAdded": "přidán",
         "actionSaved": "uložen",
-        "detailBookCount": "Počet knih",
-        "detailLpCount": "Počet LP",
-        "detailName": "Jméno",
-        "roleAutor": "Autor",
-        "roleEditor": "Editor",
-        "roleIlustrator": "Ilustrátor",
-        "roleTranslator": "Překladatel",
-        "roleMusician": "Hudebník",
-        "roleBoardGameAutor": "Autor deskové hry",
         "addNew": "Přidat nového autora",
         "addTitle": "Přidání autora",
         "createdSuccess": "Autor byl úspěšně přidán.",
@@ -40,9 +31,18 @@
         "deleteSuccessSingle": "Autor {{name}} byl úspěšně smazán.",
         "deleteTitleMany": "Smazat autory?",
         "deleteTitleSingle": "Smazat autora?",
+        "detailBookCount": "Počet knih",
+        "detailLpCount": "Počet LP",
+        "detailName": "Jméno",
         "editTitle": "Úprava autora",
         "notFound": "Chyba! Autor nebyl nalezen!",
         "pageTitle": "Autoři ({{count}})",
+        "roleAutor": "Autor",
+        "roleBoardGameAutor": "Autor deskové hry",
+        "roleEditor": "Editor",
+        "roleIlustrator": "Ilustrátor",
+        "roleMusician": "Hudebník",
+        "roleTranslator": "Překladatel",
         "saveError": "Chyba! Autor nebyl uložen!",
         "saveManySuccess_few": "{{count}} autoři byli úspěšně upraveni.",
         "saveManySuccess_one": "{{count}} autor byl úspěšně upraven.",
@@ -168,6 +168,7 @@
         "count": "Počet",
         "country": "Země",
         "currentLanguage": "Aktuální jazyk:",
+        "dateFormat": "dd.MM.yyyy",
         "delete": "Smazat",
         "details": "Detaily",
         "dimensions": "Rozměry",
@@ -178,6 +179,7 @@
         "hide": "Skrýt",
         "image": "Obrázek",
         "language": "Jazyk",
+        "locale": "cs-CZ",
         "location": "Umístění",
         "menu": "Menu",
         "multipleValues": "Více hodnot",
@@ -202,13 +204,21 @@
         "weight": "Hmotnost",
         "width": "Šířka",
         "year": "Rok",
-        "yes": "Ano",
-        "locale": "cs-CZ"
+        "yes": "Ano"
     },
     "dashboard": {
-        "heightCm": "Výška (cm)",
+        "height": "Výška",
+        "thickness": "Tloušťka",
+        "weight": "Hmotnost",
+        "square": "Čtverec",
         "noData": "Žádná data",
-        "widthCm": "Šířka (cm)"
+        "width": "Šířka",
+        "oldestBooks": "Nejstarší knihy",
+        "newestBooks": "Posledně přidané knihy",
+        "biggestBooks": "Největší knihy",
+        "languageStats": "Jazykové statistiky",
+        "readBy": "Přečteno",
+        "totalBooks": "Celkem knih"
     },
     "fields": {
         "ageFrom": "Věková kategorie od",
@@ -258,12 +268,12 @@
     },
     "language": {
         "cs": "Čeština",
-        "changeTo": "Změnit na:",
         "de": "Němčina",
         "en": "Angličtina",
         "es": "Španělština",
         "fr": "Francouzština",
         "gd": "Skotská gaelština",
+        "changeTo": "Změnit na:",
         "ru": "Ruština",
         "sk": "Slovenčina",
         "sv": "Švédština"
@@ -327,7 +337,10 @@
         "note": "Poznámka: ",
         "saveError": "Citát se nepodařilo {{action}}!",
         "saveSuccess": "Citát byl úspěšně {{action}}.",
-        "title": "Citace ({{count}})"
+        "text": "Text",
+        "title": "Citace ({{count}})",
+        "edit": "Upravit citát",
+        "delete": "Smazat citát"
     },
     "range": {
         "between": "{{from}} až {{to}} {{unit}}",
@@ -382,6 +395,7 @@
             "owner": "Vlastník",
             "pages": "Počet stran",
             "published": "Vydáno",
+            "publisher": "Vydavatel",
             "readBy": "Přečteno",
             "serie": "Série",
             "subtitle": "Podnázev",
@@ -390,7 +404,8 @@
             "translator": "Překladatel",
             "updatedAt": "Datum úpravy",
             "weight": "Hmotnost",
-            "width": "Šířka"
+            "width": "Šířka",
+            "year": "Rok"
         },
         "filters": {
             "eq": "Rovná se",

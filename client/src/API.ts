@@ -726,6 +726,42 @@ export const getReadBy = async (): Promise<AxiosResponse> => {
     }
 }
 
+export const getOldestBooks = async (): Promise<AxiosResponse> => {
+    try {
+        const oldestBooks: AxiosResponse = await axiosInstance.get(
+            `${baseUrl}/get-oldest-books`,
+        )
+        return oldestBooks;
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
+export const getNewestBooks = async (): Promise<AxiosResponse> => {
+    try {
+        const newestBooks: AxiosResponse = await axiosInstance.get(
+            `${baseUrl}/get-newest-books`,
+        )
+        return newestBooks;
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
+export const getBiggestBooks = async (dimension: string = "height"): Promise<AxiosResponse> => {
+    try {
+        const biggestBooks: AxiosResponse = await axiosInstance.get(
+            `${baseUrl}/get-biggest-books`,
+            {
+                params: { dimension }
+            }
+        )
+        return biggestBooks;
+    } catch (error: any) {
+        throw new Error(error)
+    }
+}
+
 // ### BOARD GAMES ###
 export const getBoardGames = async (params?: any): Promise<AxiosResponse<any>> => {
     try {

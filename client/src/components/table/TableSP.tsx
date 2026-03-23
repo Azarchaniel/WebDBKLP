@@ -14,6 +14,9 @@ import { isMobile, mapBookColumnsToFilterTypes, mapColumnName } from "@utils";
 import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import ThreeStateCheckbox from "@components/inputs/ThreeStateCheckbox";
 import { useTranslation } from "react-i18next";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { cs, enUS, sk } from "date-fns/locale";
 
 type PropsMT = {
     title: string;
@@ -158,6 +161,29 @@ const ServerPaginationTable: FC<PropsMT> =
         }, [filtering]);
 
         const getInputForColumn = (columnName: string) => {
+            const locale = t("common.locale");
+            const getDatePickerLocale = () => {
+                if (locale.startsWith("sk")) return sk;
+                if (locale.startsWith("cs")) return cs;
+                return enUS;
+            };
+
+            const parseIsoToDate = (value: string): Date | null => {
+                if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                    return null;
+                }
+
+                const [year, month, day] = value.split("-").map(Number);
+                return new Date(year, month - 1, day);
+            };
+
+            const formatDateToIso = (value: Date): string => {
+                const year = value.getFullYear();
+                const month = String(value.getMonth() + 1).padStart(2, "0");
+                const day = String(value.getDate()).padStart(2, "0");
+                return `${year}-${month}-${day}`;
+            };
+
             switch (mapBookColumnsToFilterTypes(columnName)) {
                 case "input":
                     return (
@@ -323,6 +349,87 @@ const ServerPaginationTable: FC<PropsMT> =
                             />
                         </div>
                     );
+                case "date":
+                    const dateFilter = (filtering as any[]).find((f) => f.id === columnName);
+                    const dateValue = dateFilter?.value || '';
+                    const dateOperator = dateFilter?.operator || '=';
+                    const currentDateFilter = numberFilterStates[columnName] || {
+                        value: dateValue,
+                        operator: dateOperator
+                    };
+
+                    const handleDateOperatorChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+                        const operator = e.target.value;
+                        const value = currentDateFilter.value;
+
+                        setNumberFilterStates(prev => ({
+                            ...prev,
+                            [columnName]: { value, operator }
+                        }));
+
+                        if (value) {
+                            setFiltering((prev: any) => {
+                                const existingFilter = prev.find((f: any) => f.id === columnName);
+                                if (existingFilter) {
+                                    return prev.map((f: any) =>
+                                        f.id === columnName ? { ...f, value, operator } : f
+                                    );
+                                }
+
+                                return [...prev, { id: columnName, value, operator }];
+                            });
+                        }
+                    };
+
+                    const handleDateValueChange = (date: Date | null) => {
+                        const operator = currentDateFilter.operator;
+
+                        setNumberFilterStates(prev => ({
+                            ...prev,
+                            [columnName]: { value: date ? formatDateToIso(date) : "", operator }
+                        }));
+
+                        if (!date) {
+                            setFiltering((prev: any) => prev.filter((f: any) => f.id !== columnName));
+                        } else {
+                            const normalizedValue = formatDateToIso(date);
+                            setFiltering((prev: any) => {
+                                const existingFilter = prev.find((f: any) => f.id === columnName);
+                                if (existingFilter) {
+                                    return prev.map((f: any) =>
+                                        f.id === columnName ? { ...f, value: normalizedValue, operator } : f
+                                    );
+                                }
+
+                                return [...prev, { id: columnName, value: normalizedValue, operator }];
+                            });
+                        }
+                    };
+
+                    return (
+                        <div className="d-flex number-filter">
+                            <select
+                                className="form-control operator-select"
+                                value={currentDateFilter.operator}
+                                onChange={handleDateOperatorChange}
+                                style={{ width: "40px", flex: "0 0 auto", padding: "0 4px" }}
+                                title={t("table.filters.operator")}
+                            >
+                                <option value="=" title={t("table.filters.eq")}>=</option>
+                                <option value="<" title={t("table.filters.lt")}>{"<"}</option>
+                                <option value=">" title={t("table.filters.gt")}>{">"}</option>
+                            </select>
+                            <DatePicker
+                                className="form-control"
+                                selected={parseIsoToDate(currentDateFilter.value)}
+                                onChange={handleDateValueChange}
+                                dateFormat={t("common.dateFormat")}
+                                locale={getDatePickerLocale()}
+                                isClearable
+                                placeholderText={t("common.dateFormat")}
+                            />
+                        </div>
+                    );
                 default:
                     return null;
             }
@@ -357,6 +464,9 @@ const ServerPaginationTable: FC<PropsMT> =
             onRowSelectionChange: setSelectedRows
         });
 
+        const headerGroups = table.getHeaderGroups();
+        const hasNestedHeaderRows = headerGroups.length > 1;
+
         return (
             <div className="p-4">
                 <div className="headerTitleAction">
@@ -373,7 +483,7 @@ const ServerPaginationTable: FC<PropsMT> =
                                     }
                                 }}
                             >
-                                <i className="fas fa-filter" title={t("table.filters.title")} />
+                                <i className="fas fa-filter" data-tooltip-id="global-tooltip" data-tooltip-content={t("table.filters.title")} />
                             </button>}
                     </div>
                 </div>
@@ -386,9 +496,12 @@ const ServerPaginationTable: FC<PropsMT> =
                         <>
                             <table className="serverPaginationTable">
                                 <thead className="tableHeader">
-                                    {table.getHeaderGroups().map((headerGroup, index) => (
+                                    {headerGroups.map((headerGroup, index) => (
                                         <React.Fragment key={headerGroup.id}>
-                                            <tr key={headerGroup.id}>
+                                            <tr
+                                                key={headerGroup.id}
+                                                className={hasNestedHeaderRows && index === 0 ? "table-header-row--nested-first" : ""}
+                                            >
                                                 {headerGroup.headers.map((header) => (
                                                     <th key={`${headerGroup.id}-${header.id}`} colSpan={header.colSpan}
                                                         className={`TSP${header.column.id} ${showFilters ? "filter-header" : ""}`}>
@@ -400,7 +513,8 @@ const ServerPaginationTable: FC<PropsMT> =
                                                                         : ''
                                                                 }
                                                                 onClick={header.column.getToggleSortingHandler()}
-                                                                title={
+                                                                data-tooltip-id="global-tooltip"
+                                                                data-tooltip-content={
                                                                     header.column.getCanSort()
                                                                         ? header.column.getNextSortingOrder() === 'asc'
                                                                             ? t("table.sort.asc")
@@ -426,14 +540,16 @@ const ServerPaginationTable: FC<PropsMT> =
                                                 ))}
                                                 {rowActions && (
                                                     <th key={`${headerGroup.id}-actions`} className="TSPactionsRow">
-                                                        <ThreeStateCheckbox
-                                                            selectedAmount={Object.keys(selectedRows).length}
-                                                            totalAmount={table.getRowModel()?.rows?.length || 0}
-                                                            onChange={(selectAll) => selectAll ? table.toggleAllRowsSelected() : table.resetRowSelection()}
-                                                        />
+                                                        {(!hasNestedHeaderRows || index !== 0) && (
+                                                            <ThreeStateCheckbox
+                                                                selectedAmount={Object.keys(selectedRows).length}
+                                                                totalAmount={table.getRowModel()?.rows?.length || 0}
+                                                                onChange={(selectAll) => selectAll ? table.toggleAllRowsSelected() : table.resetRowSelection()}
+                                                            />
+                                                        )}
                                                     </th>)}
                                             </tr>
-                                            {showFilters && index === table.getHeaderGroups().length - 1 && (
+                                            {showFilters && index === headerGroups.length - 1 && (
                                                 <tr key={headerGroup.id + "-filter"} className="filter-header">
                                                     {headerGroup.headers.map((header) => (
                                                         <th key={`${headerGroup.id}-${header.id}-filter`}>
@@ -449,15 +565,39 @@ const ServerPaginationTable: FC<PropsMT> =
                                     ))}
                                 </thead>
 
-                                <tbody style={{ pointerEvents: "none" }}>
+                                <tbody>
                                     {table.getRowModel()?.rows?.map((row) => (
                                         <React.Fragment key={row.original._id}>
                                             <tr key={row.id}>
-                                                {row.getVisibleCells().map((cell) => (
-                                                    <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
-                                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                    </td>
-                                                ))}
+                                                {(() => {
+                                                    const visibleCells = row.getVisibleCells();
+                                                    const hasPublishedPublisher = visibleCells.some((c) => c.column.id === "published.publisher");
+                                                    const hasPublishedYear = visibleCells.some((c) => c.column.id === "published.year");
+                                                    const shouldMergePublishedCells = hasPublishedPublisher && hasPublishedYear;
+
+                                                    return visibleCells.map((cell) => {
+                                                        if (shouldMergePublishedCells && cell.column.id === "published.year") {
+                                                            return null;
+                                                        }
+
+                                                        if (shouldMergePublishedCells && cell.column.id === "published.publisher") {
+                                                            const publisher = row.original?.published?.publisher ?? "";
+                                                            const year = row.original?.published?.year ?? "?";
+
+                                                            return (
+                                                                <td key={`${row.id}-${cell.id}`} className="TSPpublished" colSpan={2}>
+                                                                    {publisher ? `${publisher} (${year})` : ""}
+                                                                </td>
+                                                            );
+                                                        }
+
+                                                        return (
+                                                            <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
+                                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                            </td>
+                                                        );
+                                                    });
+                                                })()}
                                                 {rowActions &&
                                                     <td
                                                         key={`${row.id}-actions`}
@@ -481,7 +621,9 @@ const ServerPaginationTable: FC<PropsMT> =
                                                                         return newSelection;
                                                                     });
                                                                 }}
-                                                                title={t("table.selectRow")} />
+                                                                data-tooltip-id="global-tooltip"
+                                                                data-tooltip-content={t("table.selectRow")}
+                                                            />
                                                         </span>
                                                     </td>
                                                 }

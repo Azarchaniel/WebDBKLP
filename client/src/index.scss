@@ -1,8 +1,7 @@
 @use "./styles/mixin" as mixin;
-@import "./styles/_variables.scss";
+@use "./styles/_variables.scss" as *;
 @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap");
 @import url("https://fonts.cdnfonts.com/css/lucida-handwriting-std");
-@import "./styles/ModalStatus.scss";
 
 body,
 html,
@@ -370,6 +369,8 @@ textarea {
 
 /* Tabs container styles */
 .tabs-container {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   border-radius: 4px;
@@ -381,13 +382,16 @@ textarea {
   display: flex;
   background-color: #f8f9fa;
   border-bottom: 1px solid #ddd;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
   overscroll-behavior: contain;
+  height: 2.5rem;
 }
 
 /* Individual tab button styles */
 .tab-button {
-  flex: 1;
+  flex: 0 0 auto;
+  white-space: nowrap;
   padding: 10px 20px;
   text-align: center;
   background: none;
@@ -416,14 +420,26 @@ textarea {
 
 /* Tab content styles */
 .tabs-content {
+  display: flex;
+  flex: 1;
+  min-height: 0;
   height: 100%;
   width: 100%;
-  padding: 20px;
 }
 
 .tab-panel {
-  animation: fadeIn 0.3s ease;
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
 }
+
+.tab-panel>* {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+}
+
 
 /* Optional animation for smoother transitions */
 @keyframes fadeIn {

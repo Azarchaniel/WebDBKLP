@@ -334,14 +334,16 @@ export default function AutorPage() {
                             <button
                                 type="button"
                                 className="addBtnTable"
+                                data-tooltip-id="global-tooltip"
+                                data-tooltip-content={t("autors.addNew")}
                                 onClick={handleAddAutor}
-                                title={t("autors.addNew")}
                             />
                         )}
                         <i
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
-                            title={t("books.showHideColumns")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("books.showHideColumns")}
                             onClick={() => setShowColumn({ ...showColumn, control: !showColumn.control })}
                         />
                     </div>
@@ -349,17 +351,20 @@ export default function AutorPage() {
                 rowActions={isLoggedIn ? (_id, expandRow, isExpanded) => (
                     <div className="actionsRow">
                         <button
-                            title={t("common.delete")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.delete")}
                             onClick={() => handleDeleteAutor(_id)}
                             className="fa fa-trash"
                         />
                         <button
-                            title={t("common.edit")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.edit")}
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateAutor(_id)}
                         />
                         <button
-                            title={t("common.details")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.details")}
                             className={`fa ${isExpanded ? "fa-chevron-up" : "fa-chevron-down"}`}
                             onClick={() => expandRow()}
                         />

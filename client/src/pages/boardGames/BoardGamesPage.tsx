@@ -319,7 +319,8 @@ export default function BoardGamesPage() {
                         <i
                             ref={exceptRef}
                             className="fas fa-bars bookTableAction ml-4"
-                            title={t("books.showHideColumns")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("books.showHideColumns")}
                             onClick={() => setShowColumn({ ...showColumn, control: !showColumn.control })}
                         />
                     </div>
@@ -327,18 +328,21 @@ export default function BoardGamesPage() {
                 rowActions={isLoggedIn ? (_id, expandRow, isExpanded) => (
                     <div className="actionsRow">
                         <button
-                            title={t("common.delete")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.delete")}
                             onClick={() => handleDeleteBoardGame(_id)}
                             className="fa fa-trash"
                         />
                         <button
-                            title={t("common.edit")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.edit")}
                             className="fa fa-pencil-alt"
                             onClick={() => handleUpdateBoardGame(_id)}
                         />
                         <button
                             key={`detail-${_id}`}
-                            title={t("common.details")}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={t("common.details")}
                             className={`fa ${isExpanded ? "fa-chevron-up" : "fa-chevron-down"}`}
                             onClick={() => expandRow()}
                         />

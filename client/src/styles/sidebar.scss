@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables" as *;
 
 @media screen and (max-width: $mobile-width) {
   .sideBar {
@@ -12,7 +12,7 @@
 
   .opened {
     width: 100vw !important;
-    height: 25rem !important;
+    height: 30rem !important;
     display: flex;
     flex-direction: column;
 
@@ -28,6 +28,10 @@
       &.active {
         color: var(--anchor);
       }
+    }
+
+    .language-switcher button {
+      justify-content: center;
     }
   }
 }
@@ -104,17 +108,34 @@
       color: white;
       display: flex;
       align-items: center;
-      justify-content: center;
       width: 100%;
       cursor: pointer;
+      padding: 0;
 
       &:hover {
         color: var(--anchor);
       }
 
+      span.lang-icon {
+        display: flex;
+        justify-content: center;
+        width: 3rem;
+        flex-shrink: 0;
+
+        img {
+          filter: brightness(0) invert(1);
+        }
+      }
+
+      &:hover span.lang-icon img {
+        // anchor color with filter
+        filter: brightness(0) saturate(100%) invert(43%) sepia(72%) saturate(2483%) hue-rotate(152deg) brightness(99%) contrast(101%);
+      }
+
       span.lang-label {
         margin-left: 0.5rem;
-        font-size: 1.3rem;
+        font-size: 1.5rem;
+        white-space: nowrap;
       }
     }
   }
@@ -145,6 +166,21 @@
 
     span {
       opacity: 1;
+    }
+  }
+
+  .language-switcher button {
+    margin-left: -0.3rem;
+
+    span.lang-icon {
+      width: auto;
+      margin-right: 0.6rem;
+      justify-content: flex-start;
+    }
+
+    span.lang-label {
+      opacity: 1;
+      margin-left: 0;
     }
   }
 }

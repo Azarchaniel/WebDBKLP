@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { IBoardGame, ILangCode, ValidationError } from "../../type";
 import { InputField, LazyLoadMultiselect } from "@components/inputs";
-import { countryCode, emptyBoardGame, fetchAutors, fetchBoardGames } from "@utils";
+import { countryCode, EMPTY_BOARD_GAME, fetchAutors, fetchBoardGames } from "@utils";
 import { createNewAutor, AutorRole } from "@utils/autor";
 import TextArea from "@components/inputs/TextArea";
 import { ThreeStateToggleSwitch } from "@components/ToggleSwitch";
@@ -28,7 +28,7 @@ const getInitialExpansions = (data: IBoardGame | object): boolean | undefined =>
 export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
     const { t } = useTranslation();
     const [formData, setFormData] = useState(
-        Array.isArray(data) && data.length > 0 ? data : [emptyBoardGame]
+        Array.isArray(data) && data.length > 0 ? data : [EMPTY_BOARD_GAME]
     );
     const [errors, setErrors] = useState<ValidationError[]>([
         { label: t("validation.boardGameTitleRequired"), target: "title" }
@@ -38,7 +38,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
     // Normalize board game data (like BookModal)
     const normalizeBGData = (boardGameArr: any[]): IBoardGame[] => {
         return (Array.isArray(boardGameArr) ? boardGameArr : [boardGameArr]).map((data: IBoardGame) => {
-            if (!data) return emptyBoardGame;
+            if (!data) return EMPTY_BOARD_GAME;
             const modified: IBoardGame = {
                 ...data,
                 published: {
@@ -48,7 +48,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                 }
             };
             return {
-                ...emptyBoardGame,
+                ...EMPTY_BOARD_GAME,
                 ...data,
                 ...modified
             };
@@ -230,8 +230,8 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                         {...getInputParams("note", formData, t("common.note"))}
                     />
                 </div>
-                <div className="bg-expansions row">
-                    <div className="col">
+                <div className="bg-expansions">
+                    <div className="bg-expansions-toggle">
                         <ThreeStateToggleSwitch
                             id="expansions"
                             name="expansions"
@@ -241,7 +241,7 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
                             {...getInputParams("expansions", formData, t("fields.expansions"))}
                         />
                     </div>
-                    <div className="col">
+                    <div className="bg-expansions-select">
                         {expansions ?
                             <LazyLoadMultiselect
                                 disabled={expansions === undefined}

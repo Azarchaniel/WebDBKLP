@@ -91,7 +91,8 @@ const Sidebar = () => {
                 <div style={{ display: "flex", alignItems: "center", flexGrow: 1 }}>{/* Empty space */}</div>
                 <LanguageSwitcher sidebarOpened={sidebarOpened} />
                 <a
-                    title={t("nav.aboutAuthor")}
+                    data-tooltip-id="global-tooltip"
+                    data-tooltip-content={t("nav.aboutAuthor")}
                     href="https://github.com/Azarchaniel"
                     target="_blank"
                     rel="noopener noreferrer"

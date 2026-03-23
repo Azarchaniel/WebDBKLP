@@ -1,6 +1,6 @@
 import React from "react";
 import { IAutor, IBook, ILangCode, IUser } from "../../type";
-import { formatDimension, getPublishedCountry, langCode, cities } from "@utils";
+import { formatDimension, getPublishedCountry, langCode, CITIES, formatNumberLocale } from "@utils";
 import { useTranslation } from "react-i18next";
 
 interface IExtendedBook extends IBook {
@@ -21,44 +21,35 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
         contributors: keyof IExtendedBook,
         contributorsText: keyof IExtendedBook,
         labelKey: string
-    ) => {
-        if (!data[contributors] || !data[contributorsText]) return null;
+    ): string | undefined => {
+        if (!data[contributors] || !data[contributorsText]) return;
 
         const count = (data[contributors] as IAutor[]).length;
         const label = t(labelKey, { count });
 
-        return <p>{`${label}: ${data[contributorsText]}`}</p>;
+        return `${label}: ${data[contributorsText]}`;
     };
 
     const renderDimensions = () => {
-        if (!data.dimensions) return null;
+        if (!data.dimensions || Object.values(data.dimensions).every((v: any) => !v)) return null;
 
         const { dimensions } = data;
 
         return (
-            <>
-                <p>{t("bookDetail.dimensions")}: </p>
-                <table className="bookDimensions">
-                    <tbody>
-                        <tr>
-                            <td>{t("bookDetail.height")}: {formatDimension(dimensions.height, t('common.locale')) ?? "-"} cm</td>
-                            <td>{t("bookDetail.width")}: {formatDimension(dimensions.width, t('common.locale')) ?? "-"} cm</td>
-                        </tr>
-                        <tr>
-                            <td>{t("bookDetail.thickness")}: {formatDimension(dimensions.thickness, t('common.locale')) ?? "-"} cm</td>
-                            <td>
-                                {dimensions.weight && `${t("bookDetail.weight")}: ${formatDimension(dimensions.weight, t('common.locale')) ?? "-"} g`}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p />
-            </>
+            <tr>
+                <td><b>{t("bookDetail.dimensions")}:</b></td>
+                <td style={{ display: "flex", flexDirection: "column", height: "auto" }}>
+                    <span>{t("bookDetail.height")}: {formatDimension(dimensions.height, t('common.locale')) ?? "-"} cm</span>
+                    <span>{t("bookDetail.width")}: {formatDimension(dimensions.width, t('common.locale')) ?? "-"} cm</span>
+                    <span>{t("bookDetail.thickness")}: {formatDimension(dimensions.thickness, t('common.locale')) ?? "-"} cm</span>
+                    {dimensions.weight && <span>{t("bookDetail.weight")}: {formatDimension(dimensions.weight, t('common.locale')) ?? "-"} g</span>}
+                </td>
+            </tr>
         );
     };
 
-    const renderLanguage = () => {
-        if (!data.language || data.language.length === 0) return null;
+    const renderLanguage = (): string | undefined => {
+        if (!data.language || data.language.length === 0) return;
 
         const languageText = Array.isArray(data.language)
             ? langCode
@@ -69,39 +60,39 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
                 .join(", ")
             : data.language;
 
-        return <p>{t("bookDetail.language")}: {languageText}</p>;
+        return `${t("bookDetail.language")}: ${languageText}`;
     };
 
-    const renderPublisherInfo = () => {
+    const renderPublisherInfo = (): string | undefined => {
         const { publisher, year, country } = data.published ?? {};
 
-        if (!publisher && !year && !country) return null;
+        if (!publisher && !year && !country) return;
 
         const publisherText = `${publisher ?? "-"}`;
         const yearText = year ? `, ${year}` : "";
         const countryText = country ? `, ${getPublishedCountry(country)?.value ?? ""}` : "";
 
-        return <p>{t("bookDetail.publisher")}: {publisherText}{yearText}{countryText}</p>;
+        return `${t("bookDetail.publisher")}: ${publisherText}${yearText}${countryText}`;
     };
 
-    const renderLocation = () => {
-        if (!data.location) return null;
+    const renderLocation = (): string | undefined => {
+        if (!data.location) return;
 
-        const cityName = cities
+        const cityName = CITIES
             .filter(c => c.value === data.location?.city)
             .map(c => c.showValue)
             .join(", ");
         const shelf = data.location.shelf ?? "";
 
-        return <p>{t("bookDetail.location")}: {`${cityName} ${shelf}`}</p>;
+        return `${t("bookDetail.location")}: ${cityName} ${shelf}`;
     };
 
-    const renderPeopleList = (people: IUser[] | undefined, label: string) => {
-        if (!people || people.length === 0) return null;
+    const renderPeopleList = (people: IUser[] | undefined, label: string): string | undefined => {
+        if (!people || people.length === 0) return;
 
         const namesList = people.map(person => person.firstName).join(", ");
 
-        return <p>{label}: {namesList}</p>;
+        return `${label}: ${namesList}`;
     };
 
     const renderExternalLinks = () => {
@@ -148,6 +139,12 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
         );
     };
 
+    const renderTableRow = (content: string | undefined) => {
+        if (!content) return null;
+        const [label, value] = content.split(":").map(s => s.trim());
+        return <tr><td><b>{label}: </b></td><td>{value}</td></tr>;
+    }
+
     // Main render
     return (
         <div className="bookDetailRow">
@@ -160,27 +157,23 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
                 <h1>{data.title}</h1>
                 {data.subtitle && <h4>{data.subtitle}</h4>}
 
-                <h3>{renderContributorRow("autor", "autorsFull", "bookDetail.authors")}</h3>
-                {renderContributorRow("editor", "editorsFull", "bookDetail.editors")}
-                {renderContributorRow("ilustrator", "illustratorsFull", "bookDetail.illustrators")}
-                {renderContributorRow("translator", "translatorsFull", "bookDetail.translators")}
+                <table>
+                    {renderTableRow(renderContributorRow("autor", "autorsFull", "bookDetail.authors"))}
+                    {renderTableRow(renderContributorRow("editor", "editorsFull", "bookDetail.editors"))}
+                    {renderTableRow(renderContributorRow("ilustrator", "illustratorsFull", "bookDetail.illustrators"))}
+                    {renderTableRow(renderContributorRow("translator", "translatorsFull", "bookDetail.translators"))}
+                    {renderTableRow(renderLanguage())}
+                    {renderTableRow(`ISBN: ${data.ISBN}`)}
+                    {data.numberOfPages && renderTableRow(`${t("bookDetail.pages")}: ${formatNumberLocale(data.numberOfPages, t('common.locale'), 0)}`)}
+                    {renderTableRow(renderPublisherInfo())}
+                    {renderTableRow(renderLocation())}
+                    {renderTableRow(renderPeopleList(data.owner, t("bookDetail.owner")))}
+                    {renderTableRow(renderPeopleList(data.readBy, t("bookDetail.readBy")))}
+                    {renderDimensions()}
+                    {data.note && renderTableRow(`${t("bookDetail.note")}: ${data.note}`)}
 
-                {renderLanguage()}
-                {data.ISBN && <p>ISBN: {data.ISBN}</p>}
-                {data.numberOfPages && <p>{t("bookDetail.pages")}: {data.numberOfPages}</p>}
-                {renderPublisherInfo()}
-                {renderLocation()}
-                {renderPeopleList(data.owner, t("bookDetail.owner"))}
-                {renderPeopleList(data.readBy, t("bookDetail.readBy"))}
-                {renderDimensions()}
-                {data.note && <p>{t("bookDetail.note")}: {data.note}</p>}
-
-                <p>
-                    {t("common.exLibris")}: {data.exLibris ?
-                        <span className="trueMark" /> :
-                        <span className="falseMark" />
-                    }
-                </p>
+                    {renderTableRow(`Ex Libris: ${data.exLibris ? "✔" : "✘"}`)}
+                </table>
             </div>
         </div>
     );

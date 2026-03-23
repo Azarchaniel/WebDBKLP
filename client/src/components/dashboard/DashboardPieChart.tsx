@@ -1,6 +1,6 @@
 import "chart.js/auto"; //for react-chart
 import { Pie } from "react-chartjs-2";
-import { chartColors, chartLabels } from "../../utils/constants";
+import { CHART_COLORS, CHART_LABELS } from "../../utils/constants";
 import { NoData } from "./NoData";
 import { useTranslation } from "react-i18next";
 import { formatNumberLocale } from "@utils";
@@ -14,7 +14,7 @@ export const DashboardPieChart = (props: { data: any[] }) => {
 		datasets: [{
 			label: t("dashboard.bookCount"),
 			data: props.data.filter(c => c.owner).map(c => c.count),
-			backgroundColor: chartColors,
+			backgroundColor: CHART_COLORS,
 			hoverOffset: 4
 		}]
 	};
@@ -23,9 +23,14 @@ export const DashboardPieChart = (props: { data: any[] }) => {
 
 	const chartOptions = {
 		animation: false,
+		responsive: true,
+		maintainAspectRatio: false,
+		layout: {
+			padding: 8
+		},
 		plugins: {
 			legend: {
-				position: "left" as const,
+				position: "bottom" as const,
 				title: {
 					display: true,
 					text: t("dashboard.total") + ": " + count,
@@ -33,7 +38,8 @@ export const DashboardPieChart = (props: { data: any[] }) => {
 						weight: "bold" as const
 					}
 				},
-				labels: chartLabels(t('common.locale'))
+				maxHeight: 110,
+				labels: CHART_LABELS(t('common.locale'))
 			},
 			tooltip: {
 				callbacks: {
@@ -49,6 +55,10 @@ export const DashboardPieChart = (props: { data: any[] }) => {
 	}
 
 	return (
-		<Pie data={data} options={chartOptions} />
+		<div className="dashboardPieChartWrap">
+			<div className="dashboardPieChartCanvas">
+				<Pie data={data} options={chartOptions} />
+			</div>
+		</div>
 	)
 }

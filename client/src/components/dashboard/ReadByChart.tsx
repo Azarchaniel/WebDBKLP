@@ -1,7 +1,8 @@
 import { Pie } from "react-chartjs-2";
-import { chartColors, chartLabels } from "../../utils/constants";
+import { CHART_COLORS, CHART_LABELS } from "../../utils/constants";
 import { IUserReadingStats } from "../../type";
 import { useTranslation } from "react-i18next";
+import { NoData } from "./NoData";
 
 interface Props {
 	data: IUserReadingStats[];
@@ -9,14 +10,14 @@ interface Props {
 
 export const ReadByChart = (props: Props) => {
 	const { t } = useTranslation();
-	if (!props.data || Object.values(props.data).every((v: any) => v.count === 0)) return <>{t("dashboard.noData")}</>;
+	if (!props.data || Object.values(props.data).every((v: any) => v.count === 0)) return <NoData />;
 
 	const data = {
 		labels: props.data.length ? props.data.map((c: any) => c.user) : [],
 		datasets: [{
 			label: t("common.readBy"),
 			data: props.data.map((c: any) => c.count),
-			backgroundColor: chartColors,
+			backgroundColor: CHART_COLORS,
 			hoverOffset: 4
 		}]
 	};
@@ -28,12 +29,14 @@ export const ReadByChart = (props: Props) => {
 		plugins: {
 			legend: {
 				position: "left" as const,
-				labels: chartLabels(t('common.locale'))
+				labels: CHART_LABELS(t('common.locale'))
 			}
 		},
 	}
 
 	return (
-		<Pie data={data} options={chartOptions} height={"210px"} />
+		<div style={{ position: "relative", height: "210px", marginTop: "0.5rem" }}>
+			<Pie data={data} options={chartOptions} />
+		</div>
 	)
 }

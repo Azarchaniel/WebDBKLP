@@ -10,14 +10,14 @@ import {
     IUniqueFilterValues,
     IUser, TRange
 } from "../type";
-import { autorRoles, formatBoardGameRange, formatDimension, getBookLocation, tableHeaderColor } from "@utils";
+import { AUTOR_ROLES, formatBoardGameRange, formatDimension, getBookLocation, TABLE_HEADER_COLOR } from "@utils";
 import React, { useState } from "react";
 import { countryCode, langCode } from "./locale";
 import { ShowHideRow } from "@components/books/ShowHideRow";
 
-const createDateElement = (value: Date): React.ReactElement => {
-    const date = new Date(value).toLocaleDateString("cs-CZ");
-    const time = new Date(value).toLocaleTimeString("cs-CZ");
+const createDateElement = (value: Date, locale: string): React.ReactElement => {
+    const date = new Date(value).toLocaleDateString(locale);
+    const time = new Date(value).toLocaleTimeString(locale);
     return <span title={time} style={{ pointerEvents: "auto" }}>{date}</span>
 }
 
@@ -83,31 +83,31 @@ export const getBookTableColumns = (t: TFunction): ColumnDef<IBook, any>[] => [
         header: () => t("table.books.dimensions"),
         meta: {
             headerStyle: {
-                backgroundColor: tableHeaderColor
+                backgroundColor: TABLE_HEADER_COLOR
             }
         },
         columns: [
             columnHelper.accessor(row => row.dimensions?.height, {
                 id: "height",
-                cell: info => formatDimension(info.getValue()),
+                cell: info => formatDimension(info.getValue(), t('common.locale')),
                 header: t("table.books.height"),
                 sortingFn: "alphanumeric"
             }),
             columnHelper.accessor(row => row.dimensions?.width, {
                 id: "width",
-                cell: info => formatDimension(info.getValue()),
+                cell: info => formatDimension(info.getValue(), t('common.locale')),
                 header: t("table.books.width"),
                 sortingFn: "alphanumeric"
             }),
             columnHelper.accessor(row => row.dimensions?.thickness, {
                 id: "thickness",
-                cell: info => formatDimension(info.getValue()),
+                cell: info => formatDimension(info.getValue(), t('common.locale')),
                 header: t("table.books.thickness"),
                 sortingFn: "alphanumeric"
             }),
             columnHelper.accessor(row => row.dimensions?.weight, {
                 id: "weight",
-                cell: info => formatDimension(info.getValue()),
+                cell: info => formatDimension(info.getValue(), t('common.locale')),
                 header: t("table.books.weight"),
                 sortingFn: "alphanumeric"
             }),
@@ -129,15 +129,28 @@ export const getBookTableColumns = (t: TFunction): ColumnDef<IBook, any>[] => [
         }) => `${cell.getValue()?.title ?? ""} ${cell.getValue()?.no ? "(" + cell.getValue()?.no + ")" : ""}`,
         sortingFn: "alphanumeric",
     },
-    {
-        accessorKey: 'published',
-        header: t("table.books.published"),
-        cell: ({ cell }: { cell: any }) => {
-            const published = cell.getValue() as IPublished;
-            return published ? `${published?.publisher} (${published?.year ?? "?"})` : "";
+    columnHelper.group({
+        id: "published",
+        header: () => t("table.books.published"),
+        meta: {
+            headerStyle: {
+                backgroundColor: TABLE_HEADER_COLOR
+            }
         },
-        sortingFn: "datetime",
-    },
+        columns: [
+            columnHelper.accessor(row => row.published?.publisher, {
+                id: "published.publisher",
+                header: t("table.books.publisher"),
+                sortingFn: "alphanumeric"
+            }),
+            columnHelper.accessor(row => row.published?.year, {
+                id: "published.year",
+                header: t("table.books.year"),
+                cell: info => info.getValue() ?? "?",
+                sortingFn: "alphanumeric"
+            }),
+        ]
+    }),
     {
         accessorKey: 'exLibris',
         header: t("table.books.exLibris"),
@@ -168,13 +181,13 @@ export const getBookTableColumns = (t: TFunction): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'createdAt',
         header: t("table.books.createdAt"),
-        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date, t('common.locale')),
         sortingFn: "datetime"
     },
     {
         accessorKey: 'updatedAt',
         header: t("table.books.updatedAt"),
-        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date, t('common.locale')),
         sortingFn: "datetime"
     }
 ];
@@ -204,13 +217,13 @@ export const getAutorTableColumns = (t: TFunction): ColumnDef<IAutor, any>[] => 
         accessorKey: 'dateOfBirth',
         header: t("table.autors.birth"),
         sortingFn: "datetime",
-        cell: ({ cell }: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString("sk-SK") : null
+        cell: ({ cell }: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString(t('common.locale')) : null
     },
     {
         accessorKey: 'dateOfDeath',
         header: t("table.autors.death"),
         sortingFn: "datetime",
-        cell: ({ cell }: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString("sk-SK") : null
+        cell: ({ cell }: { cell: any }) => cell.getValue() ? new Date(cell.getValue()).toLocaleDateString(t('common.locale')) : null
     },
     {
         accessorKey: 'note',
@@ -222,19 +235,19 @@ export const getAutorTableColumns = (t: TFunction): ColumnDef<IAutor, any>[] => 
         cell: ({ cell }: { cell: any }) => {
             const roles = cell.getValue() as string[];
             if (!roles || roles.length === 0) return "-";
-            return roles.map((role: string) => t(autorRoles.find(r => r.value === role)?.showValue || "")).join(', ');
+            return roles.map((role: string) => t(AUTOR_ROLES.find(r => r.value === role)?.showValue || "")).join(', ');
         }
     },
     {
         accessorKey: 'createdAt',
         header: t("table.autors.createdAt"),
-        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date, t('common.locale')),
         sortingFn: "datetime"
     },
     {
         accessorKey: 'updatedAt',
         header: t("table.autors.updatedAt"),
-        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date, t('common.locale')),
         sortingFn: "datetime"
     },
 ];
@@ -287,13 +300,13 @@ export const getLPTableColumns = (t: TFunction): ColumnDef<any, any>[] => [
     {
         accessorKey: 'createdAt',
         header: t("table.lp.createdAt"),
-        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date, t('common.locale')),
         sortingFn: "datetime"
     },
     {
         accessorKey: 'updatedAt',
         header: t("table.lp.updatedAt"),
-        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date, t('common.locale')),
         sortingFn: "datetime"
     },
 ];
@@ -350,13 +363,13 @@ export const getBoardGameTableColumns = (t: TFunction): ColumnDef<any, any>[] =>
     {
         accessorKey: 'createdAt',
         header: t("table.boardGames.createdAt"),
-        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date, t('common.locale')),
         sortingFn: "datetime",
     },
     {
         accessorKey: 'updatedAt',
         header: t("table.boardGames.updatedAt"),
-        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date),
+        cell: ({ cell }: { cell: any }) => createDateElement(cell.getValue() as unknown as Date, t('common.locale')),
         sortingFn: "datetime",
     },
 ];
@@ -366,10 +379,12 @@ interface ShowHideColumnsProps<T> {
     shown: Record<string, boolean>;
     setShown: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
     dimensionsLabel?: string;
+    publishedLabel?: string;
 }
 
-export const ShowHideColumns = <T,>({ columns, shown, setShown, dimensionsLabel }: ShowHideColumnsProps<T>) => {
+export const ShowHideColumns = <T,>({ columns, shown, setShown, dimensionsLabel, publishedLabel }: ShowHideColumnsProps<T>) => {
     const [dimensionsHidden, setDimensionsHidden] = useState<boolean>(shown.dimensions ?? false);
+    const [publishedHidden, setPublishedHidden] = useState<boolean>(shown.published ?? false);
 
     const getColumnsForHidden = () => {
         // ignore those columns
@@ -399,6 +414,22 @@ export const ShowHideColumns = <T,>({ columns, shown, setShown, dimensionsLabel 
                     }} />
             }
 
+            if (column.id === "published") {
+                return <ShowHideRow
+                    key="published"
+                    label={publishedLabel || ""}
+                    init={publishedHidden}
+                    onChange={() => {
+                        setPublishedHidden(!publishedHidden);
+                        setShown((prevHidden) => ({
+                            ...prevHidden,
+                            published: !publishedHidden,
+                            "published.publisher": !publishedHidden,
+                            "published.year": !publishedHidden,
+                        }));
+                    }} />
+            }
+
             return <ShowHideRow
                 key={accessorKey as string}
                 label={header}
@@ -418,10 +449,11 @@ export const ShowHideColumns = <T,>({ columns, shown, setShown, dimensionsLabel 
 const selectFields = ['autor', 'editor', 'translator', 'ilustrator', 'owner', 'readBy', "language"];
 const inputFields = ["title", "subtitle", "content", "edition.no", "edition.title", "serie.no", "serie.title", "ISBN", "note", "published.publisher", "published.country", "location.city", "location.shelf"];
 const numberFields = ["dimensions.height", "dimensions.width", "dimensions.thickness", "dimensions.weight", "numberOfPages", "published.year"];
+const dateFields = ["createdAt", "updatedAt"];
 const checkboxFields = ["exLibris"];
 
 export const mapColumnName = (columnName: string): string => {
-    const mapping: Record<keyof IBookColumnVisibility, keyof IUniqueFilterValues> = {
+    const mapping: Record<string, string> = {
         autorsFull: "autor",
         editorsFull: "editor",
         translatorsFull: "translator",
@@ -439,6 +471,10 @@ export const mapColumnName = (columnName: string): string => {
         edition: "edition.title",
         serie: "serie.title",
         published: "published.publisher",
+        "published.publisher": "published.publisher",
+        "published.year": "published.year",
+        createdAt: "createdAt",
+        updatedAt: "updatedAt",
         exLibris: "exLibris",
         ownersFull: "owner",
         readBy: "readBy",
@@ -446,7 +482,7 @@ export const mapColumnName = (columnName: string): string => {
         location: "location.city"
     };
 
-    return mapping[columnName];
+    return mapping[columnName] || columnName;
 }
 
 export const mapBookColumnsToFilterTypes = (columnName: string): string => {
@@ -457,6 +493,8 @@ export const mapBookColumnsToFilterTypes = (columnName: string): string => {
         return "input";
     } else if (numberFields.includes(mapColumnName(columnName))) {
         return "number";
+    } else if (dateFields.includes(mapColumnName(columnName))) {
+        return "date";
     } else if (checkboxFields.includes(mapColumnName(columnName))) {
         return "checkbox";
     } else {

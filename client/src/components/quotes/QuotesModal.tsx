@@ -121,6 +121,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
                 onChange={handleInputChange}
                 name="text"
                 customerror={getErrorMsg("text")}
+                placeholder={t("quotes.text")}
             />
         </div>
 

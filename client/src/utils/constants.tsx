@@ -2,15 +2,15 @@ import { SortingState } from "@tanstack/react-table";
 import { IAutor, IBoardGame, IBook, ILP } from "type";
 import { formatNumberLocale } from "./utils";
 
-export const tableHeaderColor = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
+export const TABLE_HEADER_COLOR = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
-export const cities = [
+export const CITIES = [
     { value: "spisska", showValue: "Spišská" },
     { value: 'ujezd', showValue: 'Újezd u Chocně' },
     { value: "bruchotin", showValue: "Břuchotín" }
 ];
 
-export const chartLabels = (locale: string = 'en') => {
+export const CHART_LABELS = (locale: string = 'en') => {
     return {
         generateLabels(chart: any) {
             const data = chart.data;
@@ -31,11 +31,11 @@ export const chartLabels = (locale: string = 'en') => {
     };
 };
 
-export const chartColors = [
+export const CHART_COLORS = [
     "#073b4c", "#118ab2", "#06d6a0", "#ffd166", "#f78c6b", "#ef476f"
 ]
 
-export const autorRoles = [
+export const AUTOR_ROLES = [
     { value: "autor", showValue: "autors.roleAutor" },
     { value: "editor", showValue: "autors.roleEditor" },
     { value: "ilustrator", showValue: "autors.roleIlustrator" },
@@ -65,7 +65,7 @@ export const DEFAULT_PAGINATION: IPagination = Object.freeze({
 
 export const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
-export const emptyBook: IBook = {
+export const EMPTY_BOOK: IBook = {
     _id: "",
     title: "",
     subtitle: "",
@@ -91,7 +91,7 @@ export const emptyBook: IBook = {
     serie: undefined,
 };
 
-export const emptyAutor: IAutor = {
+export const EMPTY_AUTOR: IAutor = {
     _id: "",
     firstName: "",
     lastName: "",
@@ -102,7 +102,7 @@ export const emptyAutor: IAutor = {
     note: ""
 };
 
-export const emptyLp: ILP = {
+export const EMPTY_LP: ILP = {
     _id: "",
     autor: [],
     title: "",
@@ -114,7 +114,7 @@ export const emptyLp: ILP = {
     note: "",
 };
 
-export const emptyBoardGame: IBoardGame = {
+export const EMPTY_BOARD_GAME: IBoardGame = {
     _id: "",
     title: "",
     image: "",
