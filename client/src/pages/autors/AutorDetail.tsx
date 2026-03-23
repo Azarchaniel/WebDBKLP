@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { getAutorInfo } from "../../API";
 import { IBook, ILP } from "../../type";
-import { autorRoles } from "../../utils/constants";
+import { AUTOR_ROLES } from "../../utils/constants";
 import { countryCode } from "../../utils/locale";
 import { useTranslation } from "react-i18next";
+import { formatNumberLocale } from "@utils/utils";
 
 type Props = {
     data: any;
 }
 
 const AutorDetail: React.FC<Props> = React.memo(({ data }) => {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const [books, setBooks] = useState<IBook[] | null>(null);
     const [lps, setLps] = useState<ILP[] | null>(null);
 
@@ -43,25 +44,25 @@ const AutorDetail: React.FC<Props> = React.memo(({ data }) => {
                             </tr>
                             <tr>
                                 <td>{t("fields.birthDate")}:</td>
-                                <td>{data?.dateOfBirth ? new Date(data?.dateOfBirth as Date).toLocaleDateString(i18n.language) : "-"}</td>
+                                <td>{data?.dateOfBirth ? new Date(data?.dateOfBirth as Date).toLocaleDateString(t('common.locale')) : "-"}</td>
                             </tr>
                             <tr>
                                 <td>{t("fields.deathDate")}:</td>
-                                <td>{data?.dateOfDeath ? new Date(data?.dateOfDeath as Date).toLocaleDateString(i18n.language) : "-"}</td>
+                                <td>{data?.dateOfDeath ? new Date(data?.dateOfDeath as Date).toLocaleDateString(t('common.locale')) : "-"}</td>
                             </tr>
                             <tr>
                                 <td>{t("common.role")}:</td>
                                 <td>{data?.role?.map((role: string) =>
-                                    t(autorRoles.find(ar => ar.value === role)?.showValue || ""))
+                                    t(AUTOR_ROLES.find(ar => ar.value === role)?.showValue || ""))
                                     .join(", ")}</td>
                             </tr>
                             <tr>
                                 <td>{t("autors.detailBookCount")}:</td>
-                                <td>{books?.length}</td>
+                                <td>{formatNumberLocale(books?.length ?? 0, t('common.locale'), 0)}</td>
                             </tr>
                             <tr>
                                 <td>{t("autors.detailLpCount")}:</td>
-                                <td>{lps?.length}</td>
+                                <td>{formatNumberLocale(lps?.length ?? 0, t('common.locale'), 0)}</td>
                             </tr>
                         </tbody>
                     </table>
