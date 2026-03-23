@@ -84,6 +84,15 @@ export const LazyLoadMultiselect = React.memo(({
     const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
     const [isInputFocused, setIsInputFocused] = useState(false); // Track input focus
 
+    // Helper function to get display text for an option (string or object)
+    const getDisplayText = useCallback((option: OptionValue): string => {
+        if (typeof option === 'string') {
+            return option;
+        } else {
+            return option[displayValue];
+        }
+    }, [displayValue]);
+
     const handleInputFocus = useCallback(() => {
         if (disabled) return;
         setIsInputFocused(true);
@@ -94,20 +103,29 @@ export const LazyLoadMultiselect = React.memo(({
         setIsInputFocused(false);
     }, [disabled]);
 
+    const normalizeForSearch = (value: string): string =>
+        value
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
+
+    const getFilteredClientOptions = useCallback((query: string): OptionValue[] => {
+        const normalizedQuery = normalizeForSearch(query);
+
+        return options.filter((option) => {
+            const text = getDisplayText(option);
+            if (!text || text.trim().length === 0) return false;
+
+            return normalizeForSearch(text).includes(normalizedQuery);
+        });
+    }, [options, getDisplayText]);
+
     useEffect(() => {
         if (options.some(option => typeof option === 'object' && option !== null && !(displayValue in option))) {
             throw new Error("`displayValue` is required in every object in the `options` array.");
         }
     }, [options, displayValue]);
-
-    // Helper function to get display text for an option (string or object)
-    const getDisplayText = useCallback((option: OptionValue): string => {
-        if (typeof option === 'string') {
-            return option;
-        } else {
-            return option[displayValue];
-        }
-    }, [displayValue]);
 
     // Helper function to compare options for equality
     const areOptionsEqual = useCallback((option1: OptionValue, option2: OptionValue): boolean => {
@@ -215,16 +233,12 @@ export const LazyLoadMultiselect = React.memo(({
                 setLoadingStatus(newOptions.length > 0 ? "hasMore" : "noMore"); // Check if there are more items
             } else {
                 // Client-side filtering
-                const filtered = options.filter(option => {
-                    const text = getDisplayText(option);
-                    if (!text || text.trim().length === 0) return false; // filter empty options
-                    return text.toLowerCase().includes(query.toLowerCase());
-                });
+                const filtered = getFilteredClientOptions(query);
                 setFilteredOptions(filtered);
                 setLoadingStatus("noMore"); // No more items to load
             }
         }, 300),
-        [onSearch, options, getDisplayText]
+        [onSearch, getFilteredClientOptions]
     );
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -273,9 +287,14 @@ export const LazyLoadMultiselect = React.memo(({
         setIsOpen(true);
         if (inputRef.current) inputRef.current.focus();
         if (inputValue === "") {
-            debouncedSearch("", 1);
+            if (options.length > 0) {
+                setFilteredOptions(getFilteredClientOptions(""));
+                setLoadingStatus("noMore");
+            } else {
+                debouncedSearch("", 1);
+            }
         }
-    }, [inputValue, debouncedSearch, disabled]);
+    }, [inputValue, debouncedSearch, disabled, options, getFilteredClientOptions]);
 
     const handleCreateNew = useCallback(() => {
         if (disabled) return;
@@ -426,7 +445,8 @@ export const LazyLoadMultiselect = React.memo(({
                             {/* create new */}
                             {searchQuery.length > 0 && onNew && (
                                 <div className="autocomplete-item create-new" onClick={handleCreateNew}
-                                    title={t("inputs.selectOrType")}>
+                                    data-tooltip-id="global-tooltip"
+                                    data-tooltip-content={t("inputs.selectOrType")}>
                                     {t("common.add")} "{searchQuery}"
                                 </div>
                             )}
