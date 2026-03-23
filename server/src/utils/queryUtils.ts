@@ -96,6 +96,7 @@ const buildFilterCondition = (field: string, value: any, operator?: string): any
 };
 
 const isMongoId = (value: string): boolean => /^[a-f\d]{24}$/i.test(value);
+const dateOperatorFields = new Set(["createdAt", "updatedAt"]);
 
 /**
  * Builds the filter query for MongoDB.
@@ -116,7 +117,14 @@ const buildFilterQuery = (filters: {
             if (id === "exLibris") {
                 filterQuery[id] = value === 'Y';
             } else if (operator) {
-                Object.assign(filterQuery, buildFilterCondition(id, Number(value), operator));
+                if (dateOperatorFields.has(id)) {
+                    const dateValue = new Date(value as string);
+                    if (!Number.isNaN(dateValue.getTime())) {
+                        Object.assign(filterQuery, buildFilterCondition(id, dateValue, operator));
+                    }
+                } else {
+                    Object.assign(filterQuery, buildFilterCondition(id, Number(value), operator));
+                }
             } else if (value && Array.isArray(value)) {
                 // Handle array values (multi-select filters)
                 const nonEmptyValues = value.filter(v => v?.trim() !== "");
