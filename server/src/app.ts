@@ -7,6 +7,10 @@ import path from "path";
 const app: Express = express()
 
 const PORT: string | number = process.env.PORT || 4000;
+const useLocalDbMirror = process.env.USE_LOCAL_DB_MIRROR === "true";
+const databaseName = useLocalDbMirror
+    ? process.env.MONGO_DB_LOCAL || process.env.MONGO_DB
+    : process.env.MONGO_DB;
 
 const allowedOrigins = ["http://localhost:3000", "https://webdbklp.onrender.com"];
 app.use(
@@ -34,7 +38,7 @@ app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "client/build", "index.html"));
 });
 
-const uri: string = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
+const uri: string = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${databaseName}?retryWrites=true&w=majority`
 
 mongoose.set("strictQuery", false);
 //console.log("MongoDB URI: " + uri);

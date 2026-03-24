@@ -12,6 +12,10 @@ import UtilPage from "pages/utils/outside-utils";
 import KzpPage from "./pages/utils/KzpPage";
 import "./i18n";
 
+const localhostHosts = new Set(["localhost", "127.0.0.1", "::1"]);
+const isLocalhost = localhostHosts.has(window.location.hostname);
+document.title = isLocalhost ? "WebDBKLP - TEST" : "WebDBKLP";
+
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
 root.render(
