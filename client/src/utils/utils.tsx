@@ -227,13 +227,12 @@ export const getBookLocation = (location: ILocation): string => {
 }
 
 export const formatDimension = (dimension: any, locale: string = "cs-CZ", decimalPlaces: number = 1) => {
-	if (dimension === undefined || dimension === null) return "-";
+	if (dimension === undefined || dimension === null) return undefined;
 
 	if (typeof dimension === 'object' && "$numberDecimal" in dimension)
 		return formatNumberLocale(parseFloat(dimension.$numberDecimal), locale, decimalPlaces) as unknown as number;
 
-	// if it is not an object number and not a number, return "-"
-	if (isNaN(dimension)) return 0;
+	if (isNaN(dimension)) return undefined;
 
 	return formatNumberLocale(dimension, locale, decimalPlaces) as unknown as number;
 }

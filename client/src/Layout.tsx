@@ -9,6 +9,21 @@ interface LayoutProps {
     children: ReactNode;
 }
 
+const renderGlobalTooltip = ({ content, activeAnchor }: { content: string | null; activeAnchor: HTMLElement | null }) => {
+    const picture = activeAnchor?.dataset.tooltipPicture;
+
+    if (activeAnchor?.dataset.tooltipType === "book-cover" && picture) {
+        return (
+            <div className="bookCoverTooltip">
+                <img src={picture} alt={content || "Book cover"} className="bookCoverTooltipImage" />
+                {content && <span className="bookCoverTooltipTitle">{content}</span>}
+            </div>
+        );
+    }
+
+    return content;
+};
+
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
         <main className='App'>
@@ -16,7 +31,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Sidebar />
             {children}
             <Toast />
-            <Tooltip id="global-tooltip" positionStrategy="fixed" style={{ zIndex: 11000 }} />
+            <Tooltip id="global-tooltip" positionStrategy="fixed" style={{ zIndex: 11000 }} opacity={1} render={renderGlobalTooltip} />
         </main>
     );
 };

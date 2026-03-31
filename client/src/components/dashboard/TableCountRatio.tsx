@@ -21,7 +21,6 @@ export const TableCountRatio = ({ data, title }: { data: any[], title: string })
 		"Bez rozmerov"
 	];
 
-	const chartBlue = "#00ADB5";
 	const totalCount = dimensionGroups.reduce((sum, group) => {
 		const match = data.find((item) => item.group === group);
 		return sum + (match?.count ?? 0);
@@ -74,7 +73,7 @@ export const TableCountRatio = ({ data, title }: { data: any[], title: string })
 						<tr key={group} onMouseEnter={() => setHoveredRow(group)} onMouseLeave={() => setHoveredRow(null)}>
 							<td style={firstCellStyle}><b>{group}</b></td>
 							<td style={countBarStyle}>
-								{formatDimension(data?.find((sg) => sg.group === group)?.count ?? "-", t('common.locale'), 0)}
+								{formatDimension(data?.find((sg) => sg.group === group)?.count, t('common.locale'), 0) ?? "-"}
 							</td>
 							<td style={ratioBarStyle}>
 								{toPercentage(data?.find((sg) => sg.group === group)?.ratio, t('common.locale')) ?? "-"}
@@ -111,7 +110,7 @@ export const TableCountRatio = ({ data, title }: { data: any[], title: string })
 						<tr key={group} onMouseEnter={() => setHoveredRow(group)} onMouseLeave={() => setHoveredRow(null)}>
 							<td style={firstCellStyle}><b>{group}</b></td>
 							<td style={countBarStyle}>
-								{formatDimension(data?.find((sg: any) => sg.group === group)?.count ?? "-", t('common.locale'), 0)}
+								{formatDimension(data?.find((sg: any) => sg.group === group)?.count, t('common.locale'), 0) ?? "-"}
 							</td>
 							<td style={ratioBarStyle}>
 								{toPercentage(data?.find((sg: any) => sg.group === group)?.ratio, t('common.locale')) ?? "-"}

@@ -334,7 +334,7 @@
         width: 100%;
         min-width: 0;
         height: 25rem;
-        padding: 0.5rem;
+        //padding: 0.5rem;
         overflow: hidden;
 
         .column {
@@ -354,5 +354,9 @@
     .dashboardPieChartCanvas {
         min-height: 200px;
         max-height: 40vh;
+    }
+
+    .dashboardStatsTable {
+        border-radius: 0 0 1rem 1rem;
     }
 }

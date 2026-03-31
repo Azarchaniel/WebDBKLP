@@ -59,7 +59,7 @@
         "warningLps_other": "and {{count}} LP"
     },
     "barcode": {
-        "notFound": "No book found for this ISBN.",
+        "notFound": "No barcode was found!",
         "title": "Barcode scanner"
     },
     "boardGames": {

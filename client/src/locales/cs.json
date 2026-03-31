@@ -59,7 +59,7 @@
         "warningLps_other": "a {{count}} LP"
     },
     "barcode": {
-        "notFound": "Kniha s tímto ISBN nebyla nalezena.",
+        "notFound": "Nebyl nalezen žádný čárový kód!",
         "title": "Skener čárového kódu"
     },
     "boardGames": {

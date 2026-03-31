@@ -4,6 +4,7 @@ import { faExclamationTriangle, faWindowMinimize, faWindowMaximize } from "@fort
 import { ValidationError } from "type";
 import LoadingSpinner from "./LoadingSpinner";
 import { useTranslation } from "react-i18next";
+import "@styles/ModalStatus.scss";
 
 interface ModalProps {
     customKey: string;
