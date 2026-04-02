@@ -994,7 +994,7 @@ const dashboard = {
             let response = [];
 
             if (userId) {
-                const currUser = users.find(u => u._id === userId);
+                const currUser = users.find(u => u._id.toString() === userId);
 
                 response.push({
                     owner: { id: userId, firstName: currUser?.firstName ?? "", lastName: currUser?.lastName },
@@ -1048,7 +1048,7 @@ const dashboard = {
 
             const result: any[] = await Promise.all(
                 users.map(async user => {
-                    const userId = (user._id as string).toString();
+                    const userId = String(user._id);
 
                     const userStats: { name: string; stats: { user: string; count: number; ratio: number }[] } = {
                         name: user.firstName!,
@@ -1056,7 +1056,7 @@ const dashboard = {
                     };
 
                     for (const otherUser of users) {
-                        const otherUserId = (otherUser._id as string).toString();
+                        const otherUserId = String(otherUser._id);
 
                         // Count books read by `user` that are owned by `otherUser`
                         const count = await Book.countDocuments({

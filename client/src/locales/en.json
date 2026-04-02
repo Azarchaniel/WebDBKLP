@@ -59,7 +59,7 @@
         "warningLps_other": "and {{count}} LP"
     },
     "barcode": {
-        "notFound": "No book found for this ISBN.",
+        "notFound": "No barcode was found!",
         "title": "Barcode scanner"
     },
     "boardGames": {
@@ -155,6 +155,7 @@
         "saveManySuccess_other": "{{count}} books were successfully updated.",
         "saveSuccessSingle": "Book {{title}} was successfully {{action}}.",
         "scanIsbn": "Scan ISBN",
+        "searchByISBN": "Search by ISBN",
         "searchPlaceholder": "Search books",
         "showHideColumns": "Show/hide columns"
     },

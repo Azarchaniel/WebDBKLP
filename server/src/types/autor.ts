@@ -1,7 +1,6 @@
 import { Document } from 'mongoose'
 
 export interface IAutor extends Document {
-    _id: string;
     firstName?: string;
     lastName: string;
     nationality?: string;
@@ -11,5 +10,5 @@ export interface IAutor extends Document {
     fullName?: string;
     deletedAt?: Date;
     role?: string[];
-    normalizedSearchField?: {[key: string]: string};
+    normalizedSearchField?: { [key: string]: string };
 }

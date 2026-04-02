@@ -59,7 +59,7 @@
         "warningLps_other": "a {{count}} LP"
     },
     "barcode": {
-        "notFound": "Kniha s týmto ISBN nebola nájdená.",
+        "notFound": "Nebol nájdený žiaden čiarový kód!",
         "title": "Skener čiarového kódu"
     },
     "boardGames": {
@@ -155,6 +155,7 @@
         "saveManySuccess_other": "{{count}} kníh bolo úspešne upravených.",
         "saveSuccessSingle": "Kniha {{title}} bola úspešne {{action}}.",
         "scanIsbn": "Naskenuj ISBN",
+        "searchByISBN": "Hľadať podľa ISBN",
         "searchPlaceholder": "Vyhľadaj knihu",
         "showHideColumns": "Zobraz/skry stĺpce"
     },

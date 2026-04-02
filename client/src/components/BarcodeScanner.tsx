@@ -232,14 +232,6 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                                         pointerEvents: 'none',
                                     }}
                                 />
-                                {showNotFoundIcon && (
-                                    <div className="videoErrorIconWrapper">
-                                        <span className="fa-stack fa-lg">
-                                            <FontAwesomeIcon icon={faBarcode} className="fa-stack-1x" style={{ color: 'white' }} />
-                                            <FontAwesomeIcon icon={faBan} className="fa-stack-1x" />
-                                        </span>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     }

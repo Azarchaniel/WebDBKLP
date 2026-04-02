@@ -45,11 +45,29 @@ export const getBookTableColumns = (t: TFunction): ColumnDef<IBook, any>[] => [
     {
         accessorKey: 'title',
         header: t("table.books.title"),
-        cell: (info: any) => (
-            <b>
-                {info.getValue() as unknown as string}
-            </b>
-        ),
+        cell: (info: any) => {
+            const title = info.getValue() as string;
+            const picture = info.row.original?.picture as string | undefined;
+
+            if (!picture) {
+                return <b>{title}</b>;
+            }
+
+            return (
+                <b>
+                    <span
+                        className="bookTitleWithPreview"
+                        data-tooltip-id="global-tooltip"
+                        data-tooltip-content={title}
+                        data-tooltip-type="book-cover"
+                        data-tooltip-picture={picture}
+                        tabIndex={0}
+                    >
+                        {title}
+                    </span>
+                </b>
+            );
+        },
         sortUndefined: "last"
     },
     {

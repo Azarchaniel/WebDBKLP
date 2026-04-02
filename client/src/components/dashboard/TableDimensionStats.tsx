@@ -36,12 +36,12 @@ export const DashboardTableStats = ({ dimensionStats }: Props) => {
 						<div className="section-title">
 							{translationMap[dimension]}
 						</div>
-						<table className="responsive-table dashboardStatsTable dashboardStatsTable--mobile">
+						<table className="responsive-table dashboardStatsTable">
 							<tbody>
 								{metrics.map((metric) => (
 									<tr key={metric}>
 										<td><b>{translationMap[metric]}</b></td>
-										<td>{formatDimension(dimensionStats[dimension][metric], t('common.locale'))}</td>
+										<td>{formatDimension(dimensionStats[dimension][metric], t('common.locale')) ?? "-"}</td>
 									</tr>
 								))}
 							</tbody>
@@ -50,7 +50,7 @@ export const DashboardTableStats = ({ dimensionStats }: Props) => {
 				))}
 			</div>
 
-			<table className="desktop-table dashboardStatsTable dashboardStatsTable--desktop">
+			<table className="desktop-table dashboardStatsTable">
 				<thead>
 					<tr>
 						<th className="firstCell" />
@@ -64,7 +64,7 @@ export const DashboardTableStats = ({ dimensionStats }: Props) => {
 						<tr key={metric}>
 							<td><b>{translationMap[metric]}</b></td>
 							{dimensions.map((dimension) => (
-								<td key={dimension}>{formatDimension(dimensionStats[dimension][metric], t('common.locale'))}</td>
+								<td key={dimension}>{formatDimension(dimensionStats[dimension][metric], t('common.locale')) ?? "-"}</td>
 							))}
 						</tr>
 					))}
