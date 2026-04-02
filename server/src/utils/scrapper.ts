@@ -503,11 +503,24 @@ const fetchIsbnFromEditionsPage = async (page: Page, slug: string): Promise<stri
 // ─── MAIN DK SCRAPER ─────────────────────────────────────────────────────────
 
 const databazeKnih = async (isbn: string): Promise<object | boolean> => {
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox'],
-        timeout: 0,
-    });
+    let browser;
+    try {
+        browser = await puppeteer.launch({
+            headless: true,
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--no-first-run',
+                '--no-zygote',
+            ],
+            timeout: 0,
+        });
+    } catch (launchError) {
+        console.error("Failed to launch Puppeteer browser", launchError);
+        return false;
+    }
 
     try {
         console.log("DK called ", isbn);
