@@ -294,9 +294,10 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                     onError={(error) => console.error(error)}
                 />
                 <button
+                    type="button"
                     className="isbnLookup"
                     data-tooltip-id="global-tooltip"
-                    data-tooltip-content={t("books.scanIsbn")}
+                    data-tooltip-content={t("books.searchByISBN")}
                     onClick={getBookFromISBN}
                 >
                     <FontAwesomeIcon

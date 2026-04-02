@@ -155,6 +155,7 @@
         "saveManySuccess_other": "{{count}} kníh bolo úspešne upravených.",
         "saveSuccessSingle": "Kniha {{title}} bola úspešne {{action}}.",
         "scanIsbn": "Naskenuj ISBN",
+        "searchByISBN": "Hľadať podľa ISBN",
         "searchPlaceholder": "Vyhľadaj knihu",
         "showHideColumns": "Zobraz/skry stĺpce"
     },

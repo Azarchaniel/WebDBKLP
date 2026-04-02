@@ -275,7 +275,8 @@ export default function BoardGamesPage() {
     return (
         <>
             {isLoggedIn &&
-                <button type="button" className="addBtnTable" onClick={handleAddBoardGame} />
+                <button type="button" className="addBtnTable" onClick={handleAddBoardGame} data-tooltip-id="global-tooltip"
+                    data-tooltip-content={t("boardGames.addNew")} />
             }
             <div ref={popRef} className={`showHideColumns ${showColumn.control ? "shown" : "hidden"}`}>
                 <ShowHideColumns columns={getBoardGameTableColumns(t)} shown={showColumn} setShown={setShowColumn} />
