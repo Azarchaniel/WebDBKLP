@@ -1,5 +1,6 @@
 import { IBook, IBookColumnVisibility, SaveEntity, SaveEntityResult } from "../../type";
 import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { addBook, checkBooksUpdated, deleteBook, getBook, getBooks } from "../../API";
 import { toast } from "react-toastify";
 import {
@@ -27,12 +28,13 @@ import { useTranslation } from "react-i18next";
 
 export default function BookPage() {
     const { t } = useTranslation();
+    const { id } = useParams<{ id?: string }>();
     const { currentUser, isLoading: isAuthLoading, isLoggedIn } = useAuth();
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
     const [pagination, setPagination] = useState({
         page: DEFAULT_PAGINATION.page,
         pageSize: DEFAULT_PAGINATION.pageSize,
-        search: DEFAULT_PAGINATION.search,
+        search: id ?? DEFAULT_PAGINATION.search,
         sorting: [...DEFAULT_PAGINATION.sorting],
         filters: DEFAULT_PAGINATION.filters
     });

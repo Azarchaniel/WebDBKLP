@@ -72,14 +72,18 @@ export const buildPaginationPipeline = (page: number, pageSize: number, sortOpti
 export const buildSearchQuery = (search: string, searchFields: string[]): Record<string, any> => {
     if (!search) return {};
 
-    return {
-        $or: searchFields.map(field => ({
-            [`normalizedSearchField.${field}`]: {
-                $regex: diacritics.remove(search ?? "")?.replace(/-/g, ""),
-                $options: "i"
-            }
-        }))
-    };
+    const conditions: Record<string, any>[] = searchFields.map(field => ({
+        [`normalizedSearchField.${field}`]: {
+            $regex: diacritics.remove(search ?? "")?.replace(/-/g, ""),
+            $options: "i"
+        }
+    }));
+
+    if (/^[a-f\d]{24}$/i.test(search)) {
+        conditions.push({ _id: new Types.ObjectId(search) });
+    }
+
+    return { $or: conditions };
 };
 
 const buildFilterCondition = (field: string, value: any, operator?: string): any => {

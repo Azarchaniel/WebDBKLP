@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { IAutor, IBookColumnVisibility, SaveEntity, SaveEntityResult } from "../../type";
 import { addAutor, deleteAutor, getAutor, getAutorInfo, getAutors, getMultipleAutorsInfo } from "../../API";
 import { toast } from "react-toastify";
@@ -22,12 +23,14 @@ import { useTranslation } from "react-i18next";
 
 export default function AutorPage() {
     const { t } = useTranslation();
+    const { id } = useParams<{ id?: string }>();
     const { isLoggedIn, currentUser } = useAuth();
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [pagination, setPagination] = useState({
         ...DEFAULT_PAGINATION,
+        search: id ?? DEFAULT_PAGINATION.search,
         sorting: [{ id: "lastName", desc: false }] as SortingState
     });
     const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);

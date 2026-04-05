@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import BookPage from "./pages/books/BookPage";
 import AutorPage from "./pages/autors/AutorPage";
 import QuotePage from "./pages/quotes/QuotePage";
@@ -16,23 +16,29 @@ const localhostHosts = new Set(["localhost", "127.0.0.1", "::1"]);
 const isLocalhost = localhostHosts.has(window.location.hostname);
 document.title = isLocalhost ? "WebDBKLP - TEST" : "WebDBKLP";
 
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <App />,
+        children: [
+            { index: true, element: <DashboardPage /> },
+            { path: "books", element: <BookPage /> },
+            { path: "books/:id", element: <BookPage /> },
+            { path: "autors", element: <AutorPage /> },
+            { path: "autors/:id", element: <AutorPage /> },
+            { path: "lp", element: <LPPage /> },
+            { path: "quotes", element: <QuotePage /> },
+            { path: "board-games", element: <BoardGamesPage /> },
+        ],
+    },
+    { path: "/utils", element: <UtilPage /> },
+    { path: "/kzp", element: <KzpPage /> },
+]);
+
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
 root.render(
     <AuthProvider>
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<App />}>
-                    <Route index path="/" element={<DashboardPage />} />
-                    <Route path="/books" element={<BookPage />} />
-                    <Route path="/autors" element={<AutorPage />} />
-                    <Route path="/lp" element={<LPPage />} />
-                    <Route path="/quotes" element={<QuotePage />} />
-                    <Route path="/board-games" element={<BoardGamesPage />} />
-                </Route>
-                <Route path="/utils" element={<UtilPage />} />
-                <Route path="/kzp" element={<KzpPage />} />
-            </Routes>
-        </BrowserRouter>
+        <RouterProvider router={router} />
     </AuthProvider>
 )
