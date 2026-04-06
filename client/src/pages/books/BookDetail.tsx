@@ -18,19 +18,6 @@ interface Props {
 const BookDetail: React.FC<Props> = React.memo(({ data }) => {
     const { t } = useTranslation();
     // Helper functions
-    const renderContributorRow = (
-        contributors: keyof IExtendedBook,
-        contributorsText: keyof IExtendedBook,
-        labelKey: string
-    ): string | undefined => {
-        if (!data[contributors] || !data[contributorsText]) return;
-
-        const count = (data[contributors] as IAutor[]).length;
-        const label = t(labelKey, { count });
-
-        return `${label}: ${data[contributorsText]}`;
-    };
-
     const renderContributorLinks = (
         contributors: keyof IExtendedBook,
         labelKey: string
@@ -112,7 +99,7 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
             .join(", ");
         const shelf = data.location.shelf ?? "";
 
-        return `${t("bookDetail.location")}: ${cityName} ${shelf}`;
+        return `${t("bookDetail.location")}: ${cityName}, ${shelf}`;
     };
 
     const renderPeopleList = (people: IUser[] | undefined, label: string): string | undefined => {

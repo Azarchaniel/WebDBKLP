@@ -14,14 +14,18 @@ interface BodyProps {
     error: (err: ValidationError[] | undefined) => void;
 }
 
-const getInitialExpansions = (data: IBoardGame | object): boolean | undefined => {
-    if ((data as IBoardGame).children && (data as IBoardGame).children!.length > 0) {
-        return true;
-    }
-    if ((data as IBoardGame).parent && (data as IBoardGame).parent!.length > 0) {
-        return false;
-    }
+const getStateForOne = (item: IBoardGame): boolean | undefined => {
+    if (item.children && item.children.length > 0) return true;
+    if (item.parent && item.parent.length > 0) return false;
     return undefined;
+};
+
+const getInitialExpansions = (data: IBoardGame | IBoardGame[]): boolean | undefined => {
+    const items = Array.isArray(data) ? data : [data];
+    if (items.length === 0) return undefined;
+    const states = items.map(getStateForOne);
+    const unique = new Set(states.map(s => String(s)));
+    return unique.size === 1 ? states[0] : undefined;
 };
 
 
@@ -98,6 +102,14 @@ export const BoardGamesModalBody: React.FC<BodyProps> = ({ data, onChange, error
             setFormData(normalizeBGData(data));
         }
     }, [data]);
+
+    // Normalize on mount (formData is initialized as raw data, so [data] guard above won't fire)
+    useEffect(() => {
+        if (!data || !Array.isArray(data) || data.length === 0) return;
+        const normalized = normalizeBGData(data);
+        setFormData(normalized);
+        setExpansions(getInitialExpansions(normalized));
+    }, []);
 
     // Error handling (like BookModal)
     useEffect(() => {

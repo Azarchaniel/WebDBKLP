@@ -33,16 +33,13 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
         onChange(formData)
     }, [formData]);
 
-    // clear form btn
+    // Initialize form from data prop: normalize for editing, or reset for empty/new
     useEffect(() => {
         if (!data) return;
-        if (Object.keys(data).length === 0 && data.constructor === Object) setFormData(data);
-    }, [data]);
-
-    // edit
-    useEffect(() => {
-        if (!data) return;
-
+        if (Object.keys(data).length === 0 && data.constructor === Object) {
+            setFormData(data);
+            return;
+        }
         const typedData = data as IQuote;
         const enrichedData = {
             ...typedData,
@@ -55,7 +52,7 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
             owner: formPersonsFullName((data as IQuote)?.owner)
         };
         setFormData(enrichedData);
-    }, []);
+    }, [data]);
 
     //ERROR HANDLING
     useEffect(() => {

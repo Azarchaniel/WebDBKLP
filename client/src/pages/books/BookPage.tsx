@@ -70,8 +70,8 @@ export default function BookPage() {
         updatedAt: !isMobile(),
     });
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
-    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
-    const [filterTimeoutId, setFilterTimeoutId] = useState<NodeJS.Timeout | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const filterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [controller, setController] = useState<AbortController | null>(null);
     const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
 
@@ -143,25 +143,20 @@ export default function BookPage() {
     };
 
     useEffect(() => {
-        // Clear any existing timeout when pagination changes
-        if (timeoutId) clearTimeout(timeoutId);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-        // If search is empty, fetch immediately
         if (pagination.search === "") {
+            timeoutRef.current = null;
             fetchBooks();
             return;
         }
 
-        // Set a new timeout for debounced fetching
-        const newTimeoutId = setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
             fetchBooks();
-        }, 1000); // Wait 1s before making the request
+        }, 1000);
 
-        setTimeoutId(newTimeoutId);
-
-        // Cleanup function to clear timeout if component unmounts or pagination changes again
         return () => {
-            if (newTimeoutId) clearTimeout(newTimeoutId);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
     }, [pagination, currentUser, isAuthLoading]);
 
@@ -177,11 +172,7 @@ export default function BookPage() {
             const res = await addBook(formData);
             let message = "";
             if (Array.isArray(formData) && formData.length > 1) {
-                if (res.length < 5) {
-                    message = t("books.saveManySuccess", { count: res.length });
-                } else {
-                    message = t("books.saveManySuccess", { count: res.length });
-                }
+                message = t("books.saveManySuccess", { count: res.length });
             } else {
                 const bookTitle = Array.isArray(res)
                     ? res[0].data.book?.title
@@ -234,6 +225,7 @@ export default function BookPage() {
                         console.trace(err);
                     })
             }
+            return;
         }
         if (selectedBooks.length > 0) {
             const selectedBooksData = clonedBooks.filter((book: IBook) => selectedBooks.includes(book._id));
@@ -274,9 +266,7 @@ export default function BookPage() {
             const titles = shortenStringKeepWord(books.map(b => b.title).join("\n "), 150);
 
             let message = "";
-            if (books.length > 1 && books.length < 5) {
-                message = t("books.deleteConfirmMany", { count: books.length }) + `\n\n ${titles}`;
-            } else if (books.length >= 5) {
+            if (books.length > 1) {
                 message = t("books.deleteConfirmMany", { count: books.length }) + `\n\n ${titles}`;
             } else {
                 message = t("books.deleteConfirmSingle", { title: titles });
@@ -360,13 +350,10 @@ export default function BookPage() {
                     setPagination(prevState => ({ ...prevState, sorting: sorting }))
                 }}
                 filteringChange={(filters) => {
-                    if (filterTimeoutId) clearTimeout(filterTimeoutId);
-
-                    const newTimeoutId = setTimeout(() => {
+                    if (filterTimeoutRef.current) clearTimeout(filterTimeoutRef.current);
+                    filterTimeoutRef.current = setTimeout(() => {
                         setPagination(prevState => ({ ...prevState, page: DEFAULT_PAGINATION.page, filters: filters }));
-                    }, 1000); // Wait 1s before applying the filters
-
-                    setFilterTimeoutId(newTimeoutId);
+                    }, 1000);
                 }}
                 totalCount={countAll}
                 loading={loading}

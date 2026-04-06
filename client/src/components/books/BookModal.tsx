@@ -66,12 +66,10 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
         }
     }, [data]);
 
-    //edit book
+    // Normalize on mount (formData is initialized as raw data, so [data] guard above won't fire)
     useEffect(() => {
         if (!data || !Array.isArray(data) || data.length === 0) return;
-
-        const modifiedBooks = normalizeBookData(data);
-        setFormData(modifiedBooks);
+        setFormData(normalizeBookData(data));
     }, []);
 
     const getBookFromISBN = () => {
@@ -508,7 +506,7 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
                 <label><input type="checkbox"
                     id="exLibris"
                     className="checkBox"
-                    checked={formData?.[0]?.exLibris}
+                    checked={formData?.[0]?.exLibris ?? false}
                     onChange={(e) => handleInputChange({ name: "exLibris", value: e.target.checked })}
                 />{t("common.exLibris")}</label>
             </div>

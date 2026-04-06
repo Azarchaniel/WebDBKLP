@@ -1,6 +1,6 @@
 import { IBook, IQuote } from "../../type";
 import QuoteItem from "./QuoteItem";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { addQuote, deleteQuote, getQuotes } from "../../API";
 import { toast } from "react-toastify";
 import { generateColors, getRandomShade, ScrollToTopBtn } from "@utils";
@@ -42,43 +42,31 @@ export default function QuotePage() {
     const activeUser = useReadLocalStorage("activeUsers") as string[];
     const [loading, setLoading] = useState(true);
     const [saveQuoteSuccess, setSaveQuoteSuccess] = useState<boolean | undefined>(undefined);
-    const [quoteGroups, setQuoteGroups] = useState<QuoteGroup[]>([]);
     const { openQuoteModal } = useQuoteModal();
 
-    useEffect(() => {
-        fetchQuotes();
-    }, [activeUser, currentUser]);
-
-    useEffect(() => {
-        groupQuotesByBook();
-    }, [filteredQuotes]);
-
-    const groupQuotesByBook = () => {
-        if (!filteredQuotes || !Array.isArray(filteredQuotes)) {
-            setQuoteGroups([]);
-            return;
-        }
-
+    const quoteGroups = useMemo<QuoteGroup[]>(() => {
+        if (!filteredQuotes || !Array.isArray(filteredQuotes)) return [];
         const groups: { [bookId: string]: QuoteGroup } = {};
         const baseColors = generateColors(books.length);
         let colorIndex = 0;
-
         filteredQuotes.forEach((quote) => {
             const bookId = quote.fromBook?._id;
             if (!bookId) return;
-
             if (!groups[bookId]) {
                 groups[bookId] = {
-                    bookId: bookId,
+                    bookId,
                     quotes: [],
-                    baseColor: baseColors[colorIndex++ % baseColors.length], // Assign a base color
+                    baseColor: baseColors[colorIndex++ % baseColors.length],
                 };
             }
             groups[bookId].quotes.push(quote);
         });
+        return Object.values(groups);
+    }, [filteredQuotes, books]);
 
-        setQuoteGroups(Object.values(groups));
-    };
+    useEffect(() => {
+        fetchQuotes();
+    }, [activeUser, currentUser]);
 
     const updateFilteredBooks = (books: QuoteBookOption[]): void => {
         setBooksToFilter(books);
