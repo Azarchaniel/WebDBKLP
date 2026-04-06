@@ -1,11 +1,16 @@
 @import "variables";
 
 .quoteBookSearch {
-  margin-bottom: 1rem;
   display: flex;
   gap: 0.5rem;
-  margin-left: 10px;
-  width: 20rem;
+}
+
+.quotesTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
 .quoteSentinel {
@@ -144,6 +149,21 @@ form {
 
 /* Media query for mobile layout */
 @media screen and (max-width: 768px) {
+  .quotesTitle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 4rem;
+
+    .quoteBookSearch {
+      flex-direction: column;
+      position: relative;
+
+      input {
+        width: 100%;
+      }
+    }
+  }
 
   /* Book and page fields stack on mobile */
   .book-page-row {

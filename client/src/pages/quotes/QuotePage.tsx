@@ -242,40 +242,40 @@ export default function QuotePage() {
                 {loading ? <LoadingBooks /> : <></>}
             </div>
             <div className="p-4">
-                <div className="headerTitleAction">
-                    <h4 className="ml-4 mb-3" style={{ color: "black" }}>{t("quotes.title", { count: countAll })}</h4>
-                </div>
-                <div className="quoteBookSearch">
-                    <div className="searchTableWrapper">
-                        <InputField
-                            type="text"
-                            class="searchInput"
-                            value={searchText}
-                            onChange={(e) => {
-                                setSearchText(e.target.value);
-                                setDebouncedSearch(e.target.value);
-                            }}
-                            placeholder={t("quotes.searchPlaceholder")}
-                        />
-                        <div className="searchBtns">
-                            <button
-                                onClick={() => {
-                                    setSearchText("");
-                                    setDebouncedSearch("");
+                <div className="headerTitleAction quotesTitle">
+                    <h4 className="ml-4" style={{ color: "black" }}>{t("quotes.title", { count: countAll })}</h4>
+                    <div className="quoteBookSearch">
+                        <div className="searchTableWrapper">
+                            <InputField
+                                type="text"
+                                class="searchInput"
+                                value={searchText}
+                                onChange={(e) => {
+                                    setSearchText(e.target.value);
+                                    setDebouncedSearch(e.target.value);
                                 }}
-                            >
-                                ✖
-                            </button>
+                                placeholder={t("quotes.searchPlaceholder")}
+                            />
+                            <div className="searchBtns">
+                                <button
+                                    onClick={() => {
+                                        setSearchText("");
+                                        setDebouncedSearch("");
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
                         </div>
+                        <LazyLoadMultiselect
+                            value={booksToFilter}
+                            options={books}
+                            displayValue="showName"
+                            placeholder={t("quotes.fromBookPlaceholder")}
+                            onChange={({ value }) => updateFilteredBooks(value as QuoteBookOption[])}
+                            name="fromBook"
+                        />
                     </div>
-                    <LazyLoadMultiselect
-                        value={booksToFilter}
-                        options={books}
-                        displayValue="showName"
-                        placeholder={t("quotes.fromBookPlaceholder")}
-                        onChange={({ value }) => updateFilteredBooks(value as QuoteBookOption[])}
-                        name="fromBook"
-                    />
                 </div>
                 <div className="quote_container">
                     {quoteGroups.length > 0 ? (
