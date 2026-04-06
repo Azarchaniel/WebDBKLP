@@ -99,6 +99,8 @@ type ApiQuoteDataType = {
     quotes: IQuote[]
     quote?: IQuote
     count?: number
+    hasMore?: boolean
+    onlyQuotedBooks?: IBook[]
 }
 
 type ApiLPDataType = {

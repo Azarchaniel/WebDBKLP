@@ -125,6 +125,12 @@ export async function normalizeSearchFields(doc: any, model: string): Promise<Re
                 autor: doc.autor
             };
             break;
+        case "quote":
+            fieldsToNormalize = {
+                text: doc.text,
+                note: doc.note,
+            };
+            break;
         default:
             console.error("Unknown model")
     }

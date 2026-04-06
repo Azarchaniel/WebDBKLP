@@ -375,7 +375,7 @@ export default function BookPage() {
                         <div className="searchTableWrapper">
                             <InputField
                                 placeholder={t("books.searchPlaceholder")}
-                                className="form-control searchBookInput"
+                                className="searchInput"
                                 value={pagination.search}
                                 onChange={(e) =>
                                     setPagination((prevState) => ({

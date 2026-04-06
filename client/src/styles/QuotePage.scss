@@ -1,5 +1,27 @@
 @import "variables";
 
+.quoteBookSearch {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  margin-left: 10px;
+  width: 20rem;
+}
+
+.quoteSentinel {
+  width: 100%;
+  height: 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &__spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
 .quote_container {
   padding: 10px;
   column-count: 4;
@@ -100,11 +122,6 @@
   }
 }
 
-.quoteBookSearch {
-  margin-left: 10px;
-  width: 20rem;
-}
-
 /* Base form styles */
 form {
   display: grid;
@@ -154,6 +171,7 @@ form {
 
   .quoteBookSearch {
     width: 95%;
+    flex-direction: column;
   }
 
   .quote_container {

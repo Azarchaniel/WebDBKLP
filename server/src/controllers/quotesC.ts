@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { IPopulateOptions, IQuote, IBook } from "../types";
 import Quote from "../models/quote"
 import { optionFetchAllExceptDeleted } from "../utils/constants";
+import diacritics from "diacritics";
 
 const populateOptions: IPopulateOptions[] = [
     {
@@ -15,7 +16,11 @@ const populateOptions: IPopulateOptions[] = [
 
 const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
     try {
-        let { activeUsers, filterByBook } = req.query;
+        let { activeUsers, filterByBook, search, page, limit } = req.query;
+
+        const pageNum = Math.max(1, parseInt((page as string) || '1', 10));
+        const limitNum = Math.min(100, Math.max(1, parseInt((limit as string) || '20', 10)));
+        const skip = (pageNum - 1) * limitNum;
 
         const query: any = { ...optionFetchAllExceptDeleted };
 
@@ -27,19 +32,51 @@ const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
             query.fromBook = { $in: filterByBook };
         }
 
-        const quotes: IQuote[] = await Quote.find(query)
-            .populate(populateOptions)
-            .sort({ createdAt: -1 })
-            .exec();
+        if (search && typeof search === 'string' && search.trim()) {
+            const normalizedSearch = diacritics.remove(search.trim());
+            query['normalizedSearchField.text'] = { $regex: normalizedSearch, $options: 'i' };
+        }
 
-        const count = await Quote.countDocuments(query);
+        const [quotes, count] = await Promise.all([
+            Quote.find(query)
+                .populate(populateOptions)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limitNum)
+                .exec(),
+            Quote.countDocuments(query)
+        ]);
 
-        const onlyQuotedBooks =
-            Array.from(
-                new Set(quotes.map(q => q.fromBook))
-            ).filter(b => b).sort((a: IBook, b: IBook) => a.title.localeCompare(b.title, "sk"));
+        const hasMore = skip + limitNum < count;
 
-        res.status(200).json({ quotes, count, onlyQuotedBooks })
+        // Return available books for the filter only on the first page,
+        // querying without search/filterByBook so the dropdown always shows all quoted books.
+        let onlyQuotedBooks: IBook[] | undefined;
+        if (pageNum === 1) {
+            const booksQuery: any = { ...optionFetchAllExceptDeleted };
+            if (activeUsers) booksQuery.owner = { $in: activeUsers };
+
+            const allQuotesForBooks: IQuote[] = await Quote.find(booksQuery)
+                .populate({
+                    path: 'fromBook',
+                    model: 'Book',
+                    select: 'title autor published',
+                    populate: { path: 'autor', model: 'Autor' }
+                })
+                .select('fromBook')
+                .exec();
+
+            const bookMap = new Map<string, IBook>();
+            allQuotesForBooks.forEach(q => {
+                if (q.fromBook?._id) {
+                    bookMap.set(q.fromBook._id.toString(), q.fromBook);
+                }
+            });
+            onlyQuotedBooks = Array.from(bookMap.values())
+                .sort((a: IBook, b: IBook) => a.title.localeCompare(b.title, "sk"));
+        }
+
+        res.status(200).json({ quotes, count, onlyQuotedBooks, hasMore });
     } catch (error) {
         res.status(500);
         console.error(error);
