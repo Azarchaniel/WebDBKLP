@@ -26,7 +26,6 @@ export default function BoardGamesPage() {
     const [boardGames, setBoardGames] = useState([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
-    const [updateBoardGame, setUpdateBoardGame] = useState<any>();
     const [pagination, setPagination] = useState({
         ...DEFAULT_PAGINATION,
         sorting: [{ id: "title", desc: false }] as SortingState
@@ -83,12 +82,7 @@ export default function BoardGamesPage() {
             // Multi-edit support
             return Promise.all(formData.map(bg => addBoardGame(bg)))
                 .then((results) => {
-                    let message = "";
-                    if (results.length < 5) {
-                        message = t("boardGames.saveManySuccess", { count: results.length });
-                    } else {
-                        message = t("boardGames.saveManySuccess", { count: results.length });
-                    }
+                    const message = t("boardGames.saveManySuccess", { count: results.length });
                     toast.success(message);
                     setSaveBoardGameSuccess(true);
                     fetchBoardGames();
@@ -163,6 +157,7 @@ export default function BoardGamesPage() {
                         console.trace(err);
                     });
             }
+            return;
         }
 
         // Handle multi-edit for selected board games
@@ -196,20 +191,14 @@ export default function BoardGamesPage() {
             const totalExpansions = expansionsResults.reduce((sum, result) => sum + result.data.count, 0);
 
             let warningText = "";
-            if (totalExpansions === 1) {
-                warningText = t("boardGames.expansionsWarning", { count: totalExpansions });
-            } else if (totalExpansions > 1 && totalExpansions < 5) {
-                warningText = t("boardGames.expansionsWarning", { count: totalExpansions });
-            } else if (totalExpansions >= 5) {
+            if (totalExpansions > 0) {
                 warningText = t("boardGames.expansionsWarning", { count: totalExpansions });
             }
 
             const titles = games.map(g => g.title).join("\n ");
 
             let message = "";
-            if (games.length > 1 && games.length < 5) {
-                message = t("boardGames.deleteConfirmMany", { count: games.length, titles });
-            } else if (games.length >= 5) {
+            if (games.length > 1) {
                 message = t("boardGames.deleteConfirmMany", { count: games.length, titles });
             } else {
                 message = t("boardGames.deleteConfirmSingle", { title: titles });

@@ -1,4 +1,5 @@
 import { ReactElement } from "react";
+import { Link } from "react-router-dom";
 import { NoData } from "./NoData";
 import { useTranslation } from "react-i18next";
 import { Tab, Tabs } from "@components/Tabs";
@@ -56,9 +57,9 @@ export const TableBiggestBooks = ({ biggestBooks }: Props): ReactElement => {
                                         <div className="dashboardBookThumbPlaceholder" />
                                     )}
                                     <div className="dashboardBookMeta dashboardBookMetaGrow">
-                                        <span className="dashboardBookTitle">
+                                        <Link to={`/books/${book._id}`} className="dashboardBookTitle">
                                             {book.title}
-                                        </span>
+                                        </Link>
                                         {book.author && <span className="dashboardBookAuthor">{book.author}</span>}
                                     </div>
                                     <span className="dashboardBookValue">

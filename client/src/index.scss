@@ -61,10 +61,17 @@ main,
   margin-right: .5rem;
 }
 
+a {
+  text-decoration: none;
+  font-weight: 700;
+  color: var(--anchor);
+}
+
 .customLink {
   text-decoration: none;
   color: white;
   user-select: none;
+  font-weight: 400;
 
   &:hover {
     color: var(--anchor) !important;

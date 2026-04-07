@@ -83,7 +83,7 @@ const Sidebar = () => {
                     label={t("common.menu")}
                 />
                 {content.map(item => (
-                    <Link to={item.route} key={item.route} className={location.pathname === item.route ? "active" : ""}>
+                    <Link to={item.route} key={item.route} className={location.pathname.includes(item.route) ? "active" : ""}>
                         <i className={item.icon} />
                         {sidebarOpened && <span>{item.title}</span>}
                     </Link>

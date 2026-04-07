@@ -1,4 +1,5 @@
 import { ReactElement } from "react";
+import { Link } from "react-router-dom";
 import { NoData } from "./NoData";
 import { useTranslation } from "react-i18next";
 import { Tab, Tabs } from "@components/Tabs";
@@ -47,7 +48,7 @@ export const TableOldestBooks = ({ oldestBooks }: Props): ReactElement => {
                                             <div className="dashboardBookThumbPlaceholder" />
                                         )}
                                         <div className="dashboardBookMeta">
-                                            <span className="dashboardBookTitle">{book.title}</span>
+                                            <Link to={`/books/${book._id}`} className="dashboardBookTitle">{book.title}</Link>
                                             {book.author && (
                                                 <span className="dashboardBookAuthor">{book.author}</span>
                                             )}

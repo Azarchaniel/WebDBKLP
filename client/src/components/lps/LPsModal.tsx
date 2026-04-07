@@ -83,6 +83,12 @@ export const LPsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: Bod
         }
     }, [data]);
 
+    // Normalize on mount (formData is initialized as raw data, so [data] guard above won't fire)
+    useEffect(() => {
+        if (!data || !Array.isArray(data) || data.length === 0) return;
+        setFormData(normalizeLPData(data));
+    }, []);
+
     // Error handling (like BookModal)
     useEffect(() => {
         if (!formData) return;

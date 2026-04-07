@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { IAutor, IBookColumnVisibility, SaveEntity, SaveEntityResult } from "../../type";
 import { addAutor, deleteAutor, getAutor, getAutorInfo, getAutors, getMultipleAutorsInfo } from "../../API";
 import { toast } from "react-toastify";
@@ -22,15 +23,17 @@ import { useTranslation } from "react-i18next";
 
 export default function AutorPage() {
     const { t } = useTranslation();
+    const { id } = useParams<{ id?: string }>();
     const { isLoggedIn, currentUser } = useAuth();
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
     const [pagination, setPagination] = useState({
         ...DEFAULT_PAGINATION,
+        search: id ?? DEFAULT_PAGINATION.search,
         sorting: [{ id: "lastName", desc: false }] as SortingState
     });
-    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [saveAutorSuccess, setSaveAutorSuccess] = useState<boolean | undefined>(undefined);
     const [showColumn, setShowColumn] = useState<IBookColumnVisibility>({
         control: false,
@@ -56,35 +59,19 @@ export default function AutorPage() {
     }, exceptRef);
 
     useEffect(() => {
-        let currentTimeoutId: NodeJS.Timeout | null = null;
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
-        // Check if there's a non-empty search term (trimming whitespace)
         if (pagination.search && pagination.search.trim() !== "") {
-            // --- Debounce Logic for Search ---
-            // Set a timeout to fetch after 1 second
-            currentTimeoutId = setTimeout(() => {
+            timeoutRef.current = setTimeout(() => {
                 fetchAutors();
             }, 1000);
-
-            // Store the ID of this *new* timeout in state.
-            setTimeoutId(currentTimeoutId);
-
         } else {
-            // --- Immediate Fetch Logic (No Search Term) ---
-            // If a timeout was set from a *previous* state (where search was active), clear it now.
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-                setTimeoutId(null); // Clear the timeout ID from state
-            }
-            // Fetch immediately since there's no search term to debounce
+            timeoutRef.current = null;
             fetchAutors();
         }
 
         return () => {
-            // If a timeout was created *in this specific effect run*, clear it.
-            if (currentTimeoutId) {
-                clearTimeout(currentTimeoutId);
-            }
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
     }, [pagination, currentUser]);
 
@@ -110,11 +97,7 @@ export default function AutorPage() {
             .then((res) => {
                 let message = "";
                 if (Array.isArray(formData) && formData.length > 1) {
-                    if (res.length < 5) {
-                        message = t("autors.saveManySuccess", { count: res.length });
-                    } else {
-                        message = t("autors.saveManySuccess", { count: res.length });
-                    }
+                    message = t("autors.saveManySuccess", { count: res.length });
                 } else {
                     const autorName = Array.isArray(res)
                         ? stringifyAutors({ autor: res[0].data.autor })[0].autorsFull
@@ -168,6 +151,7 @@ export default function AutorPage() {
                         console.trace(err)
                     })
             }
+            return;
         }
 
         if (selectedAutors.length > 0) {
@@ -211,13 +195,7 @@ export default function AutorPage() {
                 const { books, lps } = (await getAutorInfo(autorToDelete!._id)).data;
 
                 let warningText: string = "";
-                if (books.length === 0) {
-                    warningText = ""
-                } else if (books.length === 1) {
-                    warningText = t("autors.warningBooks", { count: books.length });
-                } else if (books.length > 1 && books.length < 5) {
-                    warningText = t("autors.warningBooks", { count: books.length });
-                } else {
+                if (books.length > 0) {
                     warningText = t("autors.warningBooks", { count: books.length });
                 }
 
@@ -260,7 +238,7 @@ export default function AutorPage() {
 
                 openConfirmDialog({
                     title: t("autors.deleteTitleMany"),
-                    text: `${t("autors.deleteConfirmMany", { count: autors.length })}\n\n${list}`,
+                    text: `${t("autors.deleteConfirmMany", { count: idsToDelete.length })}\n\n${list}`,
                     onOk: async () => {
                         try {
                             await Promise.all(idsToDelete.map(id => deleteAutor(id)));
