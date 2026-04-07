@@ -336,6 +336,7 @@
         "deleteTitle": "Delete quote?",
         "editTitle": "Edit quote",
         "fromBookPlaceholder": "From books",
+        "searchPlaceholder": "Search quotes...",
         "noneFound": "No quotes were found!",
         "note": "Note: ",
         "saveError": "Quote could not be {{action}}!",

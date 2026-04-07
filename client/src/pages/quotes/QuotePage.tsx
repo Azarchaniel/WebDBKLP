@@ -1,22 +1,26 @@
 import { IBook, IQuote } from "../../type";
 import QuoteItem from "./QuoteItem";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addQuote, deleteQuote, getQuotes } from "../../API";
 import { toast } from "react-toastify";
 import { generateColors, getRandomShade, ScrollToTopBtn } from "@utils";
 import { LoadingBooks } from "@components/LoadingBooks";
-import { useReadLocalStorage } from "usehooks-ts";
+import LoadingSpinner from "@components/LoadingSpinner";
+import { useReadLocalStorage, useDebounceValue } from "usehooks-ts";
 import { openConfirmDialog } from "@components/ConfirmDialog";
-import { LazyLoadMultiselect } from "@components/inputs";
+import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import "@styles/QuotePage.scss";
 import { useAuth } from "@utils/context";
 import { useQuoteModal } from "@components/quotes/useQuoteModal";
 import { useTranslation } from "react-i18next";
 
+const PAGE_LIMIT = 20;
+
 interface QuoteGroup {
     bookId: string;
     quotes: IQuote[];
     baseColor: string;
+    quoteColors: Map<string, string>;
 }
 
 interface QuoteBookOption {
@@ -41,8 +45,24 @@ export default function QuotePage() {
     const [countAll, setCountAll] = useState<number>(0);
     const activeUser = useReadLocalStorage("activeUsers") as string[];
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(false);
+    const [page, setPage] = useState(1);
+    const [searchText, setSearchText] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useDebounceValue("", 400);
     const [saveQuoteSuccess, setSaveQuoteSuccess] = useState<boolean | undefined>(undefined);
     const { openQuoteModal } = useQuoteModal();
+    const sentinelRef = useRef<HTMLDivElement>(null);
+    // Stable quote-id → color map; never resets so colors don't flash on re-render
+    const quoteColorMapRef = useRef<Map<string, string>>(new Map());
+
+    // Refs so the IntersectionObserver callback always sees the latest state
+    const loadingRef = useRef(true);
+    const loadingMoreRef = useRef(false);
+    const hasMoreRef = useRef(false);
+    loadingRef.current = loading;
+    loadingMoreRef.current = loadingMore;
+    hasMoreRef.current = hasMore;
 
     const quoteGroups = useMemo<QuoteGroup[]>(() => {
         if (!filteredQuotes || !Array.isArray(filteredQuotes)) return [];
@@ -57,52 +77,107 @@ export default function QuotePage() {
                     bookId,
                     quotes: [],
                     baseColor: baseColors[colorIndex++ % baseColors.length],
+                    quoteColors: new Map(),
                 };
             }
+            // Assign a shade once per quote and keep it stable across re-renders
+            if (!quoteColorMapRef.current.has(quote._id)) {
+                quoteColorMapRef.current.set(
+                    quote._id,
+                    getRandomShade(groups[bookId].baseColor)
+                );
+            }
+            groups[bookId].quoteColors.set(quote._id, quoteColorMapRef.current.get(quote._id)!);
             groups[bookId].quotes.push(quote);
         });
         return Object.values(groups);
     }, [filteredQuotes, books]);
 
-    useEffect(() => {
-        fetchQuotes();
-    }, [activeUser, currentUser]);
+    const doFetch = useCallback((pageNum: number, bookIds: string[], search: string, users: string[] | null, isReset: boolean): void => {
+        if (isReset) {
+            setLoading(true);
+        } else {
+            setLoadingMore(true);
+        }
 
-    const updateFilteredBooks = (books: QuoteBookOption[]): void => {
-        setBooksToFilter(books);
-        fetchQuotes(books.map((book: QuoteBookOption) => book._id));
-    }
-
-    const fetchQuotes = (books?: string[]): void => {
-        setLoading(true);
-
-        getQuotes(books, activeUser)
-            .then(({ data: { quotes, count, onlyQuotedBooks } }: IQuote[] | any) => {
-                setFilteredQuotes(quotes);
-                setCountAll(count);
-                //only overwrite books if this is init call
-                if (!books) setBooks((onlyQuotedBooks ?? []).map(toQuoteBookOption));
+        getQuotes(
+            bookIds.length ? bookIds : undefined,
+            users ?? undefined,
+            pageNum,
+            PAGE_LIMIT,
+            search.trim() || undefined
+        )
+            .then(({ data: { quotes, count, onlyQuotedBooks, hasMore: more } }) => {
+                if (isReset) {
+                    quoteColorMapRef.current.clear();
+                    setFilteredQuotes(quotes);
+                } else {
+                    setFilteredQuotes(prev => [...prev, ...quotes]);
+                }
+                setCountAll(count ?? 0);
+                setHasMore(more ?? false);
+                if (pageNum === 1 && onlyQuotedBooks) {
+                    setBooks(onlyQuotedBooks.map(toQuoteBookOption));
+                }
             })
             .catch((err: Error) => console.trace(err))
-            .finally(() => setLoading(false))
-    }
+            .finally(() => {
+                if (isReset) {
+                    setLoading(false);
+                } else {
+                    setLoadingMore(false);
+                }
+            });
+        // doFetch only needs to be stable w.r.t. the setters, which are stable
+    }, []);
+
+    // Reset and re-fetch from page 1 when search, filters, or user changes
+    useEffect(() => {
+        setPage(1);
+        doFetch(1, booksToFilter.map(b => b._id), debouncedSearch, activeUser, true);
+    }, [debouncedSearch, booksToFilter, activeUser, currentUser]);
+
+    // Load next page when page increments (page 1 is handled by the effect above)
+    useEffect(() => {
+        if (page === 1) return;
+        doFetch(page, booksToFilter.map(b => b._id), debouncedSearch, activeUser, false);
+    }, [page]);
+
+    // Infinite scroll — watch the sentinel element
+    useEffect(() => {
+        const sentinel = sentinelRef.current;
+        if (!sentinel) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (
+                    entries[0].isIntersecting &&
+                    hasMoreRef.current &&
+                    !loadingRef.current &&
+                    !loadingMoreRef.current
+                ) {
+                    setPage(prev => prev + 1);
+                }
+            },
+            { threshold: 0.1 }
+        );
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, []);
 
     const handleSaveQuote = (formData: IQuote): void => {
         setSaveQuoteSuccess(undefined);
         const isNewQuote = !formData._id;
 
         addQuote(formData)
-            .then(({ status, data }) => {
+            .then(({ status }) => {
                 if (status !== 201) {
-                    throw new Error(t("quotes.saveError", { action: t("quotes.actionAdded") }))
+                    throw new Error(t("quotes.saveError", { action: t("quotes.actionAdded") }));
                 }
                 setSaveQuoteSuccess(true);
-                if (data?.quotes && Array.isArray(data.quotes)) {
-                    setFilteredQuotes(data.quotes);
-                } else {
-                    // If quotes aren't returned, refetch them
-                    fetchQuotes();
-                }
+                // Reset to page 1 to reflect the new/edited quote
+                setPage(1);
+                doFetch(1, booksToFilter.map(b => b._id), debouncedSearch, activeUser, true);
                 toast.success(t("quotes.saveSuccess", {
                     action: !isNewQuote ? t("quotes.actionEdited") : t("quotes.actionAdded")
                 }));
@@ -113,8 +188,8 @@ export default function QuotePage() {
                 }));
                 console.trace(err);
                 setSaveQuoteSuccess(false);
-            })
-    }
+            });
+    };
 
     const handleDeleteQuote = (_id: string): void => {
         openConfirmDialog({
@@ -124,29 +199,32 @@ export default function QuotePage() {
                 deleteQuote(_id)
                     .then(res => {
                         if (res.status !== 200) {
-                            throw new Error("Error! Quote not deleted")
+                            throw new Error("Error! Quote not deleted");
                         }
                         toast.success(t("quotes.deleteSuccess"));
-                        fetchQuotes();
+                        setPage(1);
+                        doFetch(1, booksToFilter.map(b => b._id), debouncedSearch, activeUser, true);
                     })
                     .catch((err) => {
                         toast.error(t("quotes.deleteError"));
                         console.trace(err);
                     });
             },
-            onCancel: () => {
-            }
+            onCancel: () => { }
         });
-    }
+    };
 
     const scrollToTopOfPage = () => {
-        window.scroll(0, 0)
-    }
+        window.scroll(0, 0);
+    };
 
-    // Handle the add quote button click
     const handleAddQuote = () => {
         setSaveQuoteSuccess(undefined);
         openQuoteModal(undefined, handleSaveQuote, saveQuoteSuccess);
+    };
+
+    const updateFilteredBooks = (selectedBooks: QuoteBookOption[]): void => {
+        setBooksToFilter(selectedBooks);
     };
 
     return (
@@ -164,18 +242,40 @@ export default function QuotePage() {
                 {loading ? <LoadingBooks /> : <></>}
             </div>
             <div className="p-4">
-                <div className="headerTitleAction">
-                    <h4 className="ml-4 mb-3" style={{ color: "black" }}>{t("quotes.title", { count: countAll })}</h4>
-                </div>
-                <div className="quoteBookSearch">
-                    <LazyLoadMultiselect
-                        value={booksToFilter}
-                        options={books}
-                        displayValue="showName"
-                        placeholder={t("quotes.fromBookPlaceholder")}
-                        onChange={({ value }) => updateFilteredBooks(value as QuoteBookOption[])}
-                        name="fromBook"
-                    />
+                <div className="headerTitleAction quotesTitle">
+                    <h4 className="ml-4" style={{ color: "black" }}>{t("quotes.title", { count: countAll })}</h4>
+                    <div className="quoteBookSearch">
+                        <div className="searchTableWrapper">
+                            <InputField
+                                type="text"
+                                class="searchInput"
+                                value={searchText}
+                                onChange={(e) => {
+                                    setSearchText(e.target.value);
+                                    setDebouncedSearch(e.target.value);
+                                }}
+                                placeholder={t("quotes.searchPlaceholder")}
+                            />
+                            <div className="searchBtns">
+                                <button
+                                    onClick={() => {
+                                        setSearchText("");
+                                        setDebouncedSearch("");
+                                    }}
+                                >
+                                    ✖
+                                </button>
+                            </div>
+                        </div>
+                        <LazyLoadMultiselect
+                            value={booksToFilter}
+                            options={books}
+                            displayValue="showName"
+                            placeholder={t("quotes.fromBookPlaceholder")}
+                            onChange={({ value }) => updateFilteredBooks(value as QuoteBookOption[])}
+                            name="fromBook"
+                        />
+                    </div>
                 </div>
                 <div className="quote_container">
                     {quoteGroups.length > 0 ? (
@@ -188,18 +288,25 @@ export default function QuotePage() {
                                             deleteQuote={handleDeleteQuote}
                                             saveQuote={handleSaveQuote}
                                             quote={quote}
-                                            bcgrClr={getRandomShade(group.baseColor)}
+                                            bcgrClr={group.quoteColors.get(quote._id)!}
                                         />
                                     ))}
                                 </React.Fragment>
                             ))}
                         </>
                     ) : (
-                        <span style={{ color: "black" }}>{t("quotes.noneFound")}</span>
+                        !loading && <span style={{ color: "black" }}>{t("quotes.noneFound")}</span>
+                    )}
+                </div>
+                <div ref={sentinelRef} className="quoteSentinel">
+                    {loadingMore && (
+                        <div className="quoteSentinel__spinner">
+                            <LoadingSpinner color="#000" size={40} />
+                        </div>
                     )}
                 </div>
             </div>
             <ScrollToTopBtn scrollToTop={scrollToTopOfPage} />
         </>
-    )
+    );
 }

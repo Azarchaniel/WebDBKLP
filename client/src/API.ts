@@ -421,13 +421,16 @@ export const getMultipleAutorsInfo = async (
 }
 
 // ### QUOTES ###
-export const getQuotes = async (filterByBook?: string[], activeUsers?: string[]): Promise<AxiosResponse<ApiQuoteDataType>> => {
+export const getQuotes = async (filterByBook?: string[], activeUsers?: string[], page?: number, limit?: number, search?: string): Promise<AxiosResponse<ApiQuoteDataType>> => {
     try {
         const quotes: AxiosResponse<ApiQuoteDataType> = await axiosInstance.get(
             baseUrl + "/quotes", {
             params: {
                 activeUsers: activeUsers,
                 filterByBook: filterByBook,
+                page: page,
+                limit: limit,
+                search: search,
             }
         }
         )

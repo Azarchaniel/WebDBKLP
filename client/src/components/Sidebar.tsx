@@ -61,14 +61,14 @@ const Sidebar = () => {
             route: "/lp",
         },
         {
-            title: t("nav.quotes"),
-            icon: "fas fa-pen-nib",
-            route: "/quotes",
-        },
-        {
             title: t("nav.boardGames"),
             icon: "fas fa-chess",
             route: "/board-games",
+        },
+        {
+            title: t("nav.quotes"),
+            icon: "fas fa-pen-nib",
+            route: "/quotes",
         }
     ];
 

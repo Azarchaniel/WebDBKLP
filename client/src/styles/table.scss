@@ -22,6 +22,7 @@ $table-divider-color: lightgray;
     position: relative;
     flex-direction: column !important;
     padding-bottom: 5rem;
+    display: flex;
   }
 
   .tableActionsRight {
@@ -455,11 +456,12 @@ $table-divider-color: lightgray;
   display: flex;
   align-items: center;
 
-  .searchBookInput {
+  .searchInput {
     width: 20rem;
     border-radius: 4px;
     padding: 5px 4rem 5px 10px;
     box-shadow: none;
+    height: 2.5rem;
   }
 
   .searchBtns {

@@ -334,6 +334,7 @@
         "deleteTitle": "Smazat citát?",
         "editTitle": "Úprava citátu",
         "fromBookPlaceholder": "Z knih",
+        "searchPlaceholder": "Hledat citáty...",
         "noneFound": "Žádné citáty nebyly nalezeny!",
         "note": "Poznámka: ",
         "saveError": "Citát se nepodařilo {{action}}!",

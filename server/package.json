@@ -9,7 +9,8 @@
     "postinstall": "npx puppeteer browsers install chrome",
     "start": "concurrently \"tsc -w\" \"nodemon dist/js/app.js\"",
     "debug": "concurrently \"tsc -w\" \"nodemon --inspect dist/js/app.js\"",
-    "startProduction": "nodemon dist/js/app.js"
+    "startProduction": "nodemon dist/js/app.js",
+    "cloneDb": "npx ts-node scripts/cloneDb.ts"
   },
   "keywords": [],
   "author": "",
