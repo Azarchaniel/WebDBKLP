@@ -17,7 +17,6 @@ interface BodyProps {
     error: (err: ValidationError[] | undefined) => void;
 }
 
-
 export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
     const { t } = useTranslation();
     const [formData, setFormData] = useState(
@@ -33,7 +32,9 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
             if (!item) return EMPTY_AUTOR;
             let role: any[] = [];
             if ("role" in item) {
-                role = AUTOR_ROLES.filter(obj => (item?.role as string[]).includes(obj?.value));
+                role = AUTOR_ROLES
+                    .filter(obj => (item?.role as string[]).includes(obj?.value))
+                    .map(obj => ({ ...obj, showValue: t(obj.showValue) }));
             } else {
                 role = [];
             }
@@ -95,6 +96,12 @@ export const AutorsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
             setFormData(normalizeAutorData(data));
         }
     }, [data]);
+
+    // Normalize on mount (formData is initialized as raw data, so [data] guard above won't fire)
+    useEffect(() => {
+        if (!data || !Array.isArray(data) || data.length === 0) return;
+        setFormData(normalizeAutorData(data));
+    }, []);
 
     // Error handling (like BookModal)
     useEffect(() => {

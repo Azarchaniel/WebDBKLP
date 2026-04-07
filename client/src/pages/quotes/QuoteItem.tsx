@@ -5,6 +5,7 @@ import { Wysiwyg } from "@components/Wysiwyg";
 import { useAuth } from "@utils/context";
 import { useQuoteModal } from "@components/quotes/useQuoteModal";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 
 interface QuoteProps {
     quote: IQuote;
@@ -70,9 +71,9 @@ const Quote: React.FC<QuoteProps> = ({ quote, bcgrClr, deleteQuote, saveQuote, s
             <div className="text">
                 {renderBookTitle()}
 
-                {quote.fromBook?.autor && (
+                {quote.fromBook?.autor?.[0]?._id && (
                     <p>
-                        <span className="secondaryText">{renderAuthorName()}</span>
+                        <Link to={`/autors/${quote.fromBook.autor[0]._id}`} className="secondaryText">{renderAuthorName()}</Link>
                     </p>
                 )}
 

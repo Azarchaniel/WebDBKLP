@@ -46,7 +46,10 @@
   display: flex;
   flex-direction: row;
   padding: 1rem;
-  pointer-events: none;
+
+  a {
+    pointer-events: auto;
+  }
 
   div {
     padding-right: 2rem;

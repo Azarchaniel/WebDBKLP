@@ -24,7 +24,7 @@ export default function LPPage() {
     const [LPs, setLPs] = useState<ILP[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
-    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const [saveLpSuccess, setSaveLpSuccess] = useState<boolean | undefined>(undefined);
     const [loading, setLoading] = useState<boolean>(true);
     const [showColumn, setShowColumn] = useState<IBookColumnVisibility>({
@@ -50,22 +50,14 @@ export default function LPPage() {
     }, exceptRef);
 
     useEffect(() => {
-        fetchLPs();
-    }, [currentUser])
-
-    useEffect(() => {
-        if (timeoutId) clearTimeout(timeoutId);
-
-        const newTimeoutId = setTimeout(() => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        timeoutRef.current = setTimeout(() => {
             fetchLPs();
-        }, 1000); // Wait 1s before making the request
-
-        setTimeoutId(newTimeoutId);
-        // Cleanup function to clear timeout if component unmounts or pagination changes again
+        }, 1000);
         return () => {
-            if (newTimeoutId) clearTimeout(newTimeoutId);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
-    }, [pagination]);
+    }, [pagination, currentUser]);
 
     // ### QUOTES ###
     const fetchLPs = (): void => {
@@ -89,12 +81,7 @@ export default function LPPage() {
             // Multi-edit support
             return Promise.all(formData.map(lp => addLP(lp)))
                 .then((results) => {
-                    let message = "";
-                    if (results.length < 5) {
-                        message = t("lp.saveManySuccess", { count: results.length });
-                    } else {
-                        message = t("lp.saveManySuccess", { count: results.length });
-                    }
+                    const message = t("lp.saveManySuccess", { count: results.length });
                     toast.success(message);
                     setSaveLpSuccess(true);
                     fetchLPs();
@@ -168,6 +155,7 @@ export default function LPPage() {
                         setSaveLpSuccess(true);
                     })
             }
+            return;
         }
         if (selectedLPs.length > 0) {
             const lpsToUpdate = LPs.filter((lp: ILP) => selectedLPs.includes(lp._id));

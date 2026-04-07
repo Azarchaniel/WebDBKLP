@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { IAutor, IBook, ILangCode, IUser } from "../../type";
 import { formatDimension, getPublishedCountry, langCode, CITIES, formatNumberLocale } from "@utils";
 import { useTranslation } from "react-i18next";
@@ -17,17 +18,31 @@ interface Props {
 const BookDetail: React.FC<Props> = React.memo(({ data }) => {
     const { t } = useTranslation();
     // Helper functions
-    const renderContributorRow = (
+    const renderContributorLinks = (
         contributors: keyof IExtendedBook,
-        contributorsText: keyof IExtendedBook,
         labelKey: string
-    ): string | undefined => {
-        if (!data[contributors] || !data[contributorsText]) return;
+    ): React.ReactNode => {
+        const items = data[contributors] as IAutor[];
+        if (!items || items.length === 0) return null;
 
-        const count = (data[contributors] as IAutor[]).length;
+        const count = items.length;
         const label = t(labelKey, { count });
 
-        return `${label}: ${data[contributorsText]}`;
+        return (
+            <tr>
+                <td><b>{label}: </b></td>
+                <td>
+                    {items.map((autor, i) => (
+                        <React.Fragment key={autor._id}>
+                            {i > 0 && ", "}
+                            <Link to={`/autors/${autor._id}`}>
+                                {autor.fullName ?? `${autor.firstName ?? ""} ${autor.lastName}`.trim()}
+                            </Link>
+                        </React.Fragment>
+                    ))}
+                </td>
+            </tr>
+        );
     };
 
     const renderDimensions = () => {
@@ -84,7 +99,7 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
             .join(", ");
         const shelf = data.location.shelf ?? "";
 
-        return `${t("bookDetail.location")}: ${cityName} ${shelf}`;
+        return `${t("bookDetail.location")}: ${cityName}, ${shelf}`;
     };
 
     const renderPeopleList = (people: IUser[] | undefined, label: string): string | undefined => {
@@ -158,21 +173,23 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
                 {data.subtitle && <h4>{data.subtitle}</h4>}
 
                 <table>
-                    {renderTableRow(renderContributorRow("autor", "autorsFull", "bookDetail.authors"))}
-                    {renderTableRow(renderContributorRow("editor", "editorsFull", "bookDetail.editors"))}
-                    {renderTableRow(renderContributorRow("ilustrator", "illustratorsFull", "bookDetail.illustrators"))}
-                    {renderTableRow(renderContributorRow("translator", "translatorsFull", "bookDetail.translators"))}
-                    {renderTableRow(renderLanguage())}
-                    {renderTableRow(`ISBN: ${data.ISBN}`)}
-                    {data.numberOfPages && renderTableRow(`${t("bookDetail.pages")}: ${formatNumberLocale(data.numberOfPages, t('common.locale'), 0)}`)}
-                    {renderTableRow(renderPublisherInfo())}
-                    {renderTableRow(renderLocation())}
-                    {renderTableRow(renderPeopleList(data.owner, t("bookDetail.owner")))}
-                    {renderTableRow(renderPeopleList(data.readBy, t("bookDetail.readBy")))}
-                    {renderDimensions()}
-                    {data.note && renderTableRow(`${t("bookDetail.note")}: ${data.note}`)}
+                    <tbody>
+                        {renderContributorLinks("autor", "bookDetail.authors")}
+                        {renderContributorLinks("editor", "bookDetail.editors")}
+                        {renderContributorLinks("ilustrator", "bookDetail.illustrators")}
+                        {renderContributorLinks("translator", "bookDetail.translators")}
+                        {renderTableRow(renderLanguage())}
+                        {renderTableRow(`ISBN: ${data.ISBN}`)}
+                        {data.numberOfPages && renderTableRow(`${t("bookDetail.pages")}: ${formatNumberLocale(data.numberOfPages, t('common.locale'), 0)}`)}
+                        {renderTableRow(renderPublisherInfo())}
+                        {renderTableRow(renderLocation())}
+                        {renderTableRow(renderPeopleList(data.owner, t("bookDetail.owner")))}
+                        {renderTableRow(renderPeopleList(data.readBy, t("bookDetail.readBy")))}
+                        {renderDimensions()}
+                        {data.note && renderTableRow(`${t("bookDetail.note")}: ${data.note}`)}
 
-                    {renderTableRow(`Ex Libris: ${data.exLibris ? "✔" : "✘"}`)}
+                        {renderTableRow(`Ex Libris: ${data.exLibris ? "✔" : "✘"}`)}
+                    </tbody>
                 </table>
             </div>
         </div>

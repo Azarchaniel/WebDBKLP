@@ -454,12 +454,11 @@ $table-divider-color: lightgray;
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
 
   .searchBookInput {
-    width: 100%;
+    width: 20rem;
     border-radius: 4px;
-    padding: 5px 5rem 5px 10px;
+    padding: 5px 4rem 5px 10px;
     box-shadow: none;
   }
 

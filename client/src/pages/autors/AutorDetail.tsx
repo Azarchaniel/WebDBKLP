@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getAutorInfo } from "../../API";
 import { IBook, ILP } from "../../type";
 import { AUTOR_ROLES } from "../../utils/constants";
@@ -80,7 +81,7 @@ const AutorDetail: React.FC<Props> = React.memo(({ data }) => {
                             <tbody>
                                 {books?.map((book, index) => (
                                     <tr key={index}>
-                                        <td>{book.title}<span className="hiddenId">{book._id}</span></td>
+                                        <td><Link to={`/books/${book._id}`}>{book.title}</Link><span className="hiddenId">{book._id}</span></td>
                                         <td>{book.ISBN}</td>
                                         <td>
                                             {book.published?.publisher} {book.published?.year ? "(" + book.published?.year + ")" : ""}
