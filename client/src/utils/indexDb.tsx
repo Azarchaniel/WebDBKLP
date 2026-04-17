@@ -81,7 +81,7 @@ export const getCachedTimestamp = async () => {
         const metadata = await db.get('metadata', 'firstPageData');
         return metadata?.timestamp;
     } catch (err) {
-        console.error("Cannot get cached timestamp",err);
+        console.error("Cannot get cached timestamp", err);
     }
 }
 
@@ -136,5 +136,64 @@ export const isCacheValid = async (): Promise<boolean> => {
         return !!metadata && (new Date().getTime() - metadata.timestamp <= CACHE_EXPIRY);
     } catch (error) {
         return false;
+    }
+};
+
+const DASHBOARD_CACHE_KEY = 'dashboardData';
+
+/**
+ * Save dashboard data to cache
+ * @param data All dashboard API results
+ * @param userId The current user's _id (used to invalidate on user switch)
+ */
+export const saveDashboardToCache = async (data: any, userId: string | undefined): Promise<void> => {
+    try {
+        const db = await getDB();
+        await db.put('metadata', {
+            key: DASHBOARD_CACHE_KEY,
+            data,
+            userId,
+            timestamp: new Date().getTime()
+        });
+    } catch (error) {
+        console.error('Error saving dashboard to IndexedDB cache:', error);
+    }
+};
+
+/**
+ * Load dashboard data from cache
+ * @param userId The current user's _id – returns null if user has changed
+ * @returns Cached dashboard data or null if cache is missing/expired/stale
+ */
+export const loadDashboardFromCache = async (userId: string | undefined): Promise<any | null> => {
+    try {
+        const db = await getDB();
+        const metadata = await db.get('metadata', DASHBOARD_CACHE_KEY);
+
+        if (!metadata || (new Date().getTime() - metadata.timestamp > CACHE_EXPIRY)) {
+            return null;
+        }
+
+        if (metadata.userId !== userId) {
+            return null;
+        }
+
+        return metadata.data ?? null;
+    } catch (error) {
+        console.error('Error loading dashboard from IndexedDB cache:', error);
+        return null;
+    }
+};
+
+/**
+ * Get the timestamp of the cached dashboard data
+ */
+export const getDashboardCachedTimestamp = async (): Promise<number | undefined> => {
+    try {
+        const db = await getDB();
+        const metadata = await db.get('metadata', DASHBOARD_CACHE_KEY);
+        return metadata?.timestamp;
+    } catch (err) {
+        console.error('Cannot get dashboard cached timestamp', err);
     }
 };

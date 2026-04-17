@@ -1,9 +1,12 @@
 {
     "auth": {
         "confirmLogout": "Skutočne sa chceš odhlásiť?",
+        "continueAsGuest": "Pokračovať ako hosť",
+        "continueAsGuestSuccess": "Prehliadaš ako hosť. Len na čítanie.",
         "emailPlaceholder": "Email",
         "enterEmail": "Zadaj používateľský email!",
         "enterPassword": "Zadaj heslo!",
+        "guest": "Hosť",
         "login": "Prihlásiť",
         "loginFailed": "Nepodarilo sa prihlásiť!",
         "loginFailedRetry": "Prihlásenie sa nepodarilo, skús znova.",
@@ -461,5 +464,10 @@
         "numberField": "{{field}} musí byť číslo!",
         "quoteBookRequired": "Musí byť vybraná kniha!",
         "quoteTextRequired": "Text citátu musí obsahovať aspoň jeden znak!"
+    },
+    "page404": {
+        "title": "Stránka nenájdená",
+        "message": "Stránka, ktorú hľadáte, neexistuje.",
+        "goHome": "Prejsť na Prehľad"
     }
 }

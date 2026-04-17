@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import '../../styles/DashboardPage.scss';
-import { countBooks, getDimensionsStatistics, getLanguageStatistics, getReadBy, getSizeGroups, getOldestBooks, getNewestBooks, getBiggestBooks } from "../../API";
+import { checkBooksUpdated, countBooks, getDimensionsStatistics, getLanguageStatistics, getReadBy, getSizeGroups, getOldestBooks, getNewestBooks, getBiggestBooks } from "../../API";
+import { getDashboardCachedTimestamp, loadDashboardFromCache, saveDashboardToCache } from "@utils";
 import { DashboardPieChart } from "@components/dashboard/DashboardPieChart";
 import { DashboardTableStats } from "@components/dashboard/TableDimensionStats";
 import { IDimensionsStatistics, ILanguageStatistics, IUserReadingStats } from "../../type";
@@ -61,41 +62,80 @@ export default function DashboardPage() {
             return;
         }
 
-        setIsLoadingData(true);
+        const fetchDashboard = async () => {
+            setIsLoadingData(true);
 
-        Promise.all([
-            countBooks(),
-            getDimensionsStatistics(),
-            getSizeGroups(),
-            getLanguageStatistics(),
-            getReadBy(),
-            getOldestBooks(),
-            getNewestBooks(),
-            getBiggestBooks("height"),
-            getBiggestBooks("width"),
-            getBiggestBooks("thickness"),
-            getBiggestBooks("weight"),
-            getBiggestBooks("square")
-        ]).then(([countResult, dimResult, sizeResult, langResult, readByResult, oldestResult, newestResult, heightResult, widthResult, thicknessResult, weightResult, squareResult]) => {
-            setCountAllBooks(countResult.data);
-            setDimensionStats(dimResult.data);
-            setSizeGroups(sizeResult.data);
-            setLangStats(langResult.data);
-            setReadBy(readByResult.data);
-            setOldestBooks(oldestResult.data);
-            setNewestBooks(newestResult.data);
-            setBiggestBooks({
-                height: heightResult.data,
-                width: widthResult.data,
-                thickness: thicknessResult.data,
-                weight: weightResult.data,
-                square: squareResult.data
-            });
-        }).catch((err) => {
-            console.error("Error fetching dashboard data:", err);
-        }).finally(() => {
-            setIsLoadingData(false);
-        });
+            try {
+                // Check if books have changed since dashboard was last cached
+                const cachedTimestamp = await getDashboardCachedTimestamp();
+                const { status } = await checkBooksUpdated(cachedTimestamp ? new Date(cachedTimestamp) : undefined);
+
+                if (status === 204) {
+                    const cached = await loadDashboardFromCache(currentUser._id);
+                    if (cached) {
+                        setCountAllBooks(cached.countAllBooks);
+                        setDimensionStats(cached.dimensionStats);
+                        setSizeGroups(cached.sizeGroups);
+                        setLangStats(cached.langStats);
+                        setReadBy(cached.readBy);
+                        setOldestBooks(cached.oldestBooks);
+                        setNewestBooks(cached.newestBooks);
+                        setBiggestBooks(cached.biggestBooks);
+                        setIsLoadingData(false);
+                        return;
+                    }
+                }
+
+                const [countResult, dimResult, sizeResult, langResult, readByResult, oldestResult, newestResult, heightResult, widthResult, thicknessResult, weightResult, squareResult] = await Promise.all([
+                    countBooks(),
+                    getDimensionsStatistics(),
+                    getSizeGroups(),
+                    getLanguageStatistics(),
+                    getReadBy(),
+                    getOldestBooks(),
+                    getNewestBooks(),
+                    getBiggestBooks("height"),
+                    getBiggestBooks("width"),
+                    getBiggestBooks("thickness"),
+                    getBiggestBooks("weight"),
+                    getBiggestBooks("square")
+                ]);
+
+                const dashboardData = {
+                    countAllBooks: countResult.data,
+                    dimensionStats: dimResult.data,
+                    sizeGroups: sizeResult.data,
+                    langStats: langResult.data,
+                    readBy: readByResult.data,
+                    oldestBooks: oldestResult.data,
+                    newestBooks: newestResult.data,
+                    biggestBooks: {
+                        height: heightResult.data,
+                        width: widthResult.data,
+                        thickness: thicknessResult.data,
+                        weight: weightResult.data,
+                        square: squareResult.data
+                    }
+                };
+
+                setCountAllBooks(dashboardData.countAllBooks);
+                setDimensionStats(dashboardData.dimensionStats);
+                setSizeGroups(dashboardData.sizeGroups);
+                setLangStats(dashboardData.langStats);
+                setReadBy(dashboardData.readBy);
+                setOldestBooks(dashboardData.oldestBooks);
+                setNewestBooks(dashboardData.newestBooks);
+                setBiggestBooks(dashboardData.biggestBooks);
+
+                saveDashboardToCache(dashboardData, currentUser._id);
+            } catch (err) {
+                console.error("Error fetching dashboard data:", err);
+            } finally {
+                setIsLoadingData(false);
+            }
+        };
+
+        fetchDashboard();
     }, [currentUser, isAuthLoading]);
 
     const getTabsForReadByStats = (): any => {

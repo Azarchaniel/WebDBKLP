@@ -29,7 +29,7 @@ import { useTranslation } from "react-i18next";
 export default function BookPage() {
     const { t } = useTranslation();
     const { id } = useParams<{ id?: string }>();
-    const { currentUser, isLoading: isAuthLoading, isLoggedIn } = useAuth();
+    const { currentUser, isLoading: isAuthLoading, isLoggedIn, isGuest } = useAuth();
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
     const [pagination, setPagination] = useState({
         page: DEFAULT_PAGINATION.page,
@@ -400,7 +400,7 @@ export default function BookPage() {
                             </div>
                         </div>
                         {/* Add book button for authenticated users */}
-                        {isLoggedIn && (
+                        {isLoggedIn && !isGuest && (
                             <button
                                 type="button"
                                 className="addBtnTable"
@@ -418,22 +418,26 @@ export default function BookPage() {
                         />
                     </div>
                 }
-                rowActions={isLoggedIn ? (_id, expandRow, isExpanded) => (
+                rowActions={(_id, expandRow, isExpanded) => (
                     <div key={_id} className="actionsRow">
-                        <button
-                            key={`delete-${_id}`}
-                            data-tooltip-id="global-tooltip"
-                            data-tooltip-content={t("common.delete")}
-                            onClick={() => handleDeleteBook(_id)}
-                            className="fa fa-trash"
-                        />
-                        <button
-                            key={`edit-${_id}`}
-                            data-tooltip-id="global-tooltip"
-                            data-tooltip-content={t("common.edit")}
-                            className="fa fa-pencil-alt"
-                            onClick={() => handleUpdateBook(_id)}
-                        />
+                        {isLoggedIn && !isGuest && (
+                            <>
+                                <button
+                                    key={`delete-${_id}`}
+                                    data-tooltip-id="global-tooltip"
+                                    data-tooltip-content={t("common.delete")}
+                                    onClick={() => handleDeleteBook(_id)}
+                                    className="fa fa-trash"
+                                />
+                                <button
+                                    key={`edit-${_id}`}
+                                    data-tooltip-id="global-tooltip"
+                                    data-tooltip-content={t("common.edit")}
+                                    className="fa fa-pencil-alt"
+                                    onClick={() => handleUpdateBook(_id)}
+                                />
+                            </>
+                        )}
                         <button
                             key={`detail-${_id}`}
                             data-tooltip-id="global-tooltip"
@@ -442,9 +446,10 @@ export default function BookPage() {
                             onClick={() => expandRow()}
                         />
                     </div>
-                ) : undefined}
+                )}
                 expandedElement={(data) => <BookDetail data={data} />}
                 selectedChanged={(ids) => setSelectedBooks(ids)}
+                showSelection={!isGuest}
             />
         </>
     );

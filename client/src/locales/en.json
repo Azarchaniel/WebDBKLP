@@ -1,9 +1,12 @@
 {
     "auth": {
         "confirmLogout": "Are you sure you want to log out?",
+        "continueAsGuest": "Continue as Guest",
+        "continueAsGuestSuccess": "Browsing as guest. Read-only access.",
         "emailPlaceholder": "Email",
         "enterEmail": "Enter user email!",
         "enterPassword": "Enter password!",
+        "guest": "Guest",
         "login": "Log in",
         "loginFailed": "Login failed!",
         "loginFailedRetry": "Login failed, try again.",
@@ -456,5 +459,10 @@
         "numberField": "{{field}} must be a number!",
         "quoteBookRequired": "A book must be selected!",
         "quoteTextRequired": "Quote text must contain at least one character!"
+    },
+    "page404": {
+        "title": "Page Not Found",
+        "message": "The page you are looking for does not exist.",
+        "goHome": "Go to Dashboard"
     }
 }

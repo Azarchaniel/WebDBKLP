@@ -17,7 +17,7 @@ interface QuoteProps {
 
 const Quote: React.FC<QuoteProps> = ({ quote, bcgrClr, deleteQuote, saveQuote, saveResultSuccess }) => {
     const { t } = useTranslation();
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, isGuest } = useAuth();
     const { openQuoteModal } = useQuoteModal();
 
     const makeImgClickable = (text: string): string => {
@@ -101,7 +101,7 @@ const Quote: React.FC<QuoteProps> = ({ quote, bcgrClr, deleteQuote, saveQuote, s
                 )}
             </div>
 
-            {isLoggedIn && (
+            {isLoggedIn && !isGuest && (
                 <div className="card-btn-wrapper">
                     <i className="fas fa-pen" onClick={handleEdit} data-tooltip-id="global-tooltip" data-tooltip-content={t("quotes.edit")} />
                     &nbsp;&nbsp;&nbsp;
