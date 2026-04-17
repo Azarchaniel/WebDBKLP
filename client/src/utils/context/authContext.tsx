@@ -8,6 +8,7 @@ interface AuthContextType {
     login: (userData: IUser) => void; // Your login function might do more
     logout: () => void; // Your logout function
     isLoggedIn: boolean;
+    isGuest: boolean;
     checkTokenValidity: () => boolean; // Add function to verify token validity
 }
 
@@ -93,6 +94,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Only consider logged in if we have a user AND a valid token
     const isLoggedIn = currentUser !== null && checkTokenValidity();
+    const isGuest = currentUser?.role === 'guest';
 
     const value = {
         currentUser,
@@ -100,6 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         isLoggedIn,
+        isGuest,
         checkTokenValidity
     };
 

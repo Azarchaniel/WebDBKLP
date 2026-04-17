@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 
 export default function BoardGamesPage() {
     const { t } = useTranslation();
-    const { isLoggedIn } = useAuth();
+    const { isLoggedIn, isGuest } = useAuth();
     const [boardGames, setBoardGames] = useState([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
@@ -263,7 +263,7 @@ export default function BoardGamesPage() {
 
     return (
         <>
-            {isLoggedIn &&
+            {isLoggedIn && !isGuest &&
                 <button type="button" className="addBtnTable" onClick={handleAddBoardGame} data-tooltip-id="global-tooltip"
                     data-tooltip-content={t("boardGames.addNew")} />
             }
@@ -315,20 +315,24 @@ export default function BoardGamesPage() {
                         />
                     </div>
                 }
-                rowActions={isLoggedIn ? (_id, expandRow, isExpanded) => (
+                rowActions={(_id, expandRow, isExpanded) => (
                     <div className="actionsRow">
-                        <button
-                            data-tooltip-id="global-tooltip"
-                            data-tooltip-content={t("common.delete")}
-                            onClick={() => handleDeleteBoardGame(_id)}
-                            className="fa fa-trash"
-                        />
-                        <button
-                            data-tooltip-id="global-tooltip"
-                            data-tooltip-content={t("common.edit")}
-                            className="fa fa-pencil-alt"
-                            onClick={() => handleUpdateBoardGame(_id)}
-                        />
+                        {isLoggedIn && !isGuest && (
+                            <>
+                                <button
+                                    data-tooltip-id="global-tooltip"
+                                    data-tooltip-content={t("common.delete")}
+                                    onClick={() => handleDeleteBoardGame(_id)}
+                                    className="fa fa-trash"
+                                />
+                                <button
+                                    data-tooltip-id="global-tooltip"
+                                    data-tooltip-content={t("common.edit")}
+                                    className="fa fa-pencil-alt"
+                                    onClick={() => handleUpdateBoardGame(_id)}
+                                />
+                            </>
+                        )}
                         <button
                             key={`detail-${_id}`}
                             data-tooltip-id="global-tooltip"
@@ -337,9 +341,10 @@ export default function BoardGamesPage() {
                             onClick={() => expandRow()}
                         />
                     </div>
-                ) : undefined}
+                )}
                 expandedElement={(data) => <BoardGameDetail data={data} />}
                 selectedChanged={(ids) => setSelectedBoardGames(ids)}
+                showSelection={!isGuest}
             />
         </>
     );

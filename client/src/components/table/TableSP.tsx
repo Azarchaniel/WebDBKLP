@@ -40,6 +40,7 @@ type PropsMT = {
     };
     hiddenCols?: { [columnId: string]: boolean };
     expandedElement?: (data: any) => ReactElement;
+    showSelection?: boolean;
 };
 
 const ServerPaginationTable: FC<PropsMT> =
@@ -58,7 +59,8 @@ const ServerPaginationTable: FC<PropsMT> =
         pagination = { page: 1, pageSize: 50, sorting: [{ id: "", desc: true }] },
         hiddenCols,
         expandedElement,
-        selectedChanged
+        selectedChanged,
+        showSelection = true
     }) => {
         const { t } = useTranslation();
         const [currentPage, setCurrentPage] = useState(pagination.page);
@@ -540,7 +542,7 @@ const ServerPaginationTable: FC<PropsMT> =
                                                 ))}
                                                 {rowActions && (
                                                     <th key={`${headerGroup.id}-actions`} className="TSPactionsRow">
-                                                        {(!hasNestedHeaderRows || index !== 0) && (
+                                                        {showSelection && (!hasNestedHeaderRows || index !== 0) && (
                                                             <ThreeStateCheckbox
                                                                 selectedAmount={Object.keys(selectedRows).length}
                                                                 totalAmount={table.getRowModel()?.rows?.length || 0}
@@ -604,27 +606,32 @@ const ServerPaginationTable: FC<PropsMT> =
                                                         className="TSPactionsRow actions-animated-td"
                                                         tabIndex={0}
                                                     >
-                                                        {/* This is the three-vertical-dots-button for row actions, like edit, delete, etc. */}
-                                                        <span className="actions-ellipsis">&#x2807;</span>
-                                                        <span className="actions-content">
-                                                            {rowActions && rowActions(row.original._id, () => row.toggleExpanded(), row.getIsExpanded())}
-                                                            <input type="checkbox" className="checkBox"
-                                                                checked={selectedRows[row.id]}
-                                                                onChange={() => {
-                                                                    setSelectedRows((prev) => {
-                                                                        const newSelection = { ...prev };
-                                                                        if (newSelection[row.id]) {
-                                                                            delete newSelection[row.id];
-                                                                        } else {
-                                                                            newSelection[row.id] = true;
-                                                                        }
-                                                                        return newSelection;
-                                                                    });
-                                                                }}
-                                                                data-tooltip-id="global-tooltip"
-                                                                data-tooltip-content={t("table.selectRow")}
-                                                            />
-                                                        </span>
+                                                        {showSelection ? (
+                                                            <>
+                                                                <span className="actions-ellipsis">&#x2807;</span>
+                                                                <span className="actions-content">
+                                                                    {rowActions(row.original._id, () => row.toggleExpanded(), row.getIsExpanded())}
+                                                                    <input type="checkbox" className="checkBox"
+                                                                        checked={selectedRows[row.id]}
+                                                                        onChange={() => {
+                                                                            setSelectedRows((prev) => {
+                                                                                const newSelection = { ...prev };
+                                                                                if (newSelection[row.id]) {
+                                                                                    delete newSelection[row.id];
+                                                                                } else {
+                                                                                    newSelection[row.id] = true;
+                                                                                }
+                                                                                return newSelection;
+                                                                            });
+                                                                        }}
+                                                                        data-tooltip-id="global-tooltip"
+                                                                        data-tooltip-content={t("table.selectRow")}
+                                                                    />
+                                                                </span>
+                                                            </>
+                                                        ) : (
+                                                            rowActions(row.original._id, () => row.toggleExpanded(), row.getIsExpanded())
+                                                        )}
                                                     </td>
                                                 }
                                             </tr>

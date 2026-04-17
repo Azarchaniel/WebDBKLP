@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useState, useEffect } from "react";
 import { Modal, showError } from "./Modal";
 import { toast } from "react-toastify";
-import { loginUser, logoutUser } from "@utils";
+import { loginUser, loginGuestUser, logoutUser } from "@utils";
 import { useAuth } from "@utils/context";
 import { IUser } from "../type";
 import { CustomPasswordField } from "./inputs";
@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 
 const LoginModal: React.FC = () => {
     const { t } = useTranslation();
-    const { login, isLoggedIn, currentUser, checkTokenValidity } = useAuth();
+    const { login, isLoggedIn, isGuest, currentUser, checkTokenValidity } = useAuth();
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState({
         email: "",
@@ -69,6 +69,19 @@ const LoginModal: React.FC = () => {
             });
     }
 
+    const sendGuestLogin = async () => {
+        loginGuestUser()
+            .then((user: IUser | undefined) => {
+                setShowModal(false);
+                login(user!);
+                toast.info(t("auth.continueAsGuestSuccess"));
+            })
+            .catch(err => {
+                console.error(err.message);
+                toast.error(t("auth.loginFailed"));
+            });
+    }
+
     const sendLogout = () => {
         logoutUser();
     }
@@ -80,7 +93,7 @@ const LoginModal: React.FC = () => {
                 onClick={() => setShowModal(true)}
                 title={isLoggedIn ? t("auth.logoutTooltip") : t("auth.loginTooltip")}
             >
-                {isLoggedIn && currentUser ? currentUser.firstName : ""}
+                {isLoggedIn && currentUser ? (isGuest ? t("auth.guest") : currentUser.firstName) : ""}
                 <i className="fa fa-user-circle" />
             </div>
             {showModal && !isLoggedIn &&
@@ -117,6 +130,9 @@ const LoginModal: React.FC = () => {
                     footer={<div className="column">
                         <div>{showError(errorKey ? t(errorKey) : "")}</div>
                         <div className="buttons">
+                            <button type="button" className="btn btn-secondary"
+                                onClick={() => sendGuestLogin()}>{t("auth.continueAsGuest")}
+                            </button>
                             <button type="button" className="btn btn-secondary"
                                 onClick={() => setShowModal(false)}>{t("common.cancel")}
                             </button>

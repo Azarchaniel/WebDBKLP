@@ -45,9 +45,9 @@ export const stringifyAutors = (
 
 export const stringifyUsers = (data: IUser[], withSurname: boolean) => {
 	let names = "";
-	data.forEach((autor: IAutor, index: number) =>
-		index > 0 ? names += `; ${withSurname ? autor.lastName + "," : ""} ${autor.firstName}`
-			: names = `${withSurname ? autor.lastName + "," : ""} ${autor.firstName}`);
+	data.forEach((user: IUser, index: number) =>
+		index > 0 ? names += `; ${withSurname ? user.lastName + "," : ""} ${user.firstName}`
+			: names = `${withSurname ? user.lastName + "," : ""} ${user.firstName}`);
 	return names;
 }
 

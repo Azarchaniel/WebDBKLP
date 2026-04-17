@@ -10,6 +10,7 @@ import DashboardPage from "./pages/dashboard/DashboardPage";
 import App from "./App";
 import UtilPage from "pages/utils/outside-utils";
 import KzpPage from "./pages/utils/KzpPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import "./i18n";
 
 const localhostHosts = new Set(["localhost", "127.0.0.1", "::1"]);
@@ -33,6 +34,7 @@ const router = createBrowserRouter([
     },
     { path: "/utils", element: <UtilPage /> },
     { path: "/kzp", element: <KzpPage /> },
+    { path: "*", element: <NotFoundPage /> },
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);

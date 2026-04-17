@@ -54,9 +54,16 @@ axiosInstance.interceptors.request.use(
         let token = localStorage.getItem("token");
         const refreshToken = localStorage.getItem('refreshToken');
 
-        // Skip refresh if no refreshToken is available
+        // If no refreshToken (e.g. guest), attach the token as-is and skip refresh
         if (!refreshToken) {
-            return config; // Pass through without refreshing the token
+            if (token) {
+                config.headers = {
+                    ...config.headers,
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                };
+            }
+            return config;
         }
 
         if (token) {
@@ -574,6 +581,10 @@ export const login = async (
 
 export const logout = async (refreshToken: string): Promise<AxiosResponse> => {
     return axiosInstance.post(baseUrl + "/logout", { refreshToken });
+};
+
+export const loginGuest = async (): Promise<AxiosResponse<ApiUserDataType>> => {
+    return axiosInstance.post(`${baseUrl}/login-guest`);
 };
 
 // ### LP ###

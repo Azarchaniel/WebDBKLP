@@ -38,7 +38,7 @@ const toQuoteBookOption = (book: IBook): QuoteBookOption => ({
 
 export default function QuotePage() {
     const { t } = useTranslation();
-    const { isLoggedIn, currentUser } = useAuth();
+    const { isLoggedIn, isGuest, currentUser } = useAuth();
     const [books, setBooks] = useState<QuoteBookOption[]>([]);
     const [booksToFilter, setBooksToFilter] = useState<QuoteBookOption[]>([]);
     const [filteredQuotes, setFilteredQuotes] = useState<IQuote[]>([]);
@@ -229,7 +229,7 @@ export default function QuotePage() {
 
     return (
         <>
-            {isLoggedIn && (
+            {isLoggedIn && !isGuest && (
                 <button
                     type="button"
                     className="addQuote"
