@@ -62,6 +62,7 @@ export interface IUser extends IBaseType {
     firstName?: string;
     lastName: string;
     hashedPassword?: string;
+    role?: 'user' | 'guest';
 }
 
 export interface IQuote extends IBaseType {

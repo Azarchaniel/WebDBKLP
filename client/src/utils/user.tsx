@@ -1,5 +1,5 @@
 import { jwtDecode } from "jwt-decode";
-import { login, logout as apiLogout } from "../API";
+import { login, loginGuest, logout as apiLogout } from "../API";
 import { clearCache } from "./indexDb";
 
 let lastLogTime = 0;
@@ -74,6 +74,24 @@ export const loginUser = async (loginForm: {
         }
     } catch (err: any) {
         throw Error("Login Error:", err);
+    }
+}
+
+export const loginGuestUser = async () => {
+    try {
+        const res = await loginGuest();
+
+        if (res.status === 200) {
+            // @ts-ignore
+            const { token, user } = res.data;
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+            return user;
+        } else {
+            throw new Error('Unexpected response');
+        }
+    } catch (err: any) {
+        throw Error("Guest Login Error: " + err);
     }
 }
 

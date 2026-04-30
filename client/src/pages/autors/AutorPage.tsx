@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 export default function AutorPage() {
     const { t } = useTranslation();
     const { id } = useParams<{ id?: string }>();
-    const { isLoggedIn, currentUser } = useAuth();
+    const { isLoggedIn, isGuest, currentUser } = useAuth();
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
@@ -308,7 +308,7 @@ export default function AutorPage() {
                             </div>
                         </div>
                         {/* Add autor button for authenticated users */}
-                        {isLoggedIn && (
+                        {isLoggedIn && !isGuest && (
                             <button
                                 type="button"
                                 className="addBtnTable"
@@ -326,20 +326,24 @@ export default function AutorPage() {
                         />
                     </div>
                 }
-                rowActions={isLoggedIn ? (_id, expandRow, isExpanded) => (
+                rowActions={(_id, expandRow, isExpanded) => (
                     <div className="actionsRow">
-                        <button
-                            data-tooltip-id="global-tooltip"
-                            data-tooltip-content={t("common.delete")}
-                            onClick={() => handleDeleteAutor(_id)}
-                            className="fa fa-trash"
-                        />
-                        <button
-                            data-tooltip-id="global-tooltip"
-                            data-tooltip-content={t("common.edit")}
-                            className="fa fa-pencil-alt"
-                            onClick={() => handleUpdateAutor(_id)}
-                        />
+                        {isLoggedIn && !isGuest && (
+                            <>
+                                <button
+                                    data-tooltip-id="global-tooltip"
+                                    data-tooltip-content={t("common.delete")}
+                                    onClick={() => handleDeleteAutor(_id)}
+                                    className="fa fa-trash"
+                                />
+                                <button
+                                    data-tooltip-id="global-tooltip"
+                                    data-tooltip-content={t("common.edit")}
+                                    className="fa fa-pencil-alt"
+                                    onClick={() => handleUpdateAutor(_id)}
+                                />
+                            </>
+                        )}
                         <button
                             data-tooltip-id="global-tooltip"
                             data-tooltip-content={t("common.details")}
@@ -347,9 +351,10 @@ export default function AutorPage() {
                             onClick={() => expandRow()}
                         />
                     </div>
-                ) : undefined}
+                )}
                 expandedElement={(data) => <AutorDetail data={data} />}
                 selectedChanged={(ids) => setSelectedAutors(ids)}
+                showSelection={!isGuest}
             />
         </>
     )

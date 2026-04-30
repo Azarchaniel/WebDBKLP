@@ -11,6 +11,7 @@ import {
     getBooksByIds,
     getAllAutorsBooks,
     loginUser,
+    loginGuest,
     refreshToken,
     checkBooksUpdated,
     getPageByStartingLetter,
@@ -27,13 +28,13 @@ import { addAutor, deleteAutor, getAllAutors, getAutor, updateAutor } from "../c
 import { addQuote, deleteQuote, getAllQuotes, getQuote } from "../controllers";
 import { getAllUsers, getUser } from "../controllers";
 import { addLp, deleteLp, getAllLps, getLp } from "../controllers";
-import { userVerification } from "../middleware";
+import { userVerification, blockGuest } from "../middleware";
 
 const router: Router = Router()
 
 router.use((req: Request, res: Response, next: NextFunction) => {
     // Routes that don't require authentication
-    const publicRoutes = ['/login', '/refresh-token'];
+    const publicRoutes = ['/login', '/refresh-token', '/login-guest'];
 
     // Allow GET requests to these base paths without authentication
     const publicGetPaths = [
@@ -57,11 +58,17 @@ router.use((req: Request, res: Response, next: NextFunction) => {
         return next();
     }
 
-    userVerification(req, res, next);
+    userVerification(req, res, () => {
+        if (req.method !== 'GET') {
+            return blockGuest(req, res, next);
+        }
+        next();
+    });
 })
 
 // ### USER ###
 router.post('/login', loginUser)
+router.post('/login-guest', loginGuest)
 router.post('/logout', logoutUser);
 router.post('/refresh-token', refreshToken)
 

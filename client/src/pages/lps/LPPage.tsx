@@ -20,7 +20,7 @@ import { useTranslation } from "react-i18next";
 
 export default function LPPage() {
     const { t } = useTranslation();
-    const { isLoggedIn, currentUser } = useAuth();
+    const { isLoggedIn, isGuest, currentUser } = useAuth();
     const [LPs, setLPs] = useState<ILP[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
@@ -296,7 +296,7 @@ export default function LPPage() {
                             </div>
                         </div>
                         {/* Add LP button for authenticated users */}
-                        {isLoggedIn && (
+                        {isLoggedIn && !isGuest && (
                             <button
                                 type="button"
                                 className="addBtnTable"
@@ -314,7 +314,7 @@ export default function LPPage() {
                         />
                     </div>
                 }
-                rowActions={isLoggedIn ? (_id) => (
+                rowActions={isLoggedIn && !isGuest ? (_id) => (
                     <div className="actionsRow">
                         <button
                             data-tooltip-id="global-tooltip"
@@ -331,6 +331,7 @@ export default function LPPage() {
                     </div>
                 ) : undefined}
                 selectedChanged={(ids) => setSelectedLPs(ids)}
+                showSelection={!isGuest}
             />
         </>
     )

@@ -1,9 +1,12 @@
 {
     "auth": {
         "confirmLogout": "Are you sure you want to log out?",
+        "continueAsGuest": "Continue as Guest",
+        "continueAsGuestSuccess": "Browsing as guest. Read-only access.",
         "emailPlaceholder": "Email",
         "enterEmail": "Enter user email!",
         "enterPassword": "Enter password!",
+        "guest": "Guest",
         "login": "Log in",
         "loginFailed": "Login failed!",
         "loginFailedRetry": "Login failed, try again.",

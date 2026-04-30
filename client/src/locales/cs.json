@@ -1,9 +1,12 @@
 {
     "auth": {
         "confirmLogout": "Opravdu se chceš odhlásit?",
+        "continueAsGuest": "Pokračovat jako host",
+        "continueAsGuestSuccess": "Prohlížíš jako host. Pouze pro čtení.",
         "emailPlaceholder": "Email",
         "enterEmail": "Zadej uživatelský email!",
         "enterPassword": "Zadej heslo!",
+        "guest": "Host",
         "login": "Přihlásit",
         "loginFailed": "Nepodařilo se přihlásit!",
         "loginFailedRetry": "Přihlášení se nepodařilo, zkus znovu.",
