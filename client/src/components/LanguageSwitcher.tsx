@@ -59,7 +59,8 @@ const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({ sidebarOpened = fal
             <button
                 type="button"
                 className="active"
-                title={tooltip}
+                data-tooltip-id="global-tooltip"
+                data-tooltip-content={tooltip}
                 onClick={() => i18n.changeLanguage(nextLang.code)}
             >
                 <span className="lang-icon">{currentLang.icon}</span>

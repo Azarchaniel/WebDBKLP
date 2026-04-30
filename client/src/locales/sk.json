@@ -185,6 +185,7 @@
         "language": "Jazyk",
         "locale": "sk-SK",
         "location": "Umiestnenie",
+        "lightMode": "Svetlý režim",
         "menu": "Menu",
         "multipleValues": "Viacero hodnôt",
         "no": "Nie",
@@ -202,6 +203,7 @@
         "search": "Vyhľadať",
         "show": "Zobraziť",
         "subtitle": "Podnázov",
+        "darkMode": "Tmavý režim",
         "thickness": "Hrúbka",
         "title": "Názov",
         "url": "URL",
@@ -464,6 +466,10 @@
         "numberField": "{{field}} musí byť číslo!",
         "quoteBookRequired": "Musí byť vybraná kniha!",
         "quoteTextRequired": "Text citátu musí obsahovať aspoň jeden znak!"
+    },
+    "network": {
+        "offline": "Pripojenie k internetu bolo stratené.",
+        "online": "Pripojenie k internetu bolo obnovené."
     },
     "page404": {
         "title": "Stránka nenájdená",

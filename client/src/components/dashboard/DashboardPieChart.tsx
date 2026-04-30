@@ -4,10 +4,13 @@ import { CHART_COLORS, CHART_LABELS } from "../../utils/constants";
 import { NoData } from "./NoData";
 import { useTranslation } from "react-i18next";
 import { formatNumberLocale } from "@utils";
+import { useThemeColor } from "../../utils/hooks";
 
 export const DashboardPieChart = (props: { data: any[] }) => {
-	if (!props.data || props.data.every(stat => stat.count === 0)) return <NoData />;
 	const { t } = useTranslation();
+	const chartTextColor = useThemeColor("--text", "#111827");
+
+	if (!props.data || props.data.every(stat => stat.count === 0)) return <NoData />;
 
 	const data = {
 		labels: props.data.length ? props.data.filter(c => c.owner !== null).map(c => c.owner === "" ? t("dashboard.noOwner") : c.owner) : [],
@@ -34,12 +37,13 @@ export const DashboardPieChart = (props: { data: any[] }) => {
 				title: {
 					display: true,
 					text: t("dashboard.total") + ": " + count,
+					color: chartTextColor,
 					font: {
 						weight: "bold" as const
 					}
 				},
 				maxHeight: 110,
-				labels: CHART_LABELS(t('common.locale'))
+				labels: CHART_LABELS(t('common.locale'), chartTextColor)
 			},
 			tooltip: {
 				callbacks: {
@@ -57,7 +61,7 @@ export const DashboardPieChart = (props: { data: any[] }) => {
 	return (
 		<div className="dashboardPieChartWrap">
 			<div className="dashboardPieChartCanvas">
-				<Pie data={data} options={chartOptions} />
+				<Pie key={chartTextColor} data={data} options={chartOptions} redraw />
 			</div>
 		</div>
 	)

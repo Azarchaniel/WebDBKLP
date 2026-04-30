@@ -185,6 +185,7 @@
         "language": "Language",
         "locale": "en-US",
         "location": "Location",
+        "lightMode": "Light mode",
         "menu": "Menu",
         "multipleValues": "Multiple values",
         "no": "No",
@@ -202,6 +203,7 @@
         "search": "Search",
         "show": "Show",
         "subtitle": "Subtitle",
+        "darkMode": "Dark mode",
         "thickness": "Thickness",
         "title": "Title",
         "url": "URL",
@@ -459,6 +461,10 @@
         "numberField": "{{field}} must be a number!",
         "quoteBookRequired": "A book must be selected!",
         "quoteTextRequired": "Quote text must contain at least one character!"
+    },
+    "network": {
+        "offline": "No internet connection.",
+        "online": "Internet connection restored."
     },
     "page404": {
         "title": "Page Not Found",

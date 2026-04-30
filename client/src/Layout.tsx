@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Toast from "./components/Toast";
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
+import useNetworkStatus from "@utils/hooks/useNetworkStatus";
 
 interface LayoutProps {
     children: ReactNode;
@@ -25,6 +26,7 @@ const renderGlobalTooltip = ({ content, activeAnchor }: { content: string | null
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+    useNetworkStatus();
     return (
         <main className='App'>
             <Header />

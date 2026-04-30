@@ -243,7 +243,7 @@ export default function QuotePage() {
             </div>
             <div className="p-4">
                 <div className="headerTitleAction quotesTitle">
-                    <h4 className="ml-4" style={{ color: "black" }}>{t("quotes.title", { count: countAll })}</h4>
+                    <h4 className="ml-4" style={{ color: "var(--text)" }}>{t("quotes.title", { count: countAll })}</h4>
                     <div className="quoteBookSearch">
                         <div className="searchTableWrapper">
                             <InputField
@@ -295,13 +295,13 @@ export default function QuotePage() {
                             ))}
                         </>
                     ) : (
-                        !loading && <span style={{ color: "black" }}>{t("quotes.noneFound")}</span>
+                        !loading && <span style={{ color: "var(--text)" }}>{t("quotes.noneFound")}</span>
                     )}
                 </div>
                 <div ref={sentinelRef} className="quoteSentinel">
                     {loadingMore && (
                         <div className="quoteSentinel__spinner">
-                            <LoadingSpinner color="#000" size={40} />
+                            <LoadingSpinner color="var(--text)" size={40} />
                         </div>
                     )}
                 </div>

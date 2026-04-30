@@ -108,20 +108,24 @@ export const darkenLightenColor = (hex: string, percent: number): string => {
 }
 
 export const generateColors = (length: number) => {
-	let colors = ["#77dd77", "#836953", "#89cff0", "#99c5c4", "#9adedb", "#aa9499", "#aaf0d1", "#b2fba5", "#b39eb5", "#bdb0d0",
-		"#bee7a5", "#befd73", "#c1c6fc", "#c6a4a4", "#c8ffb0", "#cb99c9", "#cef0cc", "#cfcfc4", "#d8a1c4", "#dea5a4", "#deece1",
-		"#dfd8e1", "#e5d9d3", "#e9d1bf", "#f49ac2", "#f4bfff", "#fdfd96", "#ff6961", "#ff964f", "#ff9899", "#ffb7ce", "#ca9bf7"];
+	const isDarkTheme = typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "dark";
+	let colors = isDarkTheme
+		? ["#243b35", "#2a2f45", "#3a2d3f", "#2f4a57", "#4a3a2c", "#314a3f", "#2d3f53", "#41314a", "#4a362f", "#263745"]
+		: ["#77dd77", "#836953", "#89cff0", "#99c5c4", "#9adedb", "#aa9499", "#aaf0d1", "#b2fba5", "#b39eb5", "#bdb0d0",
+			"#bee7a5", "#befd73", "#c1c6fc", "#c6a4a4", "#c8ffb0", "#cb99c9", "#cef0cc", "#cfcfc4", "#d8a1c4", "#dea5a4", "#deece1",
+			"#dfd8e1", "#e5d9d3", "#e9d1bf", "#f49ac2", "#f4bfff", "#fdfd96", "#ff6961", "#ff964f", "#ff9899", "#ffb7ce", "#ca9bf7"];
 
 	while (colors.length < length) {
 		// if there are more quotes than colors, duplicate arr of colors, but randomly change shade of a color by +- 40 perc
-		colors = colors.flatMap((item: string) => [item, darkenLightenColor(item, randomMinMax(30, -30, true))]);
+		colors = colors.flatMap((item: string) => [item, darkenLightenColor(item, randomMinMax(isDarkTheme ? 12 : 30, isDarkTheme ? -12 : -30, true))]);
 		colors = Array.from(new Set(colors));
 	}
 	return Array.from(new Set(colors));
 }
 
 export const getRandomShade = (hexColor: string): string => {
-	return darkenLightenColor(hexColor, randomMinMax(30, -30, true));
+	const isDarkTheme = typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "dark";
+	return darkenLightenColor(hexColor, randomMinMax(isDarkTheme ? 12 : 30, isDarkTheme ? -12 : -30, true));
 };
 
 export function checkIsbnValidity(isbn: string): boolean {

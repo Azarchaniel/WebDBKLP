@@ -7,6 +7,9 @@ import { useClickOutside } from "@hooks";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
 
+const THEME_STORAGE_KEY = "theme";
+type Theme = "light" | "dark";
+
 interface HamburgerToXProps {
     onClick: () => void;
     className: string;
@@ -37,8 +40,17 @@ const Sidebar = () => {
     const { t } = useTranslation();
     const location = useLocation();
     const [sidebarOpened, setSidebarOpened] = useState<boolean>(false);
+    const [theme, setTheme] = useState<Theme>(() => {
+        const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+        return savedTheme === "dark" ? "dark" : "light";
+    });
     const popRef = useRef<HTMLDivElement>(null);
     const exceptRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        document.documentElement.setAttribute("data-theme", theme);
+        localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }, [theme]);
 
     useClickOutside(popRef, () => {
         setSidebarOpened(false);
@@ -84,12 +96,26 @@ const Sidebar = () => {
                 />
                 {content.map(item => (
                     <Link to={item.route} key={item.route} className={location.pathname.includes(item.route) ? "active" : ""}>
-                        <i className={item.icon} />
+                        <i
+                            className={item.icon}
+                            data-tooltip-id="global-tooltip"
+                            data-tooltip-content={item.title}
+                        />
                         {sidebarOpened && <span>{item.title}</span>}
                     </Link>
                 ))}
                 <div style={{ display: "flex", alignItems: "center", flexGrow: 1 }}>{/* Empty space */}</div>
                 <LanguageSwitcher sidebarOpened={sidebarOpened} />
+                <button
+                    type="button"
+                    className="theme-switcher"
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    data-tooltip-id="global-tooltip"
+                    data-tooltip-content={theme === "dark" ? t("common.lightMode") : t("common.darkMode")}
+                >
+                    <i className={theme === "dark" ? "fas fa-sun" : "fas fa-moon"} />
+                    {sidebarOpened && <span>{theme === "dark" ? t("common.lightMode") : t("common.darkMode")}</span>}
+                </button>
                 <a
                     data-tooltip-id="global-tooltip"
                     data-tooltip-content={t("nav.aboutAuthor")}
