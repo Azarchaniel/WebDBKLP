@@ -139,6 +139,40 @@
       }
     }
   }
+
+  .theme-switcher {
+    background: transparent;
+    border: none;
+    color: white;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    width: 100%;
+    padding: 0;
+    cursor: pointer;
+    font-size: inherit;
+
+    &:hover {
+      color: var(--anchor);
+    }
+
+    i {
+      margin-right: 0;
+      transition: margin-right 0.5s ease-in-out;
+      display: flex;
+      justify-content: center;
+      width: 3rem;
+    }
+
+    span {
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 }
 
 .opened {
@@ -181,6 +215,19 @@
     span.lang-label {
       opacity: 1;
       margin-left: 0;
+    }
+  }
+
+  .theme-switcher {
+    align-items: center;
+
+    i {
+      margin-right: 1rem;
+      width: auto;
+    }
+
+    span {
+      opacity: 1;
     }
   }
 }

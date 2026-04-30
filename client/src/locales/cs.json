@@ -182,6 +182,7 @@
         "language": "Jazyk",
         "locale": "cs-CZ",
         "location": "Umístění",
+        "lightMode": "Světlý režim",
         "menu": "Menu",
         "multipleValues": "Více hodnot",
         "no": "Ne",
@@ -199,6 +200,7 @@
         "search": "Vyhledat",
         "show": "Zobrazit",
         "subtitle": "Podnázev",
+        "darkMode": "Tmavý režim",
         "thickness": "Tloušťka",
         "title": "Název",
         "url": "URL",
@@ -456,5 +458,14 @@
         "numberField": "{{field}} musí být číslo!",
         "quoteBookRequired": "Musí být vybrána kniha!",
         "quoteTextRequired": "Text citátu musí obsahovat alespoň jeden znak!"
+    },
+    "network": {
+        "offline": "Připojení k internetu bylo ztraceno.",
+        "online": "Připojení k internetu bylo obnoveno."
+    },
+    "page404": {
+        "title": "Stránka nenalezena",
+        "message": "Stránka, kterou hledáte, neexistuje.",
+        "goHome": "Přejít na Přehled"
     }
 }

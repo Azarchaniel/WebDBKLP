@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { formatDimension, toPercentage } from "../../utils/utils";
 import { NoData } from "./NoData";
@@ -6,6 +6,23 @@ import { NoData } from "./NoData";
 export const TableCountRatio = ({ data, title }: { data: any[], title: string }) => {
 	const { t } = useTranslation();
 	const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+	const [isDarkTheme, setIsDarkTheme] = useState(
+		typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "dark"
+	);
+
+	useEffect(() => {
+		if (typeof document === "undefined") return;
+
+		const root = document.documentElement;
+		const updateTheme = () => setIsDarkTheme(root.getAttribute("data-theme") === "dark");
+		updateTheme();
+
+		const observer = new MutationObserver(updateTheme);
+		observer.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
+		return () => observer.disconnect();
+	}, []);
+
 	if (!data || data?.length === 0) return <NoData />;
 
 	const dimensionGroups = [
@@ -36,11 +53,11 @@ export const TableCountRatio = ({ data, title }: { data: any[], title: string })
 		const ratioFill = Math.max(0, (barPercentage - 50) * 2);
 
 		// Determine background color based on row state
-		let bgColor = "#ffffff";  // default/odd rows
+		let bgColor = isDarkTheme ? "#1a212a" : "#ffffff";  // default/odd rows
 		if (isHovered) {
-			bgColor = "#f1f6ff";  // hover state
+			bgColor = isDarkTheme ? "#1f2832" : "#f1f6ff";  // hover state
 		} else if (isEven) {
-			bgColor = "#fbfcff";  // even rows
+			bgColor = isDarkTheme ? "#151c24" : "#fbfcff";  // even rows
 		}
 
 		return { countFill, ratioFill, bgColor };

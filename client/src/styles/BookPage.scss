@@ -132,6 +132,7 @@
   z-index: 2;
   border: none;
   background: none;
+  color: var(--text);
 
   &:hover {
     color: var(--anchor);
@@ -146,6 +147,7 @@
   z-index: 2;
   border: none;
   background: none;
+  color: var(--text);
 
   &:hover {
     color: var(--anchor);
@@ -338,7 +340,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  color: black;
+  color: var(--text);
+
+  input[type="checkbox"] {
+    color-scheme: light;
+  }
+}
+
+:root[data-theme="dark"] .b-Ex-Libris input[type="checkbox"] {
+  color-scheme: dark;
 }
 
 /* Row 10 */

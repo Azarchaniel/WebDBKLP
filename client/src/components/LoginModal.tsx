@@ -78,7 +78,8 @@ const LoginModal: React.FC = () => {
             <div
                 className={`${isLoggedIn && currentUser ? "loggedIn" : ""} customLink loginBtn`}
                 onClick={() => setShowModal(true)}
-                title={isLoggedIn ? t("auth.logoutTooltip") : t("auth.loginTooltip")}
+                data-tooltip-id="global-tooltip"
+                data-tooltip-content={isLoggedIn ? t("auth.logoutTooltip") : t("auth.loginTooltip")}
             >
                 {isLoggedIn && currentUser ? currentUser.firstName : ""}
                 <i className="fa fa-user-circle" />

@@ -21,9 +21,6 @@
     }
   }
 
-  &:hover {
-    background-color: #f1f1f1;
-  }
 }
 
 .autorDetailTable {
@@ -32,29 +29,55 @@
   margin: 10px 0;
   font-size: 14px;
 
-  th, td {
-    border: 1px solid #ddd;
+  th,
+  td {
+    border: 1px solid var(--input-border);
     padding: 8px;
     text-align: left;
   }
 
   th {
-    background-color: #f4f4f4;
+    background-color: var(--surface);
     font-weight: bold;
   }
 
   tr {
     &:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-
-    &:hover {
-      background-color: #f1f1f1;
+      background-color: color-mix(in srgb, var(--surface) 85%, var(--background) 15%);
     }
   }
 
   td::after {
-    background-color: transparent !important; /* Remove background color */
+    background-color: transparent !important;
+    /* Remove background color */
+  }
+}
+
+:root[data-theme="dark"] {
+  .autorDetailTable {
+    color: var(--text);
+
+    th,
+    td {
+      border-color: var(--input-border);
+    }
+
+    th {
+      background-color: #1f2731;
+      color: var(--text);
+    }
+
+    tbody tr {
+      background-color: #1a222b;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #141b23;
+    }
+
+    tbody tr:hover {
+      background-color: inherit;
+    }
   }
 }
 
@@ -113,7 +136,7 @@ form {
   cursor: pointer;
 }
 
-@media screen and (width <= $mobile-width) {
+@media screen and (width <=$mobile-width) {
   .autorDetail {
     flex-direction: column;
 
@@ -127,11 +150,12 @@ form {
   }
 
   form {
-    grid-template-columns: 1fr; /* Single column on mobile */
+    grid-template-columns: 1fr;
+    /* Single column on mobile */
   }
 
   /* Make all items span the single column on mobile */
-  form > div {
+  form>div {
     grid-column: 1;
     grid-area: unset !important; //has to be important, because it's less specific than classes above
   }

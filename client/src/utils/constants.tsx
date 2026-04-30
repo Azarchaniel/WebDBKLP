@@ -10,8 +10,9 @@ export const CITIES = [
     { value: "bruchotin", showValue: "Břuchotín" }
 ];
 
-export const CHART_LABELS = (locale: string = 'en') => {
+export const CHART_LABELS = (locale: string = 'en', color: string = '#111827') => {
     return {
+        color,
         generateLabels(chart: any) {
             const data = chart.data;
             return data.labels.map((label: any, i: number) => {
@@ -24,7 +25,8 @@ export const CHART_LABELS = (locale: string = 'en') => {
                     strokeStyle: style.borderColor,
                     lineWidth: style.borderWidth,
                     hidden: !chart.getDataVisibility(i),
-                    index: i
+                    index: i,
+                    color
                 };
             });
         }

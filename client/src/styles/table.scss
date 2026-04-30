@@ -1,6 +1,6 @@
 @import "variables";
 
-$table-divider-color: lightgray;
+$table-divider-color: var(--table-divider);
 
 // ============================================================================
 // MOBILE STYLES
@@ -168,12 +168,12 @@ $table-divider-color: lightgray;
   height: 5rem;
   font-size: 1.25rem;
   width: 100%;
-  color: black;
+  color: var(--text);
 }
 
 // Main table component
 .serverPaginationTable {
-  color: black;
+  color: var(--text);
   width: 100%;
 
   // Table header
@@ -288,7 +288,7 @@ $table-divider-color: lightgray;
   flex-direction: row;
   justify-content: space-between;
   padding-right: 4rem;
-  color: black;
+  color: var(--text);
   height: 2rem;
   margin-bottom: 1rem;
 
@@ -354,7 +354,7 @@ $table-divider-color: lightgray;
 
 // Page selector buttons
 .pageSelector {
-  color: black;
+  color: var(--text);
   font-size: 1.25rem;
   padding: 0 1rem;
   cursor: pointer;
@@ -377,7 +377,7 @@ $table-divider-color: lightgray;
   align-items: center;
   justify-content: flex-end;
   height: 3rem;
-  color: black;
+  color: var(--text);
   background: var(--background);
   position: fixed;
   bottom: 0;
@@ -478,7 +478,7 @@ $table-divider-color: lightgray;
       background-color: transparent;
       border: none;
       cursor: pointer;
-      color: black;
+      color: var(--text);
       right: 1.5rem;
 
       &:hover {
