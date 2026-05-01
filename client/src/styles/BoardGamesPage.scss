@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables" as variables;
 
 .boardGameDetail {
   display: flex;
@@ -11,10 +11,6 @@
     &:first-child {
       margin-right: 2rem;
     }
-  }
-
-  &:hover {
-    background-color: #f1f1f1;
   }
 
   img {
@@ -96,7 +92,7 @@
   gap: 5px;
 }
 
-@media screen and (width <=$mobile-width) {
+@media screen and (width <=variables.$mobile-width) {
   .boardGameDetail {
     flex-direction: column;
 

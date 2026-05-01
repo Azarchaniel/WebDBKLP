@@ -7,19 +7,17 @@
   --input-bg: #ffffff;
   --input-border: #c8d1dc;
   --table-divider: #d4d4d4;
-  --quote-bg: #f2f5f8;
 }
 
 :root[data-theme="dark"] {
   --background: #12171c;
   --menu: #0d1117;
-  --anchor: #0b6f74;
+  --anchor: #10979E;
   --text: #e7edf3;
   --surface: #1b222b;
   --input-bg: #1a212a;
   --input-border: #2f3a46;
-  --table-divider: transparent;
-  --quote-bg: #1f2832;
+  --table-divider: #2f3a46;
 }
 
 $mobile-width: 420px;

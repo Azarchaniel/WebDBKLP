@@ -107,25 +107,75 @@ export const darkenLightenColor = (hex: string, percent: number): string => {
 	return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-export const generateColors = (length: number) => {
-	const isDarkTheme = typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "dark";
-	let colors = isDarkTheme
-		? ["#243b35", "#2a2f45", "#3a2d3f", "#2f4a57", "#4a3a2c", "#314a3f", "#2d3f53", "#41314a", "#4a362f", "#263745"]
-		: ["#77dd77", "#836953", "#89cff0", "#99c5c4", "#9adedb", "#aa9499", "#aaf0d1", "#b2fba5", "#b39eb5", "#bdb0d0",
-			"#bee7a5", "#befd73", "#c1c6fc", "#c6a4a4", "#c8ffb0", "#cb99c9", "#cef0cc", "#cfcfc4", "#d8a1c4", "#dea5a4", "#deece1",
-			"#dfd8e1", "#e5d9d3", "#e9d1bf", "#f49ac2", "#f4bfff", "#fdfd96", "#ff6961", "#ff964f", "#ff9899", "#ffb7ce", "#ca9bf7"];
+const hexToHsl = (hex: string): [number, number, number] => {
+	hex = hex.replace(/^#/, '');
+	const r = parseInt(hex.slice(0, 2), 16) / 255;
+	const g = parseInt(hex.slice(2, 4), 16) / 255;
+	const b = parseInt(hex.slice(4, 6), 16) / 255;
+	const max = Math.max(r, g, b), min = Math.min(r, g, b);
+	const l = (max + min) / 2;
+	let h = 0, s = 0;
+	if (max !== min) {
+		const d = max - min;
+		s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+		switch (max) {
+			case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+			case g: h = ((b - r) / d + 2) / 6; break;
+			case b: h = ((r - g) / d + 4) / 6; break;
+		}
+	}
+	return [h * 360, s * 100, l * 100];
+};
+
+const hslToHex = (h: number, s: number, l: number): string => {
+	h /= 360; s /= 100; l /= 100;
+	const hue2rgb = (p: number, q: number, t: number) => {
+		if (t < 0) t += 1;
+		if (t > 1) t -= 1;
+		if (t < 1 / 6) return p + (q - p) * 6 * t;
+		if (t < 1 / 2) return q;
+		if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+		return p;
+	};
+	let r, g, b;
+	if (s === 0) {
+		r = g = b = l;
+	} else {
+		const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+		const p = 2 * l - q;
+		r = hue2rgb(p, q, h + 1 / 3);
+		g = hue2rgb(p, q, h);
+		b = hue2rgb(p, q, h - 1 / 3);
+	}
+	const toHex = (x: number) => Math.round(x * 255).toString(16).padStart(2, '0');
+	return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
+// Desaturates and darkens a color to suit a dark theme background
+const applyGrayFilter = (hex: string): string => {
+	const [h, s, l] = hexToHsl(hex);
+	return hslToHex(h, s * 0.35, l * 0.40);
+};
+
+export const generateColors = (length: number, isDarkTheme?: boolean) => {
+	const dark = isDarkTheme ?? (typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "dark");
+
+	const baseColors = ["#77dd77", "#836953", "#89cff0", "#99c5c4", "#9adedb", "#aa9499", "#aaf0d1", "#b2fba5", "#b39eb5", "#bdb0d0",
+		"#bee7a5", "#befd73", "#c1c6fc", "#c6a4a4", "#c8ffb0", "#cb99c9", "#cef0cc", "#cfcfc4", "#d8a1c4", "#dea5a4", "#deece1",
+		"#dfd8e1", "#e5d9d3", "#e9d1bf", "#f49ac2", "#f4bfff", "#fdfd96", "#ff6961", "#ff964f", "#ff9899", "#ffb7ce", "#ca9bf7"];
+	let colors = dark ? baseColors.map(applyGrayFilter) : baseColors;
 
 	while (colors.length < length) {
 		// if there are more quotes than colors, duplicate arr of colors, but randomly change shade of a color by +- 40 perc
-		colors = colors.flatMap((item: string) => [item, darkenLightenColor(item, randomMinMax(isDarkTheme ? 12 : 30, isDarkTheme ? -12 : -30, true))]);
+		colors = colors.flatMap((item: string) => [item, darkenLightenColor(item, randomMinMax(dark ? 12 : 30, dark ? -12 : -30, true))]);
 		colors = Array.from(new Set(colors));
 	}
 	return Array.from(new Set(colors));
 }
 
-export const getRandomShade = (hexColor: string): string => {
-	const isDarkTheme = typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "dark";
-	return darkenLightenColor(hexColor, randomMinMax(isDarkTheme ? 12 : 30, isDarkTheme ? -12 : -30, true));
+export const getRandomShade = (hexColor: string, isDarkTheme?: boolean): string => {
+	const dark = isDarkTheme ?? (typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "dark");
+	return darkenLightenColor(hexColor, randomMinMax(dark ? 12 : 30, dark ? -12 : -30, true));
 };
 
 export function checkIsbnValidity(isbn: string): boolean {

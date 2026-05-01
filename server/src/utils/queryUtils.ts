@@ -88,10 +88,30 @@ export const buildSearchQuery = (search: string, searchFields: string[]): Record
 
 const buildFilterCondition = (field: string, value: any, operator?: string): any => {
     if (!operator || operator === '=') {
+        // For date fields, "=" means the whole day
+        if (value instanceof Date) {
+            const start = new Date(value);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(value);
+            end.setHours(23, 59, 59, 999);
+            return { [field]: { $gte: start, $lte: end } };
+        }
         return { [field]: value };
     } else if (operator === '<') {
+        // "before day X" — compare against start of that day
+        if (value instanceof Date) {
+            const start = new Date(value);
+            start.setHours(0, 0, 0, 0);
+            return { [field]: { $lt: start } };
+        }
         return { [field]: { $lt: value } };
     } else if (operator === '>') {
+        // "after day X" — compare against end of that day
+        if (value instanceof Date) {
+            const end = new Date(value);
+            end.setHours(23, 59, 59, 999);
+            return { [field]: { $gt: end } };
+        }
         return { [field]: { $gt: value } };
     }
 

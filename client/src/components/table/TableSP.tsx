@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState, FC } from 'react';
+import React, { ReactElement, useEffect, useState, FC, useRef, useCallback } from 'react';
 import {
     useReactTable,
     getCoreRowModel,
@@ -11,6 +11,7 @@ import Pagination from "./Pagination";
 import "@styles/table.scss";
 import { getUniqueFieldValues } from "../../API";
 import { isMobile, mapBookColumnsToFilterTypes, mapColumnName } from "@utils";
+import { langCode } from "../../utils/locale";
 import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import ThreeStateCheckbox from "@components/inputs/ThreeStateCheckbox";
 import { useTranslation } from "react-i18next";
@@ -75,6 +76,8 @@ const ServerPaginationTable: FC<PropsMT> =
             value: string,
             operator: string
         }>>({});
+        const tableScrollRef = useRef<HTMLDivElement>(null);
+        const tableRef = useRef<HTMLTableElement>(null);
 
         const maxPage = Math.ceil(totalCount / currentPageSize);
 
@@ -144,9 +147,17 @@ const ServerPaginationTable: FC<PropsMT> =
             async function fetchDataForInputs() {
                 try {
                     const result = await getUniqueFieldValues();
+                    const data: any = result.data;
+                    // Language keys come back as plain strings (e.g. "en");
+                    // map them to { _id, name } so the multiselect can show the label.
+                    if (Array.isArray(data.language)) {
+                        data.language = data.language.map((key: string) => ({
+                            _id: key,
+                            name: langCode.find(l => l.key === key)?.value ?? key,
+                        }));
+                    }
                     if (mounted) {
-                        // Use state to store the fetched data
-                        setDataForFilterInputs(result.data as any);
+                        setDataForFilterInputs(data);
                     }
                 } catch (error) {
                     console.error('Failed to fetch filter data:', error);
@@ -496,162 +507,164 @@ const ServerPaginationTable: FC<PropsMT> =
                         </div>
                     ) : (
                         <>
-                            <table className="serverPaginationTable">
-                                <thead className="tableHeader">
-                                    {headerGroups.map((headerGroup, index) => (
-                                        <React.Fragment key={headerGroup.id}>
-                                            <tr
-                                                key={headerGroup.id}
-                                                className={hasNestedHeaderRows && index === 0 ? "table-header-row--nested-first" : ""}
-                                            >
-                                                {headerGroup.headers.map((header) => (
-                                                    <th key={`${headerGroup.id}-${header.id}`} colSpan={header.colSpan}
-                                                        className={`TSP${header.column.id} ${showFilters ? "filter-header" : ""}`}>
-                                                        {header.isPlaceholder ? null : (
-                                                            <div
-                                                                className={
-                                                                    header.column.getCanSort()
-                                                                        ? 'cursor-pointer select-none'
-                                                                        : ''
-                                                                }
-                                                                onClick={header.column.getToggleSortingHandler()}
-                                                                data-tooltip-id="global-tooltip"
-                                                                data-tooltip-content={
-                                                                    header.column.getCanSort()
-                                                                        ? header.column.getNextSortingOrder() === 'asc'
-                                                                            ? t("table.sort.asc")
-                                                                            : header.column.getNextSortingOrder() === 'desc'
-                                                                                ? t("table.sort.desc")
-                                                                                : t("table.sort.reset")
-                                                                        : undefined
-                                                                }
-                                                            >
-                                                                {flexRender(
-                                                                    header.column.columnDef.header,
-                                                                    header.getContext()
-                                                                )}
-                                                                {{
-                                                                    asc: <i className="fa fa-angle-up ml-2"
-                                                                        style={{ fontSize: "24px" }}></i>,
-                                                                    desc: <i className="fa fa-angle-down ml-2"
-                                                                        style={{ fontSize: "24px" }}></i>,
-                                                                }[header.column.getIsSorted() as string] ?? null}
-                                                            </div>
-                                                        )}
-                                                    </th>
-                                                ))}
-                                                {rowActions && (
-                                                    <th key={`${headerGroup.id}-actions`} className="TSPactionsRow">
-                                                        {showSelection && (!hasNestedHeaderRows || index !== 0) && (
-                                                            <ThreeStateCheckbox
-                                                                selectedAmount={Object.keys(selectedRows).length}
-                                                                totalAmount={table.getRowModel()?.rows?.length || 0}
-                                                                onChange={(selectAll) => selectAll ? table.toggleAllRowsSelected() : table.resetRowSelection()}
-                                                            />
-                                                        )}
-                                                    </th>)}
-                                            </tr>
-                                            {showFilters && index === headerGroups.length - 1 && (
-                                                <tr key={headerGroup.id + "-filter"} className="filter-header">
+                            <div className="table-scroll-wrapper" ref={tableScrollRef}>
+                                <table className="serverPaginationTable" ref={tableRef}>
+                                    <thead className="tableHeader">
+                                        {headerGroups.map((headerGroup, index) => (
+                                            <React.Fragment key={headerGroup.id}>
+                                                <tr
+                                                    key={headerGroup.id}
+                                                    className={hasNestedHeaderRows && index === 0 ? "table-header-row--nested-first" : ""}
+                                                >
                                                     {headerGroup.headers.map((header) => (
-                                                        <th key={`${headerGroup.id}-${header.id}-filter`}>
-                                                            {header.column.getCanFilter() && (
-                                                                getInputForColumn(header.column.id)
+                                                        <th key={`${headerGroup.id}-${header.id}`} colSpan={header.colSpan}
+                                                            className={`TSP${header.column.id} ${showFilters ? "filter-header" : ""}`}>
+                                                            {header.isPlaceholder ? null : (
+                                                                <div
+                                                                    className={
+                                                                        header.column.getCanSort()
+                                                                            ? 'cursor-pointer select-none'
+                                                                            : ''
+                                                                    }
+                                                                    onClick={header.column.getToggleSortingHandler()}
+                                                                    data-tooltip-id="global-tooltip"
+                                                                    data-tooltip-content={
+                                                                        header.column.getCanSort()
+                                                                            ? header.column.getNextSortingOrder() === 'asc'
+                                                                                ? t("table.sort.asc")
+                                                                                : header.column.getNextSortingOrder() === 'desc'
+                                                                                    ? t("table.sort.desc")
+                                                                                    : t("table.sort.reset")
+                                                                            : undefined
+                                                                    }
+                                                                >
+                                                                    {flexRender(
+                                                                        header.column.columnDef.header,
+                                                                        header.getContext()
+                                                                    )}
+                                                                    {{
+                                                                        asc: <i className="fa fa-angle-up ml-2"
+                                                                            style={{ fontSize: "24px" }}></i>,
+                                                                        desc: <i className="fa fa-angle-down ml-2"
+                                                                            style={{ fontSize: "24px" }}></i>,
+                                                                    }[header.column.getIsSorted() as string] ?? null}
+                                                                </div>
                                                             )}
                                                         </th>
                                                     ))}
-                                                    <th key={`${headerGroup.id}-actions-filter`}></th>
+                                                    {rowActions && (
+                                                        <th key={`${headerGroup.id}-actions`} className="TSPactionsRow">
+                                                            {showSelection && (!hasNestedHeaderRows || index !== 0) && (
+                                                                <ThreeStateCheckbox
+                                                                    selectedAmount={Object.keys(selectedRows).length}
+                                                                    totalAmount={table.getRowModel()?.rows?.length || 0}
+                                                                    onChange={(selectAll) => selectAll ? table.toggleAllRowsSelected() : table.resetRowSelection()}
+                                                                />
+                                                            )}
+                                                        </th>)}
                                                 </tr>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </thead>
+                                                {showFilters && index === headerGroups.length - 1 && (
+                                                    <tr key={headerGroup.id + "-filter"} className="filter-header">
+                                                        {headerGroup.headers.map((header) => (
+                                                            <th key={`${headerGroup.id}-${header.id}-filter`}>
+                                                                {header.column.getCanFilter() && (
+                                                                    getInputForColumn(header.column.id)
+                                                                )}
+                                                            </th>
+                                                        ))}
+                                                        <th key={`${headerGroup.id}-actions-filter`}></th>
+                                                    </tr>
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                    </thead>
 
-                                <tbody>
-                                    {table.getRowModel()?.rows?.map((row) => (
-                                        <React.Fragment key={row.original._id}>
-                                            <tr key={row.id}>
-                                                {(() => {
-                                                    const visibleCells = row.getVisibleCells();
-                                                    const hasPublishedPublisher = visibleCells.some((c) => c.column.id === "published.publisher");
-                                                    const hasPublishedYear = visibleCells.some((c) => c.column.id === "published.year");
-                                                    const shouldMergePublishedCells = hasPublishedPublisher && hasPublishedYear;
+                                    <tbody>
+                                        {table.getRowModel()?.rows?.map((row) => (
+                                            <React.Fragment key={row.original._id}>
+                                                <tr key={row.id}>
+                                                    {(() => {
+                                                        const visibleCells = row.getVisibleCells();
+                                                        const hasPublishedPublisher = visibleCells.some((c) => c.column.id === "published.publisher");
+                                                        const hasPublishedYear = visibleCells.some((c) => c.column.id === "published.year");
+                                                        const shouldMergePublishedCells = hasPublishedPublisher && hasPublishedYear;
 
-                                                    return visibleCells.map((cell) => {
-                                                        if (shouldMergePublishedCells && cell.column.id === "published.year") {
-                                                            return null;
-                                                        }
+                                                        return visibleCells.map((cell) => {
+                                                            if (shouldMergePublishedCells && cell.column.id === "published.year") {
+                                                                return null;
+                                                            }
 
-                                                        if (shouldMergePublishedCells && cell.column.id === "published.publisher") {
-                                                            const publisher = row.original?.published?.publisher ?? "";
-                                                            const year = row.original?.published?.year ?? "?";
+                                                            if (shouldMergePublishedCells && cell.column.id === "published.publisher") {
+                                                                const publisher = row.original?.published?.publisher ?? "";
+                                                                const year = row.original?.published?.year ?? "?";
+
+                                                                return (
+                                                                    <td key={`${row.id}-${cell.id}`} className="TSPpublished" colSpan={2}>
+                                                                        {publisher ? `${publisher} (${year})` : ""}
+                                                                    </td>
+                                                                );
+                                                            }
 
                                                             return (
-                                                                <td key={`${row.id}-${cell.id}`} className="TSPpublished" colSpan={2}>
-                                                                    {publisher ? `${publisher} (${year})` : ""}
+                                                                <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
+                                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                                                 </td>
                                                             );
-                                                        }
-
-                                                        return (
-                                                            <td key={`${row.id}-${cell.id}`} className={"TSP" + cell.column.id}>
-                                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                                            </td>
-                                                        );
-                                                    });
-                                                })()}
-                                                {rowActions &&
-                                                    <td
-                                                        key={`${row.id}-actions`}
-                                                        className="TSPactionsRow actions-animated-td"
-                                                        tabIndex={0}
-                                                    >
-                                                        {showSelection ? (
-                                                            <>
-                                                                <span className="actions-ellipsis">&#x2807;</span>
-                                                                <span className="actions-content">
-                                                                    {rowActions(row.original._id, () => row.toggleExpanded(), row.getIsExpanded())}
-                                                                    <input type="checkbox" className="checkBox"
-                                                                        checked={selectedRows[row.id]}
-                                                                        onChange={() => {
-                                                                            setSelectedRows((prev) => {
-                                                                                const newSelection = { ...prev };
-                                                                                if (newSelection[row.id]) {
-                                                                                    delete newSelection[row.id];
-                                                                                } else {
-                                                                                    newSelection[row.id] = true;
-                                                                                }
-                                                                                return newSelection;
-                                                                            });
-                                                                        }}
-                                                                        data-tooltip-id="global-tooltip"
-                                                                        data-tooltip-content={t("table.selectRow")}
-                                                                    />
-                                                                </span>
-                                                            </>
-                                                        ) : (
-                                                            rowActions(row.original._id, () => row.toggleExpanded(), row.getIsExpanded())
-                                                        )}
-                                                    </td>
-                                                }
-                                            </tr>
-                                            {row.getIsExpanded() && (
-                                                isMobile() ? (
-                                                    <div className="expanded-mobile-row" key={`${row.id}-expanded-mobile`}>
-                                                        {expandedElement && expandedElement(row.original)}
-                                                    </div>
-                                                ) : (
-                                                    <tr key={`${row.id}-expanded`} className="expanded-row">
-                                                        <td colSpan={row.getAllCells().length + 1}>
-                                                            {expandedElement && expandedElement(row.original)}
+                                                        });
+                                                    })()}
+                                                    {rowActions &&
+                                                        <td
+                                                            key={`${row.id}-actions`}
+                                                            className="TSPactionsRow actions-animated-td"
+                                                            tabIndex={0}
+                                                        >
+                                                            {showSelection ? (
+                                                                <>
+                                                                    <span className="actions-ellipsis">&#x2807;</span>
+                                                                    <span className="actions-content">
+                                                                        {rowActions(row.original._id, () => row.toggleExpanded(), row.getIsExpanded())}
+                                                                        <input type="checkbox" className="checkBox"
+                                                                            checked={selectedRows[row.id]}
+                                                                            onChange={() => {
+                                                                                setSelectedRows((prev) => {
+                                                                                    const newSelection = { ...prev };
+                                                                                    if (newSelection[row.id]) {
+                                                                                        delete newSelection[row.id];
+                                                                                    } else {
+                                                                                        newSelection[row.id] = true;
+                                                                                    }
+                                                                                    return newSelection;
+                                                                                });
+                                                                            }}
+                                                                            data-tooltip-id="global-tooltip"
+                                                                            data-tooltip-content={t("table.selectRow")}
+                                                                        />
+                                                                    </span>
+                                                                </>
+                                                            ) : (
+                                                                rowActions(row.original._id, () => row.toggleExpanded(), row.getIsExpanded())
+                                                            )}
                                                         </td>
-                                                    </tr>
-                                                )
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </tbody>
-                            </table>
+                                                    }
+                                                </tr>
+                                                {row.getIsExpanded() && (
+                                                    isMobile() ? (
+                                                        <div className="expanded-mobile-row" key={`${row.id}-expanded-mobile`}>
+                                                            {expandedElement && expandedElement(row.original)}
+                                                        </div>
+                                                    ) : (
+                                                        <tr key={`${row.id}-expanded`} className="expanded-row">
+                                                            <td colSpan={row.getAllCells().length + 1}>
+                                                                {expandedElement && expandedElement(row.original)}
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                             {data.length === 0 && (
                                 <div className="no-data">
                                     {t("dashboard.noData")}
@@ -662,6 +675,8 @@ const ServerPaginationTable: FC<PropsMT> =
                                 currentPage={currentPage}
                                 pageSize={currentPageSize}
                                 totalPages={maxPage}
+                                tableScrollRef={tableScrollRef}
+                                tableRef={tableRef}
                                 onPageChange={(page) => {
                                     setCurrentPage(page);
                                 }}

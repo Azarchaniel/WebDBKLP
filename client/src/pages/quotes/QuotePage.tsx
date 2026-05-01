@@ -13,6 +13,7 @@ import "@styles/QuotePage.scss";
 import { useAuth } from "@utils/context";
 import { useQuoteModal } from "@components/quotes/useQuoteModal";
 import { useTranslation } from "react-i18next";
+import { useIsDarkTheme } from "../../utils/hooks";
 
 const PAGE_LIMIT = 20;
 
@@ -55,6 +56,7 @@ export default function QuotePage() {
     const sentinelRef = useRef<HTMLDivElement>(null);
     // Stable quote-id → color map; never resets so colors don't flash on re-render
     const quoteColorMapRef = useRef<Map<string, string>>(new Map());
+    const isDarkTheme = useIsDarkTheme();
 
     // Refs so the IntersectionObserver callback always sees the latest state
     const loadingRef = useRef(true);
@@ -67,7 +69,8 @@ export default function QuotePage() {
     const quoteGroups = useMemo<QuoteGroup[]>(() => {
         if (!filteredQuotes || !Array.isArray(filteredQuotes)) return [];
         const groups: { [bookId: string]: QuoteGroup } = {};
-        const baseColors = generateColors(books.length);
+        const baseColors = generateColors(books.length, isDarkTheme);
+        console.log(baseColors);
         let colorIndex = 0;
         filteredQuotes.forEach((quote) => {
             const bookId = quote.fromBook?._id;
@@ -80,18 +83,19 @@ export default function QuotePage() {
                     quoteColors: new Map(),
                 };
             }
-            // Assign a shade once per quote and keep it stable across re-renders
-            if (!quoteColorMapRef.current.has(quote._id)) {
+            // Cache key includes theme so colors are regenerated on theme switch
+            const cacheKey = `${isDarkTheme}:${quote._id}`;
+            if (!quoteColorMapRef.current.has(cacheKey)) {
                 quoteColorMapRef.current.set(
-                    quote._id,
-                    getRandomShade(groups[bookId].baseColor)
+                    cacheKey,
+                    getRandomShade(groups[bookId].baseColor, isDarkTheme)
                 );
             }
-            groups[bookId].quoteColors.set(quote._id, quoteColorMapRef.current.get(quote._id)!);
+            groups[bookId].quoteColors.set(quote._id, quoteColorMapRef.current.get(cacheKey)!);
             groups[bookId].quotes.push(quote);
         });
         return Object.values(groups);
-    }, [filteredQuotes, books]);
+    }, [filteredQuotes, books, isDarkTheme]);
 
     const doFetch = useCallback((pageNum: number, bookIds: string[], search: string, users: string[] | null, isReset: boolean): void => {
         if (isReset) {
@@ -301,7 +305,7 @@ export default function QuotePage() {
                 <div ref={sentinelRef} className="quoteSentinel">
                     {loadingMore && (
                         <div className="quoteSentinel__spinner">
-                            <LoadingSpinner color="var(--text)" size={40} />
+                            <LoadingSpinner color="var(--text)" size={170} />
                         </div>
                     )}
                 </div>

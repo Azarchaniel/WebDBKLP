@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, RefObject } from "react";
 import { PAGE_SIZE_OPTIONS } from "../../utils/constants";
 import { getPageByStartingLetter } from "../../API";
 import { IUser } from "../../type";
@@ -11,6 +11,8 @@ type PaginationProps = {
     totalPages: number;
     onPageChange: (page: number) => void;
     onPageSizeChange: (size: number) => void;
+    tableScrollRef?: RefObject<HTMLDivElement>;
+    tableRef?: RefObject<HTMLTableElement>;
 };
 
 const Pagination: React.FC<PaginationProps> = ({
@@ -18,11 +20,61 @@ const Pagination: React.FC<PaginationProps> = ({
     pageSize,
     totalPages,
     onPageChange,
-    onPageSizeChange
+    onPageSizeChange,
+    tableScrollRef,
+    tableRef
 }) => {
     const { t } = useTranslation();
     const [inputPage, setInputPage] = useState<string>(currentPage.toString());
     const activeUsers: IUser[] | null = useReadLocalStorage("activeUsers");
+    const fakeScrollRef = useRef<HTMLDivElement>(null);
+    const fakeInnerRef = useRef<HTMLDivElement>(null);
+    const isSyncingRef = useRef(false);
+
+    // Keep fake scrollbar inner width and left offset in sync with the table wrapper
+    useEffect(() => {
+        const tableEl = tableScrollRef?.current;
+        const innerTableEl = tableRef?.current;
+        const fakeInner = fakeInnerRef.current;
+        const fakeEl = fakeScrollRef.current;
+        if (!tableEl || !fakeInner || !fakeEl) return;
+
+        const update = () => {
+            fakeInner.style.width = tableEl.scrollWidth + 'px';
+            fakeEl.style.left = tableEl.getBoundingClientRect().left + 'px';
+        };
+        update();
+        const ro = new ResizeObserver(update);
+        ro.observe(tableEl);
+        if (innerTableEl) ro.observe(innerTableEl);
+        return () => ro.disconnect();
+    }, [tableScrollRef, tableRef]);
+
+    // Sync scroll positions between table and fake scrollbar
+    useEffect(() => {
+        const tableEl = tableScrollRef?.current;
+        const fakeEl = fakeScrollRef.current;
+        if (!tableEl || !fakeEl) return;
+
+        const onTableScroll = () => {
+            if (isSyncingRef.current) return;
+            isSyncingRef.current = true;
+            fakeEl.scrollLeft = tableEl.scrollLeft;
+            isSyncingRef.current = false;
+        };
+        const onFakeScroll = () => {
+            if (isSyncingRef.current) return;
+            isSyncingRef.current = true;
+            tableEl.scrollLeft = fakeEl.scrollLeft;
+            isSyncingRef.current = false;
+        };
+        tableEl.addEventListener('scroll', onTableScroll);
+        fakeEl.addEventListener('scroll', onFakeScroll);
+        return () => {
+            tableEl.removeEventListener('scroll', onTableScroll);
+            fakeEl.removeEventListener('scroll', onFakeScroll);
+        };
+    }, [tableScrollRef]);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
@@ -62,6 +114,9 @@ const Pagination: React.FC<PaginationProps> = ({
 
     return (
         <div className="tableNavigationRow">
+            <div ref={fakeScrollRef} className="table-fake-scrollbar">
+                <div ref={fakeInnerRef} style={{ height: '1px' }} />
+            </div>
             <div className="otherTableControl">
                 <span className="pageSelectorLabel">{t("pagination.recordsPerPage")}</span>
                 <select
