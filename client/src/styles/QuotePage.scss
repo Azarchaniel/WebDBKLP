@@ -201,10 +201,6 @@ form {
 }
 
 :root[data-theme="dark"] {
-  .Quote {
-    background-color: var(--quote-bg) !important;
-  }
-
   .quotesTitle h4 {
     color: var(--text) !important;
   }

@@ -1,6 +1,5 @@
 import { SortingState } from "@tanstack/react-table";
 import { IAutor, IBoardGame, IBook, ILP } from "type";
-import { formatNumberLocale } from "./utils";
 
 export const TABLE_HEADER_COLOR = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
@@ -9,29 +8,6 @@ export const CITIES = [
     { value: 'ujezd', showValue: 'Újezd u Chocně' },
     { value: "bruchotin", showValue: "Břuchotín" }
 ];
-
-export const CHART_LABELS = (locale: string = 'en', color: string = '#111827') => {
-    return {
-        color,
-        generateLabels(chart: any) {
-            const data = chart.data;
-            return data.labels.map((label: any, i: number) => {
-                const meta = chart.getDatasetMeta(0);
-                const style = meta.controller.getStyle(i);
-
-                return {
-                    text: `${label} (${formatNumberLocale(chart.data.datasets[0].data[i] ?? 0, locale)})`,
-                    fillStyle: style.backgroundColor,
-                    strokeStyle: style.borderColor,
-                    lineWidth: style.borderWidth,
-                    hidden: !chart.getDataVisibility(i),
-                    index: i,
-                    color
-                };
-            });
-        }
-    };
-};
 
 export const CHART_COLORS = [
     "#073b4c", "#118ab2", "#06d6a0", "#ffd166", "#f78c6b", "#ef476f"

@@ -89,7 +89,7 @@ $table-divider-color: var(--table-divider);
         flex: 1 1 auto;
         width: 50%;
         box-sizing: border-box;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid $table-divider-color;
         min-height: 2rem !important;
         text-overflow: ellipsis;
         position: relative;
@@ -169,6 +169,25 @@ $table-divider-color: var(--table-divider);
   font-size: 1.25rem;
   width: 100%;
   color: var(--text);
+}
+
+.table-scroll-wrapper {
+  overflow-x: auto;
+  width: 100%;
+  /* Hide the native scrollbar — the pagination bar scrollbar is used instead */
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.table-fake-scrollbar {
+  overflow-x: auto;
+  height: 12px;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 
 // Main table component
@@ -385,6 +404,8 @@ $table-divider-color: var(--table-divider);
   padding-right: 2.5rem;
   z-index: 2;
   width: 100%;
+  padding-top: 12px;
+  /* room for the fake scrollbar */
 
   .pageInput {
     width: 3rem;
@@ -552,6 +573,22 @@ $table-divider-color: var(--table-divider);
 
     .actions-ellipsis {
       color: #333;
+    }
+  }
+}
+
+// ============================================================================
+// DARK MODE
+// ============================================================================
+
+@media screen and (width <=$mobile-width) {
+  :root[data-theme="dark"] .serverPaginationTable tbody {
+    td {
+      border-bottom: none;
+    }
+
+    td:last-child {
+      border-bottom: 1px solid $table-divider-color;
     }
   }
 }

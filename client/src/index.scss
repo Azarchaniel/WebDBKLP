@@ -475,8 +475,8 @@ textarea {
 /* Tabs header styles */
 .tabs-header {
   display: flex;
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #ddd;
+  background-color: var(--surface);
+  border-bottom: 1px solid var(--input-border);
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior: contain;
@@ -491,7 +491,7 @@ textarea {
   text-align: center;
   background: none;
   border: none;
-  border-right: 1px solid #ddd;
+  border-right: 1px solid var(--input-border);
   cursor: pointer;
   font-size: 14px;
   color: var(--anchor);
@@ -503,13 +503,13 @@ textarea {
 }
 
 .tab-button:hover {
-  background-color: #e9ecef;
+  background-color: var(--input-bg);
 }
 
 .tab-button.active {
-  background-color: #fff;
+  background-color: var(--background);
   font-weight: bold;
-  color: #495057;
+  color: var(--text);
   cursor: default;
 }
 

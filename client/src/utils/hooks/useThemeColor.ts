@@ -26,3 +26,21 @@ export const useThemeColor = (cssVarName: string, fallback: string = "#111827"):
 
     return color;
 };
+
+/** Returns true when the dark theme is active, and updates reactively on theme switches. */
+export const useIsDarkTheme = (): boolean => {
+    const isDark = () =>
+        typeof document !== "undefined" &&
+        document.documentElement.getAttribute("data-theme") === "dark";
+
+    const [dark, setDark] = useState<boolean>(isDark);
+
+    useEffect(() => {
+        if (typeof document === "undefined") return;
+        const observer = new MutationObserver(() => setDark(isDark()));
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+        return () => observer.disconnect();
+    }, []);
+
+    return dark;
+};
