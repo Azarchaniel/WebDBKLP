@@ -160,7 +160,8 @@
         "scanIsbn": "Scan ISBN",
         "searchByISBN": "Search by ISBN",
         "searchPlaceholder": "Search books",
-        "showHideColumns": "Show/hide columns"
+        "showHideColumns": "Show/hide columns",
+        "loadError": "Error loading books!"
     },
     "common": {
         "add": "Add",

@@ -1,5 +1,5 @@
 // src/utils/indexedDBService.ts
-import { openDB, IDBPDatabase } from 'idb';
+import { openDB, deleteDB, IDBPDatabase } from 'idb';
 import { IBook } from '../type';
 
 // Define database schema
@@ -24,7 +24,7 @@ let dbPromise: Promise<IDBPDatabase<BookDB>> | null = null;
 /**
  * Initialize and get database instance
  */
-export const getDB = (): Promise<IDBPDatabase<BookDB>> => {
+export const getDB = async (): Promise<IDBPDatabase<BookDB>> => {
     if (!dbPromise) {
         dbPromise = openDB<BookDB>(DB_NAME, DB_VERSION, {
             upgrade(db) {
@@ -36,9 +36,28 @@ export const getDB = (): Promise<IDBPDatabase<BookDB>> => {
                     db.createObjectStore('metadata', { keyPath: 'key' });
                 }
             },
+            terminated() {
+                // DB was externally deleted or connection was killed — force re-open on next access
+                dbPromise = null;
+            }
+        }).catch((err) => {
+            dbPromise = null;
+            throw err;
         });
     }
-    return dbPromise;
+
+    const db = await dbPromise;
+
+    // Guard against external deletion: if the stores are gone but terminated() hasn't
+    // fired yet, close the stale connection, wipe the DB and re-open from scratch.
+    if (!db.objectStoreNames.contains('books') || !db.objectStoreNames.contains('metadata')) {
+        db.close();
+        dbPromise = null;
+        await deleteDB(DB_NAME);
+        return getDB();
+    }
+
+    return db;
 };
 
 /**

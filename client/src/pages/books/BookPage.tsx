@@ -131,7 +131,13 @@ export default function BookPage() {
                     }
                 })
                 .catch((err: any) => {
-                    if (err?.name === 'AbortError' || err?.message?.includes('AbortError')) return;
+                    if (
+                        err?.name === 'AbortError' ||
+                        err?.name === 'CanceledError' ||
+                        err?.code === 'ERR_CANCELED' ||
+                        err?.message?.includes('AbortError') ||
+                        err?.message?.includes('canceled')
+                    ) return;
                     toast.error(err.response?.data?.error || t("books.loadError"));
                     console.error('Error fetching books:', err);
                 })

@@ -272,12 +272,7 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
 
         const newBook: IBook = (await bookToSave.save()).toObject();
 
-        const allBooks = await Book
-            .find(optionFetchAllExceptDeleted)
-            .populate(populateOptionsBook)
-            .exec();
-
-        res.status(200).json({ message: 'Book added', book: newBook, books: allBooks })
+        res.status(200).json({ message: 'Book added', book: newBook })
     } catch (error) {
         res.status(500).json({ error: "Chyba pri pridávaní knihy! " + error });
         console.error("Error adding book:", error);
@@ -322,15 +317,9 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
                 deletedAt: new Date()
             }
         )
-        const allBooks = await Book
-            .find(optionFetchAllExceptDeleted)
-            .populate(populateOptionsBook)
-            .exec();
-
         res.status(200).json({
             message: 'Book deleted',
             book: deletedBook,
-            books: allBooks,
         })
     } catch (error) {
         res.status(500).json({ error: "Chyba pri mazaní knihy! " + error });

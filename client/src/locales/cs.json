@@ -160,7 +160,8 @@
         "scanIsbn": "Naskenuj ISBN",
         "searchByISBN": "Hledat podle ISBN",
         "searchPlaceholder": "Vyhledej knihu",
-        "showHideColumns": "Zobraz/skryj sloupce"
+        "showHideColumns": "Zobraz/skryj sloupce",
+        "loadError": "Chyba při načítání knih!"
     },
     "common": {
         "add": "Přidat",
