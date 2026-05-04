@@ -129,6 +129,7 @@ export default function BookPage() {
                     if (checkIfFirstPage()) {
                         saveFirstPageToCache(books, count, pagination);
                     }
+                    setLoading(false);
                 })
                 .catch((err: any) => {
                     if (
@@ -137,11 +138,11 @@ export default function BookPage() {
                         err?.code === 'ERR_CANCELED' ||
                         err?.message?.includes('AbortError') ||
                         err?.message?.includes('canceled')
-                    ) return;
+                    ) return; // keep loading=true so the next request's result takes over
                     toast.error(err.response?.data?.error || t("books.loadError"));
                     console.error('Error fetching books:', err);
-                })
-                .finally(() => setLoading(false));
+                    setLoading(false);
+                });
         } catch (err: any) {
             toast.error(err.response?.data?.error);
             console.error('Error fetching books:', err);

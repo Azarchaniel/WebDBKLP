@@ -16,8 +16,14 @@ const allowedOrigins = ["http://localhost:3000", "https://webdbklp.onrender.com"
 app.use(
     cors({
         origin: function (origin, callback) {
-            // Check if the incoming origin is in the whitelist (allow listed origins)
-            if (!origin || allowedOrigins.includes(origin)) {
+            // Block requests with no origin in production (e.g. curl, server-to-server)
+            if (!origin) {
+                if (process.env.NODE_ENV !== 'production') {
+                    return callback(null, true);
+                }
+                return callback(new Error('CORS: missing origin'));
+            }
+            if (allowedOrigins.includes(origin)) {
                 callback(null, true);
             } else {
                 callback(new Error(`CORS not allowed for origin: ${origin}`));

@@ -110,7 +110,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({ books: data, count });
     } catch (error) {
         console.error("Error fetching books:", error);
-        res.status(500).json({ error: "Chyba pri získavaní kníh! " + error });
+        res.status(500).json({ error: "Chyba pri získavaní kníh! "or });
     }
 };
 
@@ -141,7 +141,7 @@ const checkBooksUpdated = async (req: Request, res: Response): Promise<void> => 
         res.status(200).json({ latestUpdate: latestUpdate?.updatedAt });
     } catch (error) {
         console.error("Error checking book updates:", error);
-        res.status(500).json({ error: "Chyba pri získavaní informácií o dátume kníh! " + error });
+        res.status(500).json({ error: "Chyba pri získavaní informácií o dátume kníh! "or });
     }
 };
 
@@ -190,7 +190,7 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
         res.status(200).json({ books, count: totalCount });
     } catch (error) {
         console.error("Error fetching books by ids:", error);
-        res.status(500).json({ error: "Chyba pri získavaní kníh! " + error });
+        res.status(500).json({ error: "Chyba pri získavaní kníh! "or });
     }
 };
 
@@ -245,7 +245,7 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
         res.status(200).json({ page });
     } catch (error) {
         console.error("Error calculating page:", error);
-        res.status(500).json({ error: "Chyba pri presune na stranu!" + error });
+        res.status(500).json({ error: "Chyba pri presune na stranu!"or });
     }
 };
 
@@ -257,7 +257,7 @@ const getBook = async (req: Request, res: Response): Promise<void> => {
             .exec();
         res.status(200).json({ book: book })
     } catch (err) {
-        res.status(500).json({ error: "Chyba pri získavaní knihy! " + err });
+        res.status(500).json({ error: "Chyba pri získavaní knihy! " });
         console.error("Error fetching book:", err);
     }
 }
@@ -274,7 +274,7 @@ const addBook = async (req: Request, res: Response): Promise<void> => {
 
         res.status(200).json({ message: 'Book added', book: newBook })
     } catch (error) {
-        res.status(500).json({ error: "Chyba pri pridávaní knihy! " + error });
+        res.status(500).json({ error: "Chyba pri pridávaní knihy! "or });
         console.error("Error adding book:", error);
     }
 }
@@ -299,7 +299,7 @@ const updateBook = async (req: Request, res: Response): Promise<void> => {
             book: updateBook
         })
     } catch (error) {
-        res.status(500).json({ error: "Chyba pri aktualizácii knihy! " + error });
+        res.status(500).json({ error: "Chyba pri aktualizácii knihy! "or });
         console.error("Error updating book:", error);
     }
 }
@@ -322,7 +322,7 @@ const deleteBook = async (req: Request, res: Response): Promise<void> => {
             book: deletedBook,
         })
     } catch (error) {
-        res.status(500).json({ error: "Chyba pri mazaní knihy! " + error });
+        res.status(500).json({ error: "Chyba pri mazaní knihy! "or });
         console.error("Error deleting book:", error);
     }
 }
@@ -338,11 +338,11 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
         if (bookInfo) {
             res.status(200).json(bookInfo);
         } else {
-            res.status(401).json({ error: "Kniha nebola nájdená." });
+            res.status(404).json({ error: "Kniha nebola nájdená." });
         }
     } catch (err: any) {
-        res.status(500).json({ error: "Chyba pri získavaní informácií o knihe! " + err.message });
-        console.error("Problem at web scrapping: " + err);
+        res.status(500).json({ error: "Chyba pri získavaní informácií o knihe! " });
+        console.error("Problem at web scrapping: ");
     }
 }
 
@@ -556,7 +556,7 @@ const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> =>
 
     } catch (error) {
         console.error("Error fetching unique field values:", error);
-        res.status(500).json({ error: "Chyba pri získavaní unikátnych hodnôt! " + error });
+        res.status(500).json({ error: "Chyba pri získavaní unikátnych hodnôt! "or });
     }
 };
 
@@ -822,7 +822,7 @@ const dashboard = {
             res.status(200).json(formattedResult);
         } catch (error: unknown) {
             console.error("Error while calculating statistics", error);
-            res.status(500).json({ error: "Chyba pri získavaní rozmerových štatistík! " + error });
+            res.status(500).json({ error: "Chyba pri získavaní rozmerových štatistík! "or });
         }
     },
     getSizesGroups: async (_: Request, res: Response): Promise<void> => {
@@ -910,7 +910,7 @@ const dashboard = {
             });
         } catch (err) {
             console.error("Error while getSizesGroups", err);
-            res.status(500).json({ error: "Chyba pri získavaní rozmerových skupín! " + err });
+            res.status(500).json({ error: "Chyba pri získavaní rozmerových skupín! " });
         }
     },
     getLanguageStatistics: async (_: Request, res: Response): Promise<void> => {
@@ -965,7 +965,7 @@ const dashboard = {
             res.status(200).json(data);
         } catch (error) {
             console.error("Error while calculating language statistics:", error);
-            res.status(500).json({ error: "Chyba pri získavaní jazykových štatistík! " + error });
+            res.status(500).json({ error: "Chyba pri získavaní jazykových štatistík! "or });
         }
     },
     countBooks: async (req: Request, res: Response): Promise<void> => {
@@ -1022,7 +1022,7 @@ const dashboard = {
             res.status(200).json(sortedData);
         } catch (error) {
             console.error("Error counting books:", error);
-            res.status(500).json({ error: "Chyba pri počítaní kníh! " + error });
+            res.status(500).json({ error: "Chyba pri počítaní kníh! "or });
         }
     },
     getReadBy: async (_: Request, res: Response): Promise<void> => {
@@ -1071,7 +1071,7 @@ const dashboard = {
             res.status(200).json(sortedData);
         } catch (error) {
             console.error('Error calculating reading statistics:', error);
-            res.status(500).json({ error: "Chyba pri získavaní štatistík čítania! " + error });
+            res.status(500).json({ error: "Chyba pri získavaní štatistík čítania! "or });
         }
     },
     getOldestBooks: async (_: Request, res: Response): Promise<void> => {
@@ -1112,7 +1112,7 @@ const dashboard = {
             res.status(200).json(Array.from(groupedByYear.values()));
         } catch (error) {
             console.error("Error fetching oldest books:", error);
-            res.status(500).json({ error: "Chyba pri získavaní najstarších kníh! " + error });
+            res.status(500).json({ error: "Chyba pri získavaní najstarších kníh! "or });
         }
     },
     getNewestBooks: async (_: Request, res: Response): Promise<void> => {
@@ -1139,7 +1139,7 @@ const dashboard = {
             res.status(200).json(formattedBooks);
         } catch (error) {
             console.error("Error fetching newest books:", error);
-            res.status(500).json({ error: "Chyba pri získavaní najnovších kníh! " + error });
+            res.status(500).json({ error: "Chyba pri získavaní najnovších kníh! "or });
         }
     },
     getBiggestBooks: async (req: Request, res: Response): Promise<void> => {
@@ -1245,7 +1245,7 @@ const dashboard = {
             res.status(200).json(formattedBooks);
         } catch (error) {
             console.error("Error fetching biggest books:", error);
-            res.status(500).json({ error: "Chyba pri získavaní najväčších kníh! " + error });
+            res.status(500).json({ error: "Chyba pri získavaní najväčších kníh! "or });
         }
     }
 }

@@ -113,7 +113,7 @@ const addLp = async (req: Request, res: Response): Promise<void> => {
             })
         }
     } catch (error) {
-        throw Error("Error while creating/editing LP \n" + error)
+        throw Error("Error while creating/editing LP \n"or)
     }
 }
 

@@ -111,9 +111,6 @@ export const logoutUser = async () => {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
 
-    // Clean other data if needed
-    localStorage.clear();
-
     // Clear cached data
     await clearCache(); //clear IndexDB - cached Books data
 

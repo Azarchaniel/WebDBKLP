@@ -34,7 +34,7 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
     const { email, password } = req.body.params;
 
     if (!email || !password) {
-        console.error(`All fields are required! Email: ${email}, password: ${password}`)
+        console.error(`All fields are required! Email: ${email}`);
         return res.status(403).json({ message: 'All fields are required' })
     }
 
@@ -75,7 +75,7 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
     refreshTokensStore.add(refreshToken);
 
     res.cookie("token", token, {
-        httpOnly: false,
+        httpOnly: true,
         secure: true,
         sameSite: "none",
     });
