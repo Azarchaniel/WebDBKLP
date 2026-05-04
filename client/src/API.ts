@@ -11,7 +11,6 @@ import {
     ILP,
     IUser
 } from "./type";
-import { jwtDecode } from "jwt-decode";
 
 const baseUrl: string = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
 const BATCH_SIZE = 5;
@@ -42,108 +41,51 @@ axiosInstance.interceptors.request.use(
             config.url?.includes(route) && config.method?.toLowerCase() === 'get'
         );
 
-        // Skip authentication for public GET routes
-        if (isPublicRoute) {
-            config.headers = {
-                ...config.headers,
-                "Content-Type": "application/json"
-            };
-            return config;
-        }
+        config.headers = { ...config.headers, "Content-Type": "application/json" };
 
-        let token = localStorage.getItem("token");
-        const refreshToken = localStorage.getItem('refreshToken');
+        // Skip proactive refresh for public routes or guests (no refresh token cookie)
+        const userStr = localStorage.getItem('user');
+        const user = userStr ? JSON.parse(userStr) : null;
+        const isGuest = user?.role === 'guest';
 
-        // If no refreshToken (e.g. guest), attach the token as-is and skip refresh
-        if (!refreshToken) {
-            if (token) {
-                config.headers = {
-                    ...config.headers,
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
-                };
+        if (!isPublicRoute && !isGuest) {
+            const tokenExpiresAt = localStorage.getItem('tokenExpiresAt');
+            if (tokenExpiresAt) {
+                const expiresAt = parseInt(tokenExpiresAt, 10);
+                const now = Date.now() / 1000;
+                if (expiresAt - now < 60) {
+                    try {
+                        // Refresh access token — server reads refreshToken cookie and sets new token cookie
+                        const response = await axios.post(baseUrl + '/refresh-token', {}, { withCredentials: true });
+                        if (response.data.tokenExpiresAt) {
+                            localStorage.setItem('tokenExpiresAt', response.data.tokenExpiresAt.toString());
+                        }
+                    } catch (e) {
+                        // Refresh failed — let the request continue; the server will 401 if needed
+                        console.warn('Proactive token refresh failed:', e);
+                    }
+                }
             }
-            return config;
-        }
-
-        if (token) {
-            config.headers = {
-                ...config.headers,
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}` // Attach token to Authorization header
-            };
-
-            const { exp } = jwtDecode(token);
-            const now = Date.now() / 1000;
-
-            if (!exp) {
-                console.error("Token has no expiration date!");
-                return config;
-            }
-
-            if (exp - now < 60) {
-                const response = await axios.post(baseUrl + '/refresh-token', {
-                    refreshToken: localStorage.getItem('refreshToken'),
-                });
-                // Update only the access token, do not update refresh token
-                token = response.data.accessToken;
-                localStorage.setItem('token', token!);
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-        }
-
-        if (token) {
-            config.headers!.Authorization = `Bearer ${token}`;
         }
 
         return config;
     },
     (error) => {
-        // Handle request error
         console.error("Request error:", error);
         return Promise.reject(error);
     }
 );
 
-let lastLogTime = 0;
-
 axiosInstance.interceptors.response.use(
-    (response: AxiosResponse) => {
-        // Just return the response if everything goes well
-        return response;
-    },
+    (response: AxiosResponse) => response,
     (error) => {
-        // Handle unauthorized errors (token expired)
         if (error.response?.status === 401) {
-            console.warn("Unauthorized! Token may be expired.");
-
-            // Clear auth data if unauthorized
-            const token = localStorage.getItem('token');
-            if (token) {
-                try {
-                    const { exp } = jwtDecode(token);
-                    const now = Date.now() / 1000;
-                    if (!exp || exp < now) {
-                        // Clear all auth data if token is expired
-                        localStorage.removeItem('token');
-                        localStorage.removeItem('refreshToken');
-                        localStorage.removeItem('user');
-
-                        // Force page reload to update auth state
-                        window.location.href = '/';
-                        return Promise.reject(new Error('Session expired. Please log in again.'));
-                    }
-                } catch (e) {
-                    console.error("Error decoding token:", e);
-                }
-            }
+            console.warn("Unauthorized! Session may have expired.");
+            localStorage.removeItem('user');
+            localStorage.removeItem('tokenExpiresAt');
+            window.location.href = '/';
+            return Promise.reject(new Error('Session expired. Please log in again.'));
         }
-
-        const now = Date.now();
-        if (now - lastLogTime > 10000) { // Check if 10 seconds have passed since the last log
-            lastLogTime = now; // Update the last log time
-        }
-
         return Promise.reject(error);
     }
 );
@@ -580,8 +522,8 @@ export const login = async (
     }
 }
 
-export const logout = async (refreshToken: string): Promise<AxiosResponse> => {
-    return axiosInstance.post(baseUrl + "/logout", { refreshToken });
+export const logout = async (): Promise<AxiosResponse> => {
+    return axiosInstance.post(baseUrl + "/logout");
 };
 
 export const loginGuest = async (): Promise<AxiosResponse<ApiUserDataType>> => {

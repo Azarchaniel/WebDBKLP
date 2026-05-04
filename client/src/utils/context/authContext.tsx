@@ -1,6 +1,5 @@
 import { createContext, useState, useContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { IUser } from '../../type';
-import { jwtDecode } from "jwt-decode";
 
 interface AuthContextType {
     currentUser: IUser | null;
@@ -21,45 +20,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Pure read-only validity check — no side effects, safe to call during render
     const isTokenCurrentlyValid = useCallback((): boolean => {
-        const token = localStorage.getItem("token");
-        if (!token) return false;
-        try {
-            const decoded = jwtDecode<{ exp?: number }>(token);
-            const now = Date.now() / 1000;
-            return !!(decoded.exp && decoded.exp >= now);
-        } catch {
-            return false;
-        }
+        const tokenExpiresAt = localStorage.getItem("tokenExpiresAt");
+        if (!tokenExpiresAt) return false;
+        const now = Date.now() / 1000;
+        return parseInt(tokenExpiresAt, 10) >= now;
     }, []);
 
     // Full validity check with side effects (clears state & storage when expired)
     const checkTokenValidity = useCallback((): boolean => {
-        const token = localStorage.getItem("token");
-        if (!token) {
+        const tokenExpiresAt = localStorage.getItem("tokenExpiresAt");
+        if (!tokenExpiresAt) {
+            setCurrentUser(null);
             return false;
         }
 
-        try {
-            const decoded = jwtDecode<{ exp?: number }>(token);
-            const now = Date.now() / 1000;
-
-            if (!decoded.exp || decoded.exp < now) {
-                // Token expired: clear user state and storage
-                localStorage.removeItem("token");
-                localStorage.removeItem("refreshToken");
-                localStorage.removeItem("user");
-                setCurrentUser(null);
-                return false;
-            }
-            return true;
-        } catch (error) {
-            console.error("Error decoding token:", error);
-            localStorage.removeItem("token");
-            localStorage.removeItem("refreshToken");
+        const now = Date.now() / 1000;
+        if (parseInt(tokenExpiresAt, 10) < now) {
+            localStorage.removeItem("tokenExpiresAt");
             localStorage.removeItem("user");
             setCurrentUser(null);
             return false;
         }
+        return true;
     }, []);
 
     // Effect to load user from localStorage on initial mount and verify token
@@ -100,9 +82,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Logout function clears state and localStorage
     const logout = useCallback(() => {
+        localStorage.removeItem('tokenExpiresAt');
         localStorage.removeItem('user');
         setCurrentUser(null);
-        // Potentially navigate to login page
     }, []);
 
     // Only consider logged in if we have a user AND a valid token.

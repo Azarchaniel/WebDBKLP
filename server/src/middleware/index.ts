@@ -9,7 +9,8 @@ interface CustomVerificationResponse extends Response {
 }
 
 const userVerification = (req: Request, res: Response, next: NextFunction) => {
-    const token = req?.headers?.authorization?.split(" ")[1];
+    // Prefer httpOnly cookie; fall back to Authorization header (e.g. non-browser clients)
+    const token = req.cookies?.token ?? req?.headers?.authorization?.split(" ")[1];
 
     if (!token) return res.status(401).send("Unauthorized");
 
@@ -22,7 +23,7 @@ const userVerification = (req: Request, res: Response, next: NextFunction) => {
 }
 
 const blockGuest = (req: Request, res: Response, next: NextFunction) => {
-    const token = req?.headers?.authorization?.split(" ")[1];
+    const token = req.cookies?.token ?? req?.headers?.authorization?.split(" ")[1];
     if (!token) return next();
     try {
         const decoded = jwt.verify(token, `${process.env.SECRET_KEY}`) as JwtPayload;

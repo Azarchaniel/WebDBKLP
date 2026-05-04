@@ -1,6 +1,7 @@
 import express, { Express } from "express"
 import mongoose from "mongoose"
 import cors from "cors"
+import cookieParser from "cookie-parser"
 import routes from "./routes"
 import path from "path";
 
@@ -34,6 +35,7 @@ app.use(
 );
 
 
+app.use(cookieParser());
 app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ limit: "20mb", extended: true }));
 app.use(routes)
