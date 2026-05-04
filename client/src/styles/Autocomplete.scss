@@ -152,6 +152,10 @@
     text-align: center;
   }
 
+  &.highlighted {
+    background-color: color-mix(in srgb, var(--anchor) 18%, transparent);
+  }
+
   &.disabled {
     cursor: not-allowed !important;
     opacity: 0.5;

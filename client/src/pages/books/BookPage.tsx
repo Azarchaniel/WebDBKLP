@@ -72,7 +72,7 @@ export default function BookPage() {
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const filterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const [controller, setController] = useState<AbortController | null>(null);
+    const controllerRef = useRef<AbortController | null>(null);
     const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
 
     const popRef = useRef<HTMLDivElement>(null);
@@ -95,12 +95,11 @@ export default function BookPage() {
             setLoading(true);
 
             // Abort previous request
-            if (controller) {
-                controller.abort();
+            if (controllerRef.current) {
+                controllerRef.current.abort();
             }
             // Create new AbortController
-            const newController = new AbortController();
-            setController(newController);
+            controllerRef.current = new AbortController();
 
             // Check if data is up-to-date
             const { status } = await checkBooksUpdated(await getCachedTimestamp());
@@ -119,7 +118,7 @@ export default function BookPage() {
                 }
             }
 
-            getBooks({ ...pagination })
+            getBooks({ ...pagination, signal: controllerRef.current.signal })
                 .then(({ data: { books, count } }: IBook[] | any) => {
                     setCountAll(count);
                     const processedBooks = stringifyAutors(books);
@@ -131,8 +130,10 @@ export default function BookPage() {
                         saveFirstPageToCache(books, count, pagination);
                     }
                 })
-                .catch(() => {
-                    throw Error()
+                .catch((err: any) => {
+                    if (err?.name === 'AbortError' || err?.message?.includes('AbortError')) return;
+                    toast.error(err.response?.data?.error || t("books.loadError"));
+                    console.error('Error fetching books:', err);
                 })
                 .finally(() => setLoading(false));
         } catch (err: any) {
@@ -365,6 +366,7 @@ export default function BookPage() {
                             <InputField
                                 placeholder={t("books.searchPlaceholder")}
                                 className="searchInput"
+                                innerClass="searchInputInner"
                                 value={pagination.search}
                                 onChange={(e) =>
                                     setPagination((prevState) => ({

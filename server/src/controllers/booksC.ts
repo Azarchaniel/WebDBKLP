@@ -70,7 +70,7 @@ const normalizeBook = (data: any): IBook => {
 
 const getAllBooks = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { page = "1", pageSize = "10_000", search = "", sorting, filterUsers, filters = [] } = req.query;
+        const { page = "1", pageSize = "10000", search = "", sorting, filterUsers, filters = [] } = req.query;
 
         const searchFields = [
             "autor", "editor", "ilustrator", "translator", "title", "subtitle", "content", "edition", "serie", "note", "published", "ISBN"
@@ -97,7 +97,7 @@ const getAllBooks = async (req: Request, res: Response): Promise<void> => {
             Book,
             {
                 page: isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage,
-                pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 10_000 : parsedPageSize,
+                pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 10000 : parsedPageSize,
                 search: search as string,
                 sorting: sorting as string,
                 searchFields,
@@ -196,7 +196,7 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
 
 const getPageByStartingLetter = async (req: Request, res: Response): Promise<void> => {
     try {
-        let { pageSize = "10_000", filterUsers, letter = "", model } = req.query;
+        let { pageSize = "10000", filterUsers, letter = "", model } = req.query;
 
         if (!letter || letter.length !== 1) {
             res.status(500).json({ error: "Nevalidné písmeno." });
@@ -238,11 +238,6 @@ const getPageByStartingLetter = async (req: Request, res: Response): Promise<voi
         ]).collation({ locale: "cs", strength: 2, numericOrdering: true });
 
         const position = countBefore.length > 0 ? countBefore[0].count : 0;
-
-        if (position === 0) {
-            res.status(404).json({ error: `Nie je možné nájsť prvú pozíciu písmena "${letter}"!` });
-            return;
-        }
 
         // Calculate the page number
         const page = Math.ceil((position + 1) / parseInt(pageSize as string));

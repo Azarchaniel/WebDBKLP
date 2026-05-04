@@ -183,7 +183,8 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
                 sorting: params?.sorting ?? [{ id: "title", desc: false }],
                 filterUsers: params?.activeUsers,
                 filters: params?.filters ?? []
-            }
+            },
+            signal: params?.signal
         });
         return books
     } catch (error: any) {

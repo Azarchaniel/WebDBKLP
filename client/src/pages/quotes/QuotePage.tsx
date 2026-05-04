@@ -252,7 +252,6 @@ export default function QuotePage() {
                         <div className="searchTableWrapper">
                             <InputField
                                 type="text"
-                                class="searchInput"
                                 value={searchText}
                                 onChange={(e) => {
                                     setSearchText(e.target.value);

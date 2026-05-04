@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, ReactNode, useEffect, useCallback } from 'react';
+import { createContext, useState, useContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { IUser } from '../../type';
 import { jwtDecode } from "jwt-decode";
 
@@ -19,7 +19,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [currentUser, setCurrentUser] = useState<IUser | null>(null);
     const [isLoading, setIsLoading] = useState(true); // Start loading
 
-    // Function to check if token is valid
+    // Pure read-only validity check — no side effects, safe to call during render
+    const isTokenCurrentlyValid = useCallback((): boolean => {
+        const token = localStorage.getItem("token");
+        if (!token) return false;
+        try {
+            const decoded = jwtDecode<{ exp?: number }>(token);
+            const now = Date.now() / 1000;
+            return !!(decoded.exp && decoded.exp >= now);
+        } catch {
+            return false;
+        }
+    }, []);
+
+    // Full validity check with side effects (clears state & storage when expired)
     const checkTokenValidity = useCallback((): boolean => {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -92,8 +105,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Potentially navigate to login page
     }, []);
 
-    // Only consider logged in if we have a user AND a valid token
-    const isLoggedIn = currentUser !== null && checkTokenValidity();
+    // Only consider logged in if we have a user AND a valid token.
+    // Uses the pure (side-effect-free) check so no state setter is called during render.
+    const isLoggedIn = useMemo(
+        () => currentUser !== null && isTokenCurrentlyValid(),
+        [currentUser, isTokenCurrentlyValid]
+    );
     const isGuest = currentUser?.role === 'guest';
 
     const value = {
