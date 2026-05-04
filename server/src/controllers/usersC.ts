@@ -6,9 +6,6 @@ import { sortByParam } from "../utils/utils";
 import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 
-// In-memory store for refresh tokens (use DB for production)
-const refreshTokensStore = new Set<string>();
-
 const getAllUsers = async (_: Request, res: Response): Promise<void> => {
     try {
         const users: IUser[] = await User.find(optionFetchAllExceptDeleted)
@@ -71,8 +68,8 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
         { expiresIn: '3d' } // Long-lived
     );
 
-    // Store refresh token
-    refreshTokensStore.add(refreshToken);
+    // Persist refresh token in DB
+    await User.updateOne({ _id: user._id }, { $push: { refreshTokens: refreshToken } });
 
     res.cookie("token", token, {
         httpOnly: true,
@@ -97,15 +94,15 @@ const refreshToken = async (req: Request, res: Response): Promise<Response> => {
         return res.status(400).json({ message: 'Refresh token is required' });
     }
 
-    // Check if refresh token is in store
-    if (!refreshTokensStore.has(refreshToken)) {
-        return res.status(401).json({ message: 'Invalid refresh token' });
-    }
-
     try {
-        // Verify the refresh token
+        // Verify the refresh token signature and expiry
         const decoded = jwt.verify(refreshToken, `${process.env.REFRESH_TOKEN_SECRET}`) as CustomJwtPayload;
-        if (!decoded) return res.status(401).json({ message: 'Invalid refresh token' });
+
+        // Check token is still stored (not revoked/logged out)
+        const user = await User.findOne({ _id: decoded.userId, refreshTokens: refreshToken });
+        if (!user) {
+            return res.status(401).json({ message: 'Invalid refresh token' });
+        }
 
         // Issue a new access token only (do not issue a new refresh token)
         const newAccessToken = jwt.sign(
@@ -116,17 +113,17 @@ const refreshToken = async (req: Request, res: Response): Promise<Response> => {
 
         return res.status(200).json({ accessToken: newAccessToken });
     } catch (error) {
-        // Remove invalid/expired token
-        refreshTokensStore.delete(refreshToken);
+        // Remove invalid/expired token from DB
+        await User.updateOne({ refreshTokens: refreshToken }, { $pull: { refreshTokens: refreshToken } });
         console.error("Error while refreshing token", error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return res.status(401).json({ message: 'Invalid refresh token' });
     }
 }
 
 const logoutUser = async (req: Request, res: Response): Promise<Response> => {
     const { refreshToken } = req.body;
     if (refreshToken) {
-        refreshTokensStore.delete(refreshToken);
+        await User.updateOne({ refreshTokens: refreshToken }, { $pull: { refreshTokens: refreshToken } });
     }
     return res.status(200).json({ message: 'Logged out' });
 }
