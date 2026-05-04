@@ -20,7 +20,7 @@ const normalizeAutor = (data: any): IAutor => {
 
 const getAllAutors = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { page = "1", pageSize = "10_000", search = "", sorting, dataFrom } = req.query;
+        const { page = "1", pageSize = "100", search = "", sorting, dataFrom } = req.query;
 
         const searchFields = ["firstName", "lastName"];
         const parsedPage = parseInt(page as string, 10);
@@ -30,7 +30,7 @@ const getAllAutors = async (req: Request, res: Response): Promise<void> => {
             Autor,
             {
                 page: isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage,
-                pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 10_000 : parsedPageSize,
+                pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 100 : parsedPageSize,
                 search: search as string,
                 sorting: sorting as string,
                 dataFrom: dataFrom as string,

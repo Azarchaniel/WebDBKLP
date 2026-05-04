@@ -12,7 +12,7 @@ const useNetworkStatus = () => {
 
         const handleOnline = () => {
             toast.dismiss("network-offline");
-            toast.success(t("network.online"), { toastId: "network-online" });
+            toast.success(t("network.online"), { toastId: "network-online", autoClose: 3000 });
         };
 
         window.addEventListener("offline", handleOffline);

@@ -82,7 +82,7 @@ export default function LPPage() {
             return Promise.all(formData.map(lp => addLP(lp)))
                 .then((results) => {
                     const message = t("lp.saveManySuccess", { count: results.length });
-                    toast.success(message);
+                    toast.success(message, { autoClose: 3000 });
                     setSaveLpSuccess(true);
                     fetchLPs();
                     return { success: true, message };
@@ -111,7 +111,7 @@ export default function LPPage() {
                         title: result.data.lp?.title,
                         action: !isNewLp ? t("lp.actionSaved") : t("lp.actionAdded")
                     });
-                    toast.success(message);
+                    toast.success(message, { autoClose: 3000 });
                     setSaveLpSuccess(true);
                     setLPs(stringifyAutors(result.data.lps));
                     return { success: true, message };
@@ -214,7 +214,7 @@ export default function LPPage() {
                                 successCount > 1
                                     ? t("lp.deleteSuccessMany", { count: successCount })
                                     : t("lp.deleteSuccessSingle", { title: lps[0].title })
-                            );
+                                , { autoClose: 3000 });
                             fetchLPs();
                         })
                         .catch((err) => {

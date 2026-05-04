@@ -190,7 +190,7 @@ export default function BookPage() {
                     action: !isNewBook ? t("books.actionSaved") : t("books.actionAdded")
                 });
             }
-            toast.success(message);
+            toast.success(message, { autoClose: 3000 });
             setSaveBookSuccess(true);
             fetchBooks();
             return { success: true, message };
@@ -292,7 +292,7 @@ export default function BookPage() {
                                 successCount > 1
                                     ? t("books.deleteSuccessMany", { count: successCount })
                                     : t("books.deleteSuccessSingle", { title: books[0].title })
-                            );
+                                , { autoClose: 3000 });
                             fetchBooks();
                         })
                         .catch((err) => {

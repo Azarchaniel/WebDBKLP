@@ -83,7 +83,7 @@ export default function BoardGamesPage() {
             return Promise.all(formData.map(bg => addBoardGame(bg)))
                 .then((results) => {
                     const message = t("boardGames.saveManySuccess", { count: results.length });
-                    toast.success(message);
+                    toast.success(message, { autoClose: 3000 });
                     setSaveBoardGameSuccess(true);
                     fetchBoardGames();
                     return { success: true, message };
@@ -112,7 +112,7 @@ export default function BoardGamesPage() {
                         title: data?.title || "",
                         action: !isNewBoardGame ? t("boardGames.actionEdited") : t("boardGames.actionAdded")
                     });
-                    toast.success(message);
+                    toast.success(message, { autoClose: 3000 });
                     setSaveBoardGameSuccess(true);
                     fetchBoardGames();
                     return { success: true, message };
@@ -220,7 +220,7 @@ export default function BoardGamesPage() {
                                 successCount > 1
                                     ? t("boardGames.deleteSuccessMany", { count: successCount })
                                     : t("boardGames.deleteSuccessSingle", { title: games[0].title })
-                            );
+                                , { autoClose: 3000 });
                             fetchBoardGames();
                         })
                         .catch((err) => {

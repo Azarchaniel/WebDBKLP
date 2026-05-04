@@ -196,7 +196,7 @@ export const fetchDataWithPagination = async (
     lookupStages: PipelineStage[] = [],
     additionalQuery: Record<string, any> = {},
 ): Promise<{ data: any[], count: number, latestUpdate?: Date | undefined }> => {
-    const { page = "1", pageSize = "10_000", search = "", sorting, dataFrom, searchFields = [], filters = [] } = options;
+    const { page = "1", pageSize = "100", search = "", sorting, dataFrom, searchFields = [], filters = [] } = options;
 
     const latestUpdate: {
         updatedAt: Date | undefined

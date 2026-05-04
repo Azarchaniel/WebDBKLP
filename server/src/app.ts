@@ -1,4 +1,4 @@
-import express, { Express } from "express"
+import express, { Express, Request, Response, NextFunction } from "express"
 import mongoose from "mongoose"
 import cors from "cors"
 import cookieParser from "cookie-parser"
@@ -36,14 +36,20 @@ app.use(
 
 
 app.use(cookieParser());
-app.use(express.json({ limit: "20mb" }));
-app.use(express.urlencoded({ limit: "20mb", extended: true }));
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ limit: "2mb", extended: true }));
 app.use(routes)
 
 app.use(express.static(path.join(__dirname, "client/build")));
 
 app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "client/build", "index.html"));
+});
+
+// Global error handler — catches unhandled errors from async route handlers
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
 });
 
 const uri: string = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${databaseName}?retryWrites=true&w=majority`

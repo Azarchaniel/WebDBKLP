@@ -18,19 +18,10 @@ interface HamburgerToXProps {
 }
 
 const HamburgerToX = forwardRef<HTMLDivElement, HamburgerToXProps>(({ onClick, className, activeEl, label }, ref) => {
-    const [active, setActive] = useState<boolean>(activeEl);
-
-    useEffect(() => {
-        setActive(activeEl);
-    }, [activeEl]);
-
     return (
         <div className={className} ref={ref}>
-            <div className="hamburger" onClick={() => {
-                setActive(!active);
-                onClick()
-            }}>
-                <a className={"main-nav-toggle" + (active ? " active-menu" : "")}><i>{label}</i></a>
+            <div className="hamburger" onClick={onClick}>
+                <a className={"main-nav-toggle" + (activeEl ? " active-menu" : "")}><i>{label}</i></a>
             </div>
         </div>
     )

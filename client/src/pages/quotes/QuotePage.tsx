@@ -184,7 +184,7 @@ export default function QuotePage() {
                 doFetch(1, booksToFilter.map(b => b._id), debouncedSearch, activeUser, true);
                 toast.success(t("quotes.saveSuccess", {
                     action: !isNewQuote ? t("quotes.actionEdited") : t("quotes.actionAdded")
-                }));
+                }), { autoClose: 3000 });
             })
             .catch((err) => {
                 toast.error(t("quotes.saveError", {
@@ -205,7 +205,7 @@ export default function QuotePage() {
                         if (res.status !== 200) {
                             throw new Error("Error! Quote not deleted");
                         }
-                        toast.success(t("quotes.deleteSuccess"));
+                        toast.success(t("quotes.deleteSuccess"), { autoClose: 3000 });
                         setPage(1);
                         doFetch(1, booksToFilter.map(b => b._id), debouncedSearch, activeUser, true);
                     })

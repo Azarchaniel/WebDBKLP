@@ -18,6 +18,7 @@ interface ModalState {
     minimized: boolean;
     position: { x: number | null, y: null | number };
     previousPosition?: { x: number | null, y: null | number };
+    closedAt?: number;
 }
 
 interface ModalContextType {
@@ -75,7 +76,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [window.innerHeight, window.innerWidth]);
+    }, []);
 
     const showModal = useCallback((props: {
         customKey: string,
@@ -121,31 +122,30 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, []);
 
     const hideModal = useCallback((key: string) => {
-        // Instead of filtering out the modal, mark it as closed and save its position
+        const closedAt = Date.now();
         setModals(prevModals =>
             prevModals.map(modal =>
                 modal.customKey === key
                     ? {
                         ...modal,
                         isOpen: false,
-                        // Store position so we can restore it when reopened
+                        closedAt,
                         previousPosition: modal.position
                     }
                     : modal
             )
         );
 
-        // Clean up any closed modals after some time to prevent state bloat
-        // This timeout can be adjusted based on UX needs
+        // Clean up closed modals after 5 seconds, but only those whose own closedAt
+        // is old enough — prevents concurrent-close races from removing other modals early.
         setTimeout(() => {
-            setModals(prevModals => {
-                // Only remove modals that have been closed for a while
-                // Keep recent ones in case they get reopened
-                return prevModals.filter(modal =>
-                    modal.isOpen || modal.customKey === key
-                );
-            });
-        }, 5000); // Keep closed modals for 5 seconds
+            const cutoff = Date.now() - 4500; // slightly under 5 s to account for timer drift
+            setModals(prevModals =>
+                prevModals.filter(modal =>
+                    modal.isOpen || !modal.closedAt || modal.closedAt > cutoff
+                )
+            );
+        }, 5000);
     }, []);
 
     // Function to calculate position for minimized modals to appear side by side

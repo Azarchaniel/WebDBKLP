@@ -7,7 +7,7 @@ import { fetchDataWithPagination } from "../utils/queryUtils";
 
 const getAllLps = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { page = "1", pageSize = "10_000", search = "", sorting } = req.query;
+        const { page = "1", pageSize = "100", search = "", sorting } = req.query;
 
         const searchFields = [
             "title",
@@ -27,7 +27,7 @@ const getAllLps = async (req: Request, res: Response): Promise<void> => {
             Lp,
             {
                 page: isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage,
-                pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 10_000 : parsedPageSize,
+                pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 100 : parsedPageSize,
                 search: search as string,
                 sorting: sorting as string,
                 searchFields

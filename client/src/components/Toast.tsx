@@ -1,11 +1,11 @@
 import React from "react";
-import {Slide, ToastContainer} from "react-toastify";
+import { Slide, ToastContainer } from "react-toastify";
 
 const Toast: React.FC = () => {
 	return (
 		<ToastContainer
 			position="bottom-center"
-			autoClose={3000}
+			autoClose={6000}
 			transition={Slide}
 			hideProgressBar={false}
 			newestOnTop={false}

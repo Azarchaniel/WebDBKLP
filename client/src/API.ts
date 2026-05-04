@@ -120,7 +120,7 @@ export const getBooks = async (params?: any): Promise<AxiosResponse<ApiBookDataT
             baseUrl + "/books", {
             params: {
                 page: params?.page ?? 1, // API expects 1-based index
-                pageSize: params?.pageSize ?? 10_000,
+                pageSize: params?.pageSize ?? 100,
                 search: params?.search ?? "",
                 sorting: params?.sorting ?? [{ id: "title", desc: false }],
                 filterUsers: params?.activeUsers,
@@ -140,7 +140,7 @@ export const getBooksByIds = async (params?: any): Promise<AxiosResponse<ApiBook
             baseUrl + "/books-by-ids", {
             params: {
                 page: params?.page ?? 1, // API expects 1-based index
-                pageSize: params?.pageSize ?? 10_000,
+                pageSize: params?.pageSize ?? 100,
                 search: params?.search ?? "",
                 sorting: params?.sorting ?? [{ id: "title", desc: false }],
                 ids: params?.ids ?? [],
@@ -226,8 +226,8 @@ export const deleteBook = async (
     _id: string
 ): Promise<AxiosResponse<ApiBookDataType>> => {
     try {
-        const deletedBook: AxiosResponse<ApiBookDataType> = await axiosInstance.post(
-            `${baseUrl}/delete-book/${_id}`
+        const deletedBook: AxiosResponse<ApiBookDataType> = await axiosInstance.delete(
+            `${baseUrl}/book/${_id}`
         )
         return deletedBook
     } catch (error: any) {
@@ -260,7 +260,7 @@ export const getAutors = async (params?: any): Promise<AxiosResponse<ApiAutorDat
             baseUrl + "/autors", {
             params: {
                 page: params?.page ?? 1, // API expects 1-based index
-                pageSize: params?.pageSize ?? 10_000,
+                pageSize: params?.pageSize ?? 100,
                 search: params?.search ?? "",
                 sorting: params?.sorting ?? [{ id: "lastName", desc: false }],
                 filterUsers: params?.activeUsers,
@@ -537,7 +537,7 @@ export const getLPs = async (params?: any): Promise<AxiosResponse<ApiLPDataType>
             baseUrl + "/lps", {
             params: {
                 page: params?.page ?? 1,
-                pageSize: params?.pageSize ?? 10_000,
+                pageSize: params?.pageSize ?? 100,
                 search: params?.search ?? "",
                 sorting: params?.sorting ?? { id: "lastName", desc: false }
             }
@@ -726,7 +726,7 @@ export const getBoardGames = async (params?: any): Promise<AxiosResponse<any>> =
             baseUrl + "/boardgames", {
             params: {
                 page: params?.page ?? 1, // API expects 1-based index
-                pageSize: params?.pageSize ?? 10_000,
+                pageSize: params?.pageSize ?? 100,
                 search: params?.search ?? "",
                 sorting: params?.sorting ?? [{ id: "title", desc: false }],
                 filters: params?.filters ?? []

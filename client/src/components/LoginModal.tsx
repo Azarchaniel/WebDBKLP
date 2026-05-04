@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useState, useEffect } from "react";
+import React, { ChangeEvent, useState } from "react";
 import { Modal, showError } from "./Modal";
 import { toast } from "react-toastify";
 import { loginUser, loginGuestUser, logoutUser } from "@utils";
@@ -9,26 +9,14 @@ import { useTranslation } from "react-i18next";
 
 const LoginModal: React.FC = () => {
     const { t } = useTranslation();
-    const { login, isLoggedIn, isGuest, currentUser, checkTokenValidity } = useAuth();
+    const { login, isLoggedIn, isGuest, currentUser } = useAuth();
     const [showModal, setShowModal] = useState(false);
     const [form, setForm] = useState({
         email: "",
         password: ""
     });
     const [errorKey, setErrorKey] = useState("auth.enterEmail");
-
-    // Verify token validity on component render and periodically
-    useEffect(() => {
-        // Check token validity immediately
-        checkTokenValidity();
-
-        // Check token validity every minute
-        const tokenCheckInterval = setInterval(() => {
-            checkTokenValidity();
-        }, 60000);
-
-        return () => clearInterval(tokenCheckInterval);
-    }, [checkTokenValidity]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const getErrMsg = (form: any) => {
         const { email, password } = form;
@@ -56,20 +44,25 @@ const LoginModal: React.FC = () => {
     };
 
     const sendLogin = async () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         loginUser(form)
             .then((user: IUser | undefined) => {
                 setShowModal(false);
                 login(user!);
-                toast.success(t("auth.loginSuccess"));
+                toast.success(t("auth.loginSuccess"), { autoClose: 3000 });
             })
             .catch(err => {
                 console.error(err.message);
                 toast.error(t("auth.loginFailed"));
                 setErrorKey("auth.loginFailedRetry");
-            });
+            })
+            .finally(() => setIsSubmitting(false));
     }
 
     const sendGuestLogin = async () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         loginGuestUser()
             .then((user: IUser | undefined) => {
                 setShowModal(false);
@@ -79,11 +72,13 @@ const LoginModal: React.FC = () => {
             .catch(err => {
                 console.error(err.message);
                 toast.error(t("auth.loginFailed"));
-            });
+            })
+            .finally(() => setIsSubmitting(false));
     }
 
-    const sendLogout = () => {
-        logoutUser();
+    const sendLogout = async () => {
+        setShowModal(false);
+        await logoutUser();
     }
 
     return (
@@ -138,7 +133,7 @@ const LoginModal: React.FC = () => {
                                 onClick={() => setShowModal(false)}>{t("common.cancel")}
                             </button>
                             <button type="submit"
-                                disabled={Boolean(errorKey?.length)}
+                                disabled={isSubmitting || Boolean(errorKey?.length)}
                                 onClick={() => sendLogin()}
                                 className="btn btn-success">{t("auth.login")}
                             </button>
