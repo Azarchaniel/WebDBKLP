@@ -5,7 +5,7 @@ $table-divider-color: var(--table-divider);
 // ============================================================================
 // MOBILE STYLES
 // ============================================================================
-@media screen and (width <=$mobile-width) {
+@media (width <=$mobile-width) {
 
   // Expanded row on mobile
   .expanded-mobile-row {
@@ -584,7 +584,7 @@ $table-divider-color: var(--table-divider);
 // DARK MODE
 // ============================================================================
 
-@media screen and (width <=$mobile-width) {
+@media (width <=$mobile-width) {
   :root[data-theme="dark"] .serverPaginationTable tbody {
     td {
       border-bottom: none;

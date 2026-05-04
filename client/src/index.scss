@@ -600,7 +600,20 @@ textarea {
   display: none;
 }
 
-@media screen and (width <=$mobile-width) {
+@media (width <=$tablet-width) {
+  .customModal {
+    max-width: 95vw;
+    min-width: unset;
+    width: 95vw;
+
+    &Body {
+      max-width: 95vw;
+      max-height: calc(85vh - 7rem);
+    }
+  }
+}
+
+@media (width <=$mobile-width) {
   .desktop-table {
     display: none;
   }
@@ -651,9 +664,11 @@ textarea {
   .customModal {
     max-width: 90vw;
     min-width: unset;
+    width: 90vw;
 
     &Body {
       max-width: 90vw;
+      max-height: calc(85vh - 7rem);
     }
   }
 }

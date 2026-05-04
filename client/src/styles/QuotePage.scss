@@ -149,7 +149,7 @@ form {
 }
 
 /* Media query for mobile layout */
-@media screen and (max-width: 768px) {
+@media (max-width: 768px) {
   .quotesTitle {
     flex-direction: column;
     align-items: flex-start;
@@ -173,19 +173,19 @@ form {
 }
 
 /* Responsive column count */
-@media screen and (max-width: 1200px) {
+@media (max-width: 1200px) {
   .quote_container {
     column-count: 3;
   }
 }
 
-@media screen and (max-width: $tablet-width) {
+@media (max-width: $tablet-width) {
   .quote_container {
     column-count: 2;
   }
 }
 
-@media screen and (max-width: $mobile-width) {
+@media (max-width: $mobile-width) {
   .quote_container {
     column-count: 1;
   }

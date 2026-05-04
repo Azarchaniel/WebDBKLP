@@ -1,6 +1,6 @@
 @use "variables" as *;
 
-@media screen and (max-width: $mobile-width) {
+@media (max-width: $mobile-width) {
   .sideBar {
     height: 3rem !important;
     position: fixed;

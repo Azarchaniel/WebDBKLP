@@ -431,10 +431,79 @@
   .b-Krajina {
     grid-area: 5 / 6 / 5 / 9;
   }
+
+  /* Row 6 */
+  .b-Mesto {
+    grid-area: 6 / 1 / 6 / 3;
+  }
+
+  .b-Police {
+    grid-area: 6 / 3 / 6 / 6;
+  }
+
+  .b-language {
+    grid-area: 6 / 6 / 6 / 9;
+  }
+
+  /* Row 7 — dimensions: pair them up, two per column-group */
+  .b-Vyska {
+    grid-area: 7 / 1 / 7 / 2;
+  }
+
+  .b-Sirka {
+    grid-area: 7 / 2 / 7 / 4;
+  }
+
+  .b-Hrubka {
+    grid-area: 7 / 4 / 7 / 6;
+  }
+
+  .b-Hmotnost {
+    grid-area: 7 / 6 / 7 / 8;
+  }
+
+  .b-Page-no {
+    grid-area: 7 / 8 / 7 / 9;
+  }
+
+  /* Row 8 */
+  .b-Obsah {
+    grid-area: 8 / 1 / 8 / 5;
+  }
+
+  .b-Poznamka {
+    grid-area: 8 / 5 / 8 / 9;
+  }
+
+  /* Row 9 */
+  .b-Precitane {
+    grid-area: 9 / 1 / 9 / 4;
+  }
+
+  .b-Vlastnik {
+    grid-area: 9 / 4 / 9 / 7;
+  }
+
+  .b-Ex-Libris {
+    grid-area: 9 / 7 / 9 / 9;
+  }
+
+  /* Row 10 */
+  .b-pic {
+    grid-area: 10 / 1 / 10 / 3;
+  }
+
+  .b-DK {
+    grid-area: 10 / 3 / 10 / 6;
+  }
+
+  .b-GR {
+    grid-area: 10 / 6 / 10 / 9;
+  }
 }
 
 /* Mobile phone layout */
-@media screen and (max-width: $mobile-width) {
+@media (max-width: $mobile-width) {
   .bookDetailRow {
     flex-direction: column;
 

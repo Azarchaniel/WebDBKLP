@@ -46,12 +46,12 @@
   grid-area: 6 / 1 / 7 / 3;
 }
 
-@media screen and (max-width: $mobile-width) {
+@media (max-width: $mobile-width) {
   form {
     grid-template-columns: 1fr !important;
   }
 
-  form > div {
+  form>div {
     grid-column: 1;
     grid-area: unset !important;
   }

@@ -65,7 +65,7 @@
   }
 }
 
-@media screen and (width <= $mobile-width) {
+@media (width <=$mobile-width) {
   h1 {
     flex-grow: 1;
   }
