@@ -200,7 +200,7 @@ export default function AutorPage() {
                 }
 
                 if (lps.length > 0) {
-                    warningText += " " + t("autors.warningLps", { count: lps.length });
+                    warningText += (books.length > 0 ? " " : "") + t(books.length > 0 ? "autors.warningLps" : "autors.warningLpsOnly", { count: lps.length });
                 }
 
                 if (books.length > 0 || lps.length > 0) warningText += "!";

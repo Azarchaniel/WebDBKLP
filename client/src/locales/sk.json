@@ -59,7 +59,11 @@
         "warningLps_few": "a {{count}} LP",
         "warningLps_many": "a {{count}} LP",
         "warningLps_one": "a {{count}} LP",
-        "warningLps_other": "a {{count}} LP"
+        "warningLps_other": "a {{count}} LP",
+        "warningLpsOnly_few": "Tento autor má k sebe priradené {{count}} LP",
+        "warningLpsOnly_many": "Tento autor má k sebe priradených {{count}} LP",
+        "warningLpsOnly_one": "Tento autor má k sebe priradené {{count}} LP",
+        "warningLpsOnly_other": "Tento autor má k sebe priradených {{count}} LP"
     },
     "barcode": {
         "notFound": "Nebol nájdený žiaden čiarový kód!",
@@ -104,8 +108,10 @@
         "authors_few": "Autori",
         "authors_one": "Autor",
         "authors_other": "Autori",
+        "content": "Obsah",
         "coverAlt": "titulka",
         "dimensions": "Rozmery",
+        "edition": "Edícia",
         "editors_few": "Editori",
         "editors_one": "Editor",
         "editors_other": "Editori",
@@ -121,6 +127,7 @@
         "pages": "Počet strán",
         "publisher": "Vydavateľ",
         "readBy": "Prečítané",
+        "serie": "Séria",
         "thickness": "Hrúbka",
         "translators_few": "Prekladatelia",
         "translators_one": "Prekladateľ",
@@ -394,8 +401,10 @@
             "players": "Počet hráčov",
             "playTime": "Čas hrania (min)",
             "published": "Vydané",
+            "publisher": "Vydavateľ",
             "title": "Názov",
-            "updatedAt": "Dátum úpravy"
+            "updatedAt": "Dátum úpravy",
+            "year": "Rok"
         },
         "books": {
             "author": "Autor",
@@ -439,10 +448,12 @@
             "createdAt": "Dátum pridania",
             "language": "Jazyk",
             "published": "Vydané",
+            "publisher": "Vydavateľ",
             "speed": "Rýchlosť",
             "subtitle": "Podnázov",
             "title": "Názov",
-            "updatedAt": "Dátum úpravy"
+            "updatedAt": "Dátum úpravy",
+            "year": "Rok"
         },
         "selection": {
             "none": "Nevybrané",

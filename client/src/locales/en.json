@@ -59,7 +59,11 @@
         "warningLps_few": "and {{count}} LP",
         "warningLps_many": "and {{count}} LP",
         "warningLps_one": "and {{count}} LP",
-        "warningLps_other": "and {{count}} LP"
+        "warningLps_other": "and {{count}} LP",
+        "warningLpsOnly_few": "This author has {{count}} LP assigned",
+        "warningLpsOnly_many": "This author has {{count}} LP assigned",
+        "warningLpsOnly_one": "This author has {{count}} LP assigned",
+        "warningLpsOnly_other": "This author has {{count}} LP assigned"
     },
     "barcode": {
         "notFound": "No barcode was found!",
@@ -104,8 +108,10 @@
         "authors_few": "Authors",
         "authors_one": "Author",
         "authors_other": "Authors",
+        "content": "Contents",
         "coverAlt": "cover",
         "dimensions": "Dimensions",
+        "edition": "Edition",
         "editors_few": "Editors",
         "editors_one": "Editor",
         "editors_other": "Editors",
@@ -121,6 +127,7 @@
         "pages": "Pages",
         "publisher": "Publisher",
         "readBy": "Read by",
+        "serie": "Series",
         "thickness": "Thickness",
         "translators_few": "Translators",
         "translators_one": "Translator",
@@ -389,8 +396,10 @@
             "players": "Players",
             "playTime": "Play time (min)",
             "published": "Published",
+            "publisher": "Publisher",
             "title": "Title",
-            "updatedAt": "Updated"
+            "updatedAt": "Updated",
+            "year": "Year"
         },
         "books": {
             "author": "Author",
@@ -434,10 +443,12 @@
             "createdAt": "Created",
             "language": "Language",
             "published": "Published",
+            "publisher": "Publisher",
             "speed": "Speed",
             "subtitle": "Subtitle",
             "title": "Title",
-            "updatedAt": "Updated"
+            "updatedAt": "Updated",
+            "year": "Year"
         },
         "selection": {
             "none": "None selected",

@@ -307,14 +307,28 @@ export const getLPTableColumns = (t: TFunction): ColumnDef<any, any>[] => [
         accessorKey: 'speed',
         header: t("table.lp.speed")
     },
-    {
-        accessorKey: 'published',
-        header: t("table.lp.published"),
-        cell: ({ cell }: { cell: any }) => {
-            const published = cell.getValue() as IPublished;
-            return published ? `${published?.publisher ?? ""} (${published?.year ?? "-"})` : null;
+    columnHelper.group({
+        id: "published",
+        header: () => t("table.lp.published"),
+        meta: {
+            headerStyle: {
+                backgroundColor: TABLE_HEADER_COLOR
+            }
         },
-    },
+        columns: [
+            columnHelper.accessor(row => row.published?.publisher, {
+                id: "published.publisher",
+                header: t("table.lp.publisher"),
+                sortingFn: "alphanumeric"
+            }),
+            columnHelper.accessor(row => row.published?.year, {
+                id: "published.year",
+                header: t("table.lp.year"),
+                cell: info => info.getValue() ?? "?",
+                sortingFn: "alphanumeric"
+            }),
+        ]
+    }),
     {
         accessorKey: 'createdAt',
         header: t("table.lp.createdAt"),
@@ -369,15 +383,28 @@ export const getBoardGameTableColumns = (t: TFunction): ColumnDef<any, any>[] =>
             return value ? formatBoardGameRange(value, t("units.years")) : "";
         },
     },
-    {
-        accessorKey: 'published',
-        header: t("table.boardGames.published"),
-        cell: ({ cell }: { cell: any }) => {
-            const published = cell.getValue() as IPublished;
-            return published ? `${published?.publisher ?? "?"} (${published?.year ?? "?"})` : "";
+    columnHelper.group({
+        id: "published",
+        header: () => t("table.boardGames.published"),
+        meta: {
+            headerStyle: {
+                backgroundColor: TABLE_HEADER_COLOR
+            }
         },
-        sortingFn: "datetime",
-    },
+        columns: [
+            columnHelper.accessor(row => row.published?.publisher, {
+                id: "published.publisher",
+                header: t("table.boardGames.publisher"),
+                sortingFn: "alphanumeric"
+            }),
+            columnHelper.accessor(row => row.published?.year, {
+                id: "published.year",
+                header: t("table.boardGames.year"),
+                cell: info => info.getValue() ?? "?",
+                sortingFn: "alphanumeric"
+            }),
+        ]
+    }),
     {
         accessorKey: 'createdAt',
         header: t("table.boardGames.createdAt"),

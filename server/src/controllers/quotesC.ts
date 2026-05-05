@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { IPopulateOptions, IQuote, IBook } from "../types";
 import Quote from "../models/quote"
 import { optionFetchAllExceptDeleted } from "../utils/constants";
-import diacritics from "diacritics";
+import { buildSearchQuery } from "../utils/queryUtils";
 
 const populateOptions: IPopulateOptions[] = [
     {
@@ -32,10 +32,7 @@ const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
             query.fromBook = { $in: filterByBook };
         }
 
-        if (search && typeof search === 'string' && search.trim()) {
-            const normalizedSearch = diacritics.remove(search.trim());
-            query['normalizedSearchField.text'] = { $regex: normalizedSearch, $options: 'i' };
-        }
+        Object.assign(query, buildSearchQuery(search as string, ['text']));
 
         const [quotes, count] = await Promise.all([
             Quote.find(query)
