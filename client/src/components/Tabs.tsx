@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 interface TabsProps {
 	children: any | any[];
 	className?: string;
+	onTabChange?: (label: string) => void;
 }
 
 interface TabProps {
@@ -10,7 +11,7 @@ interface TabProps {
 	label: string;
 }
 
-const Tabs = ({ children, className = "" }: TabsProps) => {
+const Tabs = ({ children, className = "", onTabChange }: TabsProps) => {
 	if (!Array.isArray(children)) {
 		children = [children];
 	}
@@ -41,7 +42,10 @@ const Tabs = ({ children, className = "" }: TabsProps) => {
 					<button
 						key={child.props.label}
 						className={`tab-button ${activeTab === child.props.label ? "active" : ""}`}
-						onClick={() => setActiveTab(child.props.label)}
+						onClick={() => {
+							setActiveTab(child.props.label);
+							onTabChange?.(child.props.label);
+						}}
 					>
 						{child.props.label}
 					</button>

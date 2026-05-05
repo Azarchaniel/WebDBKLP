@@ -119,7 +119,7 @@ router.get('/get-language-statistics', dashboard.getLanguageStatistics)
 router.get('/get-size-groups', dashboard.getSizesGroups)
 router.get('/get-read-by', dashboard.getReadBy)
 router.get('/get-oldest-books', dashboard.getOldestBooks)
-router.get('/get-newest-books', dashboard.getNewestBooks)
+router.get('/get-recently-updated-books', dashboard.getRecentlyUpdatedBooks)
 router.get('/get-biggest-books', dashboard.getBiggestBooks)
 
 // ### BOARD GAMES ###

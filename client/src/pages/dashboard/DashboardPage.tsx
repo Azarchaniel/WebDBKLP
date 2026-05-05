@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import '../../styles/DashboardPage.scss';
-import { checkBooksUpdated, countBooks, getDimensionsStatistics, getLanguageStatistics, getReadBy, getSizeGroups, getOldestBooks, getNewestBooks, getBiggestBooks } from "../../API";
+import { checkBooksUpdated, countBooks, getDimensionsStatistics, getLanguageStatistics, getReadBy, getSizeGroups, getOldestBooks, getRecentlyUpdatedBooks, getBiggestBooks } from "../../API";
 import { getDashboardCachedTimestamp, loadDashboardFromCache, saveDashboardToCache } from "@utils";
 import { DashboardPieChart } from "@components/dashboard/DashboardPieChart";
 import { DashboardTableStats } from "@components/dashboard/TableDimensionStats";
@@ -44,7 +44,7 @@ export default function DashboardPage() {
     const [langStats, setLangStats] = useState<ILanguageStatistics[]>();
     const [readBy, setReadBy] = useState<IUserReadingStats[]>();
     const [oldestBooks, setOldestBooks] = useState<any>();
-    const [newestBooks, setNewestBooks] = useState<any>();
+    const [recentlyUpdatedBooks, setRecentlyUpdatedBooks] = useState<any>();
     const [biggestBooks, setBiggestBooks] = useState<any>();
     const [isLoadingData, setIsLoadingData] = useState(true);
 
@@ -56,7 +56,7 @@ export default function DashboardPage() {
             setLangStats(undefined);
             setReadBy(undefined);
             setOldestBooks(undefined);
-            setNewestBooks(undefined);
+            setRecentlyUpdatedBooks(undefined);
             setBiggestBooks(undefined);
             setIsLoadingData(false);
             return;
@@ -79,21 +79,21 @@ export default function DashboardPage() {
                         setLangStats(cached.langStats);
                         setReadBy(cached.readBy);
                         setOldestBooks(cached.oldestBooks);
-                        setNewestBooks(cached.newestBooks);
+                        setRecentlyUpdatedBooks(cached.recentlyUpdatedBooks);
                         setBiggestBooks(cached.biggestBooks);
                         setIsLoadingData(false);
                         return;
                     }
                 }
 
-                const [countResult, dimResult, sizeResult, langResult, readByResult, oldestResult, newestResult, heightResult, widthResult, thicknessResult, weightResult, squareResult] = await Promise.all([
+                const [countResult, dimResult, sizeResult, langResult, readByResult, oldestResult, recentlyUpdatedResult, heightResult, widthResult, thicknessResult, weightResult, squareResult] = await Promise.all([
                     countBooks(),
                     getDimensionsStatistics(),
                     getSizeGroups(),
                     getLanguageStatistics(),
                     getReadBy(),
                     getOldestBooks(),
-                    getNewestBooks(),
+                    getRecentlyUpdatedBooks(),
                     getBiggestBooks("height"),
                     getBiggestBooks("width"),
                     getBiggestBooks("thickness"),
@@ -108,7 +108,7 @@ export default function DashboardPage() {
                     langStats: langResult.data,
                     readBy: readByResult.data,
                     oldestBooks: oldestResult.data,
-                    newestBooks: newestResult.data,
+                    recentlyUpdatedBooks: recentlyUpdatedResult.data,
                     biggestBooks: {
                         height: heightResult.data,
                         width: widthResult.data,
@@ -124,7 +124,7 @@ export default function DashboardPage() {
                 setLangStats(dashboardData.langStats);
                 setReadBy(dashboardData.readBy);
                 setOldestBooks(dashboardData.oldestBooks);
-                setNewestBooks(dashboardData.newestBooks);
+                setRecentlyUpdatedBooks(dashboardData.recentlyUpdatedBooks);
                 setBiggestBooks(dashboardData.biggestBooks);
 
                 saveDashboardToCache(dashboardData, currentUser._id);
@@ -171,7 +171,7 @@ export default function DashboardPage() {
                 </DashboardTitledCard>
             </div>
             <div className="dashboardItem">
-                <TableNewestBooks newestBooks={newestBooks} />
+                <TableNewestBooks recentBooks={recentlyUpdatedBooks} />
             </div>
             <div className="dashboardItem">
                 <TableOldestBooks oldestBooks={oldestBooks} />

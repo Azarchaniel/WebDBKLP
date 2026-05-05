@@ -694,12 +694,12 @@ export const getOldestBooks = async (): Promise<AxiosResponse> => {
     }
 }
 
-export const getNewestBooks = async (): Promise<AxiosResponse> => {
+export const getRecentlyUpdatedBooks = async (): Promise<AxiosResponse> => {
     try {
-        const newestBooks: AxiosResponse = await axiosInstance.get(
-            `${baseUrl}/get-newest-books`,
+        const recentlyUpdatedBooks: AxiosResponse = await axiosInstance.get(
+            `${baseUrl}/get-recently-updated-books`,
         )
-        return newestBooks;
+        return recentlyUpdatedBooks;
     } catch (error: any) {
         throw new Error(error)
     }

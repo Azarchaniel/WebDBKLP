@@ -496,21 +496,25 @@ textarea {
   font-size: 14px;
   color: var(--anchor);
   transition: background-color 0.2s ease, color 0.2s ease;
-}
 
-.tab-button:last-child {
-  border-right: none;
-}
+  &:first-child.active {
+    border-left: 1px solid var(--input-border);
+  }
 
-.tab-button:hover {
-  background-color: var(--input-bg);
-}
+  &:last-child {
+    border-right: none;
+  }
 
-.tab-button.active {
-  background-color: var(--background);
-  font-weight: bold;
-  color: var(--text);
-  cursor: default;
+  &:hover {
+    background-color: var(--input-bg);
+  }
+
+  &.active {
+    background-color: var(--background);
+    font-weight: bold;
+    color: var(--text);
+    cursor: default;
+  }
 }
 
 /* Tab content styles */

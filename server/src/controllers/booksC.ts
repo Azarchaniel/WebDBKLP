@@ -1115,13 +1115,13 @@ const dashboard = {
             res.status(500).json({ error: "Chyba pri získavaní najstarších kníh! " });
         }
     },
-    getNewestBooks: async (_: Request, res: Response): Promise<void> => {
+    getRecentlyUpdatedBooks: async (_: Request, res: Response): Promise<void> => {
         try {
             const books = await Book
-                .find({ deletedAt: undefined })
-                .sort({ createdAt: -1 })
-                .limit(10)
-                .select("title createdAt picture autor")
+                .find({})
+                .sort({ updatedAt: -1 })
+                .limit(30)
+                .select("title createdAt updatedAt deletedAt picture autor")
                 .populate({ path: "autor", select: "firstName lastName" })
                 .lean();
 
@@ -1131,6 +1131,8 @@ const dashboard = {
                     _id: book._id,
                     title: book.title,
                     createdAt: book.createdAt,
+                    updatedAt: book.updatedAt,
+                    deletedAt: book.deletedAt ?? null,
                     picture: book.picture ?? null,
                     author: authorDoc ? stringifyName(authorDoc) : ""
                 };
@@ -1138,8 +1140,8 @@ const dashboard = {
 
             res.status(200).json(formattedBooks);
         } catch (error) {
-            console.error("Error fetching newest books:", error);
-            res.status(500).json({ error: "Chyba pri získavaní najnovších kníh! " });
+            console.error("Error fetching recently updated books:", error);
+            res.status(500).json({ error: "Chyba pri získavaní naposledy upravených kníh!" });
         }
     },
     getBiggestBooks: async (req: Request, res: Response): Promise<void> => {
