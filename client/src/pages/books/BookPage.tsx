@@ -72,7 +72,7 @@ export default function BookPage() {
     const [saveBookSuccess, setSaveBookSuccess] = useState<boolean | undefined>(undefined);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
     const filterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const [controller, setController] = useState<AbortController | null>(null);
+    const controllerRef = useRef<AbortController | null>(null);
     const [selectedBooks, setSelectedBooks] = useState<string[]>([]);
 
     const popRef = useRef<HTMLDivElement>(null);
@@ -95,12 +95,11 @@ export default function BookPage() {
             setLoading(true);
 
             // Abort previous request
-            if (controller) {
-                controller.abort();
+            if (controllerRef.current) {
+                controllerRef.current.abort();
             }
             // Create new AbortController
-            const newController = new AbortController();
-            setController(newController);
+            controllerRef.current = new AbortController();
 
             // Check if data is up-to-date
             const { status } = await checkBooksUpdated(await getCachedTimestamp());
@@ -119,7 +118,7 @@ export default function BookPage() {
                 }
             }
 
-            getBooks({ ...pagination })
+            getBooks({ ...pagination, signal: controllerRef.current.signal })
                 .then(({ data: { books, count } }: IBook[] | any) => {
                     setCountAll(count);
                     const processedBooks = stringifyAutors(books);
@@ -130,11 +129,20 @@ export default function BookPage() {
                     if (checkIfFirstPage()) {
                         saveFirstPageToCache(books, count, pagination);
                     }
+                    setLoading(false);
                 })
-                .catch(() => {
-                    throw Error()
-                })
-                .finally(() => setLoading(false));
+                .catch((err: any) => {
+                    if (
+                        err?.name === 'AbortError' ||
+                        err?.name === 'CanceledError' ||
+                        err?.code === 'ERR_CANCELED' ||
+                        err?.message?.includes('AbortError') ||
+                        err?.message?.includes('canceled')
+                    ) return; // keep loading=true so the next request's result takes over
+                    toast.error(err.response?.data?.error || t("books.loadError"));
+                    console.error('Error fetching books:', err);
+                    setLoading(false);
+                });
         } catch (err: any) {
             toast.error(err.response?.data?.error);
             console.error('Error fetching books:', err);
@@ -182,7 +190,7 @@ export default function BookPage() {
                     action: !isNewBook ? t("books.actionSaved") : t("books.actionAdded")
                 });
             }
-            toast.success(message);
+            toast.success(message, { autoClose: 3000 });
             setSaveBookSuccess(true);
             fetchBooks();
             return { success: true, message };
@@ -284,7 +292,7 @@ export default function BookPage() {
                                 successCount > 1
                                     ? t("books.deleteSuccessMany", { count: successCount })
                                     : t("books.deleteSuccessSingle", { title: books[0].title })
-                            );
+                                , { autoClose: 3000 });
                             fetchBooks();
                         })
                         .catch((err) => {
@@ -365,6 +373,7 @@ export default function BookPage() {
                             <InputField
                                 placeholder={t("books.searchPlaceholder")}
                                 className="searchInput"
+                                innerClass="searchInputInner"
                                 value={pagination.search}
                                 onChange={(e) =>
                                     setPagination((prevState) => ({

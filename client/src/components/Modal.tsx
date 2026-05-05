@@ -20,6 +20,8 @@ interface ModalProps {
     modalIndex?: number;
 }
 
+let openBackdropCount = 0;
+
 export const Modal: React.FC<ModalProps> = ({
     customKey,
     title,
@@ -217,6 +219,21 @@ export const Modal: React.FC<ModalProps> = ({
             setInitialized(true);
         }
     }, [hasExplicitPosition, initialized]);
+
+    // Lock body scroll when backdrop is visible (not minimized)
+    useEffect(() => {
+        if (!minimized) {
+            openBackdropCount++;
+            document.body.style.overflow = 'hidden';
+            return () => {
+                openBackdropCount--;
+                if (openBackdropCount <= 0) {
+                    openBackdropCount = 0;
+                    document.body.style.overflow = '';
+                }
+            };
+        }
+    }, [minimized]);
 
     // Handle minimizing/maximizing the modal
     const toggleMinimize = useCallback(() => {

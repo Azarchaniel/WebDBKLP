@@ -9,7 +9,7 @@ $delay : $duration*0.16;
   background: radial-gradient($accent $dot, transparent 0) 0 -2.5px;
 }
 
-@media screen and (max-width: $mobile-width) {
+@media (max-width: $mobile-width) {
   .bookshelf_wrapper {
     right: 52.5% !important;
   }

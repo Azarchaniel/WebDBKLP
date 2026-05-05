@@ -92,7 +92,7 @@
   gap: 5px;
 }
 
-@media screen and (width <=variables.$mobile-width) {
+@media (width <=variables.$mobile-width) {
   .boardGameDetail {
     flex-direction: column;
 

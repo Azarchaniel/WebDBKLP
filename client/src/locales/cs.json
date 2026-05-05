@@ -59,7 +59,11 @@
         "warningLps_few": "a {{count}} LP",
         "warningLps_many": "a {{count}} LP",
         "warningLps_one": "a {{count}} LP",
-        "warningLps_other": "a {{count}} LP"
+        "warningLps_other": "a {{count}} LP",
+        "warningLpsOnly_few": "Tento autor má u sebe přiřazené {{count}} LP",
+        "warningLpsOnly_many": "Tento autor má u sebe přiřazených {{count}} LP",
+        "warningLpsOnly_one": "Tento autor má u sebe přiřazené {{count}} LP",
+        "warningLpsOnly_other": "Tento autor má u sebe přiřazených {{count}} LP"
     },
     "barcode": {
         "notFound": "Nebyl nalezen žádný čárový kód!",
@@ -104,8 +108,10 @@
         "authors_few": "Autoři",
         "authors_one": "Autor",
         "authors_other": "Autoři",
+        "content": "Obsah",
         "coverAlt": "obal",
         "dimensions": "Rozměry",
+        "edition": "Edice",
         "editors_few": "Editoři",
         "editors_one": "Editor",
         "editors_other": "Editoři",
@@ -121,6 +127,7 @@
         "pages": "Počet stran",
         "publisher": "Vydavatel",
         "readBy": "Přečteno",
+        "serie": "Série",
         "thickness": "Tloušťka",
         "translators_few": "Překladatelé",
         "translators_one": "Překladatel",
@@ -160,7 +167,8 @@
         "scanIsbn": "Naskenuj ISBN",
         "searchByISBN": "Hledat podle ISBN",
         "searchPlaceholder": "Vyhledej knihu",
-        "showHideColumns": "Zobraz/skryj sloupce"
+        "showHideColumns": "Zobraz/skryj sloupce",
+        "loadError": "Chyba při načítání knih!"
     },
     "common": {
         "add": "Přidat",
@@ -221,6 +229,12 @@
         "width": "Šířka",
         "oldestBooks": "Nejstarší knihy",
         "newestBooks": "Posledně přidané knihy",
+        "recentlyAddedBooks": "Posledně přidané knihy",
+        "recentlyUpdatedBooks": "Posledně upravené knihy",
+        "tabAdded": "Přidané",
+        "tabUpdated": "Upravené",
+        "tabDeleted": "Smazáné",
+        "recentlyDeletedBooks": "Posledně smazané knihy",
         "biggestBooks": "Největší knihy",
         "languageStats": "Jazykové statistiky",
         "readBy": "Přečteno",
@@ -382,8 +396,10 @@
             "players": "Počet hráčů",
             "playTime": "Čas hraní (min)",
             "published": "Vydáno",
+            "publisher": "Vydavatel",
             "title": "Název",
-            "updatedAt": "Datum úpravy"
+            "updatedAt": "Datum úpravy",
+            "year": "Rok"
         },
         "books": {
             "author": "Autor",
@@ -427,10 +443,12 @@
             "createdAt": "Datum přidání",
             "language": "Jazyk",
             "published": "Vydáno",
+            "publisher": "Vydavatel",
             "speed": "Rychlost",
             "subtitle": "Podnázev",
             "title": "Název",
-            "updatedAt": "Datum úpravy"
+            "updatedAt": "Datum úpravy",
+            "year": "Rok"
         },
         "selection": {
             "none": "Nevybráno",

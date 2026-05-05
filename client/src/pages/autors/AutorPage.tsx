@@ -107,7 +107,7 @@ export default function AutorPage() {
                         action: !isNewAutor ? t("autors.actionSaved") : t("autors.actionAdded")
                     });
                 }
-                toast.success(message);
+                toast.success(message, { autoClose: 3000 });
                 setSaveAutorSuccess(true)
                 fetchAutors();
                 return { success: true, message };
@@ -200,7 +200,7 @@ export default function AutorPage() {
                 }
 
                 if (lps.length > 0) {
-                    warningText += " " + t("autors.warningLps", { count: lps.length });
+                    warningText += (books.length > 0 ? " " : "") + t(books.length > 0 ? "autors.warningLps" : "autors.warningLpsOnly", { count: lps.length });
                 }
 
                 if (books.length > 0 || lps.length > 0) warningText += "!";
@@ -214,7 +214,7 @@ export default function AutorPage() {
                                 if (status !== 200) {
                                     throw new Error("Error! Autor not deleted")
                                 }
-                                toast.success(t("autors.deleteSuccessSingle", { name: autorToDelete?.fullName }));
+                                toast.success(t("autors.deleteSuccessSingle", { name: autorToDelete?.fullName }), { autoClose: 3000 });
                                 fetchAutors();
                             })
                             .catch((err) => {
@@ -242,7 +242,7 @@ export default function AutorPage() {
                     onOk: async () => {
                         try {
                             await Promise.all(idsToDelete.map(id => deleteAutor(id)));
-                            toast.success(t("autors.deleteSuccessMany"));
+                            toast.success(t("autors.deleteSuccessMany"), { autoClose: 3000 });
                             fetchAutors();
                         } catch (err) {
                             toast.error(t("autors.deleteErrorMany"));

@@ -1,6 +1,7 @@
-import express, { Express } from "express"
+import express, { Express, Request, Response, NextFunction } from "express"
 import mongoose from "mongoose"
 import cors from "cors"
+import cookieParser from "cookie-parser"
 import routes from "./routes"
 import path from "path";
 
@@ -16,8 +17,14 @@ const allowedOrigins = ["http://localhost:3000", "https://webdbklp.onrender.com"
 app.use(
     cors({
         origin: function (origin, callback) {
-            // Check if the incoming origin is in the whitelist (allow listed origins)
-            if (!origin || allowedOrigins.includes(origin)) {
+            // Block requests with no origin in production (e.g. curl, server-to-server)
+            if (!origin) {
+                if (process.env.NODE_ENV !== 'production') {
+                    return callback(null, true);
+                }
+                return callback(new Error('CORS: missing origin'));
+            }
+            if (allowedOrigins.includes(origin)) {
                 callback(null, true);
             } else {
                 callback(new Error(`CORS not allowed for origin: ${origin}`));
@@ -28,14 +35,21 @@ app.use(
 );
 
 
-app.use(express.json({ limit: "20mb" }));
-app.use(express.urlencoded({ limit: "20mb", extended: true }));
+app.use(cookieParser());
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ limit: "2mb", extended: true }));
 app.use(routes)
 
 app.use(express.static(path.join(__dirname, "client/build")));
 
 app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "client/build", "index.html"));
+});
+
+// Global error handler — catches unhandled errors from async route handlers
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    console.error(err);
+    res.status(500).json({ error: "Internal server error" });
 });
 
 const uri: string = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.og6qo.mongodb.net/${databaseName}?retryWrites=true&w=majority`

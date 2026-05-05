@@ -8,6 +8,7 @@ const userSchema: Schema = new Schema({
     hashedPassword: { type: String },
     deletedAt: { type: Date, default: null, required: false },
     role: { type: String, enum: ['user', 'guest'], default: 'user', required: false },
+    refreshTokens: { type: [String], default: [] },
 }, { timestamps: true });
 
 export default model<IUser>('User', userSchema);

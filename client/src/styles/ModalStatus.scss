@@ -1,6 +1,6 @@
 @import "variables";
 
-@media screen and (width <=$mobile-width) {
+@media (width <=$mobile-width) {
     .modal-buttons-wrapper {
         flex-direction: column;
         align-items: stretch;

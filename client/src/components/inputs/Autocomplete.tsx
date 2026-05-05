@@ -83,6 +83,7 @@ export const LazyLoadMultiselect = React.memo(({
     const [dropdownPosition, setDropdownPosition] = useState<'top' | 'bottom'>('bottom');
     const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
     const [isInputFocused, setIsInputFocused] = useState(false); // Track input focus
+    const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
 
     // Helper function to get display text for an option (string or object)
     const getDisplayText = useCallback((option: OptionValue): string => {
@@ -201,6 +202,7 @@ export const LazyLoadMultiselect = React.memo(({
         setSearchQuery('');
         setFilteredOptions([]);
         setCurrentPage(1);
+        setHighlightedIndex(-1);
         setIsOpen(false);
         if (inputRef.current) inputRef.current.focus();
     }, [selectedValues, onChange, name, selectionLimit, areOptionsEqual, disabled]);
@@ -254,16 +256,28 @@ export const LazyLoadMultiselect = React.memo(({
     const handleKeyDown = (e: KeyboardEvent) => {
         if (disabled) return;
         if (e.key === 'Backspace' && inputValue === '' && selectedValues.length > 0) {
-            // Remove last chip when backspace is pressed on empty input
             handleRemove(selectedValues[selectedValues.length - 1]);
         } else if (e.key === 'Escape') {
             setIsOpen(false);
-        } else if (e.key === 'Enter') {
-            // On Enter: select first option if available, otherwise create new when allowed
+            setHighlightedIndex(-1);
+        } else if (e.key === 'ArrowDown') {
             e.preventDefault();
-            if (filteredOptionsToDisplay.length > 0) {
-                handleSelect(filteredOptionsToDisplay[0]);
-            } else if (onNew && inputValue.trim().length > 0) {
+            if (!isOpen) {
+                setIsOpen(true);
+            }
+            setHighlightedIndex(prev =>
+                prev < filteredOptionsToDisplay.length - 1 ? prev + 1 : prev
+            );
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setHighlightedIndex(prev => (prev > 0 ? prev - 1 : 0));
+        } else if (e.key === 'Enter') {
+            const idx = highlightedIndex >= 0 ? highlightedIndex : 0;
+            if (filteredOptionsToDisplay.length > 0 && isOpen) {
+                e.preventDefault();
+                handleSelect(filteredOptionsToDisplay[idx]);
+            } else if (onNew && inputValue.trim().length > 0 && isOpen) {
+                e.preventDefault();
                 handleCreateNew();
             }
         }
@@ -282,6 +296,18 @@ export const LazyLoadMultiselect = React.memo(({
         );
     }, [filteredOptions, selectedValues, areOptionsEqual]);
 
+    // Reset highlight when options list changes
+    useEffect(() => {
+        setHighlightedIndex(-1);
+    }, [filteredOptionsToDisplay.length]);
+
+    // Scroll highlighted item into view on keyboard navigation
+    useEffect(() => {
+        if (highlightedIndex < 0 || !menuRef.current) return;
+        const item = menuRef.current.querySelector(`[id$="-option-${highlightedIndex}"]`) as HTMLElement | null;
+        item?.scrollIntoView({ block: 'nearest' });
+    }, [highlightedIndex]);
+
     const handleInputClick = useCallback(() => {
         if (disabled) return;
         setIsOpen(true);
@@ -291,6 +317,7 @@ export const LazyLoadMultiselect = React.memo(({
                 setFilteredOptions(getFilteredClientOptions(""));
                 setLoadingStatus("noMore");
             } else {
+                setLoadingStatus("loading");
                 debouncedSearch("", 1);
             }
         }
@@ -312,20 +339,21 @@ export const LazyLoadMultiselect = React.memo(({
         if (wrapperRef.current) {
             const rect = wrapperRef.current.getBoundingClientRect();
             const windowHeight = window.innerHeight;
+            const menuHeight = menuRef.current?.offsetHeight || 240;
             const spaceBelow = windowHeight - rect.bottom;
             const spaceAbove = rect.top;
             const newStyle: React.CSSProperties = {
-                position: 'absolute',
+                position: 'fixed',
                 width: rect.width,
                 left: rect.left,
                 zIndex: 9999,
             };
-            if (spaceBelow < 200 && spaceAbove > 200) { // 200px is approx menu height
+            if (spaceBelow < menuHeight && spaceAbove > menuHeight) {
                 setDropdownPosition('top');
-                newStyle.top = rect.top - 200; // show above
+                newStyle.top = rect.top - menuHeight;
             } else {
                 setDropdownPosition('bottom');
-                newStyle.top = rect.bottom; // show below
+                newStyle.top = rect.bottom;
             }
             setDropdownStyle(newStyle);
         }
@@ -349,10 +377,18 @@ export const LazyLoadMultiselect = React.memo(({
 
     useEffect(() => {
         if (isOpen && menuRef.current) {
-            menuRef.current.addEventListener('scroll', handleScroll as any);
-            return () => menuRef?.current?.removeEventListener('scroll', handleScroll as any);
+            const el = menuRef.current;
+            el.addEventListener('scroll', handleScroll as any);
+            return () => el.removeEventListener('scroll', handleScroll as any);
         }
     }, [isOpen, handleScroll]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleWindowScroll = () => adjustDropdownPosition();
+        window.addEventListener('scroll', handleWindowScroll, true);
+        return () => window.removeEventListener('scroll', handleWindowScroll, true);
+    }, [isOpen, adjustDropdownPosition]);
 
     return (
         <div style={{ position: "relative" }}>
@@ -382,14 +418,16 @@ export const LazyLoadMultiselect = React.memo(({
                                 <span>
                                     {getDisplayText(item)}
                                 </span>
-                                <span className="chip-remove">
-                                    ×
-                                </span>
+                                {!disabled && <span className="chip-remove">×</span>}
                             </div>
                         ))}
                         <input
                             ref={inputRef}
                             type="text"
+                            role="combobox"
+                            aria-expanded={isOpen}
+                            aria-autocomplete="list"
+                            aria-activedescendant={highlightedIndex >= 0 ? `${id ?? name}-option-${highlightedIndex}` : undefined}
                             value={inputValue}
                             onChange={handleInputChange}
                             onKeyDown={handleKeyDown}
@@ -412,6 +450,8 @@ export const LazyLoadMultiselect = React.memo(({
                     createPortal(
                         <div
                             ref={menuRef}
+                            role="listbox"
+                            aria-multiselectable="true"
                             className={`autocomplete-menu ${dropdownPosition === 'top' ? 'top' : ''}`}
                             style={{
                                 ...dropdownStyle,
@@ -419,8 +459,12 @@ export const LazyLoadMultiselect = React.memo(({
                                 minWidth: dropdownStyle.width,
                             }}
                         >
+                            {/* loading */}
+                            {loadingStatus === "loading" && filteredOptionsToDisplay.length === 0 && (
+                                <div className="autocomplete-item loading">{t("loading.patience")}</div>
+                            )}
                             {/* no data */}
-                            {filteredOptionsToDisplay.length === 0 && (
+                            {filteredOptionsToDisplay.length === 0 && loadingStatus !== "loading" && (
                                 <div className="autocomplete-item empty">
                                     {resolvedEmptyRecordMsg}
                                 </div>
@@ -431,8 +475,12 @@ export const LazyLoadMultiselect = React.memo(({
                                     {filteredOptionsToDisplay.map((option, index) => (
                                         <div
                                             key={index}
-                                            className={`autocomplete-item ${selectionLimit && selectedValues?.length >= selectionLimit ? 'disabled' : ''}`}
+                                            id={`${id ?? name}-option-${index}`}
+                                            role="option"
+                                            aria-selected={highlightedIndex === index}
+                                            className={`autocomplete-item${highlightedIndex === index ? ' highlighted' : ''}${selectionLimit && selectedValues?.length >= selectionLimit ? ' disabled' : ''}`}
                                             onMouseDown={disabled ? undefined : (e) => { e.preventDefault(); handleSelect(option); }}
+                                            onMouseEnter={() => setHighlightedIndex(index)}
                                         >
                                             {getDisplayText(option)}
                                         </div>
@@ -446,7 +494,7 @@ export const LazyLoadMultiselect = React.memo(({
                             {searchQuery.length > 0 && onNew && (
                                 <div className="autocomplete-item create-new" onClick={handleCreateNew}
                                     data-tooltip-id="global-tooltip"
-                                    data-tooltip-content={t("inputs.selectOrType")}>
+                                    data-tooltip-content={t("inputs.addRecord")}>
                                     {t("common.add")} "{searchQuery}"
                                 </div>
                             )}

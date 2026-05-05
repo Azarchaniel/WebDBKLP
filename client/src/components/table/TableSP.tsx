@@ -171,7 +171,7 @@ const ServerPaginationTable: FC<PropsMT> =
             return () => {
                 mounted = false;
             };
-        }, [filtering]);
+        }, []);
 
         const getInputForColumn = (columnName: string) => {
             const locale = t("common.locale");
@@ -281,7 +281,7 @@ const ServerPaginationTable: FC<PropsMT> =
                             <option value="N">{t("common.no")}</option>
                         </select>
                     );
-                case "number":
+                case "number": {
                     const numFilter = (filtering as any[]).find((f) => f.id === columnName);
                     const numValue = numFilter?.value || '';
                     const numOperator = numFilter?.operator || '=';
@@ -362,7 +362,8 @@ const ServerPaginationTable: FC<PropsMT> =
                             />
                         </div>
                     );
-                case "date":
+                }
+                case "date": {
                     const dateFilter = (filtering as any[]).find((f) => f.id === columnName);
                     const dateValue = dateFilter?.value || '';
                     const dateOperator = dateFilter?.operator || '=';
@@ -443,6 +444,7 @@ const ServerPaginationTable: FC<PropsMT> =
                             />
                         </div>
                     );
+                }
                 default:
                     return null;
             }
@@ -483,7 +485,7 @@ const ServerPaginationTable: FC<PropsMT> =
         return (
             <div className="p-4">
                 <div className="headerTitleAction">
-                    <h4 className="ml-4 mb-3" style={{ color: "black" }}>{title}</h4>
+                    <h4 className="ml-4 mb-3">{title}</h4>
                     <div>
                         {actions}
                         {filteringChange &&

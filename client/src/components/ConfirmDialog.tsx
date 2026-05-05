@@ -1,7 +1,8 @@
 import React, { FC, useCallback } from "react";
 import { Modal } from "./Modal";
 import { createRoot } from "react-dom/client";
-import { useTranslation } from "react-i18next";
+import { useTranslation, I18nextProvider } from "react-i18next";
+import i18n from "../i18n";
 
 interface ConfirmDialogProps {
 	text: string;
@@ -65,6 +66,8 @@ const ConfirmDialog: FC<ConfirmDialogProps> = React.memo(({
 const DialogManager = (() => {
 	let rootElement: HTMLDivElement | null = null;
 	let rootInstance: ReturnType<typeof createRoot> | null = null;
+	let isShowing = false;
+	let queue: ConfirmDialogProps[] = [];
 
 	const getRoot = () => {
 		if (!rootElement) {
@@ -76,14 +79,19 @@ const DialogManager = (() => {
 		return rootInstance;
 	};
 
-	return {
-		show: (props: ConfirmDialogProps) => {
-			const root = getRoot();
-			const handleClose = () => {
-				root?.render(null);
-			};
+	const showNext = () => {
+		if (queue.length === 0) {
+			isShowing = false;
+			getRoot()?.render(null);
+			return;
+		}
+		isShowing = true;
+		const props = queue.shift()!;
+		const root = getRoot();
+		const handleClose = () => showNext();
 
-			root?.render(
+		root?.render(
+			<I18nextProvider i18n={i18n}>
 				<ConfirmDialog
 					{...props}
 					onOk={() => {
@@ -95,7 +103,14 @@ const DialogManager = (() => {
 						handleClose();
 					}}
 				/>
-			);
+			</I18nextProvider>
+		);
+	};
+
+	return {
+		show: (props: ConfirmDialogProps) => {
+			queue.push(props);
+			if (!isShowing) showNext();
 		}
 	};
 })();

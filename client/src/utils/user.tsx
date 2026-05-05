@@ -1,56 +1,34 @@
-import { jwtDecode } from "jwt-decode";
 import { login, loginGuest, logout as apiLogout } from "../API";
 import { clearCache } from "./indexDb";
 
 let lastLogTime = 0;
 
 export const isUserLoggedIn = () => {
-    const token = localStorage.getItem('token');
+    const tokenExpiresAt = localStorage.getItem('tokenExpiresAt');
     const user = localStorage.getItem('user');
 
-    if (!token || !user) {
+    if (!tokenExpiresAt || !user) {
         const now = Date.now();
-        if (now - lastLogTime > 10000) { // Check if 10 seconds have passed since the last log
-            console.error('No token or user found. Please login to continue.');
-            lastLogTime = now; // Update the last log time
+        if (now - lastLogTime > 10000) {
+            console.error('No session found. Please login to continue.');
+            lastLogTime = now;
         }
 
         // Clear any incomplete auth state
-        if (!token && user) {
-            localStorage.removeItem('user');
-        }
+        if (!tokenExpiresAt && user) localStorage.removeItem('user');
+        if (tokenExpiresAt && !user) localStorage.removeItem('tokenExpiresAt');
 
-        if (token && !user) {
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-        }
-
-        return false; // No token or user, not logged in
+        return false;
     }
 
-    try {
-        const decoded = jwtDecode<{ exp?: number }>(token);
-        const now = Math.floor(Date.now() / 1000);
-
-        // Check if token is expired
-        if (decoded.exp && now > decoded.exp) {
-            // Token expired, clear all auth data
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('user');
-            return false;
-        }
-
-        // Token exists and is valid
-        return true;
-    } catch (error) {
-        console.error("Error decoding token:", error);
-        // Invalid token, clear auth data
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
+    const now = Math.floor(Date.now() / 1000);
+    if (parseInt(tokenExpiresAt, 10) < now) {
+        localStorage.removeItem('tokenExpiresAt');
         localStorage.removeItem('user');
         return false;
     }
+
+    return true;
 };
 
 export const loginUser = async (loginForm: {
@@ -58,15 +36,13 @@ export const loginUser = async (loginForm: {
     password: string
 }) => {
     try {
-        const res = await login(loginForm); // Make the API call (assumes `login` is defined elsewhere)
+        const res = await login(loginForm);
 
         if (res.status === 200) {
             // @ts-ignore
-            const { token, refreshToken, user } = res.data;
+            const { user, tokenExpiresAt } = res.data;
 
-            // Save token to localStorage or sessionStorage
-            localStorage.setItem('token', token);
-            localStorage.setItem('refreshToken', refreshToken);
+            localStorage.setItem('tokenExpiresAt', tokenExpiresAt.toString());
             localStorage.setItem('user', JSON.stringify(user));
             return user;
         } else {
@@ -83,8 +59,8 @@ export const loginGuestUser = async () => {
 
         if (res.status === 200) {
             // @ts-ignore
-            const { token, user } = res.data;
-            localStorage.setItem('token', token);
+            const { user, tokenExpiresAt } = res.data;
+            localStorage.setItem('tokenExpiresAt', tokenExpiresAt.toString());
             localStorage.setItem('user', JSON.stringify(user));
             return user;
         } else {
@@ -96,23 +72,15 @@ export const loginGuestUser = async () => {
 }
 
 export const logoutUser = async () => {
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (refreshToken) {
-        try {
-            await apiLogout(refreshToken);
-        } catch (e) {
-            console.warn("Error during API logout:", e);
-            // Ignore errors, proceed with local cleanup
-        }
+    try {
+        await apiLogout();
+    } catch (e) {
+        console.warn("Error during API logout:", e);
+        // Ignore errors, proceed with local cleanup
     }
 
-    // Explicitly remove authentication items
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('tokenExpiresAt');
     localStorage.removeItem('user');
-
-    // Clean other data if needed
-    localStorage.clear();
 
     // Clear cached data
     await clearCache(); //clear IndexDB - cached Books data

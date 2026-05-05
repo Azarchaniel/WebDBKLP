@@ -11,8 +11,15 @@
   max-height: 80px;
   background: var(--input-bg);
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   overflow-y: auto;
+
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0; // allow flex children to shrink
+  }
 
   &:focus-within {
     border: 2px solid var(--anchor) !important;
@@ -36,7 +43,8 @@
     flex-wrap: wrap;
     align-items: center;
     padding: 0;
-    width: 100%;
+    flex: 1 1 0;
+    min-width: 0; // allow it to shrink so chevron is never pushed out
     position: relative;
   }
 
@@ -44,6 +52,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0; // never shrink — always visible
     padding: 0 8px;
     cursor: pointer;
   }
@@ -152,6 +161,10 @@
     text-align: center;
   }
 
+  &.highlighted {
+    background-color: color-mix(in srgb, var(--anchor) 18%, transparent);
+  }
+
   &.disabled {
     cursor: not-allowed !important;
     opacity: 0.5;
@@ -162,21 +175,27 @@
   position: absolute;
   top: 20%;
   left: 1rem;
+  right: 2.5rem; // leave room for the chevron; acts as the overflow boundary
   z-index: 10;
   font-size: 1rem;
   margin-bottom: 0.5rem;
   color: gray;
   pointer-events: none;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &.active {
     top: -0.1rem;
     left: 0.5rem;
+    right: auto; // raised label is 11 px — no need to constrain; lets it grow naturally
     line-height: 0;
     font-size: 11px;
     opacity: 1;
     background: var(--surface);
     padding: 0.2rem;
+    overflow: visible;
   }
 
   &.disabled {

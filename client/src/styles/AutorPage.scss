@@ -136,7 +136,7 @@ form {
   cursor: pointer;
 }
 
-@media screen and (width <=$mobile-width) {
+@media (width <=$mobile-width) {
   .autorDetail {
     flex-direction: column;
 

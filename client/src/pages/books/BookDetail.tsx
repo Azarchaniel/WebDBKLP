@@ -160,6 +160,30 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
         return <tr><td><b>{label}: </b></td><td>{value}</td></tr>;
     }
 
+    const renderEdition = (): string | undefined => {
+        const { title, no } = data.edition ?? {};
+        if (!title && !no) return;
+        const parts = [title, no ? `#${no}` : undefined].filter(Boolean);
+        return `${t("bookDetail.edition")}: ${parts.join(" ")}`;
+    };
+
+    const renderSerie = (): string | undefined => {
+        const { title, no } = data.serie ?? {};
+        if (!title && !no) return;
+        const parts = [title, no ? `#${no}` : undefined].filter(Boolean);
+        return `${t("bookDetail.serie")}: ${parts.join(" ")}`;
+    };
+
+    const renderContent = (): React.ReactNode => {
+        if (!data.content || data.content.length === 0) return null;
+        return (
+            <tr>
+                <td><b>{t("bookDetail.content")}: </b></td>
+                <td>{(data.content as string[]).join(", ")}</td>
+            </tr>
+        );
+    };
+
     // Main render
     return (
         <div className="bookDetailRow">
@@ -175,19 +199,21 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
                 <table>
                     <tbody>
                         {renderContributorLinks("autor", "bookDetail.authors")}
+                        {renderTableRow(`ISBN: ${data.ISBN}`)}
+                        {renderContributorLinks("translator", "bookDetail.translators")}
                         {renderContributorLinks("editor", "bookDetail.editors")}
                         {renderContributorLinks("ilustrator", "bookDetail.illustrators")}
-                        {renderContributorLinks("translator", "bookDetail.translators")}
-                        {renderTableRow(renderLanguage())}
-                        {renderTableRow(`ISBN: ${data.ISBN}`)}
-                        {data.numberOfPages && renderTableRow(`${t("bookDetail.pages")}: ${formatNumberLocale(data.numberOfPages, t('common.locale'), 0)}`)}
+                        {renderTableRow(renderEdition())}
+                        {renderTableRow(renderSerie())}
                         {renderTableRow(renderPublisherInfo())}
                         {renderTableRow(renderLocation())}
-                        {renderTableRow(renderPeopleList(data.owner, t("bookDetail.owner")))}
-                        {renderTableRow(renderPeopleList(data.readBy, t("bookDetail.readBy")))}
+                        {renderTableRow(renderLanguage())}
                         {renderDimensions()}
+                        {data.numberOfPages && renderTableRow(`${t("bookDetail.pages")}: ${formatNumberLocale(data.numberOfPages, t('common.locale'), 0)}`)}
+                        {renderContent()}
                         {data.note && renderTableRow(`${t("bookDetail.note")}: ${data.note}`)}
-
+                        {renderTableRow(renderPeopleList(data.readBy, t("bookDetail.readBy")))}
+                        {renderTableRow(renderPeopleList(data.owner, t("bookDetail.owner")))}
                         {renderTableRow(`Ex Libris: ${data.exLibris ? "✔" : "✘"}`)}
                     </tbody>
                 </table>

@@ -72,9 +72,19 @@ export const buildPaginationPipeline = (page: number, pageSize: number, sortOpti
 export const buildSearchQuery = (search: string, searchFields: string[]): Record<string, any> => {
     if (!search) return {};
 
+    // Normalize: remove diacritics and strip non-alphanumeric chars — must match normalizeFieldValue
+    // in utils.ts which also removes (not replaces) these chars when storing normalizedSearchField.
+    // Use \s+ in the regex to handle any whitespace left behind after stripping.
+    const normalized = diacritics.remove(search)
+        .replace(/[^a-zA-Z0-9\s]/g, '')
+        .trim()
+        .replace(/\s+/g, '\\s+');
+
+    if (!normalized) return {};
+
     const conditions: Record<string, any>[] = searchFields.map(field => ({
         [`normalizedSearchField.${field}`]: {
-            $regex: diacritics.remove(search ?? "")?.replace(/-/g, ""),
+            $regex: normalized,
             $options: "i"
         }
     }));
@@ -196,7 +206,7 @@ export const fetchDataWithPagination = async (
     lookupStages: PipelineStage[] = [],
     additionalQuery: Record<string, any> = {},
 ): Promise<{ data: any[], count: number, latestUpdate?: Date | undefined }> => {
-    const { page = "1", pageSize = "10_000", search = "", sorting, dataFrom, searchFields = [], filters = [] } = options;
+    const { page = "1", pageSize = "100", search = "", sorting, dataFrom, searchFields = [], filters = [] } = options;
 
     const latestUpdate: {
         updatedAt: Date | undefined

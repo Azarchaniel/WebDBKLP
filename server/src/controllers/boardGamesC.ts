@@ -1,12 +1,12 @@
 import BoardGame from "../models/boardGame";
-import {Response, Request} from 'express';
-import {fetchDataWithPagination} from "../utils/queryUtils";
-import {createLookupStage, getIdFromArray} from "../utils/utils";
-import {IBoardGame} from "../types";
+import { Response, Request } from 'express';
+import { fetchDataWithPagination } from "../utils/queryUtils";
+import { createLookupStage, getIdFromArray } from "../utils/utils";
+import { IBoardGame } from "../types";
 
 const getAllBoardGames = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {page = "1", pageSize = "10_000", search = "", sorting, dataFrom} = req.query;
+        const { page = "1", pageSize = "100", search = "", sorting, dataFrom } = req.query;
 
         const searchFields = ["title", "autor", "published.publisher"];
         const parsedPage = parseInt(page as string, 10);
@@ -18,11 +18,11 @@ const getAllBoardGames = async (req: Request, res: Response): Promise<void> => {
             createLookupStage("boardgames", "children", "children")
         ];
 
-        const {data, count, latestUpdate} = await fetchDataWithPagination(
+        const { data, count, latestUpdate } = await fetchDataWithPagination(
             BoardGame,
             {
                 page: isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage,
-                pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 10_000 : parsedPageSize,
+                pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 100 : parsedPageSize,
                 search: search as string,
                 sorting: sorting as string,
                 dataFrom: dataFrom as string,
@@ -31,29 +31,29 @@ const getAllBoardGames = async (req: Request, res: Response): Promise<void> => {
             lookupStages
         );
 
-        res.status(200).json({boardGames: data, count: count, latestUpdate: latestUpdate})
+        res.status(200).json({ boardGames: data, count: count, latestUpdate: latestUpdate })
     } catch (error) {
         console.error("Error fetching board games:", error);
-        res.status(500).json({error: "Internal server error"});
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
 const getBoardGame = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const boardGame =
             await BoardGame.findById(id)
                 .populate('autor')
                 .populate("boardgames", "parent", "parent")
                 .populate("boardgames", "children", "children");
         if (!boardGame) {
-            res.status(404).json({error: "Board game not found"})
+            res.status(404).json({ error: "Board game not found" })
             return
         }
         res.status(200).json(boardGame)
     } catch (error) {
         console.error("Error fetching board game:", error);
-        res.status(500).json({error: "Internal server error"});
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
@@ -84,7 +84,7 @@ const addBoardGame = async (req: Request, res: Response): Promise<void> => {
             noPlayers,
             playTime,
             ageRecommendation,
-            published: {...published, country: countryPublished},
+            published: { ...published, country: countryPublished },
             note,
             autor: getIdFromArray(autor),
             parent: parent?.map((p: IBoardGame) => p._id),
@@ -97,13 +97,13 @@ const addBoardGame = async (req: Request, res: Response): Promise<void> => {
         res.status(201).json(newBoardGame)
     } catch (error) {
         console.error("Error creating board game:", error);
-        res.status(500).json({error: "Internal server error"});
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
 const updateBoardGame = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const {
             title,
             description,
@@ -129,50 +129,50 @@ const updateBoardGame = async (req: Request, res: Response): Promise<void> => {
             noPlayers,
             playTime,
             ageRecommendation,
-            published: {...published, country: countryPublished},
+            published: { ...published, country: countryPublished },
             autor: getIdFromArray(autor),
             parent: parent?.map((p: IBoardGame) => p._id),
             children: children?.map((c: IBoardGame) => c._id),
             note: note
-        }, {new: true})
+        }, { new: true })
         if (!updatedBoardGame) {
-            res.status(404).json({error: "Board game not found"})
+            res.status(404).json({ error: "Board game not found" })
             return
         }
         res.status(201).json(updatedBoardGame)
     } catch (error) {
         console.error("Error updating board game:", error);
-        res.status(500).json({error: "Internal server error"});
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
 const countBGchildren = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {id} = req.params
+        const { id } = req.params
         const boardGame = await BoardGame.findById(id).lean();
         if (!boardGame) {
-            res.status(404).json({error: "Žiadna spoločenská hra s týmto ID neexistuje"});
+            res.status(404).json({ error: "Žiadna spoločenská hra s týmto ID neexistuje" });
         }
-        res.status(200).json({count: (boardGame as IBoardGame)?.children?.length})
+        res.status(200).json({ count: (boardGame as IBoardGame)?.children?.length })
     } catch (error) {
         console.error("Error counting children:", error);
-        res.status(500).json({error: "Internal server error"});
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
 const deleteBoardGame = async (req: Request, res: Response): Promise<void> => {
     try {
-        const {id} = req.params
-        const deletedBoardGame = await BoardGame.findOneAndUpdate({_id: id}, {deletedAt: new Date()})
+        const { id } = req.params
+        const deletedBoardGame = await BoardGame.findOneAndUpdate({ _id: id }, { deletedAt: new Date() })
         if (!deletedBoardGame) {
-            res.status(404).json({error: "Board game not found"})
+            res.status(404).json({ error: "Board game not found" })
             return
         }
         res.status(200).json(deletedBoardGame)
     } catch (error) {
         console.error("Error deleting board game:", error);
-        res.status(500).json({error: "Internal server error"});
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
-export {getAllBoardGames, getBoardGame, addBoardGame, updateBoardGame, countBGchildren, deleteBoardGame};
+export { getAllBoardGames, getBoardGame, addBoardGame, updateBoardGame, countBGchildren, deleteBoardGame };

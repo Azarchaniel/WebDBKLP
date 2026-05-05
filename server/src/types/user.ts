@@ -7,7 +7,8 @@ export interface IUser extends Document {
     email: string,
     hashedPassword: string,
     deletedAt?: Date | null,
-    role?: 'user' | 'guest'
+    role?: 'user' | 'guest',
+    refreshTokens?: string[]
 }
 
 export interface CustomJwtPayload extends JwtPayload {
