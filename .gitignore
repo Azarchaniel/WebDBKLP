@@ -26,3 +26,4 @@ server/dist/
 server/nodemon.json
 .idea/
 .vscode/
+.github/

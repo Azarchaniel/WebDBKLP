@@ -8,8 +8,6 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.1",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@material-table/core": "~6.4.4",
-    "@svgr/plugin-svgo": "^8.1.0",
-    "@svgr/webpack": "^8.1.0",
     "@tanstack/react-table": "^8.20.6",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.0.1",
@@ -44,14 +42,13 @@
     "sass": "^1.81.0",
     "styled-components": "^6.1.13",
     "svgo": "^3.3.2",
-    "typescript": "^4.0.0",
+    "typescript": "^5.0.0",
     "usehooks-ts": "^3.1.0"
   },
   "scripts": {
-    "start": "react-app-rewired start",
-    "build": "react-app-rewired build",
-    "test": "react-app-rewired test",
-    "eject": "react-scripts eject",
+    "start": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
     "lint": "eslint . --fix"
   },
   "browserslist": {
@@ -80,7 +77,9 @@
     "webpack-dev-server": "^4.15.2"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.3.5",
+    "vite-plugin-svgr": "^4.3.0",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.15.0",
     "@types/react-router-dom": "^5.3.3",
@@ -89,7 +88,6 @@
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "cross-env": "^7.0.3",
-    "customize-cra": "^1.0.0",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.31.0",
@@ -97,8 +95,6 @@
     "eslint-plugin-promise": "^6.6.0",
     "eslint-plugin-react": "^7.37.2",
     "globals": "^15.12.0",
-    "react-app-rewired": "^2.2.1",
-    "react-scripts": "^5.0.1",
     "typescript-eslint": "^8.16.0"
   }
 }

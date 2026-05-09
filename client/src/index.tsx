@@ -8,7 +8,7 @@ import ReactDOM from "react-dom/client";
 import { AuthProvider } from "@utils/context";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import App from "./App";
-import UtilPage from "pages/utils/outside-utils";
+import UtilPage from "./pages/utils/outside-utils";
 import KzpPage from "./pages/utils/KzpPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import "./i18n";
