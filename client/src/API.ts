@@ -12,7 +12,10 @@ import {
     IUser
 } from "./type";
 
-const baseUrl: string = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+// In production the API is served from the same origin (Express serves both).
+// In dev VITE_API_BASE_URL = http://localhost:4000 (set in .env).
+// Use ?? so an explicitly-empty .env.production value stays as "" (same-origin).
+const baseUrl: string = import.meta.env.VITE_API_BASE_URL ?? "";
 const BATCH_SIZE = 5;
 
 const axiosInstance = axios.create({
