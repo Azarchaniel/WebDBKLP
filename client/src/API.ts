@@ -12,7 +12,7 @@ import {
     IUser
 } from "./type";
 
-const baseUrl: string = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000";
+const baseUrl: string = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 const BATCH_SIZE = 5;
 
 const axiosInstance = axios.create({
