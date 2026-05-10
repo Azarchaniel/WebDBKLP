@@ -1,4 +1,4 @@
-@import "variables";
+@use "variables" as *;
 
 @media (width <=$mobile-width) {
     .modal-buttons-wrapper {

@@ -1,6 +1,6 @@
 // src/utils/indexedDBService.ts
 import { openDB, deleteDB, IDBPDatabase } from 'idb';
-import { IBook } from '../type';
+import { IAutor, IBoardGame, IBook, ILP, IQuote } from '../type';
 
 // Define database schema
 export interface BookDB {
@@ -12,11 +12,29 @@ export interface BookDB {
         key: string;
         value: any;
     };
+    lps: {
+        key: string;
+        value: ILP;
+    };
+    autors: {
+        key: string;
+        value: IAutor;
+    };
+    boardGames: {
+        key: string;
+        value: IBoardGame;
+    };
+    quotes: {
+        key: string;
+        value: IQuote;
+    };
 }
+
+export type CollectionStoreName = 'lps' | 'autors' | 'boardGames' | 'quotes';
 
 // Database name and version
 const DB_NAME = 'books-cache';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour in milliseconds
 
 let dbPromise: Promise<IDBPDatabase<BookDB>> | null = null;
@@ -34,6 +52,18 @@ export const getDB = async (): Promise<IDBPDatabase<BookDB>> => {
                 }
                 if (!db.objectStoreNames.contains('metadata')) {
                     db.createObjectStore('metadata', { keyPath: 'key' });
+                }
+                if (!db.objectStoreNames.contains('lps')) {
+                    db.createObjectStore('lps', { keyPath: '_id' });
+                }
+                if (!db.objectStoreNames.contains('autors')) {
+                    db.createObjectStore('autors', { keyPath: '_id' });
+                }
+                if (!db.objectStoreNames.contains('boardGames')) {
+                    db.createObjectStore('boardGames', { keyPath: '_id' });
+                }
+                if (!db.objectStoreNames.contains('quotes')) {
+                    db.createObjectStore('quotes', { keyPath: '_id' });
                 }
             },
             terminated() {
@@ -214,5 +244,99 @@ export const getDashboardCachedTimestamp = async (): Promise<number | undefined>
         return metadata?.timestamp;
     } catch (err) {
         console.error('Cannot get dashboard cached timestamp', err);
+    }
+};
+
+// ─── Generic collection cache helpers ────────────────────────────────────────
+
+/**
+ * Save all items of a collection to IndexedDB, replacing any previous contents.
+ * @param store   One of the non-book collection stores
+ * @param items   Array of records (must each have `_id`)
+ * @param metaKey Metadata key for this collection (e.g. 'lps-meta')
+ * @param latestUpdate ISO string representing the newest updatedAt on the server
+ */
+export const saveCollectionToCache = async (
+    store: CollectionStoreName,
+    items: any[],
+    metaKey: string,
+    latestUpdate: string
+): Promise<void> => {
+    try {
+        const db = await getDB();
+        const tx = db.transaction([store, 'metadata'] as const, 'readwrite');
+        const itemStore = tx.objectStore(store);
+        await (itemStore as any).clear();
+        for (const item of items) {
+            await (itemStore as any).put(item);
+        }
+        await tx.objectStore('metadata').put({
+            key: metaKey,
+            latestUpdate,
+            timestamp: Date.now(),
+        });
+        await tx.done;
+    } catch (error) {
+        console.error(`Error saving ${store} to cache:`, error);
+    }
+};
+
+/**
+ * Load all items of a collection from IndexedDB.
+ * Returns null if the store is empty or the cached data is older than CACHE_EXPIRY.
+ */
+export const loadCollectionFromCache = async <T,>(
+    store: CollectionStoreName,
+    metaKey: string
+): Promise<{ items: T[]; latestUpdate: string } | null> => {
+    try {
+        const db = await getDB();
+        const meta = await db.get('metadata', metaKey);
+        if (!meta || Date.now() - meta.timestamp > CACHE_EXPIRY) return null;
+        const items = await (db as any).getAll(store) as T[];
+        return items.length > 0 ? { items, latestUpdate: meta.latestUpdate } : null;
+    } catch (error) {
+        console.error(`Error loading ${store} from cache:`, error);
+        return null;
+    }
+};
+
+/**
+ * Return only the cached latestUpdate timestamp for a collection (for change detection).
+ */
+export const getCachedCollectionLatestUpdate = async (metaKey: string): Promise<string | null> => {
+    try {
+        const db = await getDB();
+        const meta = await db.get('metadata', metaKey);
+        return meta?.latestUpdate ?? null;
+    } catch (err) {
+        console.error('Cannot get cached latestUpdate for', metaKey, err);
+        return null;
+    }
+};
+
+// ─── Collection meta-key constants ───────────────────────────────────────────
+export const META_KEY_LPS = 'lps-meta';
+export const META_KEY_AUTORS = 'autors-meta';
+export const META_KEY_BOARD_GAMES = 'boardGames-meta';
+export const META_KEY_QUOTES = 'quotes-meta';
+
+/**
+ * Refresh only the metadata record for a collection (timestamp + latestUpdate)
+ * without touching the items store. Use when the server confirms data is current
+ * (returns empty array + latestUpdate) to prevent premature cache expiry.
+ */
+export const touchCollectionCache = async (metaKey: string, latestUpdate: string): Promise<void> => {
+    try {
+        const db = await getDB();
+        const existing = await db.get('metadata', metaKey);
+        await db.put('metadata', {
+            ...(existing ?? { key: metaKey }),
+            key: metaKey,
+            latestUpdate,
+            timestamp: Date.now(),
+        });
+    } catch (error) {
+        console.error(`Error touching cache metadata for ${metaKey}:`, error);
     }
 };

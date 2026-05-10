@@ -1,7 +1,6 @@
 {
   "name": "WebDBKLP",
-  "version": "1.0.0",
-  "description": "",
+  "private": true,
   "main": "app.js",
   "type": "commonjs",
   "scripts": {

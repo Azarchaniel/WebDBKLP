@@ -1,9 +1,9 @@
 import { IBook, IQuote } from "../../type";
 import QuoteItem from "./QuoteItem";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { addQuote, deleteQuote, getQuotes } from "../../API";
+import { addQuote, deleteQuote, getAllQuotesForCache, getQuotes } from "../../API";
 import { toast } from "react-toastify";
-import { generateColors, getRandomShade, ScrollToTopBtn } from "@utils";
+import { generateColors, getRandomShade, ScrollToTopBtn, saveCollectionToCache, loadCollectionFromCache, getCachedCollectionLatestUpdate, touchCollectionCache, META_KEY_QUOTES } from "@utils";
 import { LoadingBooks } from "@components/LoadingBooks";
 import LoadingSpinner from "@components/LoadingSpinner";
 import { useReadLocalStorage, useDebounceValue } from "usehooks-ts";
@@ -70,7 +70,6 @@ export default function QuotePage() {
         if (!filteredQuotes || !Array.isArray(filteredQuotes)) return [];
         const groups: { [bookId: string]: QuoteGroup } = {};
         const baseColors = generateColors(books.length, isDarkTheme);
-        console.log(baseColors);
         let colorIndex = 0;
         filteredQuotes.forEach((quote) => {
             const bookId = quote.fromBook?._id;
@@ -104,6 +103,29 @@ export default function QuotePage() {
             setLoadingMore(true);
         }
 
+        if (!navigator.onLine) {
+            // Serve from IndexedDB when offline — always replace, never paginate offline
+            loadCollectionFromCache<IQuote>('quotes', META_KEY_QUOTES).then(cached => {
+                if (cached) {
+                    let items = cached.items;
+                    if (search.trim()) {
+                        items = items.filter(q => q.text?.toLowerCase().includes(search.trim().toLowerCase()));
+                    }
+                    if (bookIds.length) {
+                        items = items.filter(q => q.fromBook?._id && bookIds.includes(q.fromBook._id));
+                    }
+                    quoteColorMapRef.current.clear();
+                    setFilteredQuotes(items);
+                    setCountAll(items.length);
+                    setHasMore(false);
+                }
+            }).finally(() => {
+                if (isReset) setLoading(false);
+                else setLoadingMore(false);
+            });
+            return;
+        }
+
         getQuotes(
             bookIds.length ? bookIds : undefined,
             users ?? undefined,
@@ -134,6 +156,22 @@ export default function QuotePage() {
             });
         // doFetch only needs to be stable w.r.t. the setters, which are stable
     }, []);
+
+    // Background: keep quotes IndexedDB cache up-to-date after first render
+    useEffect(() => {
+        getCachedCollectionLatestUpdate(META_KEY_QUOTES).then(cachedLatest => {
+            getAllQuotesForCache(cachedLatest)
+                .then(({ data: { quotes, latestUpdate } }: any) => {
+                    if (quotes && quotes.length > 0 && latestUpdate) {
+                        saveCollectionToCache('quotes', quotes, META_KEY_QUOTES, latestUpdate);
+                    } else if (latestUpdate) {
+                        // Data unchanged — just refresh the metadata timestamp
+                        touchCollectionCache(META_KEY_QUOTES, latestUpdate);
+                    }
+                })
+                .catch(() => { /* ignore — cache stays stale */ });
+        });
+    }, [currentUser]);
 
     // Reset and re-fetch from page 1 when search, filters, or user changes
     useEffect(() => {

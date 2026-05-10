@@ -482,7 +482,8 @@
     },
     "network": {
         "offline": "Připojení k internetu bylo ztraceno.",
-        "online": "Připojení k internetu bylo obnoveno."
+        "online": "Připojení k internetu bylo obnoveno.",
+        "offlineBanner": "Jste offline – zobrazují se uložená data"
     },
     "page404": {
         "title": "Stránka nenalezena",

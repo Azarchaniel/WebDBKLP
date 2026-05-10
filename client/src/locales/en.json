@@ -482,7 +482,8 @@
     },
     "network": {
         "offline": "No internet connection.",
-        "online": "Internet connection restored."
+        "online": "Internet connection restored.",
+        "offlineBanner": "You are offline — showing cached data"
     },
     "page404": {
         "title": "Page Not Found",

@@ -1,6 +1,7 @@
 {
   "name": "WebDBKLP",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "private": true,
   "description": "System for cataloging books",
   "main": "client/index.js",
   "homepage": "/",

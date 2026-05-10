@@ -2,9 +2,11 @@ import React, { ReactNode } from 'react';
 import Header from './components/AppHeader';
 import Sidebar from './components/Sidebar';
 import Toast from "./components/Toast";
+import OfflineBanner from "./components/OfflineBanner";
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 import useNetworkStatus from "@utils/hooks/useNetworkStatus";
+import "@styles/header.scss";
 
 interface LayoutProps {
     children: ReactNode;
@@ -30,6 +32,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     return (
         <main className='App'>
             <Header />
+            <OfflineBanner />
             <Sidebar />
             {children}
             <Toast />

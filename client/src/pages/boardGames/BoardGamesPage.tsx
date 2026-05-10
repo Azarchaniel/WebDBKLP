@@ -6,7 +6,12 @@ import {
     DEFAULT_PAGINATION,
     getBoardGameTableColumns,
     ShowHideColumns,
-    isMobile, stringifyAutors
+    isMobile, stringifyAutors,
+    saveCollectionToCache,
+    loadCollectionFromCache,
+    getCachedCollectionLatestUpdate,
+    touchCollectionCache,
+    META_KEY_BOARD_GAMES,
 } from "@utils";
 import { openConfirmDialog } from "@components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
@@ -61,14 +66,55 @@ export default function BoardGamesPage() {
         fetchBoardGames();
     }, [pagination]);
 
-    const fetchBoardGames = (): void => {
+    const fetchBoardGames = async (): Promise<void> => {
         setLoading(true);
-        getBoardGames(pagination)
-            .then(({ data: { boardGames, count } }: any) => {
-                setCountAll(count);
-                setBoardGames(stringifyAutors(boardGames));
+
+        if (!navigator.onLine) {
+            const cached = await loadCollectionFromCache<IBoardGame>('boardGames', META_KEY_BOARD_GAMES);
+            if (cached) {
+                const search = pagination.search?.trim().toLowerCase();
+                const filtered = search
+                    ? cached.items.filter(bg => bg.title.toLowerCase().includes(search))
+                    : cached.items;
+                setCountAll(filtered.length);
+                setBoardGames(stringifyAutors(filtered) as any);
+            }
+            setLoading(false);
+            return;
+        }
+
+        const cachedLatest = await getCachedCollectionLatestUpdate(META_KEY_BOARD_GAMES);
+        getBoardGames({ ...pagination, pageSize: 10000, dataFrom: cachedLatest ?? undefined })
+            .then(({ data: { boardGames, count, latestUpdate } }: any) => {
+                if (boardGames && boardGames.length > 0) {
+                    setCountAll(count);
+                    setBoardGames(stringifyAutors(boardGames) as any);
+                    if (latestUpdate) {
+                        saveCollectionToCache('boardGames', boardGames, META_KEY_BOARD_GAMES, latestUpdate);
+                    }
+                } else if (boardGames && boardGames.length === 0 && latestUpdate) {
+                    // Server says data unchanged — refresh timestamp and serve from cache
+                    touchCollectionCache(META_KEY_BOARD_GAMES, latestUpdate);
+                    loadCollectionFromCache<IBoardGame>('boardGames', META_KEY_BOARD_GAMES).then(cached => {
+                        if (cached) {
+                            setCountAll(cached.items.length);
+                            setBoardGames(stringifyAutors(cached.items) as any);
+                        }
+                    });
+                } else {
+                    // Genuinely empty collection
+                    setCountAll(0);
+                    setBoardGames([] as any);
+                }
             })
-            .catch((err: Error) => console.trace(err))
+            .catch(async (err: Error) => {
+                console.trace(err);
+                const cached = await loadCollectionFromCache<IBoardGame>('boardGames', META_KEY_BOARD_GAMES);
+                if (cached) {
+                    setCountAll(cached.items.length);
+                    setBoardGames(stringifyAutors(cached.items) as any);
+                }
+            })
             .finally(() => setLoading(false));
     };
 

@@ -2,11 +2,57 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 import path from "path";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
     plugins: [
         react(),
         svgr(),
+        VitePWA({
+            registerType: "autoUpdate",
+            includeAssets: ["img/favicon.ico", "img/icons/*.png", "img/icons/*.ico", "img/*.svg"],
+            manifest: {
+                name: "WebDBKLP",
+                short_name: "DBKLP",
+                description: "Personal database for books, LPs, board games, quotes and authors",
+                theme_color: "#00ADB5",
+                background_color: "#ffffff",
+                display: "standalone",
+                start_url: "/",
+                icons: [
+                    {
+                        src: "img/icons/icon-192x192.png",
+                        sizes: "192x192",
+                        type: "image/png",
+                    },
+                    {
+                        src: "img/icons/icon-512x512.png",
+                        sizes: "512x512",
+                        type: "image/png",
+                        purpose: "any maskable",
+                    },
+                ],
+            },
+            workbox: {
+                globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+                runtimeCaching: [
+                    {
+                        urlPattern: /^https?:\/\/.*\/api\/(books|autors|lps|boardgames|quotes)(\?.*)?$/,
+                        handler: "StaleWhileRevalidate",
+                        options: {
+                            cacheName: "api-collections",
+                            expiration: {
+                                maxEntries: 50,
+                                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200],
+                            },
+                        },
+                    },
+                ],
+            },
+        }),
     ],
     resolve: {
         alias: {

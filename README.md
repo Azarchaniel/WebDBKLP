@@ -1,7 +1,27 @@
 # WebDBKLP
 
-**System for cataloging books** (and LPs and board games) I own. Predecessor for this system is https://github.com/Azarchaniel/DBKLP.
-I'm using **MERN stack**.
+A personal collection management system for cataloging books, vinyl LPs, board games, quotes, and authors. Successor to [DBKLP](https://github.com/Azarchaniel/DBKLP).
+
+Built with the **MERN stack** (MongoDB · Express · React · Node.js) and **TypeScript** on both frontend and backend.
+
+## Features
+
+### Collections
+- **Books** — full metadata: title, subtitle, authors/editors/translators/illustrators, ISBN, language, publisher, year, dimensions (height, width, thickness, weight), number of pages, series, edition, location (city/shelf), cover image, GoodReads & DatabazeKnih links, ex-libris flag, owner and read-by tracking.
+- **Authors** — first/last name, nationality, birth/death dates, roles (author, editor, illustrator, translator, musician, board game designer), linked books and LPs.
+- **LPs (vinyl records)** — title, artist, subtitle, speed, track count, publisher, language.
+- **Board Games** — title, designer, publisher, player count, play time, age recommendation, cover image, URL, expansions/parent-game hierarchy.
+- **Quotes** — rich-text or image quotes linked to books, page number, owner assignment.
+
+### Core functionality
+- Server-side paginated tables with sorting, filtering and column visibility toggle for all collections.
+- Full-text search across all major fields (diacritic-insensitive).
+- Add / edit / delete via modal forms with live validation.
+- Barcode scanner (ISBN lookup via camera) for quick book entry.
+- Auto-fill book details from ISBN via GoodReads and DatabazeKnih scraper.
+- Multi-select rows for bulk editing.
+- Expandable row detail panels.
+- PWA with offline IndexedDB.
 
 ## RUN
 cd ./server; npm run start

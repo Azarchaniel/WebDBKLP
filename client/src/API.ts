@@ -480,6 +480,22 @@ export const deleteQuote = async (
     }
 }
 
+export const getAllQuotesForCache = async (dataFrom?: string | null): Promise<AxiosResponse<ApiQuoteDataType>> => {
+    try {
+        const quotes: AxiosResponse<ApiQuoteDataType> = await axiosInstance.get(
+            baseUrl + "/quotes", {
+            params: {
+                page: 1,
+                limit: 10000,
+                dataFrom: dataFrom ?? undefined,
+            }
+        });
+        return quotes;
+    } catch (error: any) {
+        throw new Error(error);
+    }
+};
+
 // ### USER ###
 export const getUsers = async (): Promise<AxiosResponse<ApiUserDataType>> => {
     try {
@@ -542,7 +558,8 @@ export const getLPs = async (params?: any): Promise<AxiosResponse<ApiLPDataType>
                 page: params?.page ?? 1,
                 pageSize: params?.pageSize ?? 100,
                 search: params?.search ?? "",
-                sorting: params?.sorting ?? { id: "lastName", desc: false }
+                sorting: params?.sorting ?? { id: "lastName", desc: false },
+                dataFrom: params?.dataFrom
             }
         }
         )
@@ -732,7 +749,8 @@ export const getBoardGames = async (params?: any): Promise<AxiosResponse<any>> =
                 pageSize: params?.pageSize ?? 100,
                 search: params?.search ?? "",
                 sorting: params?.sorting ?? [{ id: "title", desc: false }],
-                filters: params?.filters ?? []
+                filters: params?.filters ?? [],
+                dataFrom: params?.dataFrom
             }
         });
         return boardGames
