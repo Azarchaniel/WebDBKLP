@@ -9,10 +9,7 @@ import {
     getAutorTableColumns,
     ShowHideColumns,
     isMobile,
-    saveCollectionToCache,
     loadCollectionFromCache,
-    getCachedCollectionLatestUpdate,
-    touchCollectionCache,
     META_KEY_AUTORS,
 } from "@utils";
 import { useAutorModal } from "@components/autors/useAutorModal";
@@ -20,7 +17,7 @@ import { openConfirmDialog } from "@components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
 import AutorDetail from "./AutorDetail";
 import { SortingState } from "@tanstack/react-table";
-import { useClickOutside } from "@hooks";
+import { useClickOutside, usePWABackgroundCache } from "@hooks";
 import "@styles/AutorPage.scss";
 import { useAuth } from "@utils/context";
 import { InputField } from "@components/inputs";
@@ -63,6 +60,20 @@ export default function AutorPage() {
         }));
     }, exceptRef);
 
+    // Background: populate IndexedDB for offline PWA use (only in standalone/installed mode)
+    usePWABackgroundCache({
+        store: 'autors',
+        metaKey: META_KEY_AUTORS,
+        fetchAll: async (dataFrom) => {
+            const { data } = await getAutors({
+                page: 1, pageSize: 10000, search: '',
+                sorting: [{ id: 'lastName', desc: false }],
+                dataFrom: dataFrom ?? undefined,
+            });
+            return { items: data.autors ?? [], latestUpdate: data.latestUpdate };
+        },
+    });
+
     useEffect(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
@@ -88,11 +99,18 @@ export default function AutorPage() {
             const cached = await loadCollectionFromCache<IAutor>('autors', META_KEY_AUTORS);
             if (cached) {
                 const search = pagination.search?.trim().toLowerCase();
-                const filtered = search
+                let filtered = search
                     ? cached.items.filter(a =>
                         a.firstName?.toLowerCase().includes(search) ||
                         a.lastName?.toLowerCase().includes(search))
                     : cached.items;
+                const [sortInfo] = (pagination.sorting as SortingState) ?? [];
+                const sortField = sortInfo?.id ?? 'lastName';
+                const sortDesc = sortInfo?.desc ?? false;
+                filtered = filtered.slice().sort((a, b) => {
+                    const cmp = String((a as any)[sortField] ?? '').localeCompare(String((b as any)[sortField] ?? ''), undefined, { numeric: true });
+                    return sortDesc ? -cmp : cmp;
+                });
                 setCountAll(filtered.length);
                 setAutors(filtered);
             }
@@ -100,36 +118,26 @@ export default function AutorPage() {
             return;
         }
 
-        const cachedLatest = await getCachedCollectionLatestUpdate(META_KEY_AUTORS);
-        getAutors({ ...pagination, pageSize: 10000, dataFrom: cachedLatest ?? undefined })
-            .then(({ data: { autors, count, latestUpdate } }: any) => {
-                if (autors && autors.length > 0) {
-                    setCountAll(count);
-                    setAutors(autors);
-                    if (latestUpdate) {
-                        saveCollectionToCache('autors', autors, META_KEY_AUTORS, latestUpdate);
-                    }
-                } else if (autors && autors.length === 0 && latestUpdate) {
-                    // Server says data unchanged — refresh timestamp and serve from cache
-                    touchCollectionCache(META_KEY_AUTORS, latestUpdate);
-                    loadCollectionFromCache<IAutor>('autors', META_KEY_AUTORS).then(cached => {
-                        if (cached) {
-                            setCountAll(cached.items.length);
-                            setAutors(cached.items);
-                        }
-                    });
-                } else {
-                    // Genuinely empty collection
-                    setCountAll(0);
-                    setAutors([]);
-                }
+        // Normal server-side pagination — fast, no bulk download
+        getAutors({ ...pagination })
+            .then(({ data: { autors, count } }: any) => {
+                setCountAll(count ?? 0);
+                setAutors(autors ?? []);
             })
             .catch(async (err: Error) => {
                 console.trace(err);
+                // Fall back to IndexedDB cache on network error
                 const cached = await loadCollectionFromCache<IAutor>('autors', META_KEY_AUTORS);
                 if (cached) {
-                    setCountAll(cached.items.length);
-                    setAutors(cached.items);
+                    const [sortInfo] = (pagination.sorting as SortingState) ?? [];
+                    const sortField = sortInfo?.id ?? 'lastName';
+                    const sortDesc = sortInfo?.desc ?? false;
+                    const sorted = cached.items.slice().sort((a, b) => {
+                        const cmp = String((a as any)[sortField] ?? '').localeCompare(String((b as any)[sortField] ?? ''), undefined, { numeric: true });
+                        return sortDesc ? -cmp : cmp;
+                    });
+                    setCountAll(sorted.length);
+                    setAutors(sorted);
                 }
             })
             .finally(() => setLoading(false));

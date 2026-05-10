@@ -35,22 +35,9 @@ export default defineConfig({
             },
             workbox: {
                 globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-                runtimeCaching: [
-                    {
-                        urlPattern: /^https?:\/\/.*\/api\/(books|autors|lps|boardgames|quotes)(\?.*)?$/,
-                        handler: "StaleWhileRevalidate",
-                        options: {
-                            cacheName: "api-collections",
-                            expiration: {
-                                maxEntries: 50,
-                                maxAgeSeconds: 60 * 60 * 24, // 24 hours
-                            },
-                            cacheableResponse: {
-                                statuses: [0, 200],
-                            },
-                        },
-                    },
-                ],
+                // API routes are handled by the app's own IndexedDB cache (indexDb.tsx).
+                // Adding SW runtime caching here creates a conflicting second cache layer
+                // that fires redundant background network requests for large payloads.
             },
         }),
     ],

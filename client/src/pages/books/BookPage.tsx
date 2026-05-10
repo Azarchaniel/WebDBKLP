@@ -92,8 +92,6 @@ export default function BookPage() {
     // ### BOOKS ###
     const fetchBooks = async (): Promise<void> => {
         try {
-            setLoading(true);
-
             // Abort previous request
             if (controllerRef.current) {
                 controllerRef.current.abort();
@@ -101,23 +99,44 @@ export default function BookPage() {
             // Create new AbortController
             controllerRef.current = new AbortController();
 
-            // Check if data is up-to-date
-            const { status } = await checkBooksUpdated(await getCachedTimestamp());
+            setLoading(true);
 
-            // For first page only with default pagination and no new books, try to load from cache first
-            if (checkIfFirstPage() && status === 204) {
+            // Serve IndexedDB cache immediately — no network wait
+            let servedFromCache = false;
+            if (checkIfFirstPage()) {
                 const cachedData = await loadFirstPageFromCache();
-
                 if (cachedData) {
-                    // Successfully loaded from cache
+                    const [sortInfo] = pagination.sorting ?? [];
+                    const sortField = sortInfo?.id ?? 'title';
+                    const sortDesc = sortInfo?.desc ?? false;
+                    const processed = stringifyAutors(cachedData.books);
+                    processed.forEach((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false));
+                    processed.sort((a: any, b: any) => {
+                        const cmp = String(a[sortField] ?? '').localeCompare(String(b[sortField] ?? ''), undefined, { numeric: true });
+                        return sortDesc ? -cmp : cmp;
+                    });
                     setCountAll(cachedData.count);
-                    setClonedBooks(cachedData.books.sort((a, b) => a.title.localeCompare(b.title)));
+                    setClonedBooks(processed);
                     setLoading(false);
-
-                    return;
+                    servedFromCache = true;
                 }
             }
 
+            // Check with server whether the cache is still current
+            let needsFreshData = true;
+            if (checkIfFirstPage() && servedFromCache) {
+                try {
+                    const { status } = await checkBooksUpdated(await getCachedTimestamp());
+                    needsFreshData = status !== 204;
+                } catch {
+                    return; // Offline or unreachable — cached data already shown
+                }
+            }
+
+            if (!needsFreshData) return;
+
+            // Fetch fresh data from server (silently when cache was already shown)
+            if (!servedFromCache) setLoading(true);
             getBooks({ ...pagination, signal: controllerRef.current.signal })
                 .then(({ data: { books, count } }: IBook[] | any) => {
                     setCountAll(count);
