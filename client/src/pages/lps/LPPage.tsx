@@ -8,16 +8,13 @@ import {
     DEFAULT_PAGINATION,
     getLPTableColumns,
     ShowHideColumns,
-    saveCollectionToCache,
     loadCollectionFromCache,
-    getCachedCollectionLatestUpdate,
-    touchCollectionCache,
     META_KEY_LPS,
 } from "@utils";
 import { useLPModal } from "@components/lps/useLPModal";
 import { openConfirmDialog } from "@components/ConfirmDialog";
 import ServerPaginationTable from "@components/table/TableSP";
-import { useClickOutside } from "@hooks";
+import { useClickOutside, usePWABackgroundCache } from "@hooks";
 import "@styles/LpPage.scss";
 import { useAuth } from "@utils/context";
 import { InputField } from "@components/inputs";
@@ -54,11 +51,32 @@ export default function LPPage() {
         }));
     }, exceptRef);
 
+    // Background: populate IndexedDB for offline PWA use (only in standalone/installed mode)
+    usePWABackgroundCache({
+        store: 'lps',
+        metaKey: META_KEY_LPS,
+        fetchAll: async (dataFrom) => {
+            const { data } = await getLPs({
+                page: 1, pageSize: 10000, search: '',
+                sorting: [{ id: 'title', desc: false }],
+                dataFrom: dataFrom ?? undefined,
+            });
+            return { items: data.lps ?? [], latestUpdate: data.latestUpdate };
+        },
+    });
+
     useEffect(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
-        timeoutRef.current = setTimeout(() => {
+
+        if (pagination.search && pagination.search.trim() !== "") {
+            timeoutRef.current = setTimeout(() => {
+                fetchLPs();
+            }, 1000);
+        } else {
+            timeoutRef.current = null;
             fetchLPs();
-        }, 1000);
+        }
+
         return () => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
@@ -82,6 +100,13 @@ export default function LPPage() {
                         )
                     );
                 }
+                const [sortInfo] = pagination.sorting ?? [];
+                const sortField = sortInfo?.id ?? 'title';
+                const sortDesc = sortInfo?.desc ?? false;
+                filtered = filtered.slice().sort((a: any, b: any) => {
+                    const cmp = String(a[sortField] ?? '').localeCompare(String(b[sortField] ?? ''), undefined, { numeric: true });
+                    return sortDesc ? -cmp : cmp;
+                });
                 setLPs(stringifyAutors(filtered));
                 setCountAll(filtered.length);
             }
@@ -89,36 +114,26 @@ export default function LPPage() {
             return;
         }
 
-        const cachedLatest = await getCachedCollectionLatestUpdate(META_KEY_LPS);
-        getLPs({ ...pagination, pageSize: 10000, dataFrom: cachedLatest ?? undefined })
-            .then(({ data: { lps, count, latestUpdate } }: any) => {
-                if (lps && lps.length > 0) {
-                    setLPs(stringifyAutors(lps));
-                    setCountAll(count);
-                    if (latestUpdate) {
-                        saveCollectionToCache('lps', lps, META_KEY_LPS, latestUpdate);
-                    }
-                } else if (lps && lps.length === 0 && latestUpdate) {
-                    // Server says data unchanged — serve from cache and refresh timestamp
-                    touchCollectionCache(META_KEY_LPS, latestUpdate);
-                    loadCollectionFromCache<ILP>('lps', META_KEY_LPS).then(cached => {
-                        if (cached) {
-                            setLPs(stringifyAutors(cached.items));
-                            setCountAll(cached.items.length);
-                        }
-                    });
-                } else {
-                    // Genuinely empty collection
-                    setLPs([]);
-                    setCountAll(0);
-                }
+        // Normal server-side pagination — fast, no bulk download
+        getLPs({ ...pagination })
+            .then(({ data: { lps, count } }: any) => {
+                setLPs(stringifyAutors(lps ?? []));
+                setCountAll(count ?? 0);
             })
             .catch(async (err: Error) => {
                 console.trace(err);
+                // Fall back to IndexedDB cache on network error
                 const cached = await loadCollectionFromCache<ILP>('lps', META_KEY_LPS);
                 if (cached) {
-                    setLPs(stringifyAutors(cached.items));
-                    setCountAll(cached.items.length);
+                    const [sortInfo] = pagination.sorting ?? [];
+                    const sortField = sortInfo?.id ?? 'title';
+                    const sortDesc = sortInfo?.desc ?? false;
+                    const sorted = cached.items.slice().sort((a: any, b: any) => {
+                        const cmp = String(a[sortField] ?? '').localeCompare(String(b[sortField] ?? ''), undefined, { numeric: true });
+                        return sortDesc ? -cmp : cmp;
+                    });
+                    setLPs(stringifyAutors(sorted));
+                    setCountAll(sorted.length);
                 }
             })
             .finally(() => setLoading(false));

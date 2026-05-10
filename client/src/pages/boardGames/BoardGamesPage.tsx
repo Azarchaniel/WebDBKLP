@@ -7,16 +7,13 @@ import {
     getBoardGameTableColumns,
     ShowHideColumns,
     isMobile, stringifyAutors,
-    saveCollectionToCache,
     loadCollectionFromCache,
-    getCachedCollectionLatestUpdate,
-    touchCollectionCache,
     META_KEY_BOARD_GAMES,
 } from "@utils";
 import { openConfirmDialog } from "@components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
 import { SortingState } from "@tanstack/react-table";
-import { useClickOutside } from "@hooks";
+import { useClickOutside, usePWABackgroundCache } from "@hooks";
 import { useAuth } from "@utils/context";
 import AddBoardGame from "./AddBoardGame";
 import "@styles/BoardGamesPage.scss";
@@ -62,6 +59,20 @@ export default function BoardGamesPage() {
         }));
     }, exceptRef);
 
+    // Background: populate IndexedDB for offline PWA use (only in standalone/installed mode)
+    usePWABackgroundCache({
+        store: 'boardGames',
+        metaKey: META_KEY_BOARD_GAMES,
+        fetchAll: async (dataFrom) => {
+            const { data } = await getBoardGames({
+                page: 1, pageSize: 10000, search: '',
+                sorting: [{ id: 'title', desc: false }],
+                dataFrom: dataFrom ?? undefined,
+            });
+            return { items: data.boardGames ?? [], latestUpdate: data.latestUpdate };
+        },
+    });
+
     useEffect(() => {
         fetchBoardGames();
     }, [pagination]);
@@ -73,9 +84,16 @@ export default function BoardGamesPage() {
             const cached = await loadCollectionFromCache<IBoardGame>('boardGames', META_KEY_BOARD_GAMES);
             if (cached) {
                 const search = pagination.search?.trim().toLowerCase();
-                const filtered = search
+                let filtered = search
                     ? cached.items.filter(bg => bg.title.toLowerCase().includes(search))
                     : cached.items;
+                const [sortInfo] = (pagination.sorting as SortingState) ?? [];
+                const sortField = sortInfo?.id ?? 'title';
+                const sortDesc = sortInfo?.desc ?? false;
+                filtered = filtered.slice().sort((a, b) => {
+                    const cmp = String((a as any)[sortField] ?? '').localeCompare(String((b as any)[sortField] ?? ''), undefined, { numeric: true });
+                    return sortDesc ? -cmp : cmp;
+                });
                 setCountAll(filtered.length);
                 setBoardGames(stringifyAutors(filtered) as any);
             }
@@ -83,36 +101,26 @@ export default function BoardGamesPage() {
             return;
         }
 
-        const cachedLatest = await getCachedCollectionLatestUpdate(META_KEY_BOARD_GAMES);
-        getBoardGames({ ...pagination, pageSize: 10000, dataFrom: cachedLatest ?? undefined })
-            .then(({ data: { boardGames, count, latestUpdate } }: any) => {
-                if (boardGames && boardGames.length > 0) {
-                    setCountAll(count);
-                    setBoardGames(stringifyAutors(boardGames) as any);
-                    if (latestUpdate) {
-                        saveCollectionToCache('boardGames', boardGames, META_KEY_BOARD_GAMES, latestUpdate);
-                    }
-                } else if (boardGames && boardGames.length === 0 && latestUpdate) {
-                    // Server says data unchanged — refresh timestamp and serve from cache
-                    touchCollectionCache(META_KEY_BOARD_GAMES, latestUpdate);
-                    loadCollectionFromCache<IBoardGame>('boardGames', META_KEY_BOARD_GAMES).then(cached => {
-                        if (cached) {
-                            setCountAll(cached.items.length);
-                            setBoardGames(stringifyAutors(cached.items) as any);
-                        }
-                    });
-                } else {
-                    // Genuinely empty collection
-                    setCountAll(0);
-                    setBoardGames([] as any);
-                }
+        // Normal server-side pagination — fast, no bulk download
+        getBoardGames({ ...pagination })
+            .then(({ data: { boardGames, count } }: any) => {
+                setCountAll(count ?? 0);
+                setBoardGames(stringifyAutors(boardGames ?? []) as any);
             })
             .catch(async (err: Error) => {
                 console.trace(err);
+                // Fall back to IndexedDB cache on network error
                 const cached = await loadCollectionFromCache<IBoardGame>('boardGames', META_KEY_BOARD_GAMES);
                 if (cached) {
-                    setCountAll(cached.items.length);
-                    setBoardGames(stringifyAutors(cached.items) as any);
+                    const [sortInfo] = (pagination.sorting as SortingState) ?? [];
+                    const sortField = sortInfo?.id ?? 'title';
+                    const sortDesc = sortInfo?.desc ?? false;
+                    const sorted = cached.items.slice().sort((a, b) => {
+                        const cmp = String((a as any)[sortField] ?? '').localeCompare(String((b as any)[sortField] ?? ''), undefined, { numeric: true });
+                        return sortDesc ? -cmp : cmp;
+                    });
+                    setCountAll(sorted.length);
+                    setBoardGames(stringifyAutors(sorted) as any);
                 }
             })
             .finally(() => setLoading(false));
