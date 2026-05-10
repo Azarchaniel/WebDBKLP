@@ -7,7 +7,7 @@ import { fetchDataWithPagination } from "../utils/queryUtils";
 
 const getAllLps = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { page = "1", pageSize = "100", search = "", sorting } = req.query;
+        const { page = "1", pageSize = "100", search = "", sorting, dataFrom } = req.query;
 
         const searchFields = [
             "title",
@@ -23,19 +23,20 @@ const getAllLps = async (req: Request, res: Response): Promise<void> => {
         const parsedPage = parseInt(page as string, 10);
         const parsedPageSize = parseInt(pageSize as string, 10);
 
-        const { data, count } = await fetchDataWithPagination(
+        const { data, count, latestUpdate } = await fetchDataWithPagination(
             Lp,
             {
                 page: isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage,
                 pageSize: isNaN(parsedPageSize) || parsedPageSize < 1 ? 100 : parsedPageSize,
                 search: search as string,
                 sorting: sorting as string,
+                dataFrom: dataFrom as string,
                 searchFields
             },
             lookupStages
         );
 
-        res.status(200).json({ lps: data, count: count })
+        res.status(200).json({ lps: data, count: count, latestUpdate: latestUpdate })
     } catch (error) {
         throw error
     }

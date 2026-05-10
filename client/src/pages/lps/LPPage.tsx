@@ -11,6 +11,7 @@ import {
     saveCollectionToCache,
     loadCollectionFromCache,
     getCachedCollectionLatestUpdate,
+    touchCollectionCache,
     META_KEY_LPS,
 } from "@utils";
 import { useLPModal } from "@components/lps/useLPModal";
@@ -70,11 +71,17 @@ export default function LPPage() {
         if (!navigator.onLine) {
             const cached = await loadCollectionFromCache<ILP>('lps', META_KEY_LPS);
             if (cached) {
-                const filtered = pagination.search
-                    ? cached.items.filter(lp =>
-                        lp.title.toLowerCase().includes(pagination.search!.toLowerCase()) ||
-                        (lp as any).autorsFull?.toLowerCase().includes(pagination.search!.toLowerCase()))
-                    : cached.items;
+                const search = pagination.search?.trim().toLowerCase();
+                let filtered = cached.items;
+                if (search) {
+                    filtered = cached.items.filter(lp =>
+                        lp.title.toLowerCase().includes(search) ||
+                        lp.autor?.some(a =>
+                            a.firstName?.toLowerCase().includes(search) ||
+                            a.lastName?.toLowerCase().includes(search)
+                        )
+                    );
+                }
                 setLPs(stringifyAutors(filtered));
                 setCountAll(filtered.length);
             }
@@ -92,13 +99,18 @@ export default function LPPage() {
                         saveCollectionToCache('lps', lps, META_KEY_LPS, latestUpdate);
                     }
                 } else if (lps && lps.length === 0 && latestUpdate) {
-                    // Server says data unchanged — serve from cache
+                    // Server says data unchanged — serve from cache and refresh timestamp
+                    touchCollectionCache(META_KEY_LPS, latestUpdate);
                     loadCollectionFromCache<ILP>('lps', META_KEY_LPS).then(cached => {
                         if (cached) {
                             setLPs(stringifyAutors(cached.items));
                             setCountAll(cached.items.length);
                         }
                     });
+                } else {
+                    // Genuinely empty collection
+                    setLPs([]);
+                    setCountAll(0);
                 }
             })
             .catch(async (err: Error) => {

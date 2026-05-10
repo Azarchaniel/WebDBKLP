@@ -320,3 +320,23 @@ export const META_KEY_LPS = 'lps-meta';
 export const META_KEY_AUTORS = 'autors-meta';
 export const META_KEY_BOARD_GAMES = 'boardGames-meta';
 export const META_KEY_QUOTES = 'quotes-meta';
+
+/**
+ * Refresh only the metadata record for a collection (timestamp + latestUpdate)
+ * without touching the items store. Use when the server confirms data is current
+ * (returns empty array + latestUpdate) to prevent premature cache expiry.
+ */
+export const touchCollectionCache = async (metaKey: string, latestUpdate: string): Promise<void> => {
+    try {
+        const db = await getDB();
+        const existing = await db.get('metadata', metaKey);
+        await db.put('metadata', {
+            ...(existing ?? { key: metaKey }),
+            key: metaKey,
+            latestUpdate,
+            timestamp: Date.now(),
+        });
+    } catch (error) {
+        console.error(`Error touching cache metadata for ${metaKey}:`, error);
+    }
+};

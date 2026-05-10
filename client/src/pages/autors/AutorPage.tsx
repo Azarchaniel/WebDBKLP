@@ -12,6 +12,7 @@ import {
     saveCollectionToCache,
     loadCollectionFromCache,
     getCachedCollectionLatestUpdate,
+    touchCollectionCache,
     META_KEY_AUTORS,
 } from "@utils";
 import { useAutorModal } from "@components/autors/useAutorModal";
@@ -109,12 +110,18 @@ export default function AutorPage() {
                         saveCollectionToCache('autors', autors, META_KEY_AUTORS, latestUpdate);
                     }
                 } else if (autors && autors.length === 0 && latestUpdate) {
+                    // Server says data unchanged — refresh timestamp and serve from cache
+                    touchCollectionCache(META_KEY_AUTORS, latestUpdate);
                     loadCollectionFromCache<IAutor>('autors', META_KEY_AUTORS).then(cached => {
                         if (cached) {
                             setCountAll(cached.items.length);
                             setAutors(cached.items);
                         }
                     });
+                } else {
+                    // Genuinely empty collection
+                    setCountAll(0);
+                    setAutors([]);
                 }
             })
             .catch(async (err: Error) => {

@@ -3,7 +3,7 @@ import QuoteItem from "./QuoteItem";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addQuote, deleteQuote, getAllQuotesForCache, getQuotes } from "../../API";
 import { toast } from "react-toastify";
-import { generateColors, getRandomShade, ScrollToTopBtn, saveCollectionToCache, loadCollectionFromCache, getCachedCollectionLatestUpdate, META_KEY_QUOTES } from "@utils";
+import { generateColors, getRandomShade, ScrollToTopBtn, saveCollectionToCache, loadCollectionFromCache, getCachedCollectionLatestUpdate, touchCollectionCache, META_KEY_QUOTES } from "@utils";
 import { LoadingBooks } from "@components/LoadingBooks";
 import LoadingSpinner from "@components/LoadingSpinner";
 import { useReadLocalStorage, useDebounceValue } from "usehooks-ts";
@@ -104,7 +104,7 @@ export default function QuotePage() {
         }
 
         if (!navigator.onLine) {
-            // Serve from IndexedDB when offline
+            // Serve from IndexedDB when offline — always replace, never paginate offline
             loadCollectionFromCache<IQuote>('quotes', META_KEY_QUOTES).then(cached => {
                 if (cached) {
                     let items = cached.items;
@@ -114,12 +114,8 @@ export default function QuotePage() {
                     if (bookIds.length) {
                         items = items.filter(q => q.fromBook?._id && bookIds.includes(q.fromBook._id));
                     }
-                    if (isReset) {
-                        quoteColorMapRef.current.clear();
-                        setFilteredQuotes(items);
-                    } else {
-                        setFilteredQuotes(prev => [...prev, ...items]);
-                    }
+                    quoteColorMapRef.current.clear();
+                    setFilteredQuotes(items);
                     setCountAll(items.length);
                     setHasMore(false);
                 }
@@ -168,6 +164,9 @@ export default function QuotePage() {
                 .then(({ data: { quotes, latestUpdate } }: any) => {
                     if (quotes && quotes.length > 0 && latestUpdate) {
                         saveCollectionToCache('quotes', quotes, META_KEY_QUOTES, latestUpdate);
+                    } else if (latestUpdate) {
+                        // Data unchanged — just refresh the metadata timestamp
+                        touchCollectionCache(META_KEY_QUOTES, latestUpdate);
                     }
                 })
                 .catch(() => { /* ignore — cache stays stale */ });

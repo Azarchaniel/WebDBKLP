@@ -21,7 +21,7 @@ Built with the **MERN stack** (MongoDB · Express · React · Node.js) and **Typ
 - Auto-fill book details from ISBN via GoodReads and DatabazeKnih scraper.
 - Multi-select rows for bulk editing.
 - Expandable row detail panels.
-- PWA with offline IndexDB.
+- PWA with offline IndexedDB.
 
 ## RUN
 cd ./server; npm run start

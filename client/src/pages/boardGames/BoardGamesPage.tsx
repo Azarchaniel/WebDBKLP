@@ -10,6 +10,7 @@ import {
     saveCollectionToCache,
     loadCollectionFromCache,
     getCachedCollectionLatestUpdate,
+    touchCollectionCache,
     META_KEY_BOARD_GAMES,
 } from "@utils";
 import { openConfirmDialog } from "@components/ConfirmDialog";
@@ -92,12 +93,18 @@ export default function BoardGamesPage() {
                         saveCollectionToCache('boardGames', boardGames, META_KEY_BOARD_GAMES, latestUpdate);
                     }
                 } else if (boardGames && boardGames.length === 0 && latestUpdate) {
+                    // Server says data unchanged — refresh timestamp and serve from cache
+                    touchCollectionCache(META_KEY_BOARD_GAMES, latestUpdate);
                     loadCollectionFromCache<IBoardGame>('boardGames', META_KEY_BOARD_GAMES).then(cached => {
                         if (cached) {
                             setCountAll(cached.items.length);
                             setBoardGames(stringifyAutors(cached.items) as any);
                         }
                     });
+                } else {
+                    // Genuinely empty collection
+                    setCountAll(0);
+                    setBoardGames([] as any);
                 }
             })
             .catch(async (err: Error) => {

@@ -10,7 +10,7 @@ export default defineConfig({
         svgr(),
         VitePWA({
             registerType: "autoUpdate",
-            includeAssets: ["img/favicon.ico", "img/icons/*.png", "img/*.svg"],
+            includeAssets: ["img/favicon.ico", "img/icons/*.png", "img/icons/*.ico", "img/*.svg"],
             manifest: {
                 name: "WebDBKLP",
                 short_name: "DBKLP",
@@ -21,14 +21,14 @@ export default defineConfig({
                 start_url: "/",
                 icons: [
                     {
-                        src: "img/icons/base-128x128.ico",
-                        sizes: "128x128",
-                        type: "image/x-icon",
+                        src: "img/icons/icon-192x192.png",
+                        sizes: "192x192",
+                        type: "image/png",
                     },
                     {
-                        src: "img/icons/base-512x512.ico",
+                        src: "img/icons/icon-512x512.png",
                         sizes: "512x512",
-                        type: "image/x-icon",
+                        type: "image/png",
                         purpose: "any maskable",
                     },
                 ],
