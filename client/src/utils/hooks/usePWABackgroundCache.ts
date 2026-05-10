@@ -24,7 +24,7 @@ interface BackgroundCacheOptions {
      * When dataFrom is supplied and data is unchanged, the server returns
      * { items: [], latestUpdate } — the hook handles that correctly.
      */
-    fetchAll: (dataFrom: string | null) => Promise<{ items: any[]; latestUpdate?: string }>;
+    fetchAll: (dataFrom: string | null) => Promise<{ items: any[]; latestUpdate?: string | Date }>;
     /** Delay (ms) before the background fetch starts to avoid competing with the foreground fetch. Default: 3000 */
     delayMs?: number;
 }
@@ -46,7 +46,10 @@ export function usePWABackgroundCache({
         const timer = setTimeout(async () => {
             try {
                 const cachedLatest = await getCachedCollectionLatestUpdate(metaKey);
-                const { items, latestUpdate } = await fetchAll(cachedLatest);
+                const { items, latestUpdate: rawLatest } = await fetchAll(cachedLatest);
+                const latestUpdate = rawLatest instanceof Date
+                    ? rawLatest.toISOString()
+                    : rawLatest;
                 if (items.length > 0 && latestUpdate) {
                     await saveCollectionToCache(store, items, metaKey, latestUpdate);
                 } else if (items.length === 0 && latestUpdate) {

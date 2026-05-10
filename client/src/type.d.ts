@@ -109,12 +109,21 @@ type ApiLPDataType = {
     lps: ILP[]
     lp?: ILP
     count?: number
+    latestUpdate?: Date;
 }
 
 type ApiUserDataType = {
     message: string
     users: IUser[]
     user?: IUser
+}
+
+type ApiBoardGameDataType = {
+    message: string
+    boardGames: IBoardGame[]
+    boardGame?: IBoardGame
+    count?: number
+    latestUpdate?: Date;
 }
 
 type AutorProps = {

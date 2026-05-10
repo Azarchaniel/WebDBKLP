@@ -3,11 +3,8 @@ import { TFunction } from "i18next";
 import {
     IAutor,
     IBook,
-    IBookColumnVisibility,
     ILangCode,
     ILocation,
-    IPublished,
-    IUniqueFilterValues,
     IUser, TRange
 } from "../type";
 import { AUTOR_ROLES, formatBoardGameRange, formatDimension, getBookLocation, TABLE_HEADER_COLOR } from "@utils";
