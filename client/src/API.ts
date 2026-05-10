@@ -1,6 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios"
 import {
     ApiAutorDataType,
+    ApiBoardGameDataType,
     ApiBookDataType,
     ApiLPDataType,
     ApiQuoteDataType,
@@ -740,9 +741,9 @@ export const getBiggestBooks = async (dimension: string = "height"): Promise<Axi
 }
 
 // ### BOARD GAMES ###
-export const getBoardGames = async (params?: any): Promise<AxiosResponse<any>> => {
+export const getBoardGames = async (params?: any): Promise<AxiosResponse<ApiBoardGameDataType>> => {
     try {
-        const boardGames: AxiosResponse<ApiBookDataType> = await axiosInstance.get(
+        const boardGames: AxiosResponse<ApiBoardGameDataType> = await axiosInstance.get(
             baseUrl + "/boardgames", {
             params: {
                 page: params?.page ?? 1, // API expects 1-based index
