@@ -95,11 +95,11 @@ export default defineConfig({
                     // Date utilities (large)
                     "vendor-date": ["date-fns", "react-datepicker"],
                     // Table libraries
-                    "vendor-table": ["@tanstack/react-table", "@material-table/core"],
+                    "vendor-table": ["@tanstack/react-table"],
                     // UI / styling
-                    "vendor-ui": ["react-toastify", "react-tooltip", "styled-components", "react-simple-wysiwyg"],
+                    "vendor-ui": ["react-toastify", "react-tooltip", "react-simple-wysiwyg"],
                     // HTTP + state
-                    "vendor-http": ["axios", "redux"],
+                    "vendor-http": ["axios"],
                     // FontAwesome
                     "vendor-icons": [
                         "@fortawesome/fontawesome-svg-core",
