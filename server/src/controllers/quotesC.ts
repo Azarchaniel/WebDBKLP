@@ -16,11 +16,27 @@ const populateOptions: IPopulateOptions[] = [
 
 const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
     try {
-        let { activeUsers, filterByBook, search, page, limit } = req.query;
+        let { activeUsers, filterByBook, search, page, limit, dataFrom } = req.query;
 
         const pageNum = Math.max(1, parseInt((page as string) || '1', 10));
         const limitNum = Math.min(100, Math.max(1, parseInt((limit as string) || '20', 10)));
         const skip = (pageNum - 1) * limitNum;
+
+        // Always compute latestUpdate for cache invalidation
+        const latestDoc = await Quote.findOne({ ...optionFetchAllExceptDeleted })
+            .sort({ updatedAt: -1 })
+            .select('updatedAt')
+            .lean()
+            .exec();
+        const latestUpdate: string | undefined = latestDoc?.updatedAt
+            ? (latestDoc.updatedAt as any).toISOString?.() ?? String(latestDoc.updatedAt)
+            : undefined;
+
+        // If caller already has fresh data, return early (204-style but with JSON so axios doesn't choke)
+        if (dataFrom && latestUpdate && new Date(dataFrom as string) >= new Date(latestUpdate)) {
+            res.status(200).json({ quotes: [], count: 0, hasMore: false, latestUpdate });
+            return;
+        }
 
         const query: any = { ...optionFetchAllExceptDeleted };
 
@@ -73,7 +89,7 @@ const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
                 .sort((a: IBook, b: IBook) => a.title.localeCompare(b.title, "sk"));
         }
 
-        res.status(200).json({ quotes, count, onlyQuotedBooks, hasMore });
+        res.status(200).json({ quotes, count, onlyQuotedBooks, hasMore, latestUpdate });
     } catch (error) {
         res.status(500);
         console.error(error);

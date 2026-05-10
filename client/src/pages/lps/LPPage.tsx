@@ -7,7 +7,11 @@ import {
     stringifyAutors,
     DEFAULT_PAGINATION,
     getLPTableColumns,
-    ShowHideColumns
+    ShowHideColumns,
+    saveCollectionToCache,
+    loadCollectionFromCache,
+    getCachedCollectionLatestUpdate,
+    META_KEY_LPS,
 } from "@utils";
 import { useLPModal } from "@components/lps/useLPModal";
 import { openConfirmDialog } from "@components/ConfirmDialog";
@@ -59,15 +63,52 @@ export default function LPPage() {
         };
     }, [pagination, currentUser]);
 
-    // ### QUOTES ###
-    const fetchLPs = (): void => {
+    // ### LPs ###
+    const fetchLPs = async (): Promise<void> => {
         setLoading(true);
-        getLPs(pagination)
-            .then(({ data: { lps, count } }: ILP[] | any) => {
-                setLPs(stringifyAutors(lps));
-                setCountAll(count);
+
+        if (!navigator.onLine) {
+            const cached = await loadCollectionFromCache<ILP>('lps', META_KEY_LPS);
+            if (cached) {
+                const filtered = pagination.search
+                    ? cached.items.filter(lp =>
+                        lp.title.toLowerCase().includes(pagination.search!.toLowerCase()) ||
+                        (lp as any).autorsFull?.toLowerCase().includes(pagination.search!.toLowerCase()))
+                    : cached.items;
+                setLPs(stringifyAutors(filtered));
+                setCountAll(filtered.length);
+            }
+            setLoading(false);
+            return;
+        }
+
+        const cachedLatest = await getCachedCollectionLatestUpdate(META_KEY_LPS);
+        getLPs({ ...pagination, pageSize: 10000, dataFrom: cachedLatest ?? undefined })
+            .then(({ data: { lps, count, latestUpdate } }: any) => {
+                if (lps && lps.length > 0) {
+                    setLPs(stringifyAutors(lps));
+                    setCountAll(count);
+                    if (latestUpdate) {
+                        saveCollectionToCache('lps', lps, META_KEY_LPS, latestUpdate);
+                    }
+                } else if (lps && lps.length === 0 && latestUpdate) {
+                    // Server says data unchanged — serve from cache
+                    loadCollectionFromCache<ILP>('lps', META_KEY_LPS).then(cached => {
+                        if (cached) {
+                            setLPs(stringifyAutors(cached.items));
+                            setCountAll(cached.items.length);
+                        }
+                    });
+                }
             })
-            .catch((err: Error) => console.trace(err))
+            .catch(async (err: Error) => {
+                console.trace(err);
+                const cached = await loadCollectionFromCache<ILP>('lps', META_KEY_LPS);
+                if (cached) {
+                    setLPs(stringifyAutors(cached.items));
+                    setCountAll(cached.items.length);
+                }
+            })
             .finally(() => setLoading(false));
     }
 

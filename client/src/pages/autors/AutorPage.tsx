@@ -8,7 +8,11 @@ import {
     DEFAULT_PAGINATION,
     getAutorTableColumns,
     ShowHideColumns,
-    isMobile
+    isMobile,
+    saveCollectionToCache,
+    loadCollectionFromCache,
+    getCachedCollectionLatestUpdate,
+    META_KEY_AUTORS,
 } from "@utils";
 import { useAutorModal } from "@components/autors/useAutorModal";
 import { openConfirmDialog } from "@components/ConfirmDialog";
@@ -76,14 +80,51 @@ export default function AutorPage() {
     }, [pagination, currentUser]);
 
     // ### AUTORS ###
-    const fetchAutors = (): void => {
+    const fetchAutors = async (): Promise<void> => {
         setLoading(true);
-        getAutors(pagination)
-            .then(({ data: { autors, count } }: any) => {
-                setCountAll(count);
-                setAutors(autors);
+
+        if (!navigator.onLine) {
+            const cached = await loadCollectionFromCache<IAutor>('autors', META_KEY_AUTORS);
+            if (cached) {
+                const search = pagination.search?.trim().toLowerCase();
+                const filtered = search
+                    ? cached.items.filter(a =>
+                        a.firstName?.toLowerCase().includes(search) ||
+                        a.lastName?.toLowerCase().includes(search))
+                    : cached.items;
+                setCountAll(filtered.length);
+                setAutors(filtered);
+            }
+            setLoading(false);
+            return;
+        }
+
+        const cachedLatest = await getCachedCollectionLatestUpdate(META_KEY_AUTORS);
+        getAutors({ ...pagination, pageSize: 10000, dataFrom: cachedLatest ?? undefined })
+            .then(({ data: { autors, count, latestUpdate } }: any) => {
+                if (autors && autors.length > 0) {
+                    setCountAll(count);
+                    setAutors(autors);
+                    if (latestUpdate) {
+                        saveCollectionToCache('autors', autors, META_KEY_AUTORS, latestUpdate);
+                    }
+                } else if (autors && autors.length === 0 && latestUpdate) {
+                    loadCollectionFromCache<IAutor>('autors', META_KEY_AUTORS).then(cached => {
+                        if (cached) {
+                            setCountAll(cached.items.length);
+                            setAutors(cached.items);
+                        }
+                    });
+                }
             })
-            .catch((err: Error) => console.trace(err))
+            .catch(async (err: Error) => {
+                console.trace(err);
+                const cached = await loadCollectionFromCache<IAutor>('autors', META_KEY_AUTORS);
+                if (cached) {
+                    setCountAll(cached.items.length);
+                    setAutors(cached.items);
+                }
+            })
             .finally(() => setLoading(false));
     }
 

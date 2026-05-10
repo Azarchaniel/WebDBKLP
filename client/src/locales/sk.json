@@ -487,7 +487,8 @@
     },
     "network": {
         "offline": "Pripojenie k internetu bolo stratené.",
-        "online": "Pripojenie k internetu bolo obnovené."
+        "online": "Pripojenie k internetu bolo obnovené.",
+        "offlineBanner": "Ste offline – zobrazujú sa uložené dáta"
     },
     "page404": {
         "title": "Stránka nenájdená",

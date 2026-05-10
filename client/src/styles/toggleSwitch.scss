@@ -1,3 +1,5 @@
+@use "sass:color";
+
 // Colors
 $label-colour: #00ADB5;
 $disabled-colour: #ddd;
@@ -177,7 +179,7 @@ $white: #fff;
     }
 
     &:not(.three-state-active):hover {
-      background: lighten($toggle-colour, 35%);
+      background: color.adjust($toggle-colour, $lightness: 35%);
     }
   }
 
