@@ -10,7 +10,9 @@ export default defineConfig({
         svgr(),
         VitePWA({
             registerType: "autoUpdate",
-            includeAssets: ["img/favicon.ico", "img/icons/*.png", "img/icons/*.ico", "img/*.svg"],
+            // Only include the two manifest PNG icons and the favicon — the base-*.ico
+            // files are redundant ICO copies that bloat the precache payload.
+            includeAssets: ["img/favicon.ico", "img/icons/icon-192x192.png", "img/icons/icon-512x512.png", "img/*.svg"],
             manifest: {
                 name: "WebDBKLP",
                 short_name: "DBKLP",

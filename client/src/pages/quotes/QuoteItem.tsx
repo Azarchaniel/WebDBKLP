@@ -3,6 +3,7 @@ import { IQuote } from "../../type";
 import { formPersonsFullName, stringifyUsers } from "@utils";
 import { Wysiwyg } from "@components/Wysiwyg";
 import { useAuth } from "@utils/context";
+import { useOnlineStatus } from "@hooks";
 import { useQuoteModal } from "@components/quotes/useQuoteModal";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -18,6 +19,7 @@ interface QuoteProps {
 const Quote: React.FC<QuoteProps> = ({ quote, bcgrClr, deleteQuote, saveQuote, saveResultSuccess }) => {
     const { t } = useTranslation();
     const { isLoggedIn, isGuest } = useAuth();
+    const isOnline = useOnlineStatus();
     const { openQuoteModal } = useQuoteModal();
 
     const makeImgClickable = (text: string): string => {
@@ -101,7 +103,7 @@ const Quote: React.FC<QuoteProps> = ({ quote, bcgrClr, deleteQuote, saveQuote, s
                 )}
             </div>
 
-            {isLoggedIn && !isGuest && (
+            {isLoggedIn && !isGuest && isOnline && (
                 <div className="card-btn-wrapper">
                     <i className="fas fa-pen" onClick={handleEdit} data-tooltip-id="global-tooltip" data-tooltip-content={t("quotes.edit")} />
                     &nbsp;&nbsp;&nbsp;

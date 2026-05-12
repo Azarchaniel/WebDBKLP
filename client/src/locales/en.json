@@ -483,7 +483,11 @@
     "network": {
         "offline": "No internet connection.",
         "online": "Internet connection restored.",
-        "offlineBanner": "You are offline — showing cached data"
+        "offlineBanner": "You are offline — showing cached data",
+        "pwaDownloading": "Downloading database to device: {{pct}}%",
+        "pwaPartial": "Local database: {{pct}}% cached ({{count}} / {{total}} items)",
+        "pwaOfflinePartial": "Offline — {{pct}}% available locally ({{count}} / {{total}} items)",
+        "pwaFullyCached": "Local database fully cached ({{count}} items) ✓"
     },
     "page404": {
         "title": "Page Not Found",

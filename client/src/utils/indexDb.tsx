@@ -30,7 +30,7 @@ export interface BookDB {
     };
 }
 
-export type CollectionStoreName = 'lps' | 'autors' | 'boardGames' | 'quotes';
+export type CollectionStoreName = 'lps' | 'autors' | 'boardGames' | 'quotes' | 'books';
 
 // Database name and version
 const DB_NAME = 'books-cache';
@@ -99,6 +99,20 @@ export const getDB = async (): Promise<IDBPDatabase<BookDB>> => {
 export const saveFirstPageToCache = async (books: IBook[], count: number, pagination: any): Promise<void> => {
     try {
         const db = await getDB();
+
+        // If the PWA background cache has already populated the books store with the full
+        // collection, don't wipe it — just refresh the firstPageData metadata.
+        const bgCacheMeta = await db.get('metadata', 'books-meta');
+        if (bgCacheMeta) {
+            await db.put('metadata', {
+                key: 'firstPageData',
+                count,
+                pagination,
+                timestamp: new Date().getTime()
+            });
+            return;
+        }
+
         const tx = db.transaction(['books', 'metadata'], 'readwrite');
 
         // Clear existing books before adding new ones
@@ -260,7 +274,8 @@ export const saveCollectionToCache = async (
     store: CollectionStoreName,
     items: any[],
     metaKey: string,
-    latestUpdate: string
+    latestUpdate: string,
+    serverCount?: number,
 ): Promise<void> => {
     try {
         const db = await getDB();
@@ -274,6 +289,7 @@ export const saveCollectionToCache = async (
             key: metaKey,
             latestUpdate,
             timestamp: Date.now(),
+            serverCount: serverCount ?? items.length,
         });
         await tx.done;
     } catch (error) {
@@ -320,6 +336,49 @@ export const META_KEY_LPS = 'lps-meta';
 export const META_KEY_AUTORS = 'autors-meta';
 export const META_KEY_BOARD_GAMES = 'boardGames-meta';
 export const META_KEY_QUOTES = 'quotes-meta';
+export const META_KEY_BOOKS = 'books-meta';
+
+/**
+ * Returns the count of items currently in each IndexedDB store and the
+ * server-side total that was recorded when the data was last downloaded.
+ */
+export const getAllCachedCounts = async (): Promise<{
+    cached: Record<string, number>;
+    serverCounts: Record<string, number>;
+}> => {
+    try {
+        const db = await getDB();
+        const [booksC, autorsC, lpsC, bgC, quotesC] = await Promise.all([
+            db.count('books'),
+            db.count('autors'),
+            db.count('lps'),
+            db.count('boardGames'),
+            db.count('quotes'),
+        ]);
+        const [booksMeta, autorsMeta, lpsMeta, bgMeta, quotesMeta] = await Promise.all([
+            db.get('metadata', META_KEY_BOOKS),
+            db.get('metadata', META_KEY_AUTORS),
+            db.get('metadata', META_KEY_LPS),
+            db.get('metadata', META_KEY_BOARD_GAMES),
+            db.get('metadata', META_KEY_QUOTES),
+        ]);
+        return {
+            cached: { books: booksC, autors: autorsC, lps: lpsC, boardGames: bgC, quotes: quotesC },
+            serverCounts: {
+                books: booksMeta?.serverCount ?? 0,
+                autors: autorsMeta?.serverCount ?? 0,
+                lps: lpsMeta?.serverCount ?? 0,
+                boardGames: bgMeta?.serverCount ?? 0,
+                quotes: quotesMeta?.serverCount ?? 0,
+            },
+        };
+    } catch {
+        return {
+            cached: { books: 0, autors: 0, lps: 0, boardGames: 0, quotes: 0 },
+            serverCounts: { books: 0, autors: 0, lps: 0, boardGames: 0, quotes: 0 },
+        };
+    }
+};
 
 /**
  * Refresh only the metadata record for a collection (timestamp + latestUpdate)
@@ -340,3 +399,26 @@ export const touchCollectionCache = async (metaKey: string, latestUpdate: string
         console.error(`Error touching cache metadata for ${metaKey}:`, error);
     }
 };
+
+/**
+ * Sort an array of cached items by a dynamic field using locale-aware comparison.
+ * Accepts a `sorting` array that matches TanStack Table's `SortingState` shape.
+ * Pure function — does not modify the original array.
+ */
+export function sortCachedItems<T>(
+    items: T[],
+    sorting: Array<{ id: string; desc: boolean }> | undefined,
+    defaultField: string,
+): T[] {
+    const [sortInfo] = sorting ?? [];
+    const sortField = sortInfo?.id ?? defaultField;
+    const sortDesc = sortInfo?.desc ?? false;
+    return items.slice().sort((a, b) => {
+        const cmp = String((a as any)[sortField] ?? '').localeCompare(
+            String((b as any)[sortField] ?? ''),
+            undefined,
+            { numeric: true },
+        );
+        return sortDesc ? -cmp : cmp;
+    });
+}

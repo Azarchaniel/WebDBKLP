@@ -2,10 +2,9 @@ import React, { ReactNode } from 'react';
 import Header from './components/AppHeader';
 import Sidebar from './components/Sidebar';
 import Toast from "./components/Toast";
-import OfflineBanner from "./components/OfflineBanner";
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
-import useNetworkStatus from "@utils/hooks/useNetworkStatus";
+import { usePWALayout } from "./pwa";
 import "@styles/header.scss";
 
 interface LayoutProps {
@@ -28,11 +27,12 @@ const renderGlobalTooltip = ({ content, activeAnchor }: { content: string | null
 };
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-    useNetworkStatus();
+    const { marginTop, banners } = usePWALayout();
+
     return (
-        <main className='App'>
+        <main className="App" style={{ marginTop }}>
             <Header />
-            <OfflineBanner />
+            {banners}
             <Sidebar />
             {children}
             <Toast />

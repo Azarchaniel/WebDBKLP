@@ -10,11 +10,12 @@ import {
     ShowHideColumns,
     loadCollectionFromCache,
     META_KEY_LPS,
+    sortCachedItems,
 } from "@utils";
 import { useLPModal } from "@components/lps/useLPModal";
 import { openConfirmDialog } from "@components/ConfirmDialog";
 import ServerPaginationTable from "@components/table/TableSP";
-import { useClickOutside, usePWABackgroundCache } from "@hooks";
+import { useClickOutside, useOnlineStatus } from "@hooks";
 import "@styles/LpPage.scss";
 import { useAuth } from "@utils/context";
 import { InputField } from "@components/inputs";
@@ -23,6 +24,7 @@ import { useTranslation } from "react-i18next";
 export default function LPPage() {
     const { t } = useTranslation();
     const { isLoggedIn, isGuest, currentUser } = useAuth();
+    const isOnline = useOnlineStatus();
     const [LPs, setLPs] = useState<ILP[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [pagination, setPagination] = useState(DEFAULT_PAGINATION);
@@ -51,20 +53,6 @@ export default function LPPage() {
         }));
     }, exceptRef);
 
-    // Background: populate IndexedDB for offline PWA use (only in standalone/installed mode)
-    usePWABackgroundCache({
-        store: 'lps',
-        metaKey: META_KEY_LPS,
-        fetchAll: async (dataFrom) => {
-            const { data } = await getLPs({
-                page: 1, pageSize: 10000, search: '',
-                sorting: [{ id: 'title', desc: false }],
-                dataFrom: dataFrom ?? undefined,
-            });
-            return { items: data.lps ?? [], latestUpdate: data.latestUpdate };
-        },
-    });
-
     useEffect(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
@@ -86,30 +74,28 @@ export default function LPPage() {
     const fetchLPs = async (): Promise<void> => {
         setLoading(true);
 
-        if (!navigator.onLine) {
+        // Shared helper: filter + sort cached items and set state (used both when offline and as network error fallback)
+        const serveFromCache = async () => {
             const cached = await loadCollectionFromCache<ILP>('lps', META_KEY_LPS);
             if (cached) {
                 const search = pagination.search?.trim().toLowerCase();
-                let filtered = cached.items;
-                if (search) {
-                    filtered = cached.items.filter(lp =>
+                const filtered = search
+                    ? cached.items.filter(lp =>
                         lp.title.toLowerCase().includes(search) ||
                         lp.autor?.some(a =>
                             a.firstName?.toLowerCase().includes(search) ||
                             a.lastName?.toLowerCase().includes(search)
                         )
-                    );
-                }
-                const [sortInfo] = pagination.sorting ?? [];
-                const sortField = sortInfo?.id ?? 'title';
-                const sortDesc = sortInfo?.desc ?? false;
-                filtered = filtered.slice().sort((a: any, b: any) => {
-                    const cmp = String(a[sortField] ?? '').localeCompare(String(b[sortField] ?? ''), undefined, { numeric: true });
-                    return sortDesc ? -cmp : cmp;
-                });
-                setLPs(stringifyAutors(filtered));
-                setCountAll(filtered.length);
+                    )
+                    : cached.items;
+                const sorted = sortCachedItems(filtered, pagination.sorting, 'title');
+                setLPs(stringifyAutors(sorted));
+                setCountAll(sorted.length);
             }
+        };
+
+        if (!navigator.onLine) {
+            await serveFromCache();
             setLoading(false);
             return;
         }
@@ -122,19 +108,7 @@ export default function LPPage() {
             })
             .catch(async (err: Error) => {
                 console.trace(err);
-                // Fall back to IndexedDB cache on network error
-                const cached = await loadCollectionFromCache<ILP>('lps', META_KEY_LPS);
-                if (cached) {
-                    const [sortInfo] = pagination.sorting ?? [];
-                    const sortField = sortInfo?.id ?? 'title';
-                    const sortDesc = sortInfo?.desc ?? false;
-                    const sorted = cached.items.slice().sort((a: any, b: any) => {
-                        const cmp = String(a[sortField] ?? '').localeCompare(String(b[sortField] ?? ''), undefined, { numeric: true });
-                        return sortDesc ? -cmp : cmp;
-                    });
-                    setLPs(stringifyAutors(sorted));
-                    setCountAll(sorted.length);
-                }
+                await serveFromCache(); // also applies search filter
             })
             .finally(() => setLoading(false));
     }
@@ -364,7 +338,7 @@ export default function LPPage() {
                             </div>
                         </div>
                         {/* Add LP button for authenticated users */}
-                        {isLoggedIn && !isGuest && (
+                        {isLoggedIn && !isGuest && isOnline && (
                             <button
                                 type="button"
                                 className="addBtnTable"
@@ -382,7 +356,7 @@ export default function LPPage() {
                         />
                     </div>
                 }
-                rowActions={isLoggedIn && !isGuest ? (_id) => (
+                rowActions={isLoggedIn && !isGuest && isOnline ? (_id) => (
                     <div className="actionsRow">
                         <button
                             data-tooltip-id="global-tooltip"
@@ -399,7 +373,7 @@ export default function LPPage() {
                     </div>
                 ) : undefined}
                 selectedChanged={(ids) => setSelectedLPs(ids)}
-                showSelection={!isGuest}
+                showSelection={!isGuest && isOnline}
             />
         </>
     )

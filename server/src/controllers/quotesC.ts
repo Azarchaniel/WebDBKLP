@@ -16,18 +16,22 @@ const populateOptions: IPopulateOptions[] = [
 
 const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
     try {
-        let { activeUsers, filterByBook, search, page, limit, dataFrom } = req.query;
+        let { activeUsers, filterByBook, search, page, limit, dataFrom, syncMode } = req.query;
 
         const pageNum = Math.max(1, parseInt((page as string) || '1', 10));
-        const limitNum = Math.min(100, Math.max(1, parseInt((limit as string) || '20', 10)));
+        // syncMode=true is set only by the PWA background cache — bypass the UI pagination cap.
+        const isSyncMode = syncMode === 'true';
+        const limitNum = isSyncMode ? 100_000 : Math.min(100, Math.max(1, parseInt((limit as string) || '20', 10)));
         const skip = (pageNum - 1) * limitNum;
 
-        // Always compute latestUpdate for cache invalidation
-        const latestDoc = await Quote.findOne({ ...optionFetchAllExceptDeleted })
+        // Compute latestUpdate only when needed (sync or incremental refresh)
+        const needsLatestUpdate = !!dataFrom || isSyncMode;
+        const latestDoc = needsLatestUpdate ? await Quote.findOne({ ...optionFetchAllExceptDeleted })
             .sort({ updatedAt: -1 })
             .select('updatedAt')
             .lean()
-            .exec();
+            .exec()
+            : null;
         const latestUpdate: string | undefined = latestDoc?.updatedAt
             ? (latestDoc.updatedAt as any).toISOString?.() ?? String(latestDoc.updatedAt)
             : undefined;

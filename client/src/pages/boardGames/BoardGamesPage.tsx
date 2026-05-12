@@ -9,11 +9,12 @@ import {
     isMobile, stringifyAutors,
     loadCollectionFromCache,
     META_KEY_BOARD_GAMES,
+    sortCachedItems,
 } from "@utils";
 import { openConfirmDialog } from "@components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
 import { SortingState } from "@tanstack/react-table";
-import { useClickOutside, usePWABackgroundCache } from "@hooks";
+import { useClickOutside, useOnlineStatus } from "@hooks";
 import { useAuth } from "@utils/context";
 import AddBoardGame from "./AddBoardGame";
 import "@styles/BoardGamesPage.scss";
@@ -25,6 +26,7 @@ import { useTranslation } from "react-i18next";
 export default function BoardGamesPage() {
     const { t } = useTranslation();
     const { isLoggedIn, isGuest } = useAuth();
+    const isOnline = useOnlineStatus();
     const [boardGames, setBoardGames] = useState([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
@@ -59,20 +61,6 @@ export default function BoardGamesPage() {
         }));
     }, exceptRef);
 
-    // Background: populate IndexedDB for offline PWA use (only in standalone/installed mode)
-    usePWABackgroundCache({
-        store: 'boardGames',
-        metaKey: META_KEY_BOARD_GAMES,
-        fetchAll: async (dataFrom) => {
-            const { data } = await getBoardGames({
-                page: 1, pageSize: 10000, search: '',
-                sorting: [{ id: 'title', desc: false }],
-                dataFrom: dataFrom ?? undefined,
-            });
-            return { items: data.boardGames ?? [], latestUpdate: data.latestUpdate };
-        },
-    });
-
     useEffect(() => {
         fetchBoardGames();
     }, [pagination]);
@@ -80,23 +68,22 @@ export default function BoardGamesPage() {
     const fetchBoardGames = async (): Promise<void> => {
         setLoading(true);
 
-        if (!navigator.onLine) {
+        // Shared helper: filter + sort cached items and set state (used both when offline and as network error fallback)
+        const serveFromCache = async () => {
             const cached = await loadCollectionFromCache<IBoardGame>('boardGames', META_KEY_BOARD_GAMES);
             if (cached) {
                 const search = pagination.search?.trim().toLowerCase();
-                let filtered = search
+                const filtered = search
                     ? cached.items.filter(bg => bg.title.toLowerCase().includes(search))
                     : cached.items;
-                const [sortInfo] = (pagination.sorting as SortingState) ?? [];
-                const sortField = sortInfo?.id ?? 'title';
-                const sortDesc = sortInfo?.desc ?? false;
-                filtered = filtered.slice().sort((a, b) => {
-                    const cmp = String((a as any)[sortField] ?? '').localeCompare(String((b as any)[sortField] ?? ''), undefined, { numeric: true });
-                    return sortDesc ? -cmp : cmp;
-                });
-                setCountAll(filtered.length);
-                setBoardGames(stringifyAutors(filtered) as any);
+                const sorted = sortCachedItems(filtered, pagination.sorting as SortingState, 'title');
+                setCountAll(sorted.length);
+                setBoardGames(stringifyAutors(sorted) as any);
             }
+        };
+
+        if (!navigator.onLine) {
+            await serveFromCache();
             setLoading(false);
             return;
         }
@@ -109,19 +96,7 @@ export default function BoardGamesPage() {
             })
             .catch(async (err: Error) => {
                 console.trace(err);
-                // Fall back to IndexedDB cache on network error
-                const cached = await loadCollectionFromCache<IBoardGame>('boardGames', META_KEY_BOARD_GAMES);
-                if (cached) {
-                    const [sortInfo] = (pagination.sorting as SortingState) ?? [];
-                    const sortField = sortInfo?.id ?? 'title';
-                    const sortDesc = sortInfo?.desc ?? false;
-                    const sorted = cached.items.slice().sort((a, b) => {
-                        const cmp = String((a as any)[sortField] ?? '').localeCompare(String((b as any)[sortField] ?? ''), undefined, { numeric: true });
-                        return sortDesc ? -cmp : cmp;
-                    });
-                    setCountAll(sorted.length);
-                    setBoardGames(stringifyAutors(sorted) as any);
-                }
+                await serveFromCache(); // also applies search filter
             })
             .finally(() => setLoading(false));
     };
@@ -317,7 +292,7 @@ export default function BoardGamesPage() {
 
     return (
         <>
-            {isLoggedIn && !isGuest &&
+            {isLoggedIn && !isGuest && isOnline &&
                 <button type="button" className="addBtnTable" onClick={handleAddBoardGame} data-tooltip-id="global-tooltip"
                     data-tooltip-content={t("boardGames.addNew")} />
             }
@@ -371,7 +346,7 @@ export default function BoardGamesPage() {
                 }
                 rowActions={(_id, expandRow, isExpanded) => (
                     <div className="actionsRow">
-                        {isLoggedIn && !isGuest && (
+                        {isLoggedIn && !isGuest && isOnline && (
                             <>
                                 <button
                                     data-tooltip-id="global-tooltip"
@@ -398,7 +373,7 @@ export default function BoardGamesPage() {
                 )}
                 expandedElement={(data) => <BoardGameDetail data={data} />}
                 selectedChanged={(ids) => setSelectedBoardGames(ids)}
-                showSelection={!isGuest}
+                showSelection={!isGuest && isOnline}
             />
         </>
     );
