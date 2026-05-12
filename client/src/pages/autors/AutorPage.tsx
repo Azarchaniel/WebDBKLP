@@ -11,13 +11,14 @@ import {
     isMobile,
     loadCollectionFromCache,
     META_KEY_AUTORS,
+    sortCachedItems,
 } from "@utils";
 import { useAutorModal } from "@components/autors/useAutorModal";
 import { openConfirmDialog } from "@components/ConfirmDialog";
 import ServerPaginationTable from "../../components/table/TableSP";
 import AutorDetail from "./AutorDetail";
 import { SortingState } from "@tanstack/react-table";
-import { useClickOutside, usePWABackgroundCache } from "@hooks";
+import { useClickOutside, useOnlineStatus } from "@hooks";
 import "@styles/AutorPage.scss";
 import { useAuth } from "@utils/context";
 import { InputField } from "@components/inputs";
@@ -27,6 +28,7 @@ export default function AutorPage() {
     const { t } = useTranslation();
     const { id } = useParams<{ id?: string }>();
     const { isLoggedIn, isGuest, currentUser } = useAuth();
+    const isOnline = useOnlineStatus();
     const [autors, setAutors] = useState<IAutor[]>([]);
     const [countAll, setCountAll] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(true);
@@ -60,20 +62,6 @@ export default function AutorPage() {
         }));
     }, exceptRef);
 
-    // Background: populate IndexedDB for offline PWA use (only in standalone/installed mode)
-    usePWABackgroundCache({
-        store: 'autors',
-        metaKey: META_KEY_AUTORS,
-        fetchAll: async (dataFrom) => {
-            const { data } = await getAutors({
-                page: 1, pageSize: 10000, search: '',
-                sorting: [{ id: 'lastName', desc: false }],
-                dataFrom: dataFrom ?? undefined,
-            });
-            return { items: data.autors ?? [], latestUpdate: data.latestUpdate };
-        },
-    });
-
     useEffect(() => {
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
@@ -95,25 +83,24 @@ export default function AutorPage() {
     const fetchAutors = async (): Promise<void> => {
         setLoading(true);
 
-        if (!navigator.onLine) {
+        // Shared helper: filter + sort cached items and set state (used both when offline and as network error fallback)
+        const serveFromCache = async () => {
             const cached = await loadCollectionFromCache<IAutor>('autors', META_KEY_AUTORS);
             if (cached) {
                 const search = pagination.search?.trim().toLowerCase();
-                let filtered = search
+                const filtered = search
                     ? cached.items.filter(a =>
                         a.firstName?.toLowerCase().includes(search) ||
                         a.lastName?.toLowerCase().includes(search))
                     : cached.items;
-                const [sortInfo] = (pagination.sorting as SortingState) ?? [];
-                const sortField = sortInfo?.id ?? 'lastName';
-                const sortDesc = sortInfo?.desc ?? false;
-                filtered = filtered.slice().sort((a, b) => {
-                    const cmp = String((a as any)[sortField] ?? '').localeCompare(String((b as any)[sortField] ?? ''), undefined, { numeric: true });
-                    return sortDesc ? -cmp : cmp;
-                });
-                setCountAll(filtered.length);
-                setAutors(filtered);
+                const sorted = sortCachedItems(filtered, pagination.sorting as SortingState, 'lastName');
+                setCountAll(sorted.length);
+                setAutors(sorted);
             }
+        };
+
+        if (!navigator.onLine) {
+            await serveFromCache();
             setLoading(false);
             return;
         }
@@ -126,19 +113,7 @@ export default function AutorPage() {
             })
             .catch(async (err: Error) => {
                 console.trace(err);
-                // Fall back to IndexedDB cache on network error
-                const cached = await loadCollectionFromCache<IAutor>('autors', META_KEY_AUTORS);
-                if (cached) {
-                    const [sortInfo] = (pagination.sorting as SortingState) ?? [];
-                    const sortField = sortInfo?.id ?? 'lastName';
-                    const sortDesc = sortInfo?.desc ?? false;
-                    const sorted = cached.items.slice().sort((a, b) => {
-                        const cmp = String((a as any)[sortField] ?? '').localeCompare(String((b as any)[sortField] ?? ''), undefined, { numeric: true });
-                        return sortDesc ? -cmp : cmp;
-                    });
-                    setCountAll(sorted.length);
-                    setAutors(sorted);
-                }
+                await serveFromCache(); // also applies search filter
             })
             .finally(() => setLoading(false));
     }
@@ -364,7 +339,7 @@ export default function AutorPage() {
                             </div>
                         </div>
                         {/* Add autor button for authenticated users */}
-                        {isLoggedIn && !isGuest && (
+                        {isLoggedIn && !isGuest && isOnline && (
                             <button
                                 type="button"
                                 className="addBtnTable"
@@ -384,7 +359,7 @@ export default function AutorPage() {
                 }
                 rowActions={(_id, expandRow, isExpanded) => (
                     <div className="actionsRow">
-                        {isLoggedIn && !isGuest && (
+                        {isLoggedIn && !isGuest && isOnline && (
                             <>
                                 <button
                                     data-tooltip-id="global-tooltip"
@@ -410,7 +385,7 @@ export default function AutorPage() {
                 )}
                 expandedElement={(data) => <AutorDetail data={data} />}
                 selectedChanged={(ids) => setSelectedAutors(ids)}
-                showSelection={!isGuest}
+                showSelection={!isGuest && isOnline}
             />
         </>
     )

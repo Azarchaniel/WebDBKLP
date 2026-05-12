@@ -1,9 +1,9 @@
 import { IBook, IQuote } from "../../type";
 import QuoteItem from "./QuoteItem";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { addQuote, deleteQuote, getAllQuotesForCache, getQuotes } from "../../API";
+import { addQuote, deleteQuote, getQuotes } from "../../API";
 import { toast } from "react-toastify";
-import { generateColors, getRandomShade, ScrollToTopBtn, saveCollectionToCache, loadCollectionFromCache, getCachedCollectionLatestUpdate, touchCollectionCache, META_KEY_QUOTES } from "@utils";
+import { generateColors, getRandomShade, ScrollToTopBtn, loadCollectionFromCache, META_KEY_QUOTES } from "@utils";
 import { LoadingBooks } from "@components/LoadingBooks";
 import LoadingSpinner from "@components/LoadingSpinner";
 import { useReadLocalStorage, useDebounceValue } from "usehooks-ts";
@@ -13,7 +13,7 @@ import "@styles/QuotePage.scss";
 import { useAuth } from "@utils/context";
 import { useQuoteModal } from "@components/quotes/useQuoteModal";
 import { useTranslation } from "react-i18next";
-import { useIsDarkTheme } from "../../utils/hooks";
+import { useIsDarkTheme, useOnlineStatus } from "../../utils/hooks";
 
 const PAGE_LIMIT = 20;
 
@@ -40,6 +40,7 @@ const toQuoteBookOption = (book: IBook): QuoteBookOption => ({
 export default function QuotePage() {
     const { t } = useTranslation();
     const { isLoggedIn, isGuest, currentUser } = useAuth();
+    const isOnline = useOnlineStatus();
     const [books, setBooks] = useState<QuoteBookOption[]>([]);
     const [booksToFilter, setBooksToFilter] = useState<QuoteBookOption[]>([]);
     const [filteredQuotes, setFilteredQuotes] = useState<IQuote[]>([]);
@@ -157,22 +158,6 @@ export default function QuotePage() {
         // doFetch only needs to be stable w.r.t. the setters, which are stable
     }, []);
 
-    // Background: keep quotes IndexedDB cache up-to-date after first render
-    useEffect(() => {
-        getCachedCollectionLatestUpdate(META_KEY_QUOTES).then(cachedLatest => {
-            getAllQuotesForCache(cachedLatest)
-                .then(({ data: { quotes, latestUpdate } }: any) => {
-                    if (quotes && quotes.length > 0 && latestUpdate) {
-                        saveCollectionToCache('quotes', quotes, META_KEY_QUOTES, latestUpdate);
-                    } else if (latestUpdate) {
-                        // Data unchanged — just refresh the metadata timestamp
-                        touchCollectionCache(META_KEY_QUOTES, latestUpdate);
-                    }
-                })
-                .catch(() => { /* ignore — cache stays stale */ });
-        });
-    }, [currentUser]);
-
     // Reset and re-fetch from page 1 when search, filters, or user changes
     useEffect(() => {
         setPage(1);
@@ -271,7 +256,7 @@ export default function QuotePage() {
 
     return (
         <>
-            {isLoggedIn && !isGuest && (
+            {isLoggedIn && !isGuest && isOnline && (
                 <button
                     type="button"
                     className="addQuote"

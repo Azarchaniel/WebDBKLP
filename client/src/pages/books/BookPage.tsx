@@ -10,10 +10,13 @@ import {
     getBookTableColumns,
     ShowHideColumns,
     getCachedTimestamp,
+    getCachedCollectionLatestUpdate,
     loadFirstPageFromCache,
+    loadCollectionFromCache,
     saveFirstPageToCache,
     isMobile,
-    shortenStringKeepWord
+    shortenStringKeepWord,
+    META_KEY_BOOKS,
 } from "@utils";
 import { useBookModal } from "@components/books/useBookModal";
 import { openConfirmDialog } from "@components/ConfirmDialog";
@@ -21,7 +24,7 @@ import ServerPaginationTable from "@components/table/TableSP";
 import BookDetail from "./BookDetail";
 import "@styles/BookPage.scss";
 import BarcodeScannerButton from "@components/BarcodeScanner";
-import { useClickOutside } from "@hooks";
+import { useClickOutside, useOnlineStatus } from "@hooks";
 import { useAuth } from "@utils/context";
 import { InputField } from "@components/inputs";
 import { useTranslation } from "react-i18next";
@@ -30,6 +33,8 @@ export default function BookPage() {
     const { t } = useTranslation();
     const { id } = useParams<{ id?: string }>();
     const { currentUser, isLoading: isAuthLoading, isLoggedIn, isGuest } = useAuth();
+    const isOnline = useOnlineStatus();
+
     const [clonedBooks, setClonedBooks] = useState<any[]>([]);
     const [pagination, setPagination] = useState({
         page: DEFAULT_PAGINATION.page,
@@ -101,9 +106,39 @@ export default function BookPage() {
 
             setLoading(true);
 
-            // Serve IndexedDB cache immediately — no network wait
-            let servedFromCache = false;
-            if (checkIfFirstPage()) {
+            // Shared helper: filter + sort + paginate from IndexedDB and set state.
+            // Used for offline mode and as network-error fallback.
+            const serveFromCache = async () => {
+                // Try full background cache first (PWA mode — all books, supports search)
+                const fullCache = await loadCollectionFromCache<IBook>('books', META_KEY_BOOKS);
+                if (fullCache && fullCache.items.length > 0) {
+                    const search = pagination.search?.trim().toLowerCase();
+                    let filtered = search
+                        ? fullCache.items.filter((b: any) =>
+                            b.title?.toLowerCase().includes(search) ||
+                            (b.autor as any[])?.some((a: any) =>
+                                a.firstName?.toLowerCase().includes(search) ||
+                                a.lastName?.toLowerCase().includes(search)
+                            ) ||
+                            b.ISBN?.toLowerCase().includes(search)
+                        )
+                        : fullCache.items;
+                    const [sortInfo] = pagination.sorting ?? [];
+                    const sortField = sortInfo?.id ?? 'title';
+                    const sortDesc = sortInfo?.desc ?? false;
+                    filtered = filtered.slice().sort((a: any, b: any) => {
+                        const cmp = String(a[sortField] ?? '').localeCompare(String(b[sortField] ?? ''), undefined, { numeric: true });
+                        return sortDesc ? -cmp : cmp;
+                    });
+                    const start = (pagination.page - 1) * pagination.pageSize;
+                    const paged = filtered.slice(start, start + pagination.pageSize);
+                    const processed = stringifyAutors(paged);
+                    processed.forEach((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false));
+                    setCountAll(filtered.length);
+                    setClonedBooks(processed);
+                    return;
+                }
+                // Fall back to first-page cache (limited to ~50 books, no cross-page search)
                 const cachedData = await loadFirstPageFromCache();
                 if (cachedData) {
                     const [sortInfo] = pagination.sorting ?? [];
@@ -117,8 +152,39 @@ export default function BookPage() {
                     });
                     setCountAll(cachedData.count);
                     setClonedBooks(processed);
-                    setLoading(false);
-                    servedFromCache = true;
+                }
+            };
+
+            // ── Offline: serve entirely from IndexedDB ────────────────────────────────────
+            if (!navigator.onLine) {
+                await serveFromCache();
+                setLoading(false);
+                return;
+            }
+
+            // ── Online: show first page from cache immediately (only if no full bg cache) ──
+            // When bg cache is active, showing it immediately would flash all books then
+            // snap to the server's page of 50 — skip the quick-display in that case.
+            let servedFromCache = false;
+            if (checkIfFirstPage()) {
+                const hasBgCache = (await getCachedCollectionLatestUpdate(META_KEY_BOOKS)) !== null;
+                if (!hasBgCache) {
+                    const cachedData = await loadFirstPageFromCache();
+                    if (cachedData) {
+                        const [sortInfo] = pagination.sorting ?? [];
+                        const sortField = sortInfo?.id ?? 'title';
+                        const sortDesc = sortInfo?.desc ?? false;
+                        const processed = stringifyAutors(cachedData.books);
+                        processed.forEach((book: any) => book["ownersFull"] = stringifyUsers(book.owner, false));
+                        processed.sort((a: any, b: any) => {
+                            const cmp = String(a[sortField] ?? '').localeCompare(String(b[sortField] ?? ''), undefined, { numeric: true });
+                            return sortDesc ? -cmp : cmp;
+                        });
+                        setCountAll(cachedData.count);
+                        setClonedBooks(processed);
+                        setLoading(false);
+                        servedFromCache = true;
+                    }
                 }
             }
 
@@ -150,16 +216,16 @@ export default function BookPage() {
                     }
                     setLoading(false);
                 })
-                .catch((err: any) => {
+                .catch(async (err: any) => {
                     if (
                         err?.name === 'AbortError' ||
                         err?.name === 'CanceledError' ||
                         err?.code === 'ERR_CANCELED' ||
                         err?.message?.includes('AbortError') ||
                         err?.message?.includes('canceled')
-                    ) return; // keep loading=true so the next request's result takes over
-                    toast.error(err.response?.data?.error || t("books.loadError"));
-                    console.error('Error fetching books:', err);
+                    ) return;
+                    // Network error — serve from IndexedDB cache (also applies search filter)
+                    await serveFromCache();
                     setLoading(false);
                 });
         } catch (err: any) {
@@ -428,7 +494,7 @@ export default function BookPage() {
                             </div>
                         </div>
                         {/* Add book button for authenticated users */}
-                        {isLoggedIn && !isGuest && (
+                        {isLoggedIn && !isGuest && isOnline && (
                             <button
                                 type="button"
                                 className="addBtnTable"
@@ -448,7 +514,7 @@ export default function BookPage() {
                 }
                 rowActions={(_id, expandRow, isExpanded) => (
                     <div key={_id} className="actionsRow">
-                        {isLoggedIn && !isGuest && (
+                        {isLoggedIn && !isGuest && isOnline && (
                             <>
                                 <button
                                     key={`delete-${_id}`}
@@ -477,7 +543,7 @@ export default function BookPage() {
                 )}
                 expandedElement={(data) => <BookDetail data={data} />}
                 selectedChanged={(ids) => setSelectedBooks(ids)}
-                showSelection={!isGuest}
+                showSelection={!isGuest && isOnline}
             />
         </>
     );

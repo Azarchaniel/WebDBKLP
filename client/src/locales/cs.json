@@ -483,7 +483,11 @@
     "network": {
         "offline": "Připojení k internetu bylo ztraceno.",
         "online": "Připojení k internetu bylo obnoveno.",
-        "offlineBanner": "Jste offline – zobrazují se uložená data"
+        "offlineBanner": "Jste offline – zobrazují se uložená data",
+        "pwaDownloading": "Stahování databáze do zařízení: {{pct}}%",
+        "pwaPartial": "Lokální databáze: {{pct}}% staženo ({{count}} / {{total}} položek)",
+        "pwaOfflinePartial": "Offline – {{pct}}% dostupné lokálně ({{count}} / {{total}} položek)",
+        "pwaFullyCached": "Lokální databáze je kompletně stažena ({{count}} položek) ✓"
     },
     "page404": {
         "title": "Stránka nenalezena",

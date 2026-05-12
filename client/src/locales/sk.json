@@ -488,7 +488,11 @@
     "network": {
         "offline": "Pripojenie k internetu bolo stratené.",
         "online": "Pripojenie k internetu bolo obnovené.",
-        "offlineBanner": "Ste offline – zobrazujú sa uložené dáta"
+        "offlineBanner": "Ste offline – zobrazujú sa uložené dáta",
+        "pwaDownloading": "Sťahovanie databázy do zariadenia: {{pct}}%",
+        "pwaPartial": "Lokálna databáza: {{pct}}% stiahnuté ({{count}} / {{total}} položiek)",
+        "pwaOfflinePartial": "Offline – {{pct}}% dostupné lokálne ({{count}} / {{total}} položiek)",
+        "pwaFullyCached": "Lokálna databáza je úplne stiahnutá ({{count}} položiek) ✓"
     },
     "page404": {
         "title": "Stránka nenájdená",

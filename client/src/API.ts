@@ -488,6 +488,7 @@ export const getAllQuotesForCache = async (dataFrom?: string | null): Promise<Ax
             params: {
                 page: 1,
                 limit: 10000,
+                syncMode: true,
                 dataFrom: dataFrom ?? undefined,
             }
         });
