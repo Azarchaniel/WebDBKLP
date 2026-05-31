@@ -650,17 +650,11 @@ const ServerPaginationTable: FC<PropsMT> =
                                                     }
                                                 </tr>
                                                 {row.getIsExpanded() && (
-                                                    isMobile() ? (
-                                                        <div className="expanded-mobile-row" key={`${row.id}-expanded-mobile`}>
+                                                    <tr key={`${row.id}-expanded`} className={isMobile() ? "expanded-mobile-row" : "expanded-row"}>
+                                                        <td colSpan={row.getAllCells().length + 1}>
                                                             {expandedElement && expandedElement(row.original)}
-                                                        </div>
-                                                    ) : (
-                                                        <tr key={`${row.id}-expanded`} className="expanded-row">
-                                                            <td colSpan={row.getAllCells().length + 1}>
-                                                                {expandedElement && expandedElement(row.original)}
-                                                            </td>
-                                                        </tr>
-                                                    )
+                                                        </td>
+                                                    </tr>
                                                 )}
                                             </React.Fragment>
                                         ))}
