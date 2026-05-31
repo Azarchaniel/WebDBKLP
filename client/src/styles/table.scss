@@ -9,12 +9,28 @@ $table-divider-color: var(--table-divider);
 
   // Expanded row on mobile
   .expanded-mobile-row {
-    width: 100%;
+    display: block !important;
     background: var(--background);
     border-bottom: 2px solid var(--anchor);
-    padding: 1rem;
-    box-sizing: border-box;
-    display: block;
+
+    td {
+      display: block;
+      width: 100% !important;
+      height: auto !important;
+      min-height: unset !important;
+      padding: 1rem;
+      box-sizing: border-box;
+
+      &::after {
+        height: 0 !important;
+      }
+    }
+
+    .bookDimensions {
+      display: flex !important;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
   }
 
   // Header adjustments

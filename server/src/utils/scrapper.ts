@@ -168,11 +168,16 @@ const extractTitle = (page: Page): Promise<string> =>
     });
 
 /**
- * Extract publication year from "Vydáno: YYYY" text node.
- * The HTML renders as:  Vydáno:\n1997\n,\n<a …>Publisher</a>
+ * Extract publication year.
+ * Tries:
+ *  1. "Vydáno: YYYY" text node (inline or split across siblings)
+ *  2. Year digit preceding the /nakladatelstvi/ publisher link (DK sometimes
+ *     renders it as a bare "2026 ," without a "Vydáno:" label)
  */
 const extractYear = (page: Page): Promise<string | undefined> =>
     page.evaluate(() => {
+        const YEAR_RE = /(1[89]\d\d|20[0-3]\d)/;
+
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
         let node: Text | null;
         while ((node = walker.nextNode() as Text)) {
@@ -190,9 +195,27 @@ const extractYear = (page: Page): Promise<string | undefined> =>
                 }
             }
         }
-        // Raw HTML fallback
-        const m3 = document.body.innerHTML.match(/Vydáno:[\s\S]{0,60}?(\d{4})/);
-        return m3 ? m3[1] : undefined;
+
+        // Fallback: scan text nodes immediately before the publisher link.
+        // DK sometimes renders "2026 , <a href="/nakladatelstvi/...">Argo</a>"
+        // without a "Vydáno:" label on the overview page.
+        const pubLink = document.querySelector('a[href*="/nakladatelstvi/"]');
+        if (pubLink) {
+            let prev = pubLink.previousSibling;
+            while (prev) {
+                const val = (prev.textContent ?? '').trim();
+                const m = val.match(YEAR_RE);
+                if (m) return m[1];
+                if (val.length > 20) break;
+                prev = prev.previousSibling;
+            }
+            // Also try the parent element's full text (catches inline concat)
+            const parentText = pubLink.parentElement?.textContent ?? '';
+            const m3 = parentText.match(YEAR_RE);
+            if (m3) return m3[1];
+        }
+
+        return undefined;
     });
 
 /** First /nakladatelstvi/ link text = publisher name. */
@@ -268,19 +291,17 @@ const extractIsbnFromAntikvariat = (page: Page): Promise<string | undefined> =>
     });
 
 /**
- * Intercept the AJAX request fired by the "více info..." toggle, fetch that
- * URL directly, and parse the returned HTML fragment for book details.
+ * Click the "více info…" toggle and extract the revealed fields directly from
+ * the live DOM using page.evaluate().
  *
- * Strategy:
- *  1. Enable request interception on the page.
- *  2. Click the toggle — the browser fires an XHR/fetch to something like
- *     /more-book-info/152830  (we capture the exact URL at runtime).
- *  3. Parse the HTML fragment for: pages, language, translator, illustrator, edition.
+ * Uses a text-walker instead of querySelectorAll so it works regardless of
+ * which HTML element DK uses for labels (span, td, div, p, li …).
  *
- * If interception fails (toggle is purely DOM, no AJAX), we fall back to
- * reading the DOM after a short wait.
+ * Also extracts year from "Vydáno:" which DK sometimes places inside this
+ * hidden section rather than on the visible overview.
  */
 const expandAndScrapeViceInfo = async (page: Page): Promise<{
+    yearOfPublish?: string;
     numberOfPages?: string;
     language?: string;
     translator?: string[];
@@ -288,174 +309,154 @@ const expandAndScrapeViceInfo = async (page: Page): Promise<{
     editionTitle?: string;
     editionNo?: string;
 }> => {
-
-    // ── Intercept any XHR/fetch triggered by the toggle click ────────────────
-    let ajaxHtml: string | null = null;
-
-    const client = await (page as any).createCDPSession();
-    await client.send('Network.enable');
-
-    const responseHandler = async (params: any) => {
-        try {
-            const url: string = params.response?.url ?? '';
-            // DK AJAX endpoints tend to contain the book id or keywords like
-            // "info", "vice", "more", "detail" — capture anything that isn't
-            // a static asset.
-            if (
-                url.includes('databazeknih.cz') &&
-                !url.match(/\.(js|css|png|jpg|gif|svg|woff|ico)(\?|$)/i) &&
-                !url.includes('/search') &&
-                params.response?.mimeType?.includes('html')
-            ) {
-                const body = await client.send('Network.getResponseBody', {
-                    requestId: params.requestId,
-                }).catch(() => null);
-                if (body?.body && body.body.length > 20) {
-                    ajaxHtml = body.base64Encoded
-                        ? Buffer.from(body.body, 'base64').toString('utf8')
-                        : body.body;
-                }
-            }
-        } catch { /* ignore */ }
-    };
-
-    client.on('Network.responseReceived', responseHandler);
-
-    // Click the toggle
+    // Click the toggle and wait for JS to reveal the content
     try {
         await page.evaluate(() => {
-            const all = Array.from(document.querySelectorAll('a, span, div, p'));
+            const all = Array.from(document.querySelectorAll('a, span, div, p, button'));
             const target = all.find(el =>
                 el.children.length === 0 &&
-                (el.textContent?.trim().startsWith('více info') ?? false)
+                (el.textContent?.trim().toLowerCase().startsWith('více info') ?? false)
             );
             if (target) (target as HTMLElement).click();
         });
-        // Wait up to 3 s for an AJAX response
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 2500));
     } catch { /* non-fatal */ }
 
-    client.off('Network.responseReceived', responseHandler);
+    return page.evaluate(() => {
+        /**
+         * Walk every text node and find the one that IS the label text.
+         * Then resolve the associated value via:
+         *   1. Inline "Label: value"   — captured from the same text node
+         *   2. Next sibling text node  — adjacent text in the same parent
+         *   3. Parent's next element sibling  (<span>L</span><span>V</span>)
+         *   4. Grandparent's next element sibling  (<td>L</td><td>V</td>)
+         */
+        const valueAfterLabel = (labels: string[]): string | undefined => {
+            for (const label of labels) {
+                const labelEsc = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const inlineRe = new RegExp('^' + labelEsc + ':?\\s+(.+)$', 'i');
 
-    // ── Parse the AJAX fragment (or fall back to the live DOM) ───────────────
-    const htmlToParse: string = ajaxHtml ?? await page.content();
+                const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+                let node: Text | null;
+                while ((node = walker.nextNode() as Text)) {
+                    const text = (node.textContent ?? '').trim();
 
-    return parseViceInfoHtml(htmlToParse);
-};
+                    // Case 1: label and value in one text node ("Vydáno: 2026")
+                    const inline = text.match(inlineRe);
+                    if (inline) return inline[1].trim();
 
-/**
- * Parse an HTML string (either the AJAX fragment or the full page after toggle)
- * and extract the "více info" fields.
- *
- * The DK fragment uses a <table> or <dl>/<span> structure like:
- *   <span class="...">Počet stran:</span> <span>312</span>
- *   <span class="...">Jazyk:</span> <span>český</span>
- *   <span class="...">Překlad:</span> <a href="/autori/...">Name</a>
- *   <span class="...">Edice:</span> <span>Title, 2. svazek</span>
- *
- * We use cheerio-style parsing inside page.evaluate() — but since we have
- * the raw HTML string here on the Node.js side, we parse it with a lightweight
- * regex approach that matches the label:value pairs reliably.
- */
-const parseViceInfoHtml = (html: string): {
-    numberOfPages?: string;
-    language?: string;
-    translator?: string[];
-    illustrator?: string[];
-    editionTitle?: string;
-    editionNo?: string;
-} => {
-    const result: Record<string, any> = {};
+                    // Cases 2-4: text node IS the bare label
+                    if (text !== label + ':' && text !== label) continue;
 
-    /**
-     * Extract the text after a label in HTML.
-     * Handles patterns like:
-     *   >Počet stran:<  ...text or tag...  >312<
-     *   >Jazyk vydání:<  ...  >český<
-     */
-    const afterLabel = (label: string): string | undefined => {
-        // Escape regex special chars in label
-        const esc = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Match the label text followed by optional tags and then a value
-        const re = new RegExp(esc + ':?\\s*(?:<[^>]+>\\s*)*([^<]{1,120})', 'i');
-        const m = html.match(re);
-        if (!m) return undefined;
-        const val = m[1].trim().replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ').trim();
-        return val || undefined;
-    };
+                    const parent = node.parentElement;
+                    if (!parent) continue;
 
-    /** Extract all author/contributor link texts that follow a label (must be followed by colon). */
-    const autorAfterLabel = (label: string, linkPatterns: string[] = ['autori']): string[] => {
-        const esc = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Require the label to be followed immediately by a colon to avoid matching
-        // the word mid-sentence (e.g. "překlad" in body text vs "Překlad:" as a label)
-        const labelRe = new RegExp(esc + '\\s*:', 'i');
-        const idx = html.search(labelRe);
-        if (idx < 0) return [];
+                    // Case 2: next sibling text node
+                    let sib: Node | null = node.nextSibling;
+                    while (sib) {
+                        const val = (sib.textContent ?? '').trim();
+                        if (val) return val;
+                        sib = sib.nextSibling;
+                    }
 
-        // Grab a window after the label, stopping before the next "Word:" pattern
-        const afterLabel = html.slice(idx + label.length + 1); // +1 for the colon
-        const nextLabelMatch = afterLabel.search(/[\u00C0-\u017E\w]{4,}\s*:/);
-        const window = afterLabel.slice(0, nextLabelMatch > 0 ? Math.min(nextLabelMatch, 600) : 600);
+                    // Case 3: parent element's next element sibling
+                    const parentSibEl = parent.nextElementSibling;
+                    if (parentSibEl) {
+                        const val = parentSibEl.textContent?.trim();
+                        if (val && val !== text) return val;
+                    }
 
-        // Build regex pattern for all link types (autori, prekladatele, ilustratori, etc.)
-        const linkPattern = linkPatterns.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-        const linkRe = new RegExp(`href="[^"]*\\/(${linkPattern})\/[^"]*"[^>]*>([^<]+)<\\/a>`, 'gi');
-        const names: string[] = [];
-        let match: RegExpExecArray | null;
-        while ((match = linkRe.exec(window)) !== null) {
-            const name = match[2].trim();
-            if (name) names.push(name);
+                    // Case 4: grandparent's next element sibling
+                    const grandSibEl = parent.parentElement?.nextElementSibling ?? null;
+                    if (grandSibEl) {
+                        const val = grandSibEl.textContent?.trim();
+                        if (val && val !== text) return val;
+                    }
+                }
+            }
+            return undefined;
+        };
+
+        /**
+         * Find <a> links whose href matches one of pathSegments, located in
+         * the element immediately after the matching label text.
+         */
+        const linksAfterLabel = (labels: string[], pathSegments: string[]): string[] => {
+            for (const label of labels) {
+                const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+                let node: Text | null;
+                while ((node = walker.nextNode() as Text)) {
+                    const text = (node.textContent ?? '').trim();
+                    if (text !== label + ':' && text !== label) continue;
+
+                    const parent = node.parentElement;
+                    if (!parent) continue;
+
+                    const containers: (Element | null)[] = [
+                        parent.nextElementSibling,
+                        parent.parentElement?.nextElementSibling ?? null,
+                    ];
+
+                    const names: string[] = [];
+                    for (const container of containers) {
+                        if (!container) continue;
+                        const links = container.tagName === 'A'
+                            ? [container as HTMLAnchorElement]
+                            : Array.from(container.querySelectorAll('a'));
+                        for (const link of links) {
+                            const href = (link as HTMLAnchorElement).href ?? '';
+                            if (pathSegments.some(seg => href.includes('/' + seg + '/'))) {
+                                const name = link.textContent?.trim() ?? '';
+                                if (name) names.push(name);
+                            }
+                        }
+                    }
+                    if (names.length) return names;
+                }
+            }
+            return [];
+        };
+
+        const result: Record<string, any> = {};
+
+        // Year — "Vydáno:" may be inside this hidden section on some books
+        const yearRaw = valueAfterLabel(['Vydáno']);
+        if (yearRaw) {
+            const m = yearRaw.match(/(1[89]\d\d|20[0-3]\d)/);
+            if (m) result.yearOfPublish = m[1];
         }
-        return names;
-    };
 
-    result.numberOfPages =
-        afterLabel('Počet stran') ??
-        afterLabel('Stran');
+        result.numberOfPages = valueAfterLabel(['Počet stran', 'Stran']);
+        result.language = valueAfterLabel(['Jazyk vydání', 'Jazyk']);
+        result.translator = linksAfterLabel(
+            ['Překlad', 'Překladatel'],
+            ['prekladatele', 'autori']
+        );
+        result.illustrator = linksAfterLabel(
+            ['Ilustrace', 'Ilustrátor', 'Ilustrace/foto'],
+            ['ilustratori', 'ilustrator', 'autori']
+        );
 
-    result.language =
-        afterLabel('Jazyk vydání') ??
-        afterLabel('Jazyk');
-
-    // Translator / illustrator — try different label variations and link types
-    // For translators: 'Překlad' is more common in newer books, 'Překladatel' in older ones
-    // Link types: '/prekladatele/' for translators, '/autori/' as fallback
-    const translatorLinks = ['prekladatele', 'autori'];
-    const translatorLabels = ['Překlad', 'Překladatel'];
-    result.translator = translatorLabels
-        .flatMap(label => autorAfterLabel(label, translatorLinks))
-        .filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
-
-    // For illustrators: 'Ilustrace' is more common, 'Ilustrátor' as fallback
-    // Link types: '/ilustratori/' or '/ilustrator/' for illustrators, '/autori/' as fallback
-    const illustratorLinks = ['ilustratori', 'ilustrator', 'autori'];
-    const illustratorLabels = ['Ilustrace', 'Ilustrátor', 'Ilustrace/foto'];
-    result.illustrator = illustratorLabels
-        .flatMap(label => autorAfterLabel(label, illustratorLinks))
-        .filter((v, i, a) => a.indexOf(v) === i); // Remove duplicates
-
-    // Edition — may be "Title, 2. svazek" or just "Title"
-    const editionRaw =
-        afterLabel('Edice');
-    if (editionRaw) {
-        const m = editionRaw.match(/^(.+?),\s*(\d+)\.\s*(?:svazek|díl|část)/i)
-            ?? editionRaw.match(/^(.+?),\s*(\d+)$/);
-        if (m) {
-            result.editionTitle = m[1].trim();
-            result.editionNo = m[2];
-        } else {
-            result.editionTitle = editionRaw;
+        const editionRaw = valueAfterLabel(['Edice']);
+        if (editionRaw) {
+            const m = editionRaw.match(/^(.+?),\s*(\d+)\.\s*(?:svazek|díl|část)/i)
+                ?? editionRaw.match(/^(.+?)\s*\((\d+)\.\)$/)
+                ?? editionRaw.match(/^(.+?),\s*(\d+)$/);
+            if (m) {
+                result.editionTitle = m[1].trim();
+                result.editionNo = m[2];
+            } else {
+                result.editionTitle = editionRaw;
+            }
         }
-    }
 
-    // Strip any leftover colon-only values
-    for (const k of Object.keys(result)) {
-        if (result[k] === ':' || result[k] === '') delete result[k];
-        if (Array.isArray(result[k]) && result[k].length === 0) delete result[k];
-    }
-
-    return result;
+        // Strip empty/null entries
+        for (const k of Object.keys(result)) {
+            if (result[k] === undefined || result[k] === null) delete result[k];
+            if (Array.isArray(result[k]) && result[k].length === 0) delete result[k];
+        }
+        return result;
+    });
 };
 
 /**
@@ -500,12 +501,17 @@ const fetchIsbnFromEditionsPage = async (page: Page, slug: string): Promise<stri
     }
 };
 
-// ─── MAIN DK SCRAPER ─────────────────────────────────────────────────────────
+// ─── BROWSER SINGLETON ───────────────────────────────────────────────────────
+// Reuse one Chromium process across all scrape calls — each puppeteer.launch()
+// costs ~200 MB. With this pattern only one instance ever exists at a time.
 
-const databazeKnih = async (isbn: string): Promise<object | boolean> => {
-    let browser;
-    try {
-        browser = await puppeteer.launch({
+let _browserInstance: import('puppeteer').Browser | null = null;
+let _browserInitPromise: Promise<import('puppeteer').Browser> | null = null;
+
+const getBrowser = async (): Promise<import('puppeteer').Browser> => {
+    if (_browserInstance?.isConnected()) return _browserInstance;
+    if (!_browserInitPromise) {
+        _browserInitPromise = puppeteer.launch({
             headless: true,
             args: [
                 '--no-sandbox',
@@ -514,17 +520,33 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
                 '--disable-gpu',
                 '--no-first-run',
                 '--no-zygote',
+                '--disable-extensions',
+                '--disable-background-networking',
             ],
             timeout: 0,
+        }).then(browser => {
+            _browserInstance = browser;
+            _browserInitPromise = null;
+            browser.once('disconnected', () => {
+                _browserInstance = null;
+            });
+            return browser;
+        }).catch(err => {
+            _browserInitPromise = null;
+            throw err;
         });
-    } catch (launchError) {
-        console.error("Failed to launch Puppeteer browser", launchError);
-        return false;
     }
+    return _browserInitPromise;
+};
 
+// ─── MAIN DK SCRAPER ─────────────────────────────────────────────────────────
+
+const databazeKnih = async (isbn: string): Promise<object | boolean> => {
+    let page: Page | null = null;
     try {
+        const browser = await getBrowser();
+        page = await browser.newPage();
         console.log("DK called ", isbn);
-        const page: Page = await browser.newPage();
 
         await page.setUserAgent(
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
@@ -540,7 +562,6 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         const noBookFound = await page.$("h1[class='oddown']");
         if (noBookFound) {
             console.error(`Book ${isbn} not found on DK.`);
-            await browser.close();
             return false;
         }
 
@@ -557,7 +578,6 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 
         if (!bookUrl) {
             console.error("No book result links found for ISBN", isbn);
-            await browser.close();
             return false;
         }
 
@@ -617,20 +637,21 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 
 
         // Remove translator names from the authors list
-        const translatorNames = new Set((extra.translator ?? []).map((t: string) => t.toLowerCase()));
+        const extraTranslators = extra.translator ?? [];
+        const translatorNamesLower = new Set(extraTranslators.map((t: string) => t.toLowerCase()));
         const cleanAuthors = authors
             .map(a => a.replace(' (p)', '').trim())
-            .filter(a => a && !translatorNames.has(a.toLowerCase()));
+            .filter(a => a && !translatorNamesLower.has(a.toLowerCase()));
 
         const book = {
             title,
             originalTitle,
             autor: cleanAuthors,
-            translator: Array.from(translatorNames),
+            translator: extraTranslators,
             ilustrator: extra.illustrator ?? [],
             published: {
                 publisher: publisher?.trim(),
-                year: yearOfPublish?.trim(),
+                year: (yearOfPublish ?? extra.yearOfPublish)?.trim(),
                 country: langCode,
             },
             numberOfPages: extra.numberOfPages?.trim(),
@@ -648,13 +669,13 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
             picture: imgHref,
         };
 
-        await browser.close();
         return book;
 
     } catch (error) {
         console.error("Error in databazeKnih", error);
-        await browser.close();
-        return {};
+        return false;
+    } finally {
+        await page?.close().catch(() => { });
     }
 };
 
