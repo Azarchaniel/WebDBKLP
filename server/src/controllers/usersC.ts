@@ -65,7 +65,7 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
     const newRefreshToken = jwt.sign(
         { userId: user._id },
         `${process.env.REFRESH_TOKEN_SECRET}`!,
-        { expiresIn: '3d' } // Long-lived
+        { expiresIn: '7d' } // Long-lived
     );
 
     // Persist refresh token in DB
@@ -84,7 +84,7 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        maxAge: 3 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({ user, tokenExpiresAt });
@@ -111,16 +111,16 @@ const handleRefreshToken = async (req: Request, res: Response): Promise<Response
         const newAccessToken = jwt.sign(
             { userId: decoded.userId },
             `${process.env.SECRET_KEY}`,
-            { expiresIn: '15m' }
+            { expiresIn: '3h' }
         );
 
-        const tokenExpiresAt = Math.floor(Date.now() / 1000) + 15 * 60;
+        const tokenExpiresAt = Math.floor(Date.now() / 1000) + 3 * 60 * 60;
 
         res.cookie("token", newAccessToken, {
             httpOnly: true,
             secure: true,
             sameSite: "none",
-            maxAge: 15 * 60 * 1000,
+            maxAge: 3 * 60 * 60 * 1000,
         });
 
         return res.status(200).json({ tokenExpiresAt });

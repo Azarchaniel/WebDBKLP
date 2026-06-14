@@ -24,6 +24,35 @@ const axiosInstance = axios.create({
     withCredentials: true, // Enable cookies to be sent with requests
 });
 
+// Single-flight refresh: ensures only one /refresh-token call is in flight at a time.
+let refreshInFlight: Promise<boolean> | null = null;
+
+export const tryRefreshToken = (): Promise<boolean> => {
+    if (refreshInFlight) return refreshInFlight;
+
+    refreshInFlight = (async () => {
+        try {
+            const response = await axios.post(
+                baseUrl + '/refresh-token',
+                {},
+                { withCredentials: true }
+            );
+            if (response.data?.tokenExpiresAt) {
+                localStorage.setItem('tokenExpiresAt', response.data.tokenExpiresAt.toString());
+                return true;
+            }
+            return false;
+        } catch (e) {
+            console.warn('Token refresh failed:', e);
+            return false;
+        } finally {
+            refreshInFlight = null;
+        }
+    })();
+
+    return refreshInFlight;
+};
+
 axiosInstance.interceptors.request.use(
     async (config: AxiosRequestConfig<any>): Promise<any> => {
         // Define public routes that don't need authentication
@@ -58,16 +87,7 @@ axiosInstance.interceptors.request.use(
                 const expiresAt = parseInt(tokenExpiresAt, 10);
                 const now = Date.now() / 1000;
                 if (expiresAt - now < 60) {
-                    try {
-                        // Refresh access token — server reads refreshToken cookie and sets new token cookie
-                        const response = await axios.post(baseUrl + '/refresh-token', {}, { withCredentials: true });
-                        if (response.data.tokenExpiresAt) {
-                            localStorage.setItem('tokenExpiresAt', response.data.tokenExpiresAt.toString());
-                        }
-                    } catch (e) {
-                        // Refresh failed — let the request continue; the server will 401 if needed
-                        console.warn('Proactive token refresh failed:', e);
-                    }
+                    await tryRefreshToken();
                 }
             }
         }
@@ -82,8 +102,24 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
     (response: AxiosResponse) => response,
-    (error) => {
-        if (error.response?.status === 401) {
+    async (error) => {
+        const originalRequest = error.config as (AxiosRequestConfig & { _retry?: boolean }) | undefined;
+
+        // On 401, try to refresh once and retry the original request.
+        if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+            const userStr = localStorage.getItem('user');
+            const user = userStr ? JSON.parse(userStr) : null;
+            const isGuest = user?.role === 'guest';
+            const isRefreshCall = originalRequest.url?.includes('/refresh-token');
+
+            if (!isGuest && !isRefreshCall) {
+                originalRequest._retry = true;
+                const ok = await tryRefreshToken();
+                if (ok) {
+                    return axiosInstance.request(originalRequest);
+                }
+            }
+
             console.warn("Unauthorized! Session may have expired.");
             localStorage.removeItem('user');
             localStorage.removeItem('tokenExpiresAt');
