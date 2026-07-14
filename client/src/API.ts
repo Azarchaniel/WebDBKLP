@@ -157,7 +157,7 @@ export const getBooksByIds = async (params?: any): Promise<AxiosResponse<ApiBook
     }
 }
 
-export const checkBooksUpdated = async (dataFrom?: Date): Promise<AxiosResponse<{ latestUpdate: Date }>> => {
+export const checkBooksUpdated = async (dataFrom?: Date | number): Promise<AxiosResponse<{ latestUpdate: Date }>> => {
     try {
         const response: AxiosResponse<{ latestUpdate: Date }> = await axiosInstance.get(
             baseUrl + "/books/check-updated", {

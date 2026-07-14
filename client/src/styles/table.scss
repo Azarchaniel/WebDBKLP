@@ -25,12 +25,6 @@ $table-divider-color: var(--table-divider);
         height: 0 !important;
       }
     }
-
-    .bookDimensions {
-      display: flex !important;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
   }
 
   // Header adjustments
@@ -186,6 +180,12 @@ $table-divider-color: var(--table-divider);
   width: 100%;
   color: var(--text);
 }
+
+.bookDimensions {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 
 .table-scroll-wrapper {
   overflow-x: auto;
