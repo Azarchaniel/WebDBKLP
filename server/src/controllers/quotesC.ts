@@ -54,15 +54,28 @@ const getAllQuotes = async (req: Request, res: Response): Promise<void> => {
 
         Object.assign(query, buildSearchQuery(search as string, ['text']));
 
-        const [quotes, count] = await Promise.all([
-            Quote.find(query)
-                .populate(populateOptions)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limitNum)
-                .exec(),
-            Quote.countDocuments(query)
+        const [quotePage] = await Quote.aggregate([
+            { $match: query },
+            { $sort: { createdAt: -1 } },
+            {
+                $facet: {
+                    quotes: [
+                        { $skip: skip },
+                        { $limit: limitNum },
+                        { $project: { _id: 1 } }
+                    ],
+                    count: [{ $count: "count" }]
+                }
+            }
         ]);
+
+        const quoteIds = quotePage?.quotes?.map((quote: IQuote) => quote._id) ?? [];
+        const count = quotePage?.count?.[0]?.count ?? 0;
+        const populatedQuotes = await Quote.find({ _id: { $in: quoteIds } })
+            .populate(populateOptions)
+            .exec();
+        const quotesById = new Map(populatedQuotes.map(quote => [quote._id.toString(), quote]));
+        const quotes = quoteIds.map((id: any) => quotesById.get(id.toString())).filter(Boolean);
 
         const hasMore = skip + limitNum < count;
 
