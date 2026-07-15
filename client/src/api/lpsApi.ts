@@ -34,7 +34,8 @@ export const addLP = async (formData: SavePayload<ILP>): Promise<any> => {
             (!Array.isArray(formData) && !("_id" in formData)) ||
             (Array.isArray(formData) && !formData[0]?._id)
         ) {
-            const { published, ...lpData } = formData as ILP;
+            const lpFormData = Array.isArray(formData) ? formData[0] : formData;
+            const { published, ...lpData } = lpFormData;
             const processedFormData = {
                 ...lpData,
                 published: {

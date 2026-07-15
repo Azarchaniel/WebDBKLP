@@ -9,7 +9,8 @@
     "install-server": "cd server && npm run build",
     "start-server": "cd server && npm run startProduction",
     "build-client": "cd client && npm install --legacy-peer-deps && npm run build",
-    "start-client": "cd client && npm run start"
+    "start-client": "cd client && npm run start",
+    "test": "cd client && npm run test:frontend && npm run test:types && cd ../server && npm run test:unit"
   },
   "keywords": [],
   "author": "Lubos Csonka <csonkalubos@gmail.com>",

@@ -9,7 +9,9 @@
     "start": "concurrently \"tsc -w\" \"nodemon dist/js/app.js\"",
     "debug": "concurrently \"tsc -w\" \"nodemon --inspect dist/js/app.js\"",
     "startProduction": "nodemon dist/js/app.js",
-    "cloneDb": "npx ts-node scripts/cloneDb.ts"
+    "cloneDb": "npx ts-node scripts/cloneDb.ts",
+    "test": "npm run build && node dist/js/__tests__/regression.test.js",
+    "test:unit": "tsc && node dist/js/__tests__/regression.test.js"
   },
   "keywords": [],
   "author": "",

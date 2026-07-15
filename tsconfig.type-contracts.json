@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "baseUrl": "./client/src",
+    "paths": {
+      "@styles/*": ["styles/*"],
+      "@components/*": ["components/*"],
+      "@components": ["components"],
+      "@utils": ["utils"],
+      "@utils/*": ["utils/*"],
+      "@hooks": ["utils/hooks/index.ts"]
+    },
+    "types": ["node"],
+    "typeRoots": ["./client/node_modules/@types", "./server/node_modules/@types"]
+  },
+  "include": [
+    "type-tests/**/*.ts",
+    "type-tests/**/*.d.ts",
+    "client/src/type.d.ts"
+  ],
+  "exclude": ["client/node_modules", "server/node_modules"]
+}

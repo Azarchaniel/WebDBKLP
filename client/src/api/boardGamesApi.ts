@@ -1,6 +1,6 @@
-import { ApiBoardGameDataType, ApiBookDataType } from "../type";
+import { ApiBoardGameDataType, ApiBookDataType, IBoardGameModalInput } from "../type";
 import { axiosInstance, baseUrl, BATCH_SIZE } from "./http";
-import { ApiResponse, PaginationRequest } from "./types";
+import { ApiResponse, PaginationRequest, SavePayload } from "./types";
 
 export const getBoardGames = async (params?: PaginationRequest): Promise<ApiResponse<ApiBoardGameDataType>> => {
     try {
@@ -28,7 +28,7 @@ export const getBoardGame = async (_id: string): Promise<ApiResponse<any>> => {
     }
 };
 
-export const addBoardGame = async (formData: any): Promise<any> => {
+export const addBoardGame = async (formData: SavePayload<IBoardGameModalInput>): Promise<any> => {
     try {
         if (
             (!Array.isArray(formData) && !formData._id) ||
@@ -41,7 +41,7 @@ export const addBoardGame = async (formData: any): Promise<any> => {
             const results = [];
             for (let i = 0; i < formData.length; i += BATCH_SIZE) {
                 const batch = formData.slice(i, i + BATCH_SIZE);
-                const batchPromises = batch.map(async (boardGame: any) =>
+                const batchPromises = batch.map(async (boardGame: IBoardGameModalInput) =>
                     await axiosInstance.put(`${baseUrl}/edit-boardgame/${boardGame._id}`, boardGame)
                 );
                 const batchResults = await Promise.all(batchPromises);

@@ -1268,5 +1268,6 @@ export {
     getBooksByIds,
     checkBooksUpdated,
     getPageByStartingLetter,
-    getUniqueFieldValues
+    getUniqueFieldValues,
+    normalizeBook
 }

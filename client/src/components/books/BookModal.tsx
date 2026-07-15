@@ -25,7 +25,7 @@ import { useTranslation } from "react-i18next";
 
 interface BodyProps {
     data: IBook[];
-    onChange: (data: IBook | object) => void;
+    onChange: (data: IBook[]) => void;
     error: (err: ValidationError[] | undefined) => void;
     editedLP?: IBook;
 }

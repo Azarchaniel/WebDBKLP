@@ -1,9 +1,10 @@
 import React from 'react';
 import { useModal } from '@utils/context/ModalContext';
-import { IBoardGame, ValidationError } from '../../type';
+import { IBoardGame, IBoardGameModalInput, SaveEntity, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { BoardGamesModalBody } from './BoardGamesModal';
 import { useTranslation } from "react-i18next";
+import { EMPTY_BOARD_GAME } from "@utils";
 
 /**
  * Custom hook for managing BoardGame modals with persistence across navigation
@@ -20,7 +21,7 @@ export const useBoardGameModal = () => {
      */
     const openBoardGameModal = (
         boardGames: IBoardGame[],
-        onSave: (formData: IBoardGame[] | object) => void,
+        onSave: (formData: SaveEntity<IBoardGameModalInput>) => Promise<any> | void,
         saveResultSuccess?: boolean
     ) => {
         // Generate a unique key for this modal instance
@@ -29,13 +30,13 @@ export const useBoardGameModal = () => {
             : `add-boardgame-${Date.now()}`;
 
         // Internal state for form data and validation
-        let formData: IBoardGame[] | object = boardGames || [];
+        let formData: SaveEntity<IBoardGameModalInput> = boardGames && boardGames.length ? boardGames : [EMPTY_BOARD_GAME];
         let validationErrors: ValidationError[] | undefined = undefined;
 
         const getTitle = () => boardGames.length > 0 && boardGames[0]._id ? t("boardGames.editTitle") : t("boardGames.addTitle");
 
         // Helper to render the modal with given data
-        const renderModal = (data: IBoardGame[] | object, includeRevert: boolean = true) => {
+        const renderModal = (data: SaveEntity<IBoardGameModalInput>, includeRevert: boolean = true) => {
             const dataArray = Array.isArray(data) ? data : [data as IBoardGame];
 
             showModal({
@@ -61,7 +62,7 @@ export const useBoardGameModal = () => {
         };
 
         // Handler for form changes
-        const handleChange = (data: IBoardGame[] | object) => {
+        const handleChange = (data: IBoardGameModalInput[]) => {
             formData = data;
         };
 
@@ -78,7 +79,7 @@ export const useBoardGameModal = () => {
 
         // Handler for clearing the form
         const handleClear = () => {
-            formData = [{}];
+            formData = [{ ...EMPTY_BOARD_GAME }];
             validationErrors = undefined;
             renderModal(formData);
         };

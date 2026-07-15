@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { IBoardGame, ILangCode, ValidationError } from "../../type";
+import { IBoardGame, IBoardGameModalInput, ILangCode, ValidationError } from "../../type";
 import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import { countryCode, EMPTY_BOARD_GAME, fetchAutors, fetchBoardGames } from "@utils";
 import { createNewAutor, AutorRole } from "@utils/autor";
@@ -9,8 +9,8 @@ import { getInputParams, handleInputChange } from "@utils/form";
 import { useTranslation } from "react-i18next";
 
 interface BodyProps {
-    data: IBoardGame[];
-    onChange: (data: IBoardGame[] | object) => void;
+    data: IBoardGameModalInput[];
+    onChange: (data: IBoardGameModalInput[]) => void;
     error: (err: ValidationError[] | undefined) => void;
 }
 

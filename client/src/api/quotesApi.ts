@@ -1,6 +1,6 @@
-import { ApiQuoteDataType } from "../type";
+import { ApiQuoteDataType, IQuoteModalInput } from "../type";
 import { axiosInstance, baseUrl, BATCH_SIZE } from "./http";
-import { ApiResponse } from "./types";
+import { ApiResponse, SavePayload } from "./types";
 
 export const getQuotes = async (filterByBook?: string[], activeUsers?: string[], page?: number, limit?: number, search?: string): Promise<ApiResponse<ApiQuoteDataType>> => {
     try {
@@ -28,14 +28,14 @@ export const getQuote = async (_id: string): Promise<ApiResponse<ApiQuoteDataTyp
     }
 };
 
-export const addQuote = async (formData: any): Promise<ApiResponse<ApiQuoteDataType> | any> => {
+export const addQuote = async (formData: SavePayload<IQuoteModalInput>): Promise<ApiResponse<ApiQuoteDataType> | any> => {
     try {
         if (Array.isArray(formData)) {
             const results = [];
             for (let i = 0; i < formData.length; i += BATCH_SIZE) {
                 const batch = formData.slice(i, i + BATCH_SIZE);
                 const batchPromises = batch.map(async (quoteData) => {
-                    const quote: any = {
+                    const quote = {
                         id: quoteData._id,
                         text: quoteData.text,
                         fromBook: quoteData.fromBook,
@@ -55,7 +55,7 @@ export const addQuote = async (formData: any): Promise<ApiResponse<ApiQuoteDataT
             return results;
         }
 
-        const quote: any = {
+        const quote = {
             id: formData._id,
             text: formData.text,
             fromBook: formData.fromBook,

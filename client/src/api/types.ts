@@ -35,6 +35,6 @@ export interface LoginRequest {
     password: string;
 }
 
-export type SavePayload<T> = T | T[] | object;
+export type SavePayload<T> = T | T[];
 
 export type UniqueFieldValuesResponse = Record<string, any[]>;
