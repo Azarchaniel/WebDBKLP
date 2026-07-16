@@ -65,7 +65,7 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
     const newRefreshToken = jwt.sign(
         { userId: user._id },
         `${process.env.REFRESH_TOKEN_SECRET}`!,
-        { expiresIn: '3d' } // Long-lived
+        { expiresIn: '7d' } // Long-lived
     );
 
     // Persist refresh token in DB
@@ -84,7 +84,7 @@ const loginUser = async (req: Request, res: Response): Promise<Response> => {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        maxAge: 3 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({ user, tokenExpiresAt });

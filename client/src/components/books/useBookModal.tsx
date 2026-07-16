@@ -1,5 +1,5 @@
 import { useModal } from '@utils/context/ModalContext';
-import { IBook, ValidationError } from '../../type';
+import { IBook, SaveEntity, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { BooksModalBody } from './BookModal';
 import { EMPTY_BOOK } from '@utils';
@@ -20,7 +20,7 @@ export const useBookModal = () => {
      */
     const openBookModal = (
         books: IBook[],
-        onSave: (formData: IBook | IBook[] | object) => Promise<any>,
+        onSave: (formData: SaveEntity<IBook>) => Promise<any>,
         saveResultSuccess?: boolean
     ) => {
         // Generate a unique key for this modal instance
@@ -31,7 +31,7 @@ export const useBookModal = () => {
 
         // Internal mutable container for form data and validation (kept outside React state – updates trigger manual re-showModal)
         // Initialize with original books (if any) so that an immediate save without edits preserves original data.
-        let formData: IBook[] | IBook | object = books && books.length ? books : [EMPTY_BOOK];
+        let formData: SaveEntity<IBook> = books && books.length ? books : [EMPTY_BOOK];
         let validationErrors: ValidationError[] | undefined = undefined;
         // Version to force remount of body component when clearing/reverting
         let bodyVersion = 0;
@@ -39,7 +39,7 @@ export const useBookModal = () => {
         const getTitle = () => isEdit ? t("books.editTitle") : t("books.addTitle");
 
         // Helper to (re)render the modal with provided data
-        const renderModal = (data: IBook[] | IBook | object, forceRemount: boolean = false) => {
+        const renderModal = (data: SaveEntity<IBook>, forceRemount: boolean = false) => {
             if (forceRemount) bodyVersion += 1;
             const dataArray = Array.isArray(data) ? data : [data as IBook];
 
@@ -67,7 +67,7 @@ export const useBookModal = () => {
         };
 
         // Handler for form changes
-        const handleChange = (data: IBook | IBook[] | object) => {
+        const handleChange = (data: IBook[]) => {
             formData = data;
         };
 

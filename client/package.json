@@ -33,7 +33,9 @@
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --fix"
+    "lint": "eslint . --fix",
+    "test:types": "tsc -p ../tsconfig.type-contracts.json",
+    "test:frontend": "tsc -p ../tsconfig.frontend-tests.json && node dist-tests/__tests__/frontend-basic.test.js"
   },
   "browserslist": {
     "production": [

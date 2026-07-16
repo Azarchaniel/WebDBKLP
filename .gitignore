@@ -8,6 +8,7 @@
 
 # testing
 /client/coverage
+/client/dist-tests
 
 # production
 /client/build

@@ -3,7 +3,7 @@ import diacritics from "diacritics";
 
 interface SortParam {
     id: string;
-    desc: string;
+    desc: string | boolean;
 }
 
 interface PaginationOptions {
@@ -37,7 +37,7 @@ export const parseSorting = (sorting: string | SortParam[] | undefined): { [key:
 
         sortParams.forEach((param) => {
             if (dimensions.includes(param.id)) param.id = "dimensions." + param.id;
-            sortOptions[param.id] = param.desc === "true" ? -1 : 1;
+            sortOptions[param.id] = param.desc === true || param.desc === "true" ? -1 : 1;
         });
     }
 
@@ -138,7 +138,7 @@ const dateOperatorFields = new Set(["createdAt", "updatedAt"]);
  * @param {Array<{id: string, value: string}>} filters - The filters to apply.
  * @returns {Record<string, any>} - The MongoDB filter query.
  */
-const buildFilterQuery = (filters: {
+export const buildFilterQuery = (filters: {
     id: string;
     value: string | string[];
     operator?: string
@@ -238,12 +238,23 @@ export const fetchDataWithPagination = async (
         ...lookupStages
     ];
 
-    const data = await model.aggregate([...pipeline, ...paginationPipeline]).collation({
+    const [result] = await model.aggregate([
+        ...pipeline,
+        {
+            $facet: {
+                data: paginationPipeline,
+                count: [{ $count: "count" }]
+            }
+        }
+    ]).collation({
         locale: "cs",
         strength: 2,
         numericOrdering: true
     });
-    const count = (await model.aggregate(pipeline)).length;
 
-    return { data, count, latestUpdate: latestUpdate?.updatedAt };
+    return {
+        data: result?.data ?? [],
+        count: result?.count?.[0]?.count ?? 0,
+        latestUpdate: latestUpdate?.updatedAt
+    };
 };

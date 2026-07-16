@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "baseUrl": "./client/src",
+    "paths": {
+      "@styles/*": ["styles/*"],
+      "@components/*": ["components/*"],
+      "@components": ["components"],
+      "@utils": ["utils"],
+      "@utils/*": ["utils/*"],
+      "@hooks": ["utils/hooks/index.ts"],
+      "type": ["type.d.ts"]
+    },
+    "types": ["node"],
+    "typeRoots": ["./client/node_modules/@types"],
+    "outDir": "./client/dist-tests",
+    "rootDir": "./client/src"
+  },
+  "include": [
+    "client/src/__tests__/**/*.test.ts",
+    "client/src/type.d.ts"
+  ],
+  "exclude": ["client/node_modules", "client/dist", "client/dist-tests"]
+}

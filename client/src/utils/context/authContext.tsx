@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, ReactNode, useEffect, useCallback, useMemo } from 'react';
 import { IUser } from '../../type';
+import { tryRefreshToken } from '../../API';
 
 interface AuthContextType {
     currentUser: IUser | null;
@@ -61,14 +62,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }, [checkTokenValidity]);
 
-    // Periodically check token validity
+    // Periodically check token validity, attempting a refresh before logging out
     useEffect(() => {
-        const tokenCheckInterval = setInterval(() => {
+        const tokenCheckInterval = setInterval(async () => {
+            if (isTokenCurrentlyValid()) return;
+
+            // Access token expired — for non-guest users, try refresh before clearing state.
+            const isGuest = currentUser?.role === 'guest';
+            if (currentUser && !isGuest) {
+                const ok = await tryRefreshToken();
+                if (ok) return; // refresh succeeded; tokenExpiresAt updated
+            }
+
+            // Refresh not possible or failed — clear state.
             checkTokenValidity();
         }, 60000); // Check every minute
 
         return () => clearInterval(tokenCheckInterval);
-    }, [checkTokenValidity]);
+    }, [checkTokenValidity, isTokenCurrentlyValid, currentUser]);
 
     // Login function updates state and localStorage
     const login = useCallback((userData: IUser) => {

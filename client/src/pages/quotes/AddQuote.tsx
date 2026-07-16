@@ -1,10 +1,10 @@
-import { IQuote } from "../../type";
+import { IQuote, IQuoteModalInput } from "../../type";
 import React, { useEffect, useState } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useQuoteModal } from "@components/quotes/useQuoteModal";
 
 interface Props {
-	saveQuote: (formData: IQuote | any) => void;
+	saveQuote: (formData: IQuoteModalInput) => void;
 	quote?: IQuote | undefined;
 	saveResultSuccess?: boolean;
 }

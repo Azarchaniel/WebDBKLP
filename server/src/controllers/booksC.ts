@@ -173,21 +173,26 @@ const getBooksByIds = async (req: Request, res: Response): Promise<void> => {
             { $match: query }, // Match by query (ids and search)
             createLookupStage("autors", "autor", "autor")
         ];
-        const paginationPipeline = buildPaginationPipeline(validPage, validPageSize, { title: 1 })
+        const paginationPipeline = buildPaginationPipeline(validPage, validPageSize, { title: 1 }) as PipelineStage.FacetPipelineStage[]
 
-        const books = await Book.aggregate([...pipeline, ...paginationPipeline]).collation({
+        const [result] = await Book.aggregate([
+            ...pipeline,
+            {
+                $facet: {
+                    books: paginationPipeline,
+                    count: [{ $count: "count" }]
+                }
+            }
+        ]).collation({
             locale: "cs",
             strength: 2,
             numericOrdering: true
         });
-        const count = await Book.aggregate(pipeline).collation({
-            locale: "cs",
-            strength: 2,
-            numericOrdering: true
-        }).count("count");
-        const totalCount = count[0]?.count ?? 0;
 
-        res.status(200).json({ books, count: totalCount });
+        res.status(200).json({
+            books: result?.books ?? [],
+            count: result?.count?.[0]?.count ?? 0
+        });
     } catch (error) {
         console.error("Error fetching books by ids:", error);
         res.status(500).json({ error: "Chyba pri získavaní kníh! " });
@@ -338,11 +343,11 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
         if (bookInfo) {
             res.status(200).json(bookInfo);
         } else {
-            res.status(401).json({ error: "Kniha nebola nájdená." });
+            res.status(404).json({ error: "Kniha nebola nájdená." });
         }
     } catch (err: any) {
         res.status(500).json({ error: "Chyba pri získavaní informácií o knihe! " });
-        console.error("Problem at web scrapping: ");
+        console.error("Problem at web scrapping:", err);
     }
 }
 
@@ -1263,5 +1268,6 @@ export {
     getBooksByIds,
     checkBooksUpdated,
     getPageByStartingLetter,
-    getUniqueFieldValues
+    getUniqueFieldValues,
+    normalizeBook
 }

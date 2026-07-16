@@ -42,7 +42,7 @@ export interface ILP extends IBaseType {
     note: string;
 }
 
-interface ILocation {
+export interface ILocation {
     city: any;
     shelf?: string;
 }
@@ -130,7 +130,7 @@ type AutorProps = {
     autor: IAutor
 }
 
-interface IPublished {
+export interface IPublished {
     publisher?: string;
     year?: number;
     country?: ILangCode[];
@@ -156,7 +156,7 @@ export interface ISideMenuItems {
 }
 
 interface IEditionSerie {
-    no?: number;
+    no?: string;
     title: string;
 }
 
@@ -278,7 +278,7 @@ export interface IBoardGame {
     playTime?: TRange;
     ageRecommendation?: TRange;
     published?: IPublished;
-    autor?: string[];
+    autor?: IAutor[];
     picture?: string;
     url?: string;
     note?: string;
@@ -286,7 +286,19 @@ export interface IBoardGame {
     children?: IBoardGame[];
 }
 
-export type SaveEntity<T> = T | T[] | object;
+export type SaveEntity<T> = T | T[];
+
+export type IBookModalInput = IBook;
+export type IAutorModalInput = IAutor;
+export type ILPModalInput = ILP;
+export type IBoardGameModalInput = Omit<IBoardGame, "autor" | "parent" | "children"> & {
+    autor?: IAutor[];
+    parent?: IBoardGame[];
+    children?: IBoardGame[];
+};
+export type IQuoteModalInput = Omit<IQuote, "fromBook"> & {
+    fromBook: IBook[];
+};
 
 export interface SaveEntityResult {
     success: boolean;

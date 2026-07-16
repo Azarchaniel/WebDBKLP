@@ -61,3 +61,7 @@ Use Node newer than v15 (`nvm use 18.2.0`)
 
 `tsc command not found`
 Reinstall TS (`npm install typescript -g`)
+
+`Error: listen EADDRINUSE: address already in use :::4000`
+Kill everything running on ports 3000 and 4000:
+`3000,4000 | ForEach-Object { Get-NetTCPConnection -LocalPort $_ -State Listen -ErrorAction SilentlyContinue } | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force }`

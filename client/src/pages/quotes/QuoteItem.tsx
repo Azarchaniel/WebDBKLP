@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { IQuote } from "../../type";
+import { IQuote, IQuoteModalInput } from "../../type";
 import { formPersonsFullName, stringifyUsers } from "@utils";
 import { Wysiwyg } from "@components/Wysiwyg";
 import { useAuth } from "@utils/context";
@@ -12,7 +12,7 @@ interface QuoteProps {
     quote: IQuote;
     bcgrClr: string;
     deleteQuote: (_id: string) => void;
-    saveQuote: (formData: IQuote) => void;
+    saveQuote: (formData: IQuoteModalInput) => void;
     saveResultSuccess?: boolean;
 }
 
