@@ -229,7 +229,7 @@ export default function BookPage() {
                     setLoading(false);
                 });
         } catch (err: any) {
-            toast.error(err.response?.data?.error);
+            toast.error(err?.response?.data?.error || err?.message || t("books.loadError"));
             console.error('Error fetching books:', err);
             setLoading(false);
         }

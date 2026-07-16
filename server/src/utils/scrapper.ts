@@ -2,6 +2,58 @@ import axios from 'axios';
 import Autor from '../models/autor';
 import puppeteer, { Page } from 'puppeteer';
 
+const DK_NAVIGATION_TIMEOUT_MS = 20000;
+const DK_SOURCE_TIMEOUT_MS = 50000;
+const GOOGLE_SOURCE_TIMEOUT_MS = 12000;
+
+const isObject = (value: unknown): value is Record<string, any> =>
+    typeof value === 'object' && value !== null;
+
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, sourceName: string): Promise<T> => {
+    let timeoutHandle: NodeJS.Timeout | null = null;
+    try {
+        const timeoutPromise = new Promise<never>((_, reject) => {
+            timeoutHandle = setTimeout(() => {
+                reject(new Error(`${sourceName} timed out after ${timeoutMs}ms`));
+            }, timeoutMs);
+        });
+        return await Promise.race([promise, timeoutPromise]);
+    } finally {
+        if (timeoutHandle) clearTimeout(timeoutHandle);
+    }
+};
+
+const safePageGoto = async (
+    page: Page,
+    url: string,
+    timeout = DK_NAVIGATION_TIMEOUT_MS,
+    attempts = 2
+): Promise<boolean> => {
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+        try {
+            await page.goto(url, {
+                waitUntil: 'domcontentloaded',
+                timeout,
+            });
+            return true;
+        } catch (error) {
+            const isLastAttempt = attempt === attempts;
+            const err = error as any;
+            const isTimeoutError = err?.name === 'TimeoutError' || `${err?.message ?? ''}`.includes('timeout');
+            if (isLastAttempt) {
+                console.error(`Navigation failed for ${url}`, err?.message ?? err);
+                return false;
+            }
+            if (!isTimeoutError) {
+                console.warn(`Navigation attempt ${attempt} failed for ${url}, retrying once.`);
+            } else {
+                console.warn(`Navigation timeout for ${url}, retrying (${attempt}/${attempts}).`);
+            }
+        }
+    }
+    return false;
+};
+
 enum GoodReadsRoles {
     AUTHOR = "",
     EDITOR = "Editor",
@@ -69,7 +121,7 @@ const filterAuthorsFromGR = (authors: any[], role: GoodReadsRoles): string[] => 
 
 const getAuthorsIDandUnique = async (authors: string[]) => {
     try {
-        if (!authors) return;
+        if (!authors || !Array.isArray(authors) || authors.length === 0) return [];
 
         const foundAuthors = [];
 
@@ -92,7 +144,10 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
                 lastName = splitted[splitted?.length - 1];
             }
 
-            if (!lastName || firstName.includes("*") || firstName === "kolektiv") return;
+            firstName = firstName ?? "";
+            lastName = lastName ?? "";
+
+            if (!lastName || firstName.includes("*") || firstName.toLowerCase() === "kolektiv") continue;
 
             let queryOptions: any[] = [
                 {
@@ -132,6 +187,7 @@ const getAuthorsIDandUnique = async (authors: string[]) => {
         );
     } catch (err) {
         console.error("Cannot get author from webScrapping", err);
+        return [];
     }
 };
 
@@ -465,10 +521,9 @@ const expandAndScrapeViceInfo = async (page: Page): Promise<{
  */
 const fetchIsbnFromEditionsPage = async (page: Page, slug: string): Promise<string | undefined> => {
     try {
-        await page.goto(
-            `https://www.databazeknih.cz/dalsi-vydani/${slug}`,
-            { waitUntil: 'domcontentloaded', timeout: 15000 }
-        );
+        const editionsUrl = `https://www.databazeknih.cz/dalsi-vydani/${slug}`;
+        const loaded = await safePageGoto(page, editionsUrl, DK_NAVIGATION_TIMEOUT_MS, 2);
+        if (!loaded) return undefined;
 
         return page.evaluate(() => {
             // Scan text nodes for "ISBN: …"
@@ -544,138 +599,154 @@ const getBrowser = async (): Promise<import('puppeteer').Browser> => {
 const databazeKnih = async (isbn: string): Promise<object | boolean> => {
     let page: Page | null = null;
     try {
-        const browser = await getBrowser();
-        page = await browser.newPage();
-        console.log("DK called ", isbn);
+        return await withTimeout((async () => {
+            const browser = await getBrowser();
+            page = await browser.newPage();
+            console.log("DK called ", isbn);
 
-        await page.setUserAgent(
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
-            '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        );
-
-        // Step 1: search by ISBN
-        await page.goto('https://www.databazeknih.cz/search?q=' + isbn, {
-            waitUntil: 'domcontentloaded',
-            timeout: 30000,
-        });
-
-        const noBookFound = await page.$("h1[class='oddown']");
-        if (noBookFound) {
-            console.error(`Book ${isbn} not found on DK.`);
-            return false;
-        }
-
-        // Step 2: extract the book URL from the search results and navigate directly.
-        // We avoid page.click() entirely — it requires the element to be visible and
-        // in the viewport, which is fragile. page.goto() with the extracted href is reliable.
-        const bookUrl: string | null = await page.evaluate(() => {
-            // Prefer /prehled-knihy/ links; fall back to /knihy/ links.
-            const prehled = document.querySelector('a[href*="/prehled-knihy/"]') as HTMLAnchorElement | null;
-            if (prehled) return prehled.href;
-            const knihy = document.querySelector('a[href*="/knihy/"]') as HTMLAnchorElement | null;
-            return knihy ? knihy.href : null;
-        });
-
-        if (!bookUrl) {
-            console.error("No book result links found for ISBN", isbn);
-            return false;
-        }
-
-        // Always land on the /prehled-knihy/ overview — convert /knihy/ URLs if needed, strip hash
-        const overviewUrl = (bookUrl.includes('/knihy/') && !bookUrl.includes('/prehled-knihy/')
-            ? bookUrl.replace('/knihy/', '/prehled-knihy/')
-            : bookUrl).split('#')[0];
-
-        await page.goto(overviewUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
-
-        const slugMatch = overviewUrl.match(/\/prehled-knihy\/([^/?#]+)/);
-        const slug = slugMatch ? slugMatch[1] : '';
-
-        // Step 3: scrape the overview page
-        const title = await extractTitle(page);
-        const yearOfPublish = await extractYear(page);
-        const publisher = await extractPublisher(page);
-        const series = await extractSeries(page);
-        const originalTitle = await extractOriginalTitle(page);
-
-        // Authors: first /autori/ link on the page is the primary author.
-        // After expanding "více info...", translator links also appear under /autori/,
-        // so we grab only the author(s) visible BEFORE the toggle fires.
-        const authors: string[] = await page.evaluate(() =>
-            Array.from(document.querySelectorAll('a[href*="/autori/"]'))
-                .slice(0, 3) // generous upper bound — translator deduplicated later
-                .map(el => el.textContent?.trim() ?? '')
-                .filter(Boolean)
-        );
-
-        // ISBN from antikvariát link href — fastest, no extra request
-        let isbnFound = await extractIsbnFromAntikvariat(page);
-
-        // Cover image
-        let imgHref = '';
-        try {
-            imgHref = await page.$eval(
-                'img[src*="/img/books/"]',
-                el => (el as HTMLImageElement).src
+            await page.setUserAgent(
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+                '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             );
-        } catch {
-            console.log("Book cover image not found");
-        }
 
-        // Step 4: expand "více info..." and extract hidden fields
-        const extra = await expandAndScrapeViceInfo(page);
+            // Step 1: search by ISBN
+            const searchUrl = 'https://www.databazeknih.cz/search?q=' + encodeURIComponent(isbn);
+            const searchLoaded = await safePageGoto(page, searchUrl, DK_NAVIGATION_TIMEOUT_MS, 2);
+            if (!searchLoaded) {
+                console.error(`DK search page failed for ISBN ${isbn}`);
+                return false;
+            }
 
-        // Step 5: ISBN fallback — check /dalsi-vydani/ page
-        if (!isbnFound && slug) {
-            isbnFound = await fetchIsbnFromEditionsPage(page, slug);
-        }
+            const noBookFound = await page.evaluate(() => {
+                const text = document.body?.innerText?.toLowerCase() ?? '';
+                return text.includes('nic nenalezeno') || text.includes('nenalezeno') || text.includes('žádný výsledek');
+            });
+            if (noBookFound) {
+                console.error(`Book ${isbn} not found on DK.`);
+                return false;
+            }
 
-        // Step 6: assemble result
-        const langCode = extra.language
-            ? [mapDBKlanguageToLangCode(extra.language)]
-            : [];
+            // Step 2: extract the book URL from the search results and navigate directly.
+            // We avoid page.click() entirely — it requires the element to be visible and
+            // in the viewport, which is fragile. page.goto() with the extracted href is reliable.
+            const bookUrl: string | null = await page.evaluate(() => {
+                // Prefer /prehled-knihy/ links; fall back to /knihy/ links.
+                const prehled = document.querySelector('a[href*="/prehled-knihy/"]') as HTMLAnchorElement | null;
+                if (prehled) return prehled.href;
+                const knihy = document.querySelector('a[href*="/knihy/"]') as HTMLAnchorElement | null;
+                if (knihy) return knihy.href;
+                const anyBook = document.querySelector('a[href*="/kniha/"]') as HTMLAnchorElement | null;
+                return anyBook ? anyBook.href : null;
+            });
+
+            if (!bookUrl) {
+                console.error("No book result links found for ISBN", isbn);
+                return false;
+            }
+
+            // Always land on the /prehled-knihy/ overview — convert /knihy/ URLs if needed, strip hash
+            const overviewUrl = (bookUrl.includes('/knihy/') && !bookUrl.includes('/prehled-knihy/')
+                ? bookUrl.replace('/knihy/', '/prehled-knihy/')
+                : bookUrl).split('#')[0];
+
+            const overviewLoaded = await safePageGoto(page, overviewUrl, DK_NAVIGATION_TIMEOUT_MS, 2);
+            if (!overviewLoaded) {
+                console.error(`DK overview page failed for ISBN ${isbn}`);
+                return false;
+            }
+
+            const slugMatch = overviewUrl.match(/\/prehled-knihy\/([^/?#]+)/);
+            const slug = slugMatch ? slugMatch[1] : '';
+
+            // Step 3: scrape the overview page
+            const title = await extractTitle(page);
+            const yearOfPublish = await extractYear(page);
+            const publisher = await extractPublisher(page);
+            const series = await extractSeries(page);
+            const originalTitle = await extractOriginalTitle(page);
+
+            // Authors: first /autori/ link on the page is the primary author.
+            // After expanding "více info...", translator links also appear under /autori/,
+            // so we grab only the author(s) visible BEFORE the toggle fires.
+            const authors: string[] = await page.evaluate(() =>
+                Array.from(document.querySelectorAll('a[href*="/autori/"]'))
+                    .slice(0, 3)
+                    .map(el => el.textContent?.trim() ?? '')
+                    .filter(Boolean)
+            );
+
+            // ISBN from antikvariát link href — fastest, no extra request
+            let isbnFound = await extractIsbnFromAntikvariat(page);
+
+            // Cover image
+            let imgHref = '';
+            try {
+                imgHref = await page.$eval(
+                    'img[src*="/img/books/"]',
+                    el => (el as HTMLImageElement).src
+                );
+            } catch {
+                console.log("Book cover image not found");
+            }
+
+            // Step 4: expand "více info..." and extract hidden fields
+            const extra = await expandAndScrapeViceInfo(page);
+
+            // Step 5: ISBN fallback — check /dalsi-vydani/ page
+            if (!isbnFound && slug) {
+                isbnFound = await fetchIsbnFromEditionsPage(page, slug);
+            }
+
+            // Step 6: assemble result
+            const langCode = extra.language
+                ? [mapDBKlanguageToLangCode(extra.language)]
+                : [];
 
 
-        // Remove translator names from the authors list
-        const extraTranslators = extra.translator ?? [];
-        const translatorNamesLower = new Set(extraTranslators.map((t: string) => t.toLowerCase()));
-        const cleanAuthors = authors
-            .map(a => a.replace(' (p)', '').trim())
-            .filter(a => a && !translatorNamesLower.has(a.toLowerCase()));
+            // Remove translator names from the authors list
+            const extraTranslators = extra.translator ?? [];
+            const translatorNamesLower = new Set(extraTranslators.map((t: string) => t.toLowerCase()));
+            const cleanAuthors = authors
+                .map(a => a.replace(' (p)', '').trim())
+                .filter(a => a && !translatorNamesLower.has(a.toLowerCase()));
 
-        const book = {
-            title,
-            originalTitle,
-            autor: cleanAuthors,
-            translator: extraTranslators,
-            ilustrator: extra.illustrator ?? [],
-            published: {
-                publisher: publisher?.trim(),
-                year: (yearOfPublish ?? extra.yearOfPublish)?.trim(),
-                country: langCode,
-            },
-            numberOfPages: extra.numberOfPages?.trim(),
-            ISBN: isbnFound?.trim(),
-            language: langCode,
-            serie: {
-                title: series.title,
-                no: series.no,
-            },
-            edition: {
-                title: extra.editionTitle?.trim(),
-                no: extra.editionNo ?? '',
-            },
-            hrefDatabazeKnih: overviewUrl.split('#')[0],
-            picture: imgHref,
-        };
+            const book = {
+                title,
+                originalTitle,
+                autor: cleanAuthors,
+                translator: extraTranslators,
+                ilustrator: extra.illustrator ?? [],
+                published: {
+                    publisher: publisher?.trim(),
+                    year: (yearOfPublish ?? extra.yearOfPublish)?.trim(),
+                    country: langCode,
+                },
+                numberOfPages: extra.numberOfPages?.trim(),
+                ISBN: isbnFound?.trim(),
+                language: langCode,
+                serie: {
+                    title: series.title,
+                    no: series.no,
+                },
+                edition: {
+                    title: extra.editionTitle?.trim(),
+                    no: extra.editionNo ?? '',
+                },
+                hrefDatabazeKnih: overviewUrl.split('#')[0],
+                picture: imgHref,
+            };
 
-        return book;
+            return book;
+        })(), DK_SOURCE_TIMEOUT_MS, 'databazeKnih');
 
     } catch (error) {
         console.error("Error in databazeKnih", error);
         return false;
     } finally {
-        await page?.close().catch(() => { });
+        const pageToClose = page as unknown as Page | null;
+        if (pageToClose) {
+            await pageToClose.close().catch(() => { });
+        }
     }
 };
 
@@ -683,80 +754,78 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 
 const fetchGoogleBook = async (isbn: string, attempt = 1): Promise<object | boolean> => {
     try {
-        console.info("Google Books API called ", isbn);
-        const googleBooksApiKey = process.env.GOOGLE_BOOKS_API_KEY;
-        if (!googleBooksApiKey) {
-            console.warn('GOOGLE_BOOKS_API_KEY is missing at runtime; request will be sent without key.');
-        }
-        const searchParams = new URLSearchParams({
-            q: `isbn:${isbn}`,
-            ...(googleBooksApiKey ? { key: googleBooksApiKey } : {}),
-        });
-
-        const response = await axios.get(`https://www.googleapis.com/books/v1/volumes`, {
-            params: { q: `isbn:${isbn}`, ...(googleBooksApiKey ? { key: googleBooksApiKey } : {}) },
-            timeout: 5000,
-        });
-
-        if (!response.data || response.data.totalItems === 0) {
-            console.error(`Book with ISBN ${isbn} not found in Google Books`);
-            return false;
-        }
-
-        const bookData = response.data.items[0];
-        let volumeInfo = bookData.volumeInfo;
-
-        try {
-            const detailedResponse = await axios.get(
-                `https://www.googleapis.com/books/v1/volumes/${bookData.id}`,
-                {
-                    params: { ...(googleBooksApiKey ? { key: googleBooksApiKey } : {}) },
-                    timeout: 5000,
-                }
-            );
-            if (detailedResponse.data?.volumeInfo) {
-                volumeInfo = { ...volumeInfo, ...detailedResponse.data.volumeInfo };
+        return await withTimeout((async () => {
+            console.info("Google Books API called ", isbn);
+            const googleBooksApiKey = process.env.GOOGLE_BOOKS_API_KEY;
+            if (!googleBooksApiKey) {
+                console.warn('GOOGLE_BOOKS_API_KEY is missing at runtime; request will be sent without key.');
             }
-        } catch {
-            console.log(`Could not fetch detailed info for volume ${bookData.id}`);
-        }
 
-        const isbnIdentifier =
-            volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
-            ?? volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_10')?.identifier
-            ?? isbn;
+            const response = await axios.get(`https://www.googleapis.com/books/v1/volumes`, {
+                params: { q: `isbn:${isbn}`, ...(googleBooksApiKey ? { key: googleBooksApiKey } : {}) },
+                timeout: 5000,
+            });
 
-        const languageCode = volumeInfo.language ? [volumeInfo.language] : [];
-        const year = volumeInfo.publishedDate?.split('-')[0] || '';
-        const imageUrl = volumeInfo.imageLinks?.thumbnail || volumeInfo.imageLinks?.smallThumbnail || '';
+            if (!response.data || response.data.totalItems === 0) {
+                console.error(`Book with ISBN ${isbn} not found in Google Books`);
+                return false;
+            }
 
-        const dimensions: any = {};
-        if (volumeInfo.dimensions) {
-            if (volumeInfo.dimensions.height) dimensions.height = parseFloat(volumeInfo.dimensions.height);
-            if (volumeInfo.dimensions.width) dimensions.width = parseFloat(volumeInfo.dimensions.width);
-            if (volumeInfo.dimensions.thickness) dimensions.thickness = parseFloat(volumeInfo.dimensions.thickness);
-        }
+            const bookData = response.data.items[0];
+            let volumeInfo = bookData.volumeInfo;
 
-        const book = {
-            title: volumeInfo.title || '',
-            subtitle: volumeInfo.subtitle || '',
-            autor: volumeInfo.authors || [],
-            published: {
-                publisher: volumeInfo.publisher || '',
-                year,
-                country: languageCode,
-            },
-            numberOfPages: (volumeInfo.printedPageCount || volumeInfo.pageCount)?.toString() || '',
-            ISBN: isbnIdentifier,
-            language: languageCode,
-            categories: volumeInfo.categories || [],
-            ...(Object.keys(dimensions).length > 0 && { dimensions }),
-            picture: imageUrl,
-            hrefGoogleBooks: volumeInfo.infoLink || '',
-            previewLink: volumeInfo.previewLink || '',
-        };
+            try {
+                const detailedResponse = await axios.get(
+                    `https://www.googleapis.com/books/v1/volumes/${bookData.id}`,
+                    {
+                        params: { ...(googleBooksApiKey ? { key: googleBooksApiKey } : {}) },
+                        timeout: 5000,
+                    }
+                );
+                if (detailedResponse.data?.volumeInfo) {
+                    volumeInfo = { ...volumeInfo, ...detailedResponse.data.volumeInfo };
+                }
+            } catch {
+                console.log(`Could not fetch detailed info for volume ${bookData.id}`);
+            }
 
-        return book;
+            const isbnIdentifier =
+                volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_13')?.identifier
+                ?? volumeInfo.industryIdentifiers?.find((id: any) => id.type === 'ISBN_10')?.identifier
+                ?? isbn;
+
+            const languageCode = volumeInfo.language ? [volumeInfo.language] : [];
+            const year = volumeInfo.publishedDate?.split('-')[0] || '';
+            const imageUrl = volumeInfo.imageLinks?.thumbnail || volumeInfo.imageLinks?.smallThumbnail || '';
+
+            const dimensions: any = {};
+            if (volumeInfo.dimensions) {
+                if (volumeInfo.dimensions.height) dimensions.height = parseFloat(volumeInfo.dimensions.height);
+                if (volumeInfo.dimensions.width) dimensions.width = parseFloat(volumeInfo.dimensions.width);
+                if (volumeInfo.dimensions.thickness) dimensions.thickness = parseFloat(volumeInfo.dimensions.thickness);
+            }
+
+            const book = {
+                title: volumeInfo.title || '',
+                subtitle: volumeInfo.subtitle || '',
+                autor: volumeInfo.authors || [],
+                published: {
+                    publisher: volumeInfo.publisher || '',
+                    year,
+                    country: languageCode,
+                },
+                numberOfPages: (volumeInfo.printedPageCount || volumeInfo.pageCount)?.toString() || '',
+                ISBN: isbnIdentifier,
+                language: languageCode,
+                categories: volumeInfo.categories || [],
+                ...(Object.keys(dimensions).length > 0 && { dimensions }),
+                picture: imageUrl,
+                hrefGoogleBooks: volumeInfo.infoLink || '',
+                previewLink: volumeInfo.previewLink || '',
+            };
+
+            return book;
+        })(), GOOGLE_SOURCE_TIMEOUT_MS, 'googleBooks');
 
     } catch (error: any) {
         if (error.code === 'ECONNABORTED') {
@@ -783,18 +852,21 @@ const fetchGoogleBook = async (isbn: string, attempt = 1): Promise<object | bool
 export const webScrapper = async (isbn: string): Promise<any> => {
     const originalIsbn = isbn;
     const googleIsbn = originalIsbn;
-    isbn = isbn.replace(/[^0-9X]/gi, '');
+    const normalizedIsbn = isbn.replace(/[^0-9X]/gi, '');
 
-    const results = await Promise.allSettled([databazeKnih(isbn), fetchGoogleBook(googleIsbn)]);
+    const results = await Promise.allSettled([
+        databazeKnih(normalizedIsbn),
+        fetchGoogleBook(googleIsbn),
+    ]);
 
-    const dkBook = results[0].status === 'fulfilled' ? results[0].value : null;
-    const googleBook = results[1].status === 'fulfilled' ? results[1].value : null;
+    const dkBook = (results[0].status === 'fulfilled' && isObject(results[0].value)) ? results[0].value : null;
+    const googleBook = (results[1].status === 'fulfilled' && isObject(results[1].value)) ? results[1].value : null;
 
     if (!dkBook) console.error('Failed to fetch data from databazeKnih');
     if (!googleBook) console.error('Failed to fetch data from Google Books');
 
     if (!dkBook && !googleBook) {
-        console.error("Book not found in any source", isbn);
+        console.error("Book not found in any source", normalizedIsbn);
         return false;
     }
 
@@ -802,14 +874,26 @@ export const webScrapper = async (isbn: string): Promise<any> => {
         ? mergeObjects(googleBook, dkBook)
         : (dkBook || googleBook);
 
+    if (!isObject(mergedBook)) {
+        console.error("Merged book result is not an object", normalizedIsbn);
+        return false;
+    }
+
     mergedBook.ISBN = mergedBook?.ISBN?.includes('-') ? mergedBook.ISBN : originalIsbn;
+
+    const [autor, translator, ilustrator, editor] = await Promise.all([
+        getAuthorsIDandUnique(Array.isArray(mergedBook.autor) ? mergedBook.autor : []),
+        getAuthorsIDandUnique(Array.isArray(mergedBook.translator) ? mergedBook.translator : []),
+        getAuthorsIDandUnique(Array.isArray(mergedBook.ilustrator) ? mergedBook.ilustrator : []),
+        getAuthorsIDandUnique(Array.isArray(mergedBook.editor) ? mergedBook.editor : []),
+    ]);
 
     const finalBook = {
         ...mergedBook,
-        autor: await getAuthorsIDandUnique(mergedBook.autor),
-        translator: await getAuthorsIDandUnique(mergedBook.translator),
-        ilustrator: await getAuthorsIDandUnique(mergedBook.ilustrator),
-        editor: await getAuthorsIDandUnique(mergedBook.editor),
+        autor,
+        translator,
+        ilustrator,
+        editor,
     };
 
     return trimNestedStrings(finalBook);

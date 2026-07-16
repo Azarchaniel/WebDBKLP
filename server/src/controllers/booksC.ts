@@ -338,11 +338,11 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
         if (bookInfo) {
             res.status(200).json(bookInfo);
         } else {
-            res.status(401).json({ error: "Kniha nebola nájdená." });
+            res.status(404).json({ error: "Kniha nebola nájdená." });
         }
     } catch (err: any) {
         res.status(500).json({ error: "Chyba pri získavaní informácií o knihe! " });
-        console.error("Problem at web scrapping: ");
+        console.error("Problem at web scrapping:", err);
     }
 }
 
