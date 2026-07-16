@@ -111,16 +111,16 @@ const handleRefreshToken = async (req: Request, res: Response): Promise<Response
         const newAccessToken = jwt.sign(
             { userId: decoded.userId },
             `${process.env.SECRET_KEY}`,
-            { expiresIn: '3h' }
+            { expiresIn: '15m' }
         );
 
-        const tokenExpiresAt = Math.floor(Date.now() / 1000) + 3 * 60 * 60;
+        const tokenExpiresAt = Math.floor(Date.now() / 1000) + 15 * 60;
 
         res.cookie("token", newAccessToken, {
             httpOnly: true,
             secure: true,
             sameSite: "none",
-            maxAge: 3 * 60 * 60 * 1000,
+            maxAge: 15 * 60 * 1000,
         });
 
         return res.status(200).json({ tokenExpiresAt });
