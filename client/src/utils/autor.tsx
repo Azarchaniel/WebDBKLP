@@ -35,7 +35,7 @@ export const createNewAutor = async (
     }
 
     try {
-        const res = await addAutor([{ firstName, lastName, role: [{ value: role }] }]);
+        const res = await addAutor([{ _id: "", firstName, lastName, role: role ? [{ value: role, showValue: role }] : undefined }]);
         if (res.status === 201 && res.data?.autor?._id) {
             toast.success(i18n.t("autors.createdSuccess"), { autoClose: 3000 });
             if (setFormData) {

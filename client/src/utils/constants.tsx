@@ -1,5 +1,5 @@
 import { SortingState } from "@tanstack/react-table";
-import { IAutor, IBoardGame, IBook, ILP } from "type";
+import { IAutor, IBoardGame, IBook, ILP, IQuoteModalInput } from "type";
 
 export const TABLE_HEADER_COLOR = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
@@ -106,4 +106,12 @@ export const EMPTY_BOARD_GAME: IBoardGame = {
     note: "",
     parent: [],
     children: [],
+};
+export const EMPTY_QUOTE: IQuoteModalInput = {
+    _id: "",
+    text: "",
+    fromBook: [],
+    pageNo: undefined,
+    note: "",
+    owner: [],
 };

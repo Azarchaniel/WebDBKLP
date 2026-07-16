@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
-import { countryCode, langCode, fetchAutors, formPersonsFullName, getPublishedCountry } from "@utils";
+import { countryCode, EMPTY_LP, langCode, fetchAutors, formPersonsFullName, getPublishedCountry } from "@utils";
 import { ILangCode, ILP, ValidationError } from "../../type";
 import { InputField, LazyLoadMultiselect } from "@components/inputs";
 import "@styles/LpPage.scss";
@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 
 interface BodyProps {
     data: ILP[];
-    onChange: (data: ILP[] | object) => void;
+    onChange: (data: ILP[]) => void;
     error: (err: ValidationError[] | undefined) => void;
     editedLP?: ILP;
 }
@@ -20,7 +20,7 @@ interface BodyProps {
 export const LPsModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
     const { t } = useTranslation();
     const [formData, setFormData] = useState(
-        Array.isArray(data) && data.length > 0 ? data : [{}]
+        Array.isArray(data) && data.length > 0 ? data : [EMPTY_LP]
     );
     const [errors, setErrors] = useState<ValidationError[]>([
         { label: t("validation.lpTitleRequired"), target: "title" }

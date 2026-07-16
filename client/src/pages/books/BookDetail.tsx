@@ -53,11 +53,13 @@ const BookDetail: React.FC<Props> = React.memo(({ data }) => {
         return (
             <tr>
                 <td><b>{t("bookDetail.dimensions")}:</b></td>
-                <td className="bookDimensions">
-                    <span>{t("bookDetail.height")}: {formatDimension(dimensions.height, t('common.locale')) ?? "-"} cm</span>
-                    <span>{t("bookDetail.width")}: {formatDimension(dimensions.width, t('common.locale')) ?? "-"} cm</span>
-                    <span>{t("bookDetail.thickness")}: {formatDimension(dimensions.thickness, t('common.locale')) ?? "-"} cm</span>
-                    {dimensions.weight && <span>{t("bookDetail.weight")}: {formatDimension(dimensions.weight, t('common.locale')) ?? "-"} g</span>}
+                <td>
+                    <div className="bookDimensions">
+                        <span>{t("bookDetail.height")}: {formatDimension(dimensions.height, t('common.locale')) ?? "-"} cm</span>
+                        <span>{t("bookDetail.width")}: {formatDimension(dimensions.width, t('common.locale')) ?? "-"} cm</span>
+                        <span>{t("bookDetail.thickness")}: {formatDimension(dimensions.thickness, t('common.locale')) ?? "-"} cm</span>
+                        {dimensions.weight && <span>{t("bookDetail.weight")}: {formatDimension(dimensions.weight, t('common.locale')) ?? "-"} g</span>}
+                    </div>
                 </td>
             </tr>
         );

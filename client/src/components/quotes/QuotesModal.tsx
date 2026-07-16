@@ -1,4 +1,4 @@
-import { IQuote, ValidationError } from "../../type";
+import { IQuote, IQuoteModalInput, ValidationError } from "../../type";
 import React, { useCallback, useEffect, useState } from "react";
 import { showError } from "../Modal";
 import { InputField, LazyLoadMultiselect } from "@components/inputs";
@@ -8,8 +8,8 @@ import TextArea from "@components/inputs/TextArea";
 import { useTranslation } from "react-i18next";
 
 interface BodyProps {
-    data: IQuote | object;
-    onChange: (data: IQuote | object) => void;
+    data: IQuoteModalInput;
+    onChange: (data: IQuoteModalInput) => void;
     error: (err: ValidationError[] | undefined) => void;
     editedQuote?: IQuote;
 }
@@ -23,7 +23,7 @@ interface ButtonsProps {
 
 export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: BodyProps) => {
     const { t } = useTranslation();
-    const [formData, setFormData] = useState<IQuote | any>(data);
+    const [formData, setFormData] = useState<IQuoteModalInput>(data);
     const [errors, setErrors] = useState<ValidationError[]>([
         { label: t("validation.quoteTextRequired"), target: "text" },
         { label: t("validation.quoteBookRequired"), target: "fromBook" }
@@ -37,26 +37,32 @@ export const QuotesModalBody: React.FC<BodyProps> = ({ data, onChange, error }: 
     useEffect(() => {
         if (!data) return;
         if (Object.keys(data).length === 0 && data.constructor === Object) {
-            setFormData(data);
+            setFormData(data as IQuoteModalInput);
             return;
         }
-        const typedData = data as IQuote;
+        const typedData = data;
+        const fromBooks = Array.isArray(typedData.fromBook)
+            ? typedData.fromBook
+            : typedData.fromBook ? [typedData.fromBook] : [];
         const enrichedData = {
             ...typedData,
-            fromBook: typedData.fromBook ? [{
-                ...typedData.fromBook, showName: `${typedData.fromBook.title} 
-					${typedData.fromBook.autor && typedData.fromBook.autor[0] && typedData.fromBook.autor[0].firstName ? "/ " + typedData.fromBook.autor[0].firstName : ""} 
-					${typedData.fromBook.autor && typedData.fromBook.autor[0] && typedData.fromBook.autor[0].lastName ? typedData.fromBook.autor[0].lastName : ""} 
-					${typedData.fromBook.published && typedData.fromBook.published?.year ? "/ " + typedData.fromBook.published?.year : ""}`
-            }] : [],
-            owner: formPersonsFullName((data as IQuote)?.owner)
+            fromBook: fromBooks.map(book => ({
+                ...book,
+                showName: [
+                    book.title,
+                    book.autor?.[0]?.firstName ? `/ ${book.autor[0].firstName}` : "",
+                    book.autor?.[0]?.lastName ?? "",
+                    book.published?.year ? `/ ${book.published.year}` : ""
+                ].filter(Boolean).join(" ")
+            })),
+            owner: formPersonsFullName(data.owner)
         };
-        setFormData(enrichedData);
+        setFormData(enrichedData as IQuoteModalInput);
     }, [data]);
 
     //ERROR HANDLING
     useEffect(() => {
-        const data = (formData as unknown as IQuote);
+        const data = formData;
 
         let localErrors: ValidationError[] = [];
 

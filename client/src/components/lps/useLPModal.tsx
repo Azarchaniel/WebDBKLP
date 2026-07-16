@@ -1,9 +1,10 @@
 import React from 'react';
 import { useModal } from '@utils/context/ModalContext';
-import { ILP, ValidationError } from '../../type';
+import { ILP, SaveEntity, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { LPsModalBody } from './LPsModal';
 import { useTranslation } from "react-i18next";
+import { EMPTY_LP } from "@utils";
 
 /**
  * Custom hook for managing LP modals with persistence across navigation
@@ -20,7 +21,7 @@ export const useLPModal = () => {
      */
     const openLPModal = (
         lps: ILP[],
-        onSave: (formData: ILP[] | ILP | object) => void,
+        onSave: (formData: SaveEntity<ILP>) => Promise<any>,
         saveResultSuccess?: boolean
     ) => {
         // Generate a unique key for this modal instance
@@ -29,13 +30,13 @@ export const useLPModal = () => {
             : `add-lp-${Date.now()}`;
 
         // Internal state for form data and validation
-        let formData: ILP[] | ILP | object = lps || [];
+        let formData: SaveEntity<ILP> = lps && lps.length ? lps : [EMPTY_LP];
         let validationErrors: ValidationError[] | undefined = undefined;
 
         const getTitle = () => lps.length > 0 && lps[0]._id ? t("lp.editTitle") : t("lp.addTitle");
 
         // Helper to render the modal with given data
-        const renderModal = (data: ILP[] | ILP | object) => {
+        const renderModal = (data: SaveEntity<ILP>) => {
             const dataArray = Array.isArray(data) ? data : [data as ILP];
 
             showModal({
@@ -61,7 +62,7 @@ export const useLPModal = () => {
         };
 
         // Handler for form changes
-        const handleChange = (data: ILP[] | ILP | object) => {
+        const handleChange = (data: ILP[]) => {
             formData = data;
         };
 
@@ -78,7 +79,7 @@ export const useLPModal = () => {
 
         // Handler for clearing the form
         const handleClear = () => {
-            formData = [{}] as ILP[];
+            formData = [{ ...EMPTY_LP }];
             validationErrors = undefined;
             renderModal(formData);
         };

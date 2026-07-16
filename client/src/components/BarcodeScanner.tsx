@@ -209,7 +209,11 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                     customKey="barcode-scanner"
                     title={t("barcode.title")}
                     onClose={handleCloseClick}
-                    overrideStyle={{ minWidth: '600px', maxWidth: '800px' }}
+                    overrideStyle={{
+                        width: 'min(800px, calc(100vw - 10px))',
+                        minWidth: 'min(600px, calc(100vw - 10px))',
+                        maxWidth: 'calc(100vw - 10px)'
+                    }}
                     body={
                         <div className="barcodeScannerModalBody">
                             <div className="videoWrapper">

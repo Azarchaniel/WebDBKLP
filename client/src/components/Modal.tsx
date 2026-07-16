@@ -207,11 +207,13 @@ export const Modal: React.FC<ModalProps> = ({
 
         const rect = modalRef.current.getBoundingClientRect();
         const centeredX = Math.max(PADDING, (window.innerWidth - rect.width) / 2);
-        const centeredY = Math.max(PADDING, (window.innerHeight - rect.height) / 2);
+        const initialY = customKey === "barcode-scanner"
+            ? PADDING
+            : Math.max(PADDING, (window.innerHeight - rect.height) / 2);
 
-        setPosition({ x: centeredX, y: centeredY });
+        setPosition({ x: centeredX, y: initialY });
         setInitialized(true);
-    }, [hasExplicitPosition, setPosition]);
+    }, [customKey, hasExplicitPosition, setPosition]);
 
     // If an explicit position arrives later (e.g., from context), mark initialized
     useEffect(() => {
@@ -331,7 +333,6 @@ export const Modal: React.FC<ModalProps> = ({
         </div>
     );
 };
-
 export const showError = (error: string | any[] | undefined) => {
     if (!error || (Array.isArray(error) && error.length === 0)) return null;
 

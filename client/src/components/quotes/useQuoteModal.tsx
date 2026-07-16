@@ -1,9 +1,10 @@
 import React, { useCallback, useMemo } from 'react';
 import { useModal } from '@utils/context/ModalContext';
-import { IQuote, ValidationError } from '../../type';
+import { IQuote, IQuoteModalInput, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { QuotesModalBody } from './QuotesModal';
 import { useTranslation } from "react-i18next";
+import { EMPTY_QUOTE } from "@utils";
 
 /**
  * Custom hook for managing Quote modals with persistence across navigation
@@ -20,7 +21,7 @@ export const useQuoteModal = () => {
      */
     const openQuoteModal = (
         quote: IQuote | undefined,
-        onSave: (formData: IQuote) => void,
+        onSave: (formData: IQuoteModalInput) => void,
         saveResultSuccess?: boolean
     ) => {
         // Generate a unique key for this modal instance
@@ -29,11 +30,18 @@ export const useQuoteModal = () => {
             : `add-quote-${Date.now()}`;
 
         // Internal state for form data and validation
-        let formData: IQuote | object = quote || {};
+        let formData: IQuoteModalInput = quote
+            ? {
+                ...(quote as IQuote),
+                fromBook: Array.isArray((quote as any).fromBook)
+                    ? (quote as unknown as IQuoteModalInput).fromBook
+                    : (quote as IQuote).fromBook ? [(quote as IQuote).fromBook] : []
+            }
+            : { ...EMPTY_QUOTE };
         let validationErrors: ValidationError[] | undefined = undefined;
 
         // Handler for form changes
-        const handleChange = (data: IQuote | object) => {
+        const handleChange = (data: IQuoteModalInput) => {
             formData = data;
         };
 
@@ -46,14 +54,14 @@ export const useQuoteModal = () => {
         const handleSave = () => {
             // Use requestAnimationFrame to ensure UI updates are batched efficiently
             requestAnimationFrame(() => {
-                onSave(formData as IQuote);
+                onSave(formData);
             });
         };
 
         // Handler for clearing the form
         const handleClear = () => {
             // Reset to empty quote
-            formData = {};
+            formData = { ...EMPTY_QUOTE };
 
             // Re-render the modal with updated data - use requestAnimationFrame for smoother updates
             requestAnimationFrame(() => {
@@ -62,7 +70,7 @@ export const useQuoteModal = () => {
                     title: quote?._id ? t("quotes.editTitle") : t("quotes.addTitle"),
                     body: (
                         <QuotesModalBody
-                            data={{}}
+                            data={{ ...EMPTY_QUOTE }}
                             onChange={handleChange}
                             error={handleError}
                         />
@@ -83,7 +91,7 @@ export const useQuoteModal = () => {
         const ModalBodyComponent = React.memo(function ModalBody() {
             return (
                 <QuotesModalBody
-                    data={formData as IQuote}
+                    data={formData}
                     onChange={handleChange}
                     error={handleError}
                 />

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { IBoardGame } from "../../type";
+import { IBoardGame, SaveEntity } from "../../type";
 import { useBoardGameModal } from "@components/boardGames/useBoardGameModal";
 
 interface Props {
-    saveBoardGame: (formData: IBoardGame[] | object) => void;
+    saveBoardGame: (formData: SaveEntity<IBoardGame>) => void;
     boardGame?: IBoardGame[];
     saveResultSuccess?: boolean;
 }
@@ -21,7 +21,7 @@ const AddBoardGame: React.FC<Props> = ({ saveBoardGame, boardGame, saveResultSuc
 
     const handleOpenModal = () => {
         const { closeModal } = openBoardGameModal(
-            boardGame || [{}] as IBoardGame[],
+            boardGame || [],
             (formData) => {
                 saveBoardGame(formData);
             },

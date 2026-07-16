@@ -22,7 +22,7 @@ export interface IBook extends Document {
     numberOfPages?: number;
     exLibris?: boolean;
     location?: ILocation;
-    owner?: string;
+    owner?: string[];
     createdAt?: Date;
     updatedAt?: Date;
     deletedAt?: Date;

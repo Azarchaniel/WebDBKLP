@@ -13,7 +13,7 @@ registerLocale('sk', sk)
 
 interface BodyProps {
     data: IAutor[];
-    onChange: (data: IAutor[] | object) => void;
+    onChange: (data: IAutor[]) => void;
     error: (err: ValidationError[] | undefined) => void;
 }
 

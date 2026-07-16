@@ -48,16 +48,31 @@ export default function DashboardPage() {
     const [biggestBooks, setBiggestBooks] = useState<any>();
     const [isLoadingData, setIsLoadingData] = useState(true);
 
+    const clearDashboardData = () => {
+        setCountAllBooks([]);
+        setDimensionStats(undefined);
+        setSizeGroups(undefined);
+        setLangStats(undefined);
+        setReadBy(undefined);
+        setOldestBooks(undefined);
+        setRecentlyUpdatedBooks(undefined);
+        setBiggestBooks(undefined);
+    };
+
+    const applyDashboardData = (dashboardData: any) => {
+        setCountAllBooks(dashboardData.countAllBooks);
+        setDimensionStats(dashboardData.dimensionStats);
+        setSizeGroups(dashboardData.sizeGroups);
+        setLangStats(dashboardData.langStats);
+        setReadBy(dashboardData.readBy);
+        setOldestBooks(dashboardData.oldestBooks);
+        setRecentlyUpdatedBooks(dashboardData.recentlyUpdatedBooks);
+        setBiggestBooks(dashboardData.biggestBooks);
+    };
+
     useEffect(() => {
         if (isAuthLoading || !currentUser) {
-            setCountAllBooks([]);
-            setDimensionStats(undefined);
-            setSizeGroups(undefined);
-            setLangStats(undefined);
-            setReadBy(undefined);
-            setOldestBooks(undefined);
-            setRecentlyUpdatedBooks(undefined);
-            setBiggestBooks(undefined);
+            clearDashboardData();
             setIsLoadingData(false);
             return;
         }
@@ -65,26 +80,38 @@ export default function DashboardPage() {
         const fetchDashboard = async () => {
             setIsLoadingData(true);
 
-            try {
-                // Check if books have changed since dashboard was last cached
-                const cachedTimestamp = await getDashboardCachedTimestamp();
-                const { status } = await checkBooksUpdated(cachedTimestamp ? new Date(cachedTimestamp) : undefined);
+            const serveFromCache = async (): Promise<boolean> => {
+                const cached = await loadDashboardFromCache(currentUser._id);
+                if (!cached) return false;
 
-                if (status === 204) {
-                    const cached = await loadDashboardFromCache(currentUser._id);
-                    if (cached) {
-                        setCountAllBooks(cached.countAllBooks);
-                        setDimensionStats(cached.dimensionStats);
-                        setSizeGroups(cached.sizeGroups);
-                        setLangStats(cached.langStats);
-                        setReadBy(cached.readBy);
-                        setOldestBooks(cached.oldestBooks);
-                        setRecentlyUpdatedBooks(cached.recentlyUpdatedBooks);
-                        setBiggestBooks(cached.biggestBooks);
-                        setIsLoadingData(false);
-                        return;
+                applyDashboardData(cached);
+                setIsLoadingData(false);
+                return true;
+            };
+
+            try {
+                if (!navigator.onLine) {
+                    await serveFromCache();
+                    setIsLoadingData(false);
+                    return;
+                }
+
+                // Match BookPage: show cached dashboard immediately, then refresh in the background if stale.
+                const servedFromCache = await serveFromCache();
+                let needsFreshData = true;
+
+                if (servedFromCache) {
+                    try {
+                        const cachedTimestamp = await getDashboardCachedTimestamp();
+                        const { status } = await checkBooksUpdated(cachedTimestamp);
+                        needsFreshData = status !== 204;
+                    } catch {
+                        return; // Server unreachable - cached dashboard is already shown.
                     }
                 }
+
+                if (!needsFreshData) return;
+                if (!servedFromCache) setIsLoadingData(true);
 
                 const [countResult, dimResult, sizeResult, langResult, readByResult, oldestResult, recentlyUpdatedResult, heightResult, widthResult, thicknessResult, weightResult, squareResult] = await Promise.all([
                     countBooks(),
@@ -118,18 +145,13 @@ export default function DashboardPage() {
                     }
                 };
 
-                setCountAllBooks(dashboardData.countAllBooks);
-                setDimensionStats(dashboardData.dimensionStats);
-                setSizeGroups(dashboardData.sizeGroups);
-                setLangStats(dashboardData.langStats);
-                setReadBy(dashboardData.readBy);
-                setOldestBooks(dashboardData.oldestBooks);
-                setRecentlyUpdatedBooks(dashboardData.recentlyUpdatedBooks);
-                setBiggestBooks(dashboardData.biggestBooks);
-
+                applyDashboardData(dashboardData);
                 saveDashboardToCache(dashboardData, currentUser._id);
             } catch (err) {
-                console.error("Error fetching dashboard data:", err);
+                const servedFromCache = await serveFromCache();
+                if (!servedFromCache) {
+                    console.error("Error fetching dashboard data:", err);
+                }
             } finally {
                 setIsLoadingData(false);
             }

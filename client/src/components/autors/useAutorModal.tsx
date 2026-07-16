@@ -1,9 +1,10 @@
 import React from 'react';
 import { useModal } from '@utils/context/ModalContext';
-import { IAutor, ValidationError } from '../../type';
+import { IAutor, SaveEntity, ValidationError } from '../../type';
 import { ModalButtons } from '../Modal';
 import { AutorsModalBody } from './AutorsModal';
 import { useTranslation } from "react-i18next";
+import { EMPTY_AUTOR } from "@utils";
 
 /**
  * Custom hook for managing Autor modals with persistence across navigation
@@ -20,7 +21,7 @@ export const useAutorModal = () => {
      */
     const openAutorModal = (
         autors: IAutor[],
-        onSave: (formData: IAutor[] | object) => void,
+        onSave: (formData: SaveEntity<IAutor>) => Promise<any>,
         saveResultSuccess?: boolean
     ) => {
         // Generate a unique key for this modal instance
@@ -29,13 +30,13 @@ export const useAutorModal = () => {
             : `add-autor-${Date.now()}`;
 
         // Internal state for form data and validation
-        let formData: IAutor[] | object = autors || [];
+        let formData: SaveEntity<IAutor> = autors && autors.length ? autors : [EMPTY_AUTOR];
         let validationErrors: ValidationError[] | undefined = undefined;
 
         const getTitle = () => autors.length > 0 && autors[0]._id ? t("autors.editTitle") : t("autors.addTitle");
 
         // Helper to render the modal with given data
-        const renderModal = (data: IAutor[] | object) => {
+        const renderModal = (data: SaveEntity<IAutor>) => {
             const dataArray = Array.isArray(data) ? data : [data as IAutor];
 
             showModal({
@@ -61,7 +62,7 @@ export const useAutorModal = () => {
         };
 
         // Handler for form changes
-        const handleChange = (data: IAutor[] | object) => {
+        const handleChange = (data: IAutor[]) => {
             formData = data;
         };
 
@@ -78,7 +79,7 @@ export const useAutorModal = () => {
 
         // Handler for clearing the form
         const handleClear = () => {
-            formData = [{}] as IAutor[];
+            formData = [{ ...EMPTY_AUTOR }];
             validationErrors = undefined;
             renderModal(formData);
         };

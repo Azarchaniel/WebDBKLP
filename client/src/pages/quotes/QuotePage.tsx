@@ -1,4 +1,4 @@
-import { IBook, IQuote } from "../../type";
+import { IBook, IQuote, IQuoteModalInput } from "../../type";
 import QuoteItem from "./QuoteItem";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addQuote, deleteQuote, getQuotes } from "../../API";
@@ -192,7 +192,7 @@ export default function QuotePage() {
         return () => observer.disconnect();
     }, []);
 
-    const handleSaveQuote = (formData: IQuote): void => {
+    const handleSaveQuote = (formData: IQuoteModalInput): void => {
         setSaveQuoteSuccess(undefined);
         const isNewQuote = !formData._id;
 

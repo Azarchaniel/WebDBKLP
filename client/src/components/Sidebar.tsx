@@ -86,7 +86,7 @@ const Sidebar = () => {
                     label={t("common.menu")}
                 />
                 {content.map(item => (
-                    <Link to={item.route} key={item.route} className={location.pathname.includes(item.route) ? "active" : ""}>
+                    <Link to={item.route} key={item.route} className={location.pathname.includes(item.route) ? "active" : ""} onClick={() => setSidebarOpened(false)}>
                         <i
                             className={item.icon}
                             data-tooltip-id="global-tooltip"
