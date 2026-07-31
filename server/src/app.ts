@@ -13,7 +13,7 @@ const databaseName = useLocalDbMirror
     ? process.env.MONGO_DB_LOCAL || process.env.MONGO_DB
     : process.env.MONGO_DB;
 
-const allowedOrigins = ["http://localhost:3000", "https://webdbklp.onrender.com", "https://webdbklp.csonka.cz/"];
+const allowedOrigins = ["http://localhost:3000", "https://webdbklp.onrender.com", "https://webdbklp.csonka.cz"];
 app.use(
     cors({
         origin: function (origin, callback) {
