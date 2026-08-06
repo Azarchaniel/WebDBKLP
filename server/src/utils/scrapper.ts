@@ -4,10 +4,17 @@ import puppeteer, { Page } from 'puppeteer';
 
 const DK_NAVIGATION_TIMEOUT_MS = 20000;
 const DK_SOURCE_TIMEOUT_MS = 50000;
+const DK_EDITIONS_TIMEOUT_MS = 8000;
 const GOOGLE_SOURCE_TIMEOUT_MS = 12000;
 
 const isObject = (value: unknown): value is Record<string, any> =>
     typeof value === 'object' && value !== null;
+
+const normalizeIsbn = (isbn: string | undefined): string =>
+    (isbn ?? '').replace(/[^0-9X]/gi, '').toUpperCase();
+
+const sanitizeDkSlug = (slug: string): string =>
+    slug.trim().replace(/[,\s]+$/g, '');
 
 const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, sourceName: string): Promise<T> => {
     let timeoutHandle: NodeJS.Timeout | null = null;
@@ -516,49 +523,43 @@ const expandAndScrapeViceInfo = async (page: Page): Promise<{
 };
 
 /**
- * Fallback: navigate to /dalsi-vydani/ and read "ISBN: …" as plain text.
- * The editions page always renders this without JS.
+ * Fallback: fetch /dalsi-vydani/ with plain HTTP and read "ISBN: ..." from HTML.
+ * Keeping this out of Puppeteer prevents a slow editions page from consuming the
+ * whole DK scrape timeout after the overview page has already loaded.
  */
-const fetchIsbnFromEditionsPage = async (page: Page, slug: string): Promise<string | undefined> => {
+const fetchIsbnFromEditionsPage = async (slug: string, requestedIsbn: string): Promise<string | undefined> => {
     try {
-        const editionsUrl = `https://www.databazeknih.cz/dalsi-vydani/${slug}`;
-        const loaded = await safePageGoto(page, editionsUrl, DK_NAVIGATION_TIMEOUT_MS, 2);
-        if (!loaded) return undefined;
+        const safeSlug = sanitizeDkSlug(slug);
+        if (!safeSlug) return undefined;
 
-        return page.evaluate(() => {
-            // Scan text nodes for "ISBN: …"
-            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-            let node: Text | null;
-            while ((node = walker.nextNode() as Text)) {
-                const text = node.textContent ?? '';
-                const m = text.match(/ISBN:\s*([\dX][\d\-X]{7,16})/i);
-                if (m) return m[1].trim();
-                if (text.trim() === 'ISBN:') {
-                    let sib = node.nextSibling;
-                    while (sib) {
-                        const val = sib.textContent?.trim() ?? '';
-                        if (/^[\dX][\d\-X]{7,16}$/i.test(val)) return val;
-                        if (val) break;
-                        sib = sib.nextSibling;
-                    }
-                }
-            }
-            // Also check antikvariát link
-            const link = document.querySelector('a[href*="restorio.cz"]') as HTMLAnchorElement | null;
-            if (link) {
-                const m2 = link.href.match(/[?&]isbn=([^&]+)/i);
-                if (m2?.[1] && m2[1].length > 3) return decodeURIComponent(m2[1]);
-            }
-            return undefined;
+        const editionsUrl = `https://www.databazeknih.cz/dalsi-vydani/${encodeURIComponent(safeSlug)}`;
+        const response = await axios.get<string>(editionsUrl, {
+            timeout: DK_EDITIONS_TIMEOUT_MS,
+            responseType: 'text',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            },
         });
-    } catch {
+
+        const html = response.data ?? '';
+        const isbnMatches = Array.from(html.matchAll(/ISBN:\s*([\dX][\d\-\sX]{7,20})/gi))
+            .map(match => match[1].replace(/\s+/g, '').trim())
+            .filter(Boolean);
+
+        if (isbnMatches.length === 0) return undefined;
+
+        const normalizedRequested = normalizeIsbn(requestedIsbn);
+        return isbnMatches.find(found => normalizeIsbn(found) === normalizedRequested) ?? isbnMatches[0];
+    } catch (error: any) {
+        console.warn(`DK editions ISBN fallback failed for ${slug}`, error?.message ?? error);
         return undefined;
     }
 };
 
-// ─── BROWSER SINGLETON ───────────────────────────────────────────────────────
-// Reuse one Chromium process across all scrape calls — each puppeteer.launch()
-// costs ~200 MB. With this pattern only one instance ever exists at a time.
+// BROWSER SINGLETON
+// Reuse one Chromium process across all scrape calls. Each puppeteer.launch()
+// costs about 200 MB. With this pattern only one instance exists at a time.
 
 let _browserInstance: import('puppeteer').Browser | null = null;
 let _browserInitPromise: Promise<import('puppeteer').Browser> | null = null;
@@ -656,7 +657,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
             }
 
             const slugMatch = overviewUrl.match(/\/prehled-knihy\/([^/?#]+)/);
-            const slug = slugMatch ? slugMatch[1] : '';
+            const slug = slugMatch ? sanitizeDkSlug(slugMatch[1]) : '';
 
             // Step 3: scrape the overview page
             const title = await extractTitle(page);
@@ -694,7 +695,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 
             // Step 5: ISBN fallback — check /dalsi-vydani/ page
             if (!isbnFound && slug) {
-                isbnFound = await fetchIsbnFromEditionsPage(page, slug);
+                isbnFound = await fetchIsbnFromEditionsPage(slug, isbn);
             }
 
             // Step 6: assemble result
