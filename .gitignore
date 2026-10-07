@@ -25,6 +25,7 @@
 /client/yarn-error.log*
 
 server/dist/
+server/vendor/obscura/
 server/nodemon.json
 .idea/
 .vscode/

@@ -1,13 +1,27 @@
 import axios from 'axios';
 import Autor from '../models/autor';
-import puppeteer, { Page } from 'puppeteer';
+import { spawn, ChildProcess } from 'child_process';
+import fs from 'fs';
+import http from 'http';
+import net from 'net';
+import path from 'path';
+import puppeteer, { Browser, Page } from 'puppeteer-core';
 
 const DK_NAVIGATION_TIMEOUT_MS = 20000;
 const DK_SOURCE_TIMEOUT_MS = 50000;
+const DK_EDITIONS_TIMEOUT_MS = 8000;
+const DK_HTTP_TIMEOUT_MS = 10000;
 const GOOGLE_SOURCE_TIMEOUT_MS = 12000;
+const OBSCURA_CONNECT_TIMEOUT_MS = 10000;
 
 const isObject = (value: unknown): value is Record<string, any> =>
     typeof value === 'object' && value !== null;
+
+const normalizeIsbn = (isbn: string | undefined): string =>
+    (isbn ?? '').replace(/[^0-9X]/gi, '').toUpperCase();
+
+const sanitizeDkSlug = (slug: string): string =>
+    slug.trim().replace(/[,\s]+$/g, '');
 
 const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, sourceName: string): Promise<T> => {
     let timeoutHandle: NodeJS.Timeout | null = null;
@@ -52,6 +66,55 @@ const safePageGoto = async (
         }
     }
     return false;
+};
+
+const withBaseHref = (html: string, url: string): string => {
+    const baseTag = `<base href="${url}">`;
+    return html.includes('<head')
+        ? html.replace(/<head([^>]*)>/i, `<head$1>${baseTag}`)
+        : `${baseTag}${html}`;
+};
+
+const stripActiveHtml = (html: string): string =>
+    html
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/\s+on[a-z]+\s*=\s*"[^"]*"/gi, '')
+        .replace(/\s+on[a-z]+\s*=\s*'[^']*'/gi, '');
+
+const loadDkHtmlPage = async (page: Page, url: string): Promise<boolean> => {
+    try {
+        const response = await axios.get<string>(url, {
+            timeout: DK_HTTP_TIMEOUT_MS,
+            responseType: 'text',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            },
+        });
+        const html = withBaseHref(stripActiveHtml(response.data ?? ''), url);
+        await page.evaluate((content: string) => {
+            document.open();
+            document.write(content);
+            document.close();
+        }, html);
+        return true;
+    } catch (error: any) {
+        console.error(`DK HTML fetch failed for ${url}`, error?.message ?? error);
+        return false;
+    }
+};
+
+const configureDkPage = async (page: Page): Promise<void> => {
+    await page.setJavaScriptEnabled(process.env.DK_ENABLE_PAGE_JAVASCRIPT === 'true');
+    await page.setRequestInterception(true);
+    page.on('request', request => {
+        const resourceType = request.resourceType();
+        if (['image', 'media', 'font', 'stylesheet', 'script', 'websocket', 'eventsource'].includes(resourceType)) {
+            request.abort().catch(() => { });
+            return;
+        }
+        request.continue().catch(() => { });
+    });
 };
 
 enum GoodReadsRoles {
@@ -365,20 +428,20 @@ const expandAndScrapeViceInfo = async (page: Page): Promise<{
     editionTitle?: string;
     editionNo?: string;
 }> => {
-    // Click the toggle and wait for JS to reveal the content
-    try {
-        await page.evaluate(() => {
-            const all = Array.from(document.querySelectorAll('a, span, div, p, button'));
-            const target = all.find(el =>
-                el.children.length === 0 &&
-                (el.textContent?.trim().toLowerCase().startsWith('více info') ?? false)
-            );
-            if (target) (target as HTMLElement).click();
-        });
-        await new Promise(r => setTimeout(r, 2500));
-    } catch { /* non-fatal */ }
-
-    return page.evaluate(() => {
+    if (process.env.DK_ENABLE_PAGE_JAVASCRIPT === 'true') {
+        try {
+            await page.evaluate(() => {
+                const all = Array.from(document.querySelectorAll('a, span, div, p, button'));
+                const target = all.find(el =>
+                    el.children.length === 0 &&
+                    (el.textContent?.trim().toLowerCase().startsWith('více info') ?? false)
+                );
+                if (target) (target as HTMLElement).click();
+            });
+            await new Promise(r => setTimeout(r, 250));
+        } catch { /* non-fatal */ }
+    }
+return page.evaluate(() => {
         /**
          * Walk every text node and find the one that IS the label text.
          * Then resolve the associated value via:
@@ -516,78 +579,181 @@ const expandAndScrapeViceInfo = async (page: Page): Promise<{
 };
 
 /**
- * Fallback: navigate to /dalsi-vydani/ and read "ISBN: …" as plain text.
- * The editions page always renders this without JS.
+ * Fallback: fetch /dalsi-vydani/ with plain HTTP and read "ISBN: ..." from HTML.
+ * Keeping this out of Puppeteer prevents a slow editions page from consuming the
+ * whole DK scrape timeout after the overview page has already loaded.
  */
-const fetchIsbnFromEditionsPage = async (page: Page, slug: string): Promise<string | undefined> => {
+const fetchIsbnFromEditionsPage = async (slug: string, requestedIsbn: string): Promise<string | undefined> => {
     try {
-        const editionsUrl = `https://www.databazeknih.cz/dalsi-vydani/${slug}`;
-        const loaded = await safePageGoto(page, editionsUrl, DK_NAVIGATION_TIMEOUT_MS, 2);
-        if (!loaded) return undefined;
+        const safeSlug = sanitizeDkSlug(slug);
+        if (!safeSlug) return undefined;
 
-        return page.evaluate(() => {
-            // Scan text nodes for "ISBN: …"
-            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-            let node: Text | null;
-            while ((node = walker.nextNode() as Text)) {
-                const text = node.textContent ?? '';
-                const m = text.match(/ISBN:\s*([\dX][\d\-X]{7,16})/i);
-                if (m) return m[1].trim();
-                if (text.trim() === 'ISBN:') {
-                    let sib = node.nextSibling;
-                    while (sib) {
-                        const val = sib.textContent?.trim() ?? '';
-                        if (/^[\dX][\d\-X]{7,16}$/i.test(val)) return val;
-                        if (val) break;
-                        sib = sib.nextSibling;
-                    }
-                }
-            }
-            // Also check antikvariát link
-            const link = document.querySelector('a[href*="restorio.cz"]') as HTMLAnchorElement | null;
-            if (link) {
-                const m2 = link.href.match(/[?&]isbn=([^&]+)/i);
-                if (m2?.[1] && m2[1].length > 3) return decodeURIComponent(m2[1]);
-            }
-            return undefined;
+        const editionsUrl = `https://www.databazeknih.cz/dalsi-vydani/${encodeURIComponent(safeSlug)}`;
+        const response = await axios.get<string>(editionsUrl, {
+            timeout: DK_EDITIONS_TIMEOUT_MS,
+            responseType: 'text',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            },
         });
-    } catch {
+
+        const html = response.data ?? '';
+        const isbnMatches = Array.from(html.matchAll(/ISBN:\s*([\dX][\d\-\sX]{7,20})/gi))
+            .map(match => match[1].replace(/\s+/g, '').trim())
+            .filter(Boolean);
+
+        if (isbnMatches.length === 0) return undefined;
+
+        const normalizedRequested = normalizeIsbn(requestedIsbn);
+        return isbnMatches.find(found => normalizeIsbn(found) === normalizedRequested) ?? isbnMatches[0];
+    } catch (error: any) {
+        console.warn(`DK editions ISBN fallback failed for ${slug}`, error?.message ?? error);
         return undefined;
     }
 };
 
-// ─── BROWSER SINGLETON ───────────────────────────────────────────────────────
-// Reuse one Chromium process across all scrape calls — each puppeteer.launch()
-// costs ~200 MB. With this pattern only one instance ever exists at a time.
+// OBSCURA BROWSER SINGLETON
+// Obscura runs as a CDP server; puppeteer-core only speaks the protocol.
 
-let _browserInstance: import('puppeteer').Browser | null = null;
-let _browserInitPromise: Promise<import('puppeteer').Browser> | null = null;
+let _browserInstance: Browser | null = null;
+let _browserInitPromise: Promise<Browser> | null = null;
+let _obscuraProcess: ChildProcess | null = null;
 
-const getBrowser = async (): Promise<import('puppeteer').Browser> => {
+const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+
+const getFreePort = (): Promise<number> =>
+    new Promise((resolve, reject) => {
+        const server = net.createServer();
+        server.once('error', reject);
+        server.listen(0, '127.0.0.1', () => {
+            const address = server.address();
+            server.close(() => {
+                if (typeof address === 'object' && address?.port) {
+                    resolve(address.port);
+                } else {
+                    reject(new Error('Could not allocate a local port for Obscura'));
+                }
+            });
+        });
+    });
+
+const waitForObscuraEndpoint = async (port: number, timeoutMs: number): Promise<void> => {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+        const ready = await new Promise<boolean>(resolve => {
+            const request = http.get({
+                host: '127.0.0.1',
+                port,
+                path: '/json/version',
+                timeout: 500,
+            }, response => {
+                response.resume();
+                resolve(response.statusCode === 200);
+            });
+            request.once('error', () => resolve(false));
+            request.once('timeout', () => {
+                request.destroy();
+                resolve(false);
+            });
+        });
+        if (ready) return;
+        await sleep(150);
+    }
+    throw new Error(`Obscura CDP server did not start on port ${port} within ${timeoutMs}ms`);
+};
+
+const getBundledObscuraPath = (): string | undefined => {
+    const executableName = process.platform === 'win32' ? 'obscura.exe' : 'obscura';
+    const candidates = [
+        path.resolve(process.cwd(), 'vendor', 'obscura', executableName),
+        path.resolve(__dirname, '..', '..', '..', 'vendor', 'obscura', executableName),
+    ];
+    return candidates.find(candidate => fs.existsSync(candidate));
+};
+
+const getObscuraExecutable = (): string => {
+    const configured = process.env.OBSCURA_EXECUTABLE_PATH;
+    if (configured) return configured;
+
+    const bundled = getBundledObscuraPath();
+    if (bundled) return bundled;
+
+    return process.platform === 'win32' ? 'obscura.exe' : 'obscura';
+};
+
+const startManagedObscura = async (): Promise<string> => {
+    const port = process.env.OBSCURA_CDP_PORT
+        ? Number(process.env.OBSCURA_CDP_PORT)
+        : await getFreePort();
+    if (!Number.isInteger(port) || port <= 0) {
+        throw new Error(`Invalid OBSCURA_CDP_PORT: ${process.env.OBSCURA_CDP_PORT}`);
+    }
+
+    const args = ['serve', '--port', String(port)];
+    if (process.env.OBSCURA_STEALTH === 'true') {
+        args.push('--stealth');
+    }
+
+    const executable = getObscuraExecutable();
+    const debugObscuraLogs = process.env.OBSCURA_DEBUG_LOGS === 'true';
+    const obscuraProcess = spawn(executable, args, {
+        stdio: ['ignore', debugObscuraLogs ? 'pipe' : 'ignore', debugObscuraLogs ? 'pipe' : 'ignore'],
+        windowsHide: true,
+    });
+    _obscuraProcess = obscuraProcess;
+
+    if (debugObscuraLogs) {
+        obscuraProcess.stdout?.on('data', chunk => {
+            console.info(`[obscura] ${chunk.toString().trim()}`);
+        });
+        obscuraProcess.stderr?.on('data', chunk => {
+            console.warn(`[obscura] ${chunk.toString().trim()}`);
+        });
+    }
+    obscuraProcess.once('exit', (code, signal) => {
+        _obscuraProcess = null;
+        _browserInstance = null;
+        console.warn(`Obscura process exited`, { code, signal });
+    });
+
+    await waitForObscuraEndpoint(port, OBSCURA_CONNECT_TIMEOUT_MS);
+    return `ws://127.0.0.1:${port}/devtools/browser`;
+};
+
+const stopManagedObscura = (): void => {
+    if (_obscuraProcess && !_obscuraProcess.killed) {
+        _obscuraProcess.kill();
+    }
+};
+
+process.once('exit', stopManagedObscura);
+process.once('SIGINT', () => {
+    stopManagedObscura();
+    process.exit(130);
+});
+process.once('SIGTERM', () => {
+    stopManagedObscura();
+    process.exit(143);
+});
+
+const getBrowser = async (): Promise<Browser> => {
     if (_browserInstance?.isConnected()) return _browserInstance;
     if (!_browserInitPromise) {
-        _browserInitPromise = puppeteer.launch({
-            headless: true,
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-gpu',
-                '--no-first-run',
-                '--no-zygote',
-                '--disable-extensions',
-                '--disable-background-networking',
-            ],
-            timeout: 0,
-        }).then(browser => {
+        _browserInitPromise = (async () => {
+            const browserWSEndpoint = process.env.OBSCURA_CDP_ENDPOINT ?? await startManagedObscura();
+            return puppeteer.connect({ browserWSEndpoint });
+        })().then(browser => {
             _browserInstance = browser;
             _browserInitPromise = null;
             browser.once('disconnected', () => {
                 _browserInstance = null;
+                stopManagedObscura();
             });
             return browser;
         }).catch(err => {
             _browserInitPromise = null;
+            stopManagedObscura();
             throw err;
         });
     }
@@ -602,6 +768,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
         return await withTimeout((async () => {
             const browser = await getBrowser();
             page = await browser.newPage();
+            await configureDkPage(page);
             console.log("DK called ", isbn);
 
             await page.setUserAgent(
@@ -611,7 +778,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 
             // Step 1: search by ISBN
             const searchUrl = 'https://www.databazeknih.cz/search?q=' + encodeURIComponent(isbn);
-            const searchLoaded = await safePageGoto(page, searchUrl, DK_NAVIGATION_TIMEOUT_MS, 2);
+            const searchLoaded = await loadDkHtmlPage(page, searchUrl);
             if (!searchLoaded) {
                 console.error(`DK search page failed for ISBN ${isbn}`);
                 return false;
@@ -649,14 +816,14 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
                 ? bookUrl.replace('/knihy/', '/prehled-knihy/')
                 : bookUrl).split('#')[0];
 
-            const overviewLoaded = await safePageGoto(page, overviewUrl, DK_NAVIGATION_TIMEOUT_MS, 2);
+            const overviewLoaded = await loadDkHtmlPage(page, overviewUrl);
             if (!overviewLoaded) {
                 console.error(`DK overview page failed for ISBN ${isbn}`);
                 return false;
             }
 
             const slugMatch = overviewUrl.match(/\/prehled-knihy\/([^/?#]+)/);
-            const slug = slugMatch ? slugMatch[1] : '';
+            const slug = slugMatch ? sanitizeDkSlug(slugMatch[1]) : '';
 
             // Step 3: scrape the overview page
             const title = await extractTitle(page);
@@ -694,7 +861,7 @@ const databazeKnih = async (isbn: string): Promise<object | boolean> => {
 
             // Step 5: ISBN fallback — check /dalsi-vydani/ page
             if (!isbnFound && slug) {
-                isbnFound = await fetchIsbnFromEditionsPage(page, slug);
+                isbnFound = await fetchIsbnFromEditionsPage(slug, isbn);
             }
 
             // Step 6: assemble result
@@ -830,6 +997,8 @@ const fetchGoogleBook = async (isbn: string, attempt = 1): Promise<object | bool
     } catch (error: any) {
         if (error.code === 'ECONNABORTED') {
             console.error(`Google Books API timed out for ISBN ${isbn}`);
+        } else if (error.response?.status === 429 && !process.env.GOOGLE_BOOKS_API_KEY) {
+            console.warn(`Google Books API rate limited for ISBN ${isbn}; skipping retries without GOOGLE_BOOKS_API_KEY.`);
         } else if (error.response?.status === 429 && attempt < 4) {
             const retryAfterHeader = Number(error.response?.headers?.['retry-after']);
             const delayMs = Number.isFinite(retryAfterHeader) && retryAfterHeader > 0
@@ -851,8 +1020,8 @@ const fetchGoogleBook = async (isbn: string, attempt = 1): Promise<object | bool
 
 export const webScrapper = async (isbn: string): Promise<any> => {
     const originalIsbn = isbn;
-    const googleIsbn = originalIsbn;
     const normalizedIsbn = isbn.replace(/[^0-9X]/gi, '');
+    const googleIsbn = normalizedIsbn;
 
     const results = await Promise.allSettled([
         databazeKnih(normalizedIsbn),
