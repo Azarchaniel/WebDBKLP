@@ -21,6 +21,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
     const videoRef = useRef<HTMLVideoElement>(null);
     const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const detectionLockedRef = useRef<boolean>(false);
 
     // Track interval for cleanup
     const drawIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -45,6 +46,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
         if (!videoRef.current || codeReaderRef.current) return;
 
         setShowNotFoundIcon(false);
+        detectionLockedRef.current = false;
         const hints = new Map<DecodeHintType, any>();
         codeReaderRef.current = new BrowserMultiFormatReader(hints);
 
@@ -66,8 +68,11 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
             await videoRef.current.play();
 
             await codeReaderRef.current.decodeFromVideoDevice(null, videoRef.current, async (result: Result | null, error?: Error) => {
+                if (detectionLockedRef.current) return;
+
                 drawScanAreaRect(!!result);
                 if (result) {
+                    detectionLockedRef.current = true;
                     setShowNotFoundIcon(false);
                     setShowWarningTimeout(false);
 
@@ -77,10 +82,8 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
                         warningTimeoutRef.current = null;
                     }
 
-                    setTimeout(() => {
-                        setIsScanning(false);
-                        onBarcodeDetected(result!.getText());
-                    }, 1000);
+                    onBarcodeDetected(result.getText());
+                    setIsScanning(false);
                 } else {
 
                     if (!error) throw new Error("Unknown error during decoding.");
@@ -141,6 +144,7 @@ const BarcodeScannerButton: React.FC<BarcodeScannerButtonProps> = ({
     };
 
     const stopScanning = () => {
+        detectionLockedRef.current = false;
         // Cancel draw interval
         if (drawIntervalRef.current) {
             clearInterval(drawIntervalRef.current);
