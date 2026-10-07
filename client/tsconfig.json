@@ -28,6 +28,7 @@
     "outDir": "dist",
     "rootDir": "./",
     "baseUrl": "./src",
+    "ignoreDeprecations": "5.0",
     "paths": {
       "@styles/*": [
         "styles/*"

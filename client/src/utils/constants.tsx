@@ -4,9 +4,9 @@ import { IAutor, IBoardGame, IBook, ILP, IQuoteModalInput } from "type";
 export const TABLE_HEADER_COLOR = getComputedStyle(document.documentElement).getPropertyValue("--anchor");
 
 export const CITIES = [
+    { value: "bruchotin", showValue: "Břuchotín" },
     { value: "spisska", showValue: "Spišská" },
-    { value: 'ujezd', showValue: 'Újezd u Chocně' },
-    { value: "bruchotin", showValue: "Břuchotín" }
+    { value: 'ujezd', showValue: 'Újezd u Chocně' }
 ];
 
 export const CHART_COLORS = [
