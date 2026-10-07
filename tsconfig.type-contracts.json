@@ -16,6 +16,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "baseUrl": "./client/src",
+    "ignoreDeprecations": "5.0",
     "paths": {
       "@styles/*": ["styles/*"],
       "@components/*": ["components/*"],

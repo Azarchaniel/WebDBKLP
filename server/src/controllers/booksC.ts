@@ -353,6 +353,65 @@ const getInfoFromISBN = async (req: Request, res: Response): Promise<void> => {
 
 const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> => {
     try {
+        const collator = new Intl.Collator(['sk', 'cs', 'en'], {
+            sensitivity: 'base',
+            numeric: true,
+            ignorePunctuation: true
+        });
+
+        const getComparableText = (value: any): string => {
+            if (value === null || value === undefined) return '';
+
+            if (typeof value === 'string') return value.trim();
+            if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+
+            if (typeof value === 'object') {
+                if (typeof value.name === 'string') return value.name.trim();
+                if (typeof value.title === 'string') return value.title.trim();
+                if (typeof value.showValue === 'string') return value.showValue.trim();
+                if (typeof value.value === 'string') return value.value.trim();
+                if (typeof value.value === 'number' || typeof value.value === 'boolean') return String(value.value);
+                if (typeof value.key === 'string') return value.key.trim();
+            }
+
+            return String(value);
+        };
+
+        const splitDisplayName = (name: string): { last: string; first: string; full: string } => {
+            const normalized = (name || '').trim();
+            const [lastName = '', ...rest] = normalized.split(',');
+            const firstName = rest.join(',').trim();
+
+            if (rest.length === 0) {
+                return { last: normalized, first: '', full: normalized };
+            }
+
+            return { last: lastName.trim(), first: firstName, full: normalized };
+        };
+
+        const sortValuesForField = (fieldName: string, values: any[]): any[] => {
+            if (!Array.isArray(values)) return [];
+
+            const isReferenceField = ['autor', 'editor', 'translator', 'ilustrator', 'owner', 'readBy'].includes(fieldName);
+
+            if (isReferenceField) {
+                return [...values].sort((a, b) => {
+                    const aName = splitDisplayName(getComparableText(a));
+                    const bName = splitDisplayName(getComparableText(b));
+
+                    const byLastName = collator.compare(aName.last, bName.last);
+                    if (byLastName !== 0) return byLastName;
+
+                    const byFirstName = collator.compare(aName.first, bName.first);
+                    if (byFirstName !== 0) return byFirstName;
+
+                    return collator.compare(aName.full, bName.full);
+                });
+            }
+
+            return [...values].sort((a, b) => collator.compare(getComparableText(a), getComparableText(b)));
+        };
+
         const facetStage: Record<string, any[]> = {};
 
         // --- Fields to explicitly exclude ---
@@ -555,6 +614,11 @@ const getUniqueFieldValues = async (_: Request, res: Response): Promise<void> =>
                         return value;
                     })
                     .filter((value: any) => value !== null && value !== undefined);
+
+                uniqueValues[originalFieldName] = sortValuesForField(
+                    originalFieldName,
+                    uniqueValues[originalFieldName]
+                );
             }
         }
         res.status(200).json(uniqueValues);
