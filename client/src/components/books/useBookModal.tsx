@@ -4,6 +4,8 @@ import { ModalButtons } from '../Modal';
 import { BooksModalBody } from './BookModal';
 import { EMPTY_BOOK } from '@utils';
 import { useTranslation } from "react-i18next";
+import BookCameraScanner from "../BookCameraScanner";
+import { handleInputChange } from "@utils/form";
 
 /**
  * Custom hook for managing Book modals with persistence across navigation
@@ -61,6 +63,14 @@ export const useBookModal = () => {
                         onRevert={handleRevert}
                         error={validationErrors}
                         saveResultSuccess={saveResultSuccess}
+                        leftContent={dataArray.length === 1 ? (
+                            <BookCameraScanner onDetected={result => {
+                                formData = handleInputChange<IBook>({ name: "ISBN", value: result.barcode }, formData);
+                                formData = handleInputChange<IBook>({ name: "dimensions.width", value: result.widthMm / 10 }, formData);
+                                formData = handleInputChange<IBook>({ name: "dimensions.height", value: result.heightMm / 10 }, formData);
+                                renderModal(formData);
+                            }} />
+                        ) : undefined}
                     />
                 )
             });

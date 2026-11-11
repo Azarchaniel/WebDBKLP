@@ -9,6 +9,7 @@ import "@styles/ModalStatus.scss";
 interface ModalProps {
     customKey: string;
     title: string;
+    headerContent?: ReactElement;
     body: ReactElement;
     footer?: ReactElement;
     onClose?: () => void;
@@ -25,6 +26,7 @@ let openBackdropCount = 0;
 export const Modal: React.FC<ModalProps> = ({
     customKey,
     title,
+    headerContent,
     body,
     footer,
     onClose,
@@ -305,6 +307,7 @@ export const Modal: React.FC<ModalProps> = ({
                     {title}
                     <p className="hiddenId">{customKey}</p>
                     <div className="modalControls">
+                        {headerContent}
                         <button
                             type="button"
                             className="minimizeModal"
@@ -358,6 +361,7 @@ interface ModalButtonsProps {
     saveResultSuccess?: boolean; // legacy flag, can be removed later
     saveLabel?: string;
     clearLabel?: string;
+    leftContent?: ReactElement;
 }
 
 export const ModalButtons: React.FC<ModalButtonsProps> = ({
@@ -367,7 +371,8 @@ export const ModalButtons: React.FC<ModalButtonsProps> = ({
     error,
     saveResultSuccess,
     saveLabel,
-    clearLabel
+    clearLabel,
+    leftContent
 }) => {
     const { t } = useTranslation();
     const [loading, setLoading] = useState<boolean>(false);
@@ -442,6 +447,7 @@ export const ModalButtons: React.FC<ModalButtonsProps> = ({
     return (
         <div className="modal-buttons-wrapper">
             <div className="modal-footer-left">
+                {leftContent}
                 {showError(error)}
                 {statusMessage && (
                     <div

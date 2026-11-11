@@ -534,4 +534,3 @@ export const BooksModalBody: React.FC<BodyProps> = ({ data, onChange, error }: B
         </div>
     </form>)
 }
-
