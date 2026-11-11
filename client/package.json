@@ -58,8 +58,11 @@
     "postcss": "8.5.23",
     "serialize-javascript": ">=6.0.2",
     "underscore": ">=1.13.8",
-    "fast-uri": "3.1.5",
-    "js-yaml": "4.3.1"
+    "fast-uri": "3.1.9",
+    "js-yaml": "4.3.2",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^11.0.1"
+    }
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

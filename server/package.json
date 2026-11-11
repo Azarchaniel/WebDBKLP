@@ -16,6 +16,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "overrides": {
+    "nodemon": {
+      "minimatch": "^11.0.1"
+    }
+  },
   "dependencies": {
     "axios": "^1.8.1",
     "bcrypt": "^6.0.0",
@@ -25,7 +30,7 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.3",
-    "puppeteer-core": "^19.8.3"
+    "puppeteer-core": "^25.16.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -37,7 +42,7 @@
     "@types/mongoose": "^5.11.96",
     "@types/node": "^25.6.2",
     "concurrently": "^6.3.0",
-    "nodemon": "^1.14.10",
+    "nodemon": "^3.1.14",
     "typescript": "^5.7.2"
   }
 }

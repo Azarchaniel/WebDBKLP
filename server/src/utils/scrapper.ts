@@ -738,7 +738,7 @@ process.once('SIGTERM', () => {
 });
 
 const getBrowser = async (): Promise<Browser> => {
-    if (_browserInstance?.isConnected()) return _browserInstance;
+    if (_browserInstance?.connected) return _browserInstance;
     if (!_browserInitPromise) {
         _browserInitPromise = (async () => {
             const browserWSEndpoint = process.env.OBSCURA_CDP_ENDPOINT ?? await startManagedObscura();
